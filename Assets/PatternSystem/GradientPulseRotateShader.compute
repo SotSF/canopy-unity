@@ -21,14 +21,14 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float2 center = float2(63, 63);
     float2 newpoint = rotate(id.xy, center, timeSeconds*2);
 
-    float oscillator = sin(timeSeconds / 4);
+    float oscillator = (sin(timeSeconds / 4)/2)+0.5;
     //float oscillatorR = sin(timeSeconds) / 2 + 0.5;
     //float oscillatorG = sin(timeSeconds * .8) / 2 + 0.5;
     //float oscillatorB = sin(timeSeconds * .6) / 2 + 0.5;
 
-    float4 color = float4(  (newpoint.x%16) / 16.0, 
-                            0, 
-                            (newpoint.y%16) / 16.0, 
+    float4 color = float4(  abs((newpoint.x%16) / 16.0), 
+                            oscillator, 
+                            abs((newpoint.y%16) / 16.0), 
                             0.0);
     if (id.x < 75 && id.y < 96) {
         Result[id.xy] = color;

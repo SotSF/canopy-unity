@@ -10,6 +10,9 @@ public class Canopy: MonoBehaviour
     public int renderTextureSize = 128;
     public Material canopyMaterial;
 
+    public Transform start;
+    public Transform end;
+
     private Transform pixels;
 
     public int numStrips = 96;
@@ -91,7 +94,7 @@ public class Canopy: MonoBehaviour
 
     public void GenerateStrips()
     {
-        pixels = transform.Find("Pixels");
+        pixels = transform.Find("Apex/Pixels");
 
         int meshcount = 0;
 
@@ -101,13 +104,15 @@ public class Canopy: MonoBehaviour
         List<Vector2> uvs = new List<Vector2>();
         List<int> tris = new List<int>();
 
+        Vector2[] catenary = MathUtils.Catenary(Vector2.zero, new Vector2(end.position.x-start.position.x, end.position.y-start.position.y), 2.5f, 75);
+
         for (int stripIndex = 0; stripIndex < numStrips; stripIndex++)
         {
             for (int pixelIndex = 0; pixelIndex < pixelsPerStrip; pixelIndex++)
             {
                 var numverts = verts.Count;
                 uvs.AddRange(GetUVs(pixelIndex, stripIndex));
-                verts.AddRange(GetVerts(stripIndex, pixelIndex));;
+                verts.AddRange(GetVerts(stripIndex, pixelIndex, catenary[pixelIndex]));;
                 tris.AddRange(pixelBase.triangles.Select(x => x + numverts));
             }
             if (verts.Count >= maxVerts - (pixelBase.vertexCount * 75))
@@ -120,11 +125,11 @@ public class Canopy: MonoBehaviour
         SaveMesh(filter, verts, uvs, tris);
     }
 
-    private IEnumerable<Vector3> GetVerts(int stripIndex, int pixelIndex)
+    private IEnumerable<Vector3> GetVerts(int stripIndex, int pixelIndex, Vector2 catenaryOffset)
     {
         Quaternion rotation = GetRotation(stripIndex);
-        Vector3 offset = PixelToOffset(stripIndex, pixelIndex);
-        var newverts = pixelBase.vertices.Select(vert => rotation * (vert + offset));
+        //Vector3 offset = PixelToOffset(stripIndex, pixelIndex);
+        var newverts = pixelBase.vertices.Select(vert => rotation * (vert + new Vector3(0, catenaryOffset.y, catenaryOffset.x)));
         return newverts;
     }
 

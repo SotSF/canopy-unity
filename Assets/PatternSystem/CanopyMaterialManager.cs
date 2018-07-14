@@ -9,11 +9,10 @@ public class CanopyMaterialManager : MonoBehaviour
 
     public Material canopyMaterial;
 
-    public Light light;
+    public Light lightCaster;
 
     private Vector3[] data;
 
-    private Vector3 baseData = new Vector3(.5f, .5f, .5f);
     private int kernelId;
 
     const int FLOAT_BYTES = 4;
@@ -27,7 +26,7 @@ public class CanopyMaterialManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        buff = new ComputeBuffer(1, FLOAT_BYTES * VEC3_LENGTH);
+        buff = new ComputeBuffer(75*96, FLOAT_BYTES * VEC3_LENGTH);
         canopyTex = new RenderTexture(128, 128, 24);
         canopyTex.enableRandomWrite = true;
         canopyTex.Create();
@@ -55,25 +54,24 @@ public class CanopyMaterialManager : MonoBehaviour
         Vector3 avg = Vector3.zero;
         for (int i = 0; i < data.Length; i++)
         {
-            avg += data[i];
-            if (data[i] != Vector3.zero)
+            if (!(float.IsNaN(data[i].x) || float.IsNaN(data[i].y) || float.IsNaN(data[i].z)))
             {
+                avg += data[i];
                 count++;
             }
-        }
-            
+        }     
         avg /= count;
         Color avgColor = new Color(avg.x, avg.y, avg.z);
-        if (light != null)
+        if (lightCaster != null)
         {
             if (elapsed > 2)
             {
                 elapsed = 0;
                 Debug.Log(avgColor);
                 Debug.LogFormat("Sampling of data: {0}, {1}, {2}, {3}", data[0], data[1], data[2], data[3]);
-                Debug.LogFormat("Count of nonzero values: {0}", count);
+                Debug.LogFormat("Non-NaN count: {0}", count);
             }
-            light.color = Color.Lerp(light.color, avgColor, 0.25f);
+            lightCaster.color = Color.Lerp(lightCaster.color, avgColor, 0.25f);
         }
         elapsed += Time.deltaTime;
         //Send render texture to backend!
