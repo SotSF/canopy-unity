@@ -1,0 +1,21 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+RWStructuredBuffer<float3> dataBuffer;
+float timeSeconds;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    /*Result[id.xy] = float4(dataBuffer[0].x, dataBuffer[0].y, dataBuffer[0].z, 0.0);*/
+    float oscillator = sin(timeSeconds) / 2 + 0.5;
+    float sinval = sin(timeSeconds);
+    float cosval = cos(timeSeconds);
+
+    float4 color = float4((id.x * oscillator) / 128.0, 0, (id.y * oscillator) / 128.0, 0.0);
+
+    Result[id.xy] = color;
+}
