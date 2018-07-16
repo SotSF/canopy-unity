@@ -133,7 +133,7 @@ public class Canopy: MonoBehaviour
         var diff = catenaryOffsets[b] - catenaryOffsets[a];
 
         float angle = -Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
-        Debug.LogFormat("A: ({0},{1}), B: ({2},{3}), Catenary angle: {4}", catenaryOffsets[a].x, catenaryOffsets[a].y, catenaryOffsets[b].x, catenaryOffsets[b].y, angle);
+        
         Quaternion catenaryRotation = Quaternion.Euler(0, 0, 0);
         //Vector3 offset = PixelToOffset(stripIndex, pixelIndex);
         Vector3 offset = new Vector3(0, catenaryOffsets[pixelIndex].y, catenaryOffsets[pixelIndex].x);

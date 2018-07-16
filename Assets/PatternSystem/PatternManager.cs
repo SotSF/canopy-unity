@@ -2,12 +2,16 @@
 using System.Collections;
 using System.Linq;
 using System;
+using UnityEditor;
 
 public class PatternManager : MonoBehaviour
 {
     public Material canopyMaterial;
 
     public Light lightCaster;
+
+    public ComputeShader basePatternShader;
+    public Pattern basePatternComponent;
 
     public float period;
     public float cycles;
@@ -47,6 +51,42 @@ public class PatternManager : MonoBehaviour
             {
                 canopyMaterial.SetTexture(tex, pattern.patternTexture);
             }
+        }
+    }
+
+    public void CreateNewPattern()
+    {
+        Shader displayShader = Shader.Find("PatternDisplayShaderGraph");
+        Material material = new Material(displayShader);
+        AssetDatabase.CreateAsset(material, "Assets/PatternSystem/PatternNewPatternMaterial.mat");
+        Pattern patternObj = Instantiate(basePatternComponent);
+        string sourceShaderFile = "Assets/PatternSystem/PatternRotateShader.compute";
+        string destShaderFile = "Assets/PatternSystem/PatternNewPatternShader.compute";
+        System.IO.File.Copy(sourceShaderFile, destShaderFile, true);
+        AssetDatabase.Refresh();
+        ComputeShader patternShader = AssetDatabase.LoadAssetAtPath<ComputeShader>(destShaderFile);
+        patternObj.transform.SetParent(transform);
+        patternObj.transform.localPosition = Vector3.zero;
+        patternObj.patternShader = patternShader;
+        patternObj.patternMaterial = material;
+        patternObj.GetComponent<MeshRenderer>().sharedMaterial = material;
+        patternObj.name = "NewPattern";
+        AssetDatabase.SaveAssets();
+        ArrangePatternDisplays();
+    }
+
+    private void ArrangePatternDisplays()
+    {
+        var patterns = GetComponentsInChildren<Pattern>();
+        float theta = 0;
+        Vector3 offset = 2.2f*Vector3.forward;
+        for (int i = 0; i < patterns.Length; i++)
+        {
+            var pattern = patterns[i];
+            pattern.transform.localPosition = Quaternion.Euler(0, theta, 0) * offset;
+            theta += 30;
+            pattern.transform.LookAt(transform);
+            pattern.transform.rotation *= Quaternion.Euler(0, 180, 0);
         }
     }
 

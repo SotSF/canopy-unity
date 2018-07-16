@@ -14,9 +14,17 @@ public class PatternManagerEditor : Editor
         {
             //Something changed!
         }
-        if (GUILayout.Button("Next Pattern"))
+        if (Application.isPlaying) { 
+            if (GUILayout.Button("Next Pattern"))
+            {
+                manager.NextPattern();
+            }
+        } else
         {
-            manager.NextPattern();
+            if (GUILayout.Button("Create new pattern"))
+            {
+                manager.CreateNewPattern();
+            }
         }
     }
 }
