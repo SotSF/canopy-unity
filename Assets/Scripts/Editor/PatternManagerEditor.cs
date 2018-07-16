@@ -25,6 +25,10 @@ public class PatternManagerEditor : Editor
             {
                 manager.CreateNewPattern();
             }
+            if (GUILayout.Button("Arrange displays"))
+            {
+                manager.ArrangePatternDisplays();
+            }
         }
     }
 }

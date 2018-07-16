@@ -36,15 +36,17 @@ public class PatternManager : MonoBehaviour
         dataBuffer = new ComputeBuffer(75*96, FLOAT_BYTES * VEC3_LENGTH);
         colorData = new Vector3[75 * 96];
 
-        var RingsPattern = transform.Find("RingsPattern").GetComponent<Pattern>();
-        SelectPattern(RingsPattern);
         patterns = GetComponentsInChildren<Pattern>();
+        SelectPattern(patterns[0]);
     }
 
     void SelectPattern(Pattern pattern)
     {
         if (pattern != null)
         {
+            if (activePattern != null)
+                activePattern.presenting = false;
+            lastPattern = pattern;
             activePattern = pattern;
             var textures = canopyMaterial.GetTexturePropertyNames();
             foreach (string tex in textures)
@@ -52,16 +54,18 @@ public class PatternManager : MonoBehaviour
                 canopyMaterial.SetTexture(tex, pattern.patternTexture);
             }
         }
+        activePattern.presenting = true;
     }
 
     public void CreateNewPattern()
     {
+        string patternDir = "Assets/PatternSystem/Patterns/";
         Shader displayShader = Shader.Find("PatternDisplayShaderGraph");
         Material material = new Material(displayShader);
-        AssetDatabase.CreateAsset(material, "Assets/PatternSystem/PatternNewPatternMaterial.mat");
+        AssetDatabase.CreateAsset(material, patternDir+"PatternMaterials/NewPatternMaterial.mat");
         Pattern patternObj = Instantiate(basePatternComponent);
-        string sourceShaderFile = "Assets/PatternSystem/PatternRotateShader.compute";
-        string destShaderFile = "Assets/PatternSystem/PatternNewPatternShader.compute";
+        string sourceShaderFile = patternDir+"Rotate.compute";
+        string destShaderFile = patternDir+"NewPattern.compute";
         System.IO.File.Copy(sourceShaderFile, destShaderFile, true);
         AssetDatabase.Refresh();
         ComputeShader patternShader = AssetDatabase.LoadAssetAtPath<ComputeShader>(destShaderFile);
@@ -70,21 +74,23 @@ public class PatternManager : MonoBehaviour
         patternObj.patternShader = patternShader;
         patternObj.patternMaterial = material;
         patternObj.GetComponent<MeshRenderer>().sharedMaterial = material;
-        patternObj.name = "NewPattern";
+        patternObj.name = "NewPatternDisplay";
         AssetDatabase.SaveAssets();
         ArrangePatternDisplays();
     }
 
-    private void ArrangePatternDisplays()
+    public void ArrangePatternDisplays()
     {
         var patterns = GetComponentsInChildren<Pattern>();
         float theta = 0;
-        Vector3 offset = 2.2f*Vector3.forward;
+        Vector3 offset = 4.2f*Vector3.forward;
         for (int i = 0; i < patterns.Length; i++)
         {
             var pattern = patterns[i];
             pattern.transform.localPosition = Quaternion.Euler(0, theta, 0) * offset;
-            theta += 30;
+            theta += Mathf.Atan2(1.2f, offset.magnitude) * Mathf.Rad2Deg;
+
+            //LookAt() leaves the display facing backwards, so flip it 180 afterwards
             pattern.transform.LookAt(transform);
             pattern.transform.rotation *= Quaternion.Euler(0, 180, 0);
         }
@@ -96,6 +102,7 @@ public class PatternManager : MonoBehaviour
         {
             SelectPattern(activePattern);
             lastPattern = activePattern;
+            Debug.Log("Selected " + activePattern);
         }
     }
 
@@ -117,12 +124,13 @@ public class PatternManager : MonoBehaviour
     {
         if (lightCaster != null)
         {
-            lightCaster.color = Color.Lerp(lightCaster.color, color, 0.25f);
+            lightCaster.color = Color.Lerp(lightCaster.color, color, 0.5f);
         }
     }
 
     void Update()
     {
+        period = 4 * (Mathf.Sin(Time.time)/2 + 2);
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             NextPattern();
@@ -131,16 +139,16 @@ public class PatternManager : MonoBehaviour
         {
             PreviousPattern();
         }
-        if (Input.GetMouseButtonUp(0))
-        {
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            Debug.Log("Mouse up, ray = " + ray);
-            if (Physics.Raycast(ray, out hit))
-            {
-                SelectPattern(hit.transform.GetComponent<Pattern>());
-                Debug.LogFormat("Hit: {0}", hit.transform.gameObject.name);
-            }
-        }
+        //if (Input.GetMouseButtonUp(0))
+        //{
+        //    var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //    RaycastHit hit;
+        //    Debug.Log("Mouse up, ray = " + ray);
+        //    if (Physics.Raycast(ray, out hit))
+        //    {
+        //        SelectPattern(hit.transform.GetComponent<Pattern>());
+        //        Debug.LogFormat("Hit: {0}", hit.transform.gameObject.name);
+        //    }
+        //}
     }
 }
