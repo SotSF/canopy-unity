@@ -61,7 +61,7 @@ public class Canopy: MonoBehaviour
     {
         if (pixels == null)
         {
-            pixels = transform.Find("Pixels");
+            pixels = transform.Find("Apex/Pixels");
         }
         int count = pixels.childCount;
         List<Transform> children = new Transform[count].Select( (t, i) => pixels.GetChild(i)).ToList();
@@ -112,7 +112,7 @@ public class Canopy: MonoBehaviour
             {
                 var numverts = verts.Count;
                 uvs.AddRange(GetUVs(pixelIndex, stripIndex));
-                verts.AddRange(GetVerts(stripIndex, pixelIndex, catenary[pixelIndex]));;
+                verts.AddRange(GetVerts(stripIndex, pixelIndex, catenary));;
                 tris.AddRange(pixelBase.triangles.Select(x => x + numverts));
             }
             if (verts.Count >= maxVerts - (pixelBase.vertexCount * 75))
@@ -125,11 +125,19 @@ public class Canopy: MonoBehaviour
         SaveMesh(filter, verts, uvs, tris);
     }
 
-    private IEnumerable<Vector3> GetVerts(int stripIndex, int pixelIndex, Vector2 catenaryOffset)
+    private IEnumerable<Vector3> GetVerts(int stripIndex, int pixelIndex, Vector2[] catenaryOffsets)
     {
-        Quaternion rotation = GetRotation(stripIndex);
+        Quaternion stripRotation = GetRotation(stripIndex);
+        int a = pixelIndex > 0 ? pixelIndex - 1 : pixelIndex;
+        int b = pixelIndex > 0 ? pixelIndex : pixelIndex + 1;
+        var diff = catenaryOffsets[b] - catenaryOffsets[a];
+
+        float angle = -Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
+        Debug.LogFormat("A: ({0},{1}), B: ({2},{3}), Catenary angle: {4}", catenaryOffsets[a].x, catenaryOffsets[a].y, catenaryOffsets[b].x, catenaryOffsets[b].y, angle);
+        Quaternion catenaryRotation = Quaternion.Euler(0, 0, 0);
         //Vector3 offset = PixelToOffset(stripIndex, pixelIndex);
-        var newverts = pixelBase.vertices.Select(vert => rotation * (vert + new Vector3(0, catenaryOffset.y, catenaryOffset.x)));
+        Vector3 offset = new Vector3(0, catenaryOffsets[pixelIndex].y, catenaryOffsets[pixelIndex].x);
+        var newverts = pixelBase.vertices.Select(vert => stripRotation * ((catenaryRotation * vert) + offset));
         return newverts;
     }
 
