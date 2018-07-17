@@ -7,6 +7,7 @@ RWStructuredBuffer<float3> dataBuffer;
 float timeSeconds;
 float period;
 float cycleCount;
+float brightness;
 
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
@@ -16,6 +17,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
     float4 color = float4(whiteLevel, whiteLevel, whiteLevel, 0.0);
 
-    Frame[id.xy] = color;
-    dataBuffer[96 * id.x + id.y] = float3(color.x, color.y, color.z);
+    Frame[id.xy] = brightness*color;
+    dataBuffer[96 * id.x + id.y] = brightness*float3(color.x, color.y, color.z);
 }

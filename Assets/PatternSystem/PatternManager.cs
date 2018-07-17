@@ -15,6 +15,7 @@ public class PatternManager : MonoBehaviour
 
     public float period;
     public float cycles;
+    public float brightness;
 
     const int FLOAT_BYTES = 4;
     const int VEC3_LENGTH = 3;
@@ -101,7 +102,6 @@ public class PatternManager : MonoBehaviour
         if (lastPattern != activePattern)
         {
             SelectPattern(activePattern);
-            lastPattern = activePattern;
             Debug.Log("Selected " + activePattern);
         }
     }
@@ -130,7 +130,7 @@ public class PatternManager : MonoBehaviour
 
     void Update()
     {
-        period = 4 * (Mathf.Sin(Time.time)/2 + 2);
+        //period = 4 * (Mathf.Sin(Time.time)/2 + 2);
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             NextPattern();
@@ -139,16 +139,16 @@ public class PatternManager : MonoBehaviour
         {
             PreviousPattern();
         }
-        //if (Input.GetMouseButtonUp(0))
-        //{
-        //    var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //    RaycastHit hit;
-        //    Debug.Log("Mouse up, ray = " + ray);
-        //    if (Physics.Raycast(ray, out hit))
-        //    {
-        //        SelectPattern(hit.transform.GetComponent<Pattern>());
-        //        Debug.LogFormat("Hit: {0}", hit.transform.gameObject.name);
-        //    }
-        //}
+        if (Input.GetMouseButtonUp(0))
+        {
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            Debug.Log("Mouse up, ray = " + ray);
+            if (Physics.Raycast(ray, out hit))
+            {
+                SelectPattern(hit.transform.GetComponent<Pattern>());
+                Debug.LogFormat("Hit: {0}", hit.transform.gameObject.name);
+            }
+        }
     }
 }

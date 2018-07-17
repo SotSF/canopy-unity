@@ -13,6 +13,7 @@ float timeSeconds;
 
 float period;
 float cycleCount;
+float brightness;
 
 //This function rotates a point (uint2 xy) theta degrees around a center point
 float2 rotate(uint2 xy, float2 center, float theta)
@@ -46,6 +47,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
                             abs((newpoint.y%cycle) / cycle), 
                             0.0);
     // Color the "Result" image and put it in the general dataBuffer
-    Frame[id.xy] = color;
-    dataBuffer[96*id.x+id.y] = color;
+    Frame[id.xy] = brightness*color;
+    dataBuffer[96*id.x+id.y] = brightness*color;
 }

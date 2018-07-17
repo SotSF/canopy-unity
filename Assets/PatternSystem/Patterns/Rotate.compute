@@ -10,7 +10,7 @@ RWTexture2D<float4> Frame;
 RWStructuredBuffer<float3> dataBuffer;
 
 float timeSeconds;
-
+float brightness;
 float period;
 float cycleCount;
 
@@ -46,6 +46,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
                             abs((newpoint.y%cycle) / cycle), 
                             0.0);
     // Color the "Result" image and put it in the general dataBuffer
-    Frame[id.xy] = color;
-    dataBuffer[96*id.x+id.y] = color;
+    Frame[id.xy] = brightness*color;
+    dataBuffer[96*id.x+id.y] = brightness*color;
 }
