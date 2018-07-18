@@ -5,9 +5,16 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Generic;
+using UnityEditor;
+using System;
 
 public class Pattern : MonoBehaviour
 {
+    public Func<float> timeSeconds = PatternInputGenerator.TimeSeconds;
+    public Func<float> period = PatternInputGenerator.ManagerPeriod;
+    public Func<float> cycleCount = PatternInputGenerator.ManagerCycleCount;
+    public Func<float> brightness = PatternInputGenerator.ManagerBrightness;
+
     public ComputeShader patternShader;
     public Material patternMaterial;
 
@@ -20,7 +27,7 @@ public class Pattern : MonoBehaviour
 
     protected Dictionary<string, float> renderParams = new Dictionary<string, float>();
 
-    int kernelId;
+    protected int kernelId;
 
     void Start()
     {
@@ -76,10 +83,10 @@ public class Pattern : MonoBehaviour
 
     protected virtual void UpdateRenderParams()
     {
-        renderParams["timeSeconds"] = Time.time;
-        renderParams["period"] = manager.period;
-        renderParams["cycleCount"] = manager.cycles;
-        renderParams["brightness"] = manager.brightness + manager.brightnessMod;
+        renderParams["timeSeconds"] = timeSeconds();
+        renderParams["period"] = period();
+        renderParams["cycleCount"] = cycleCount();
+        renderParams["brightness"] = brightness();
     }
 
     // Update is called once per frame

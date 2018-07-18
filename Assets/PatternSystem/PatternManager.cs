@@ -6,6 +6,8 @@ using UnityEditor;
 
 public class PatternManager : MonoBehaviour
 {
+    static PatternManager _instance;
+    public static PatternManager instance { get { return _instance; } }
     public Material canopyMaterial;
 
     public Light lightCaster;
@@ -16,6 +18,7 @@ public class PatternManager : MonoBehaviour
     public float period;
     public float cycles;
     public float brightness;
+    public float maxBrightness = .7f;
     public float brightnessMod = 0;
 
     const int FLOAT_BYTES = 4;
@@ -31,6 +34,11 @@ public class PatternManager : MonoBehaviour
     public Pattern activePattern;
     private Pattern lastPattern;
     private Pattern[] patterns;
+
+    private void Awake()
+    {
+        _instance = this;
+    }
 
     void Start()
     {
@@ -141,6 +149,6 @@ public class PatternManager : MonoBehaviour
                 SelectPattern(hit.transform.GetComponent<Pattern>());
             }
         }
-        brightnessMod = Mathf.Abs(Input.GetAxis("BrightnessMod")) * (1 - brightness);
+        brightnessMod = Mathf.Abs(Input.GetAxis("BrightnessMod")) * (maxBrightness - brightness);
     }
 }
