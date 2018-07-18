@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System;
 using UnityEditor;
+using UnityEngine.Networking;
 
 public class PatternManager : MonoBehaviour
 {
@@ -10,22 +11,19 @@ public class PatternManager : MonoBehaviour
 
     public Light lightCaster;
 
-    public ComputeShader basePatternShader;
     public Pattern basePatternComponent;
 
     public float period;
     public float cycles;
     public float brightness;
 
+    [HideInInspector]
+    public float brightnessMod = 0;
+    [HideInInspector]
+    public bool pusherConnected;
+
     const int FLOAT_BYTES = 4;
     const int VEC3_LENGTH = 3;
-
-    [HideInInspector]
-    public Vector3[] colorData;
-
-    [HideInInspector]
-    public ComputeBuffer dataBuffer;
-
 
     public Pattern activePattern;
     private Pattern lastPattern;
@@ -33,14 +31,15 @@ public class PatternManager : MonoBehaviour
 
     void Start()
     {
-        // Initialize shader communication buffer
-        dataBuffer = new ComputeBuffer(75*96, FLOAT_BYTES * VEC3_LENGTH);
-        colorData = new Vector3[75 * 96];
-
         patterns = GetComponentsInChildren<Pattern>();
-        SelectPattern(patterns[0]);
+        Invoke("ChooseRandomPattern", .1f);
+        StartCoroutine(CheckForAPI());
     }
-
+    public void ChooseRandomPattern()
+    {
+        System.Random rand = new System.Random();
+        SelectPattern(patterns[rand.Next(patterns.Length)]);
+    }
     void SelectPattern(Pattern pattern)
     {
         if (pattern != null)
@@ -58,6 +57,7 @@ public class PatternManager : MonoBehaviour
         activePattern.presenting = true;
     }
 
+#if UNITY_EDITOR
     public void CreateNewPattern()
     {
         string patternDir = "Assets/PatternSystem/Patterns/";
@@ -79,7 +79,7 @@ public class PatternManager : MonoBehaviour
         AssetDatabase.SaveAssets();
         ArrangePatternDisplays();
     }
-
+#endif 
     public void ArrangePatternDisplays()
     {
         var patterns = GetComponentsInChildren<Pattern>();
@@ -97,15 +97,6 @@ public class PatternManager : MonoBehaviour
         }
     }
 
-    private void OnValidate()
-    {
-        if (lastPattern != activePattern)
-        {
-            SelectPattern(activePattern);
-            Debug.Log("Selected " + activePattern);
-        }
-    }
-
     public void NextPattern()
     {
         var index = Array.IndexOf(patterns, activePattern);
@@ -116,7 +107,7 @@ public class PatternManager : MonoBehaviour
     public void PreviousPattern()
     {
         var index = Array.IndexOf(patterns, activePattern);
-        int next = (index - 1) % patterns.Length;
+        int next = index == 0 ? patterns.Length-1 : (index - 1) % patterns.Length;
         SelectPattern(patterns[next]);
     }
 
@@ -125,6 +116,25 @@ public class PatternManager : MonoBehaviour
         if (lightCaster != null)
         {
             lightCaster.color = Color.Lerp(lightCaster.color, color, 0.5f);
+        }
+    }
+
+    IEnumerator CheckForAPI()
+    {
+        Uri pingEndpoint = new Uri("http://localhost:8080/api/ping");
+        float lastChecked = 0;
+        while (true)
+        {
+            if (lastChecked > 2)
+            {
+                var req = new UnityWebRequest(pingEndpoint);
+                yield return req.SendWebRequest();
+                pusherConnected = req.responseCode == 200;
+                Debug.LogFormat("Canopy API {0}", pusherConnected ? "connected" : "not connected");
+                lastChecked = 0;
+            }
+            lastChecked += Time.deltaTime;
+            yield return null;
         }
     }
 
@@ -143,12 +153,11 @@ public class PatternManager : MonoBehaviour
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            Debug.Log("Mouse up, ray = " + ray);
             if (Physics.Raycast(ray, out hit))
             {
                 SelectPattern(hit.transform.GetComponent<Pattern>());
-                Debug.LogFormat("Hit: {0}", hit.transform.gameObject.name);
             }
         }
+        brightnessMod = Mathf.Abs(Input.GetAxis("BrightnessMod")) * (1 - brightness);
     }
 }

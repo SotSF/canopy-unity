@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Collections.Generic;
 
 public class Pattern : MonoBehaviour
 {
@@ -15,9 +16,20 @@ public class Pattern : MonoBehaviour
     [HideInInspector]
     public bool presenting;
 
+    protected Dictionary<string, float> renderParams = new Dictionary<string, float>();
+
     private PatternManager manager;
+    private ComputeBuffer dataBuffer;
+    private Vector3[] colorData;
+
+    private byte[] pixelBuffer;
 
     int kernelId;
+
+    const int FLOAT_BYTES = 4;
+    const int VEC3_LENGTH = 3;
+
+    private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
 
     void Start()
     {
@@ -34,35 +46,37 @@ public class Pattern : MonoBehaviour
 
         kernelId = patternShader.FindKernel("CSMain");
         patternShader.SetTexture(kernelId, "Frame", patternTexture);
+        dataBuffer = new ComputeBuffer(75 * 96, FLOAT_BYTES * VEC3_LENGTH);
+        colorData = new Vector3[75 * 96];
+        pixelBuffer = new byte[colorData.Length * 3];
+        patternShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
+
     }
 
-    Color PresentPattern()
+    private void PresentPattern()
     {
-        var uri = new System.Uri("http://localhost:8080/api/renderbytes");
-        manager.dataBuffer.GetData(manager.colorData);
-        //Average result colors for setting light property
-        //byte[] bytes = new byte[manager.colorDPost(uri, b64data);ata.Length * 3];
-        //byte[] bytes = new byte[144 * 3];
-        //for (int i = 0; i < 144; i+=3)
-        //{
-        //    bytes[i] = (byte)(manager.colorData[i / 3].x * 255);
-        //    bytes[i + 1] = (byte)(manager.colorData[i / 3].y * 255);
-        //    bytes[i + 2] = (byte)(manager.colorData[i / 3].z * 255);
-        //}      
+        dataBuffer.GetData(colorData);
 
-        //var b64data = System.Convert.ToBase64String(bytes);
-        //var request = new UnityWebRequest(uri, "POST");
-        //request.uploadHandler = new UploadHandlerRaw(bytes);
-        ////request.Send();
-        //request.SendWebRequest();
-        //return Color.white;
-        int count = 0;
-        Vector3 avg = Vector3.zero;
-        for (int i = 0; i < manager.colorData.Length; i++)
+        if (manager.pusherConnected)
         {
-            if (!(float.IsNaN(manager.colorData[i].x) || float.IsNaN(manager.colorData[i].y) || float.IsNaN(manager.colorData[i].z)))
+            for (int i = 0; i < colorData.Length*3; i += 3)
             {
-                avg += manager.colorData[i];
+                pixelBuffer[i] = (byte)(colorData[i / 3].x * 255);
+                pixelBuffer[i + 1] = (byte)(colorData[i / 3].y * 255);
+                pixelBuffer[i + 2] = (byte)(colorData[i / 3].z * 255);
+            }
+            var request = new UnityWebRequest(pixelEndpoint, "POST");
+            request.uploadHandler = new UploadHandlerRaw(pixelBuffer);
+            request.SendWebRequest();
+        }
+
+        int count = 0;
+        Vector3 avg = Vector3.one;
+        for (int i = 0; i < colorData.Length; i++)
+        {
+            if (!(float.IsNaN(colorData[i].x) || float.IsNaN(colorData[i].y) || float.IsNaN(colorData[i].z)))
+            {
+                avg += colorData[i];
                 count++;
             }
             else
@@ -71,28 +85,36 @@ public class Pattern : MonoBehaviour
             }
         }
         avg /= count;
-        return new Color(avg.x, avg.y, avg.z);
+        manager.SetLightColor(new Color(avg.x, avg.y, avg.z));
+    }
 
+    protected virtual void UpdateRenderParams()
+    {
+        renderParams["timeSeconds"] = Time.time;
+        renderParams["period"] = manager.period;
+        renderParams["cycleCount"] = manager.cycles;
+        renderParams["brightness"] = manager.brightness + manager.brightnessMod;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (presenting)
+        UpdateRenderParams();
+        foreach (string param in renderParams.Keys)
         {
-            //PresentPattern();
-            manager.SetLightColor(PresentPattern());
-            //Now send it to the backend!
+            patternShader.SetFloat(param, renderParams[param]);
         }
-        patternShader.SetBuffer(kernelId, "dataBuffer", manager.dataBuffer);
-
-        patternShader.SetFloat("timeSeconds", Time.time);
-        patternShader.SetFloat("period", manager.period);
-        patternShader.SetFloat("cycleCount", manager.cycles);
-        patternShader.SetFloat("brightness", manager.brightness);
 
         //Execute pattern shader
         patternShader.Dispatch(kernelId, 75 / 8, 96 / 8, 1);
+        if (presenting)
+        {
+             PresentPattern();
+        }
+    }
 
+    private void OnDestroy()
+    {
+        dataBuffer.Release();
     }
 }
