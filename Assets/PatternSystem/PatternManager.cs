@@ -16,6 +16,7 @@ public class PatternManager : MonoBehaviour
     public float period;
     public float cycles;
     public float brightness;
+    public float brightnessMod = 0;
 
     const int FLOAT_BYTES = 4;
     const int VEC3_LENGTH = 3;
@@ -58,6 +59,7 @@ public class PatternManager : MonoBehaviour
         activePattern.presenting = true;
     }
 
+#if UNITY_EDITOR
     public void CreateNewPattern()
     {
         string patternDir = "Assets/PatternSystem/Patterns/";
@@ -79,7 +81,7 @@ public class PatternManager : MonoBehaviour
         AssetDatabase.SaveAssets();
         ArrangePatternDisplays();
     }
-
+#endif 
     public void ArrangePatternDisplays()
     {
         var patterns = GetComponentsInChildren<Pattern>();
@@ -97,15 +99,6 @@ public class PatternManager : MonoBehaviour
         }
     }
 
-    private void OnValidate()
-    {
-        if (lastPattern != activePattern)
-        {
-            SelectPattern(activePattern);
-            Debug.Log("Selected " + activePattern);
-        }
-    }
-
     public void NextPattern()
     {
         var index = Array.IndexOf(patterns, activePattern);
@@ -116,7 +109,7 @@ public class PatternManager : MonoBehaviour
     public void PreviousPattern()
     {
         var index = Array.IndexOf(patterns, activePattern);
-        int next = (index - 1) % patterns.Length;
+        int next = index == 0 ? patterns.Length-1 : (index - 1) % patterns.Length;
         SelectPattern(patterns[next]);
     }
 
@@ -143,12 +136,11 @@ public class PatternManager : MonoBehaviour
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            Debug.Log("Mouse up, ray = " + ray);
             if (Physics.Raycast(ray, out hit))
             {
                 SelectPattern(hit.transform.GetComponent<Pattern>());
-                Debug.LogFormat("Hit: {0}", hit.transform.gameObject.name);
             }
         }
+        brightnessMod = Mathf.Abs(Input.GetAxis("BrightnessMod")) * (1 - brightness);
     }
 }
