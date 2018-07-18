@@ -24,7 +24,7 @@ public class Canopy: MonoBehaviour
 
     //private int numLEDs = numStrips * pixelsPerStrip;
 
-    const float apexRadius = 0.0332f;
+    const float apexRadius = 0.332f;
 
     private Vector3 PixelToOffset(int stripIndex, int pixelIndex)
     {
@@ -83,7 +83,7 @@ public class Canopy: MonoBehaviour
     private IEnumerable<Vector2> GetUVs(int pixelIndex, int stripIndex)
     {
         int low = 0;
-        int high = 24;
+        int high = 20;
 
         float u = pixelIndex / (1.0f * renderTextureSize);
         float v = stripIndex / (1.0f * renderTextureSize);
