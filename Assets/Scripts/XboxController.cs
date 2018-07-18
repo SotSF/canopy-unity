@@ -5,6 +5,15 @@ using UnityEngine;
 
 public class XboxController : MonoBehaviour {
 
+    static XboxController _instance;
+    public static XboxController instance
+    {
+        get
+        {
+            return _instance;
+        }
+    }
+
     enum Axis:int
     {
         Joyaxis0 = 0, Joyaxis1, Joyaxis2, Joyaxis3, Joyaxis4, Joyaxis5, Joyaxis6, Joyaxis7, Joyaxis8, Joyaxis9, Joyaxis10,
@@ -14,84 +23,88 @@ public class XboxController : MonoBehaviour {
         Joybutton15 = 26, Joybutton16 = 27, Joybutton17 = 28, Joybutton18 = 29, Joybutton19 = 30
     };
 
-    float[] controls = new float[30];
+    public enum ControlInput : int
+    {
+        leftStickX, leftStickY, leftStickClick,
+        rightStickX, rightStickY, rightStickClick,
 
-    Axis leftStickX, leftStickY, leftStickClick;
-    Axis rightStickX, rightStickY, rightStickClick;
+        dpadX, dpadY,
+        leftTrigger, rightTrigger,
 
-    Axis dpadX, dpadY;
-    Axis leftTrigger, rightTrigger;
+        a, b, x, y,
+        leftBumper, rightBumper,
 
-    Axis a, b, x, y;
-    Axis leftBumper, rightBumper;
+        back, start
+    }
 
-    Axis back, start;
-
+    private Dictionary<ControlInput, Axis> controlAxes;
     private Dictionary<Axis, string> axisNames;
+    private float[] controlValues = new float[30];
 
     private void Awake()
     {
+        _instance = this;
+        //controlValues = new Dictionary<ControlInput, float>();
+
+        controlAxes = new Dictionary<ControlInput, Axis>();
         axisNames = new Dictionary<Axis, string>();
         foreach (Axis axis in Enum.GetValues(typeof(Axis)))
             axisNames[axis] = axis.ToString();
 
-        Debug.Log(axisNames[Axis.Joyaxis0]);
-
         if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer)
         {
-            leftStickX = Axis.Joyaxis0;
-            leftStickY = Axis.Joyaxis1;
-            rightStickX = Axis.Joyaxis4;
-            rightStickY = Axis.Joyaxis5;
-            dpadX = Axis.Joyaxis6;
-            dpadY = Axis.Joyaxis7;
-            leftTrigger = Axis.Joyaxis9;
-            rightTrigger = Axis.Joyaxis10;
-            a = Axis.Joybutton0;
-            b = Axis.Joybutton1;
-            x = Axis.Joybutton2;
-            y = Axis.Joybutton3;
-            leftBumper = Axis.Joybutton4;
-            rightBumper = Axis.Joybutton5;
-            back = Axis.Joybutton6;
-            start = Axis.Joybutton7;
-            leftStickClick = Axis.Joybutton8;
-            leftStickClick = Axis.Joybutton9;
+            controlAxes[ControlInput.leftStickX] = Axis.Joyaxis1;
+            controlAxes[ControlInput.leftStickY] = Axis.Joyaxis2;
+            controlAxes[ControlInput.rightStickX] = Axis.Joyaxis4;
+            controlAxes[ControlInput.rightStickY] = Axis.Joyaxis5;
+            controlAxes[ControlInput.dpadX] = Axis.Joyaxis6;
+            controlAxes[ControlInput.dpadY] = Axis.Joyaxis7;
+            controlAxes[ControlInput.leftTrigger] = Axis.Joyaxis9;
+            controlAxes[ControlInput.rightTrigger] = Axis.Joyaxis10;
+            controlAxes[ControlInput.a] = Axis.Joybutton0;
+            controlAxes[ControlInput.b] = Axis.Joybutton1;
+            controlAxes[ControlInput.x] = Axis.Joybutton2;
+            controlAxes[ControlInput.y] = Axis.Joybutton3;
+            controlAxes[ControlInput.leftBumper] = Axis.Joybutton4;
+            controlAxes[ControlInput.rightBumper] = Axis.Joybutton5;
+            controlAxes[ControlInput.back] = Axis.Joybutton6;
+            controlAxes[ControlInput.start] = Axis.Joybutton7;
+            controlAxes[ControlInput.leftStickClick] = Axis.Joybutton8;
+            controlAxes[ControlInput.leftStickClick] = Axis.Joybutton9;
         }
         else if (Application.platform == RuntimePlatform.OSXPlayer)
         {
-            leftStickX = Axis.Joyaxis0;
-            leftStickY = Axis.Joyaxis1;
-            rightStickX = Axis.Joyaxis3;
-            rightStickY = Axis.Joyaxis4;
+            controlAxes[ControlInput.leftStickX] = Axis.Joyaxis1;
+            controlAxes[ControlInput.leftStickY] = Axis.Joyaxis2;
+            controlAxes[ControlInput.rightStickX] = Axis.Joyaxis3;
+            controlAxes[ControlInput.rightStickY] = Axis.Joyaxis4;
             // note: this will only work with left and up for mac for now.
-            dpadX = Axis.Joybutton7;
-            dpadY = Axis.Joybutton5;
-            leftTrigger = Axis.Joyaxis5;
-            rightTrigger = Axis.Joyaxis6;
-            a = Axis.Joybutton16;
-            b = Axis.Joybutton17;
-            x = Axis.Joybutton18;
-            y = Axis.Joybutton19;
-            leftBumper = Axis.Joybutton13;
-            rightBumper = Axis.Joybutton14;
-            back = Axis.Joybutton10;
-            start = Axis.Joybutton9;
-            leftStickClick = Axis.Joybutton11;
-            leftStickClick = Axis.Joybutton12;
+            controlAxes[ControlInput.dpadX] = Axis.Joybutton7;
+            controlAxes[ControlInput.dpadY] = Axis.Joybutton5;
+            controlAxes[ControlInput.leftTrigger] = Axis.Joyaxis5;
+            controlAxes[ControlInput.rightTrigger] = Axis.Joyaxis6;
+            controlAxes[ControlInput.a] = Axis.Joybutton16;
+            controlAxes[ControlInput.b] = Axis.Joybutton17;
+            controlAxes[ControlInput.x] = Axis.Joybutton18;
+            controlAxes[ControlInput.y] = Axis.Joybutton19;
+            controlAxes[ControlInput.leftBumper] = Axis.Joybutton13;
+            controlAxes[ControlInput.rightBumper] = Axis.Joybutton14;
+            controlAxes[ControlInput.back] = Axis.Joybutton10;
+            controlAxes[ControlInput.start] = Axis.Joybutton9;
+            controlAxes[ControlInput.leftStickClick] = Axis.Joybutton11;
+            controlAxes[ControlInput.leftStickClick] = Axis.Joybutton12;
         }
     }
 
-    float Get(Axis axis)
+    public float Get(ControlInput controlInput)
     {
-        return controls[(int)axis];
+        return controlValues[(int)controlInput];
     }
     
 	// Update is called once per frame
 	void Update () {
-		foreach (KeyValuePair<Axis, string> entry in axisNames)
-        {
-            controls[(int)entry.Key] = Input.GetAxis(entry.Value);
+        foreach (ControlInput input in controlAxes.Keys) {
+            controlValues[(int)input] = Input.GetAxis(axisNames[controlAxes[input]]);
         }
 	}
 }
