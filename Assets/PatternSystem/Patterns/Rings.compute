@@ -1,0 +1,22 @@
+﻿#pragma kernel CSMain
+
+RWTexture2D<float4> Frame;
+RWStructuredBuffer<float3> dataBuffer;
+
+// Input parameters controlled by the C# pattern class
+float timeSeconds;
+float period;
+float cycleCount;
+float brightness;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float cycle = 75 / cycleCount;
+    float whiteLevel = ((id.x + (timeSeconds*cycle)/(period/cycleCount)) % cycle) / cycle;
+
+    float4 color = float4(whiteLevel, whiteLevel, whiteLevel, 0.0);
+
+    Frame[id.xy] = brightness*color;
+    dataBuffer[96 * id.x + id.y] = brightness*float3(color.x, color.y, color.z);
+}

@@ -1,0 +1,36 @@
+﻿// This is like declaring the "main" function of a C-family language, the thing that gets executed
+#pragma kernel CSMain
+
+// These are the pieces of data the GPU uses to communicate with the CPU
+// "Result" is just an image file (a 2D array of float4s, which represent colors, eg <1,0,0,0> is red)
+// "dataBuffer" is a 1D array of float3s, used to send the color values back in a format more usable by
+// the rest of the code
+// "timeSeconds" is the current time and passed in by the CPU so that eg sin() based oscillators will oscillate
+Texture2D<float4> InputTex;
+RWTexture2D<float4> Frame;
+RWStructuredBuffer<float3> dataBuffer;
+
+float timeSeconds;
+float brightness;
+float period;
+float cycleCount;
+
+float rightStickX;
+float rightStickY;
+float leftStickX;
+float leftStickY;
+
+//The 'numthreads' declaration determines how many threads are used on the GPU
+// you pass in X/Y/Z values - this program will use 64 threads concurrently
+// and each one will get an X/Y value representing a pixel in the output image that
+// it works on ("uint3 id")
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+	float2 newOffsets = float2(id.x + leftStickX * (75 / 2.0) + (128/2.0 -75/2.0), id.y + leftStickY * (96 / 2.0) + (128/2.0 - 96/2.0));
+	float4 color = InputTex[newOffsets];
+
+	// Color the "Result" image and put it in the general dataBuffer
+	Frame[id.xy] = brightness * color;
+	dataBuffer[96 * id.x + id.y] = brightness * color;
+}
