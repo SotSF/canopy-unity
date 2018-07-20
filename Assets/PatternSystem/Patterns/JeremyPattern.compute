@@ -1,0 +1,56 @@
+﻿// This is like declaring the "main" function of a C-family language, the thing that gets executed
+#pragma kernel CSMain
+
+// These are the pieces of data the GPU uses to communicate with the CPU
+// "Result" is just an image file (a 2D array of float4s, which represent colors, eg <1,0,0,0> is red)
+// "dataBuffer" is a 1D array of float3s, used to send the color values back in a format more usable by
+// the rest of the code
+// "timeSeconds" is the current time and passed in by the CPU so that eg sin() based oscillators will oscillate
+RWTexture2D<float4> Frame;
+RWStructuredBuffer<float3> dataBuffer;
+
+float timeSeconds;
+float brightness;
+float period;
+float cycleCount;
+
+//This function rotates a point (uint2 xy) theta degrees around a center point
+float2 rotate(uint2 xy, float2 center, float theta)
+{
+    float r = distance(center, xy);
+    float startAngle = atan2(xy.y - center.y, xy.x - center.x);
+    float newX = center.x + r * cos(theta + startAngle);
+    float newY = center.y + r * sin(theta + startAngle);
+    return float2(newX, newY);
+}
+
+//The 'numthreads' declaration determines how many threads are used on the GPU
+// you pass in X/Y/Z values - this program will use 64 threads concurrently
+// and each one will get an X/Y value representing a pixel in the output image that
+// it works on ("uint3 id")
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float pi = 3.14159265f;
+    float cycle = 75 / cycleCount;
+    // We declare a center point of the 75x96 texture around which to rotate, and then
+    // rotate our input point
+    float2 center = float2(75/2.0, 48);
+    float2 newpoint = rotate(id.xy, center, 2 * pi * timeSeconds / period);
+ 
+    float xRatio = id.x / 74.;
+    float yRatio = id.y / 95.;
+
+
+    float oscillator = (sin(timeSeconds / period)/2)+0.5;
+    float oscillator2 = (sin(timeSeconds / period / 1.5) / 2) + 0.5;
+
+    // Get a color based on slapping some functions together 
+    float4 color = float4(  (sin((cycleCount * xRatio + oscillator) * pi) /2)+.5,
+                             (sin((1.5 * cycleCount * yRatio + oscillator) * pi) / 2) + .5,
+                           (sin((2 * xRatio * yRatio * cycleCount + oscillator + oscillator2) * pi) / 2) + .5,
+                            0.0);
+    // Color the "Result" image and put it in the general dataBuffer
+    Frame[id.xy] = brightness*color;
+    dataBuffer[96*id.x+id.y] = brightness*color;
+}
