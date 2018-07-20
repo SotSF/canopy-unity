@@ -38,8 +38,14 @@ public class PatternInputGenerator : MonoBehaviour
     {
         Func<float> getValue = () =>
         {
-            //Debug.Log(XboxController.instance.Get(controlInput));
-            return XboxController.instance.Get(controlInput);
+            if (XboxController.instance != null)
+            {
+                return XboxController.instance.Get(controlInput);
+            } else
+            {
+                return 0;
+            }
+
         };
         return getValue;
     }

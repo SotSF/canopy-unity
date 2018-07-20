@@ -61,10 +61,14 @@ public class PongPattern : Pattern
         // Read input from XboxController.instance
         // update paddle state, ball state
         // set values on shader
-        var xInput = XboxController.instance.Get(XboxController.ControlInput.leftStickX);
+        float xInput = 0;
+        if (XboxController.instance != null)
+        {
+            xInput = XboxController.instance.Get(XboxController.ControlInput.leftStickX);
+        }
+        
         paddleLocation += (xInput * paddleSpeed)%360;
         CalculateBallPosition();
-        Debug.Log("Ball data = " + ballData);
         renderParams["paddleLocation"] = paddleLocation;
         patternShader.SetVector("ballData", ballData);
     }

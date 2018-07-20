@@ -102,6 +102,8 @@ public class Pattern : MonoBehaviour
         renderParams["period"] = manager.period;
         renderParams["cycleCount"] = manager.cycles;
         renderParams["brightness"] = manager.brightness + manager.brightnessMod;
+        renderParams["hue"] = manager.hue;
+        renderParams["saturation"] = manager.saturation;
     }
 
     // Update is called once per frame

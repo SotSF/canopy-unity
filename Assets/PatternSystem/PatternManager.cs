@@ -16,6 +16,11 @@ public class PatternManager : MonoBehaviour
 
     public float period;
     public float cycles;
+    [Range(-1,1)]
+    public float hue;
+    [Range(0, 1)]
+    public float saturation;
+    [Range(0, 1)]
     public float brightness;
 
     [HideInInspector]

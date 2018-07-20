@@ -5,9 +5,11 @@ RWStructuredBuffer<float3> dataBuffer;
 
 // Input parameters controlled by the C# pattern class
 float timeSeconds;
+float hue;
+float saturation;
+float brightness;
 float period;
 float cycleCount;
-float brightness;
 
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
