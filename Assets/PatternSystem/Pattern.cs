@@ -30,13 +30,16 @@ public class Pattern : MonoBehaviour
     const int FLOAT_BYTES = 4;
     const int VEC3_LENGTH = 3;
 
+    private const int NumStrips = 96;
+    private const int PixelsPerStrip = 75;
+
     private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
 
     void Start()
     {
         manager = GetComponentInParent<PatternManager>();
 
-        patternTexture = new RenderTexture(75, 96, 24);
+        patternTexture = new RenderTexture(PixelsPerStrip+1, NumStrips, 24);
         patternTexture.enableRandomWrite = true;
         patternTexture.Create();
 
@@ -51,8 +54,8 @@ public class Pattern : MonoBehaviour
 
         kernelId = patternShader.FindKernel("CSMain");
         patternShader.SetTexture(kernelId, "Frame", patternTexture);
-        dataBuffer = new ComputeBuffer(75 * 96, FLOAT_BYTES * VEC3_LENGTH);
-        colorData = new Vector3[75 * 96];
+        dataBuffer = new ComputeBuffer(PixelsPerStrip * NumStrips, FLOAT_BYTES * VEC3_LENGTH);
+        colorData = new Vector3[PixelsPerStrip * NumStrips];
         pixelBuffer = new byte[colorData.Length * 3];
         patternShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
 
@@ -111,7 +114,9 @@ public class Pattern : MonoBehaviour
         }
 
         //Execute pattern shader
-        patternShader.Dispatch(kernelId, 75 / 8, 96 / 8, 1);
+        int groupx_size = PixelsPerStrip + (8 - (PixelsPerStrip % 8));
+        int groupy_size = NumStrips + (8 - (NumStrips % 8));
+        patternShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
         if (presenting)
         {
              PresentPattern();

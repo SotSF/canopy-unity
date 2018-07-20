@@ -18,5 +18,5 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float4 color = float4(whiteLevel, whiteLevel, whiteLevel, 0.0);
 
     Frame[id.xy] = brightness*color;
-    dataBuffer[96 * id.x + id.y] = brightness*float3(color.x, color.y, color.z);
+    dataBuffer[75 * id.y + id.x] = brightness*float3(color.x, color.y, color.z);
 }
