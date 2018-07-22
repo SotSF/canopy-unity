@@ -6,7 +6,17 @@ using Lightsale.Utility;
 
 public class UIController : MonoBehaviour
 {
+    public struct SliderDefinition
+    {
+        public string name;
+        public float min;
+        public float max;
+        public float start;
+    }
+
     public static UIController instance;
+
+    public SliderDefinition[] sliders;
 
     [Tooltip("Objects which should only be displayed in simulator mode")]
     public Transform[] simulationOnlyObjects;

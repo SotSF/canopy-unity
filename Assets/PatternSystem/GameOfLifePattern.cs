@@ -13,7 +13,7 @@ public class GameOfLifePattern : Pattern {
         base.Start();
         //renderTexture = new RenderTexture(tex);
         //RenderTexture.crea
-        renderTexture = new RenderTexture(PixelsPerStrip + 1, NumStrips, 24);
+        renderTexture = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
         renderTexture.enableRandomWrite = true;
         renderTexture.Create();
 
@@ -33,8 +33,8 @@ public class GameOfLifePattern : Pattern {
     protected override void Update()
     {
         base.Update();
-        int groupx_size = PixelsPerStrip + (8 - (PixelsPerStrip % 8));
-        int groupy_size = NumStrips + (8 - (NumStrips % 8));
+        int groupx_size = Constants.PIXELS_PER_STRIP + (8 - (Constants.PIXELS_PER_STRIP % 8));
+        int groupy_size = Constants.NUM_STRIPS + (8 - (Constants.NUM_STRIPS % 8));
         swapShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
     }
 }

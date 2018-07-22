@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class Pattern : MonoBehaviour
 {
@@ -30,32 +31,23 @@ public class Pattern : MonoBehaviour
     protected const int FLOAT_BYTES = 4;
     protected const int VEC3_LENGTH = 3;
 
-    protected const int NumStrips = 96;
-    protected const int PixelsPerStrip = 75;
-
     private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
 
     protected virtual void Start()
     {
         manager = GetComponentInParent<PatternManager>();
 
-        patternTexture = new RenderTexture(PixelsPerStrip+1, NumStrips, 24);
+        patternTexture = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
         patternTexture.enableRandomWrite = true;
         patternTexture.Create();
 
-        patternMaterial = new Material(Shader.Find("PatternDisplayShaderGraph"));
-
-        foreach (string tex in patternMaterial.GetTexturePropertyNames())
-        {
-            patternMaterial.SetTexture(tex, patternTexture);
-        }
-
-        GetComponent<MeshRenderer>().sharedMaterial = patternMaterial;
+        RawImage image = GetComponent<RawImage>();
+        image.texture = patternTexture;
 
         kernelId = patternShader.FindKernel("CSMain");
         patternShader.SetTexture(kernelId, "Frame", patternTexture);
-        dataBuffer = new ComputeBuffer(PixelsPerStrip * NumStrips, FLOAT_BYTES * VEC3_LENGTH);
-        colorData = new Vector3[PixelsPerStrip * NumStrips];
+        dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, FLOAT_BYTES * VEC3_LENGTH);
+        colorData = new Vector3[Constants.NUM_LEDS];
         pixelBuffer = new byte[colorData.Length * 3];
         patternShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
 
@@ -121,8 +113,8 @@ public class Pattern : MonoBehaviour
             }
 
             //Execute pattern shader
-            int groupx_size = PixelsPerStrip + (8 - (PixelsPerStrip % 8));
-            int groupy_size = NumStrips + (8 - (NumStrips % 8));
+            int groupx_size = Constants.PIXELS_PER_STRIP + (8 - (Constants.PIXELS_PER_STRIP % 8));
+            int groupy_size = Constants.NUM_STRIPS + (8 - (Constants.NUM_STRIPS % 8));
             patternShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
             if (presenting)
             {

@@ -34,7 +34,6 @@ public class PatternManager : MonoBehaviour
     const int VEC3_LENGTH = 3;
 
     public Pattern activePattern;
-    private Pattern lastPattern;
     private Pattern[] patterns;
 
 
@@ -60,7 +59,6 @@ public class PatternManager : MonoBehaviour
         {
             if (activePattern != null)
                 activePattern.presenting = false;
-            lastPattern = pattern;
             activePattern = pattern;
             var textures = canopyMaterial.GetTexturePropertyNames();
             foreach (string tex in textures)
@@ -75,7 +73,6 @@ public class PatternManager : MonoBehaviour
     public void CreateNewPattern()
     {
         string patternDir = "Assets/PatternSystem/Patterns/";
-        Shader displayShader = Shader.Find("PatternDisplayShaderGraph");
         Pattern patternObj = Instantiate(basePatternComponent);
         string sourceShaderFile = patternDir+"Rotate.compute";
         string destShaderFile = patternDir+"NewPattern.compute";
@@ -93,6 +90,7 @@ public class PatternManager : MonoBehaviour
 #endif 
     public void ArrangePatternDisplays()
     {
+
         var patterns = GetComponentsInChildren<Pattern>();
         float theta = 0;
         Vector3 offset = 4.2f*Vector3.forward;
@@ -100,11 +98,6 @@ public class PatternManager : MonoBehaviour
         {
             var pattern = patterns[i];
             pattern.transform.localPosition = Quaternion.Euler(0, theta, 0) * offset;
-            theta += Mathf.Atan2(1.2f, offset.magnitude) * Mathf.Rad2Deg;
-
-            //LookAt() leaves the display facing backwards, so flip it 180 afterwards
-            pattern.transform.LookAt(transform);
-            pattern.transform.rotation *= Quaternion.Euler(0, 180, 0);
         }
     }
 

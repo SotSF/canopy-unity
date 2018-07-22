@@ -4,6 +4,7 @@ using System;
 
 public class Controls: MonoBehaviour
 {
+    public static Controls instance;
     private const float inputThreshold = 0.1f;
     public float speed = .01f;
     public float mouseSensitivity;
@@ -16,9 +17,21 @@ public class Controls: MonoBehaviour
     private float minimumY = -90;
     private Quaternion originalRotation;
     // Use this for initialization
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
     void Start()
     {
         originalRotation = transform.localRotation;
+    }
+
+    public void ResetRotation()
+    {
+        rotationX = 0;
+        rotationY = 0;
     }
 
     public static float ClampAngle(float angle, float min, float max)
@@ -49,17 +62,20 @@ public class Controls: MonoBehaviour
         rotationX += Mathf.Abs(rawx) > inputThreshold ? rawx : 0;
         rotationY += Mathf.Abs(rawy) > inputThreshold ? rawy : 0;
 
-        rotationX = ClampAngle(rotationX, minimumX, maximumX);
-        rotationY = ClampAngle(rotationY, minimumY, maximumY);
 
-        Quaternion xQuaternion = Quaternion.AngleAxis(rotationX, Vector3.up);
-        Quaternion yQuaternion = Quaternion.AngleAxis(rotationY, Vector3.left);
 
         if (UIController.instance.inSimulatorMode)
         {
+            rotationX = ClampAngle(rotationX, minimumX, maximumX);
+            rotationY = ClampAngle(rotationY, minimumY, maximumY);
+
+            Quaternion xQuaternion = Quaternion.AngleAxis(rotationX, Vector3.up);
+            Quaternion yQuaternion = Quaternion.AngleAxis(rotationY, Vector3.left);
             transform.localRotation = originalRotation * xQuaternion * yQuaternion;
         } else
         {
+            Quaternion xQuaternion = Quaternion.AngleAxis(rotationX, Vector3.up);
+            Quaternion yQuaternion = Quaternion.AngleAxis(rotationY, Vector3.left);
             Canopy.instance.UpdateRotation(xQuaternion * yQuaternion);
         }
 

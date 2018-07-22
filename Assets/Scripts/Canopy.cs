@@ -21,6 +21,8 @@ public class Canopy: MonoBehaviour
     private Coroutine animRoutine;
     private Quaternion originalRotation;
 
+    private Vector3 controlViewPosition = new Vector3(.75f, 1.6f, 3.3f);
+
     public int numStrips = 96;
     public int pixelsPerStrip = 75;
     
@@ -38,16 +40,19 @@ public class Canopy: MonoBehaviour
     }
     public void EnterSimulationMode()
     {
+        Controls.instance.ResetRotation();
         originalRotation = Quaternion.identity;
-        var rotate = Animations.LocalQuatLerp(transform, Quaternion.identity);
+        var rotate = Animations.LocalQuatLerp(transform, originalRotation);
         var trans = Animations.LocalPositionLerp(transform, new Vector3(0, 4, 0));
         this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
     }
     public void EnterControllerMode()
     {
-        originalRotation = Quaternion.Euler(90, 0, 0);
+        //originalRotation = Quaternion.Euler(90, 0, 0);
+        Controls.instance.ResetRotation();
+        originalRotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position) * Quaternion.Euler(180,0,0);
         var rotate = Animations.LocalQuatLerp(transform, originalRotation);
-        var trans = Animations.LocalPositionLerp(transform, new Vector3(.75f, 1.3f, 3f));
+        var trans = Animations.LocalPositionLerp(transform, controlViewPosition);
         this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
     }
     public void UpdateRotation(Quaternion rotation)
@@ -111,8 +116,8 @@ public class Canopy: MonoBehaviour
 
     private IEnumerable<Vector2> GetUVs(int pixelIndex, int stripIndex)
     {
-        int low = 0;
-        int high = 20;
+        //int low = 0;
+        //int high = 20;
 
         float u = (float)pixelIndex / (pixelsPerStrip-1);
         float v = (float)stripIndex / (numStrips-1);
@@ -160,14 +165,15 @@ public class Canopy: MonoBehaviour
         Quaternion stripRotation = GetRotation(stripIndex);
         int a = pixelIndex > 0 ? pixelIndex - 1 : pixelIndex;
         int b = pixelIndex > 0 ? pixelIndex : pixelIndex + 1;
-        var diff = catenaryOffsets[b] - catenaryOffsets[a];
+        //var diff = catenaryOffsets[b] - catenaryOffsets[a];
 
-        float angle = -Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
+        //float angle = -Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
         
-        Quaternion catenaryRotation = Quaternion.Euler(0, 0, 0);
+        //Quaternion catenaryRotation = Quaternion.Euler(0, 0, 0);
         //Vector3 offset = PixelToOffset(stripIndex, pixelIndex);
         Vector3 offset = new Vector3(0, catenaryOffsets[pixelIndex].y, catenaryOffsets[pixelIndex].x) + apexRadius*Vector3.forward;
-        var newverts = pixelBase.vertices.Select(vert => stripRotation * ((catenaryRotation * vert) + offset));
+        //var newverts = pixelBase.vertices.Select(vert => stripRotation * ((catenaryRotation * vert) + offset));
+        var newverts = pixelBase.vertices.Select(vert => stripRotation * (vert + offset));
         return newverts;
     }
 
