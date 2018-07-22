@@ -10,7 +10,7 @@ public class Pattern : MonoBehaviour
 {
     public ComputeShader patternShader;
 
-    private Material patternMaterial;
+    protected Material patternMaterial;
 
     [HideInInspector]
     public RenderTexture patternTexture;
@@ -19,23 +19,23 @@ public class Pattern : MonoBehaviour
 
     protected Dictionary<string, float> renderParams = new Dictionary<string, float>();
 
-    private PatternManager manager;
-    private ComputeBuffer dataBuffer;
-    private Vector3[] colorData;
+    protected PatternManager manager;
+    protected ComputeBuffer dataBuffer;
+    protected Vector3[] colorData;
 
-    private byte[] pixelBuffer;
+    protected byte[] pixelBuffer;
 
     protected int kernelId;
 
-    const int FLOAT_BYTES = 4;
-    const int VEC3_LENGTH = 3;
+    protected const int FLOAT_BYTES = 4;
+    protected const int VEC3_LENGTH = 3;
 
-    private const int NumStrips = 96;
-    private const int PixelsPerStrip = 75;
+    protected const int NumStrips = 96;
+    protected const int PixelsPerStrip = 75;
 
     private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
 
-    void Start()
+    protected virtual void Start()
     {
         manager = GetComponentInParent<PatternManager>();
 
@@ -61,7 +61,7 @@ public class Pattern : MonoBehaviour
 
     }
 
-    private void PresentPattern()
+    protected void PresentPattern()
     {
         dataBuffer.GetData(colorData);
 
@@ -107,7 +107,7 @@ public class Pattern : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
         UpdateRenderParams();
         foreach (string param in renderParams.Keys)
