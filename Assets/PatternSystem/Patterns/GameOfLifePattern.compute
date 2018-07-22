@@ -1,11 +1,14 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
 
+#define ALIVE_THRESHOLD 0.01
+
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 Texture2D<float4> InputTex;
 RWTexture2D<float4> Frame;
 RWStructuredBuffer<float3> dataBuffer;
+
 
 float timeSeconds;
 float brightness;
@@ -14,13 +17,12 @@ float cycleCount;
 
 int gameOfLifeSample(int2 id, int x, int y) {
 	int2 coords = int2((id.x + x + 75) % 75, (id.y + y + 96) % 96);
-	return InputTex[coords].r > 0.01 ? 1 : 0;
+	return InputTex[coords].r > ALIVE_THRESHOLD ? 1 : 0;
 }
 
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-	float self = InputTex[id.xy].r > 0.01 ? 1 : 0;
 	int neighbors = 0;
 
 	// above
@@ -37,17 +39,15 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 	neighbors += gameOfLifeSample(id.xy, 0, 1);
 	neighbors += gameOfLifeSample(id.xy, 1, 1);
 
-	// Add current pixel for reason
-	//neighborPixels += currentPixel;
-
-	// 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-	// 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
-
-	// 2. Any live cell with two or three live neighbours lives on to the next generation.
-	// 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+	// Conway's game of life.
+	// [DEAD] 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+	// [LIVE] 2. Any live cell with two or three live neighbours lives on to the next generation.
+	// [DEAD] 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
+	// [LIVE] 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
 	float val = 0;
-	if (self > 0.75) {
+	float self = InputTex[id.xy].r > ALIVE_THRESHOLD ? 1 : 0;
+	if (self == 1) {
 		if (neighbors >= 2 && neighbors <= 3) {
 			val = 1;
 		}
