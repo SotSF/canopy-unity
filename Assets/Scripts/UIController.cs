@@ -30,8 +30,8 @@ public class UIController : MonoBehaviour
 
     private void Start()
     {
-        viewModeButton = transform.Find("ViewModeButton").GetComponent<Button>();
-        performanceModeButton = transform.Find("PerformanceModeButton").GetComponent<Button>();
+        viewModeButton = transform.Find("ControlButtons/ViewModeButton").GetComponent<Button>();
+        performanceModeButton = transform.Find("ControlButtons/PerformanceModeButton").GetComponent<Button>();
         canopyLight = Canopy.instance.GetComponentInChildren<Light>();
     }
 
