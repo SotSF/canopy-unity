@@ -130,6 +130,7 @@ public class PatternManager : MonoBehaviour
     IEnumerator CheckForAPI()
     {
         Uri pingEndpoint = new Uri("http://localhost:8080/api/ping");
+        bool wasConnected = false;
         float lastChecked = 0;
         while (true)
         {
@@ -138,7 +139,11 @@ public class PatternManager : MonoBehaviour
                 var req = new UnityWebRequest(pingEndpoint);
                 yield return req.SendWebRequest();
                 pusherConnected = req.responseCode == 200;
-                Debug.LogFormat("Canopy API {0}", pusherConnected ? "connected" : "not connected");
+                if (pusherConnected != wasConnected)
+                {
+                    Debug.LogFormat("Canopy API {0}", pusherConnected ? "connected" : "not connected");
+                    wasConnected = pusherConnected;
+                }
                 lastChecked = 0;
             }
             lastChecked += Time.deltaTime;
