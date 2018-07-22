@@ -78,22 +78,25 @@ public class Pattern : MonoBehaviour
             request.SendWebRequest();
         }
 
-        int count = 0;
-        Vector3 avg = Vector3.one;
-        for (int i = 0; i < colorData.Length; i++)
+        if (!manager.highPerformance)
         {
-            if (!(float.IsNaN(colorData[i].x) || float.IsNaN(colorData[i].y) || float.IsNaN(colorData[i].z)))
+            int count = 0;
+            Vector3 avg = Vector3.one;
+            for (int i = 0; i < colorData.Length; i++)
             {
-                avg += colorData[i];
-                count++;
+                if (!(float.IsNaN(colorData[i].x) || float.IsNaN(colorData[i].y) || float.IsNaN(colorData[i].z)))
+                {
+                    avg += colorData[i];
+                    count++;
+                }
+                else
+                {
+                    //Note the NaN?
+                }
             }
-            else
-            {
-                //Note the NaN?
-            }
+            avg /= count;
+            manager.SetLightColor(new Color(avg.x, avg.y, avg.z));
         }
-        avg /= count;
-        manager.SetLightColor(new Color(avg.x, avg.y, avg.z));
     }
 
     protected virtual void UpdateRenderParams()
@@ -109,19 +112,22 @@ public class Pattern : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
-        UpdateRenderParams();
-        foreach (string param in renderParams.Keys)
+        if (!manager.highPerformance || presenting)
         {
-            patternShader.SetFloat(param, renderParams[param]);
-        }
+            UpdateRenderParams();
+            foreach (string param in renderParams.Keys)
+            {
+                patternShader.SetFloat(param, renderParams[param]);
+            }
 
-        //Execute pattern shader
-        int groupx_size = PixelsPerStrip + (8 - (PixelsPerStrip % 8));
-        int groupy_size = NumStrips + (8 - (NumStrips % 8));
-        patternShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
-        if (presenting)
-        {
-             PresentPattern();
+            //Execute pattern shader
+            int groupx_size = PixelsPerStrip + (8 - (PixelsPerStrip % 8));
+            int groupy_size = NumStrips + (8 - (NumStrips % 8));
+            patternShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
+            if (presenting)
+            {
+                 PresentPattern();
+            }
         }
     }
 

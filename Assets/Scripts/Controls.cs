@@ -55,7 +55,14 @@ public class Controls: MonoBehaviour
         Quaternion xQuaternion = Quaternion.AngleAxis(rotationX, Vector3.up);
         Quaternion yQuaternion = Quaternion.AngleAxis(rotationY, Vector3.left);
 
-        transform.localRotation = originalRotation * xQuaternion * yQuaternion;
+        if (UIController.instance.inSimulatorMode)
+        {
+            transform.localRotation = originalRotation * xQuaternion * yQuaternion;
+        } else
+        {
+            Canopy.instance.UpdateRotation(xQuaternion * yQuaternion);
+        }
+
         CheckButtons();
     }
 

@@ -27,6 +27,8 @@ public class PatternManager : MonoBehaviour
     public float brightnessMod = 0;
     [HideInInspector]
     public bool pusherConnected;
+    [HideInInspector]
+    public bool highPerformance;
 
     const int FLOAT_BYTES = 4;
     const int VEC3_LENGTH = 3;
@@ -34,6 +36,7 @@ public class PatternManager : MonoBehaviour
     public Pattern activePattern;
     private Pattern lastPattern;
     private Pattern[] patterns;
+
 
     private void Awake()
     {

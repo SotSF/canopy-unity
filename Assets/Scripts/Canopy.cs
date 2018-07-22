@@ -3,9 +3,13 @@ using System.Collections;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using Lightsale.Animation;
+using Lightsale.Utility;
 
 public class Canopy: MonoBehaviour
 {
+    public static Canopy instance;
+
     public Mesh pixelBase;
     public int renderTextureSize = 128;
     public Material canopyMaterial;
@@ -14,10 +18,12 @@ public class Canopy: MonoBehaviour
     public Transform end;
 
     private Transform pixels;
+    private Coroutine animRoutine;
+    private Quaternion originalRotation;
 
     public int numStrips = 96;
     public int pixelsPerStrip = 75;
-
+    
     const int pixelsPerMeter = 30;
 
     const int maxVerts = 65000;
@@ -25,6 +31,29 @@ public class Canopy: MonoBehaviour
     //private int numLEDs = numStrips * pixelsPerStrip;
 
     const float apexRadius = 0.332f;
+    private void Awake()
+    {
+        originalRotation = Quaternion.identity;
+        instance = this;
+    }
+    public void EnterSimulationMode()
+    {
+        originalRotation = Quaternion.identity;
+        var rotate = Animations.LocalQuatLerp(transform, Quaternion.identity);
+        var trans = Animations.LocalPositionLerp(transform, new Vector3(0, 4, 0));
+        this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
+    }
+    public void EnterControllerMode()
+    {
+        originalRotation = Quaternion.Euler(90, 0, 0);
+        var rotate = Animations.LocalQuatLerp(transform, originalRotation);
+        var trans = Animations.LocalPositionLerp(transform, new Vector3(.75f, 1.3f, 3f));
+        this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
+    }
+    public void UpdateRotation(Quaternion rotation)
+    {
+        transform.localRotation = originalRotation * rotation;
+    }
 
     private Vector3 PixelToOffset(int stripIndex, int pixelIndex)
     {
