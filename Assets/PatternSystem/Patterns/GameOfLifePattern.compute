@@ -12,6 +12,11 @@ float brightness;
 float period;
 float cycleCount;
 
+int gameOfLifeSample(int2 id, int x, int y) {
+	int2 coords = int2((id.x + x + 75) % 75, (id.y + y + 96) % 96);
+	return InputTex[coords].r > 0.01 ? 1 : 0;
+}
+
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
@@ -19,19 +24,18 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 	int neighbors = 0;
 
 	// above
-	neighbors += InputTex[int2(id.x-1, id.y-1)].r > 0.01 ? 1 : 0;
-	neighbors += InputTex[int2(id.x+0, id.y - 1)].r > 0.01 ? 1 : 0;
-	neighbors += InputTex[int2(id.x+1, id.y - 1)].r > 0.01 ? 1 : 0;
+	neighbors += gameOfLifeSample(id.xy, -1, -1);
+	neighbors += gameOfLifeSample(id.xy, 0, -1);
+	neighbors += gameOfLifeSample(id.xy, 1, -1);
 
 	// same level
-	neighbors += InputTex[int2(id.x - 1, id.y)].r > 0.01 ? 1 : 0;
-	neighbors += InputTex[int2(id.x + 1, id.y)].r > 0.01 ? 1 : 0;
+	neighbors += gameOfLifeSample(id.xy, -1, 0);
+	neighbors += gameOfLifeSample(id.xy, 1, 0);
 
 	// below
-	neighbors += InputTex[int2(id.x - 1, id.y + 1)].r > 0.01 ? 1 : 0;
-	neighbors += InputTex[int2(id.x + 0, id.y + 1)].r > 0.01 ? 1 : 0;
-	neighbors += InputTex[int2(id.x + 1, id.y + 1)].r > 0.01 ? 1 : 0;
-	
+	neighbors += gameOfLifeSample(id.xy, -1, 1);
+	neighbors += gameOfLifeSample(id.xy, 0, 1);
+	neighbors += gameOfLifeSample(id.xy, 1, 1);
 
 	// Add current pixel for reason
 	//neighborPixels += currentPixel;
