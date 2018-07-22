@@ -46,7 +46,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float4 color = float4(  0, 
         abs((newpoint.x%cycle) / cycle) / 2,
                             0, 
-                            0.0);
+                            1);
     // Color the "Result" image and put it in the general dataBuffer
     Frame[id.xy] = brightness*color;
     dataBuffer[75*id.y + id.x] = brightness*color;

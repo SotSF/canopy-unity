@@ -17,7 +17,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     float cycle = 75 / cycleCount;
     float whiteLevel = ((id.x + (timeSeconds*cycle)/(period/cycleCount)) % cycle) / cycle;
 
-    float4 color = float4(whiteLevel, whiteLevel, whiteLevel, 0.0);
+    float4 color = float4(whiteLevel, whiteLevel, whiteLevel, 1);
 
     Frame[id.xy] = brightness*color;
     dataBuffer[75 * id.y + id.x] = brightness*float3(color.x, color.y, color.z);

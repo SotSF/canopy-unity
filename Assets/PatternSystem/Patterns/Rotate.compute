@@ -69,7 +69,7 @@ float3 applyHSVTransforms(in float3 color) {
 // Color the "Frame" image and put it in the general dataBuffer
 void returnColorData(in uint2 pixel, in float3 color) {
     color = applyHSVTransforms(color);
-    Frame[pixel.xy] = float4(color, 0);
+    Frame[pixel.xy] = float4(color, 1);
     dataBuffer[75 * pixel.y + pixel.x] = color;
 }
 
