@@ -65,21 +65,21 @@ void returnColorData(in uint2 pixel, in float3 color) {
     dataBuffer[75 * pixel.y + pixel.x] = color;
 }
 
-float2 worldspace(in uint2 pixel, in float width) {
+float2 worldspace(in uint2 pixel, in float2 dimensions) {
     // go from pixelSpace to width-normalized world space
     float pi = 3.14159265;
     float2 center = float2(0, 0);
     float apexRadius = 0.332f;
     float stripLength = 2.5f;
-
+    float normalizedDimension = dimensions.x > dimensions.y ? dimensions.y : dimensions.x;
     float normalizedX = ((stripLength*pixel.x / 75.0f) + apexRadius) / (stripLength + apexRadius);
-    return (width*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (width / 2);
+    return (normalizedDimension*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (normalizedDimension / 2);
 }
 
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-    float2 cartesian = worldspace(id.xy, width);
+    float2 cartesian = worldspace(id.xy, float2(width,height));
     float4 color = InputTex[cartesian];
     returnColorData(id.xy, color.rgb);
 }

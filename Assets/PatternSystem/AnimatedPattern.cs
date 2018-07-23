@@ -1,0 +1,30 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Video;
+
+public class AnimatedPattern : Pattern
+{
+    private VideoPlayer player;
+    private RenderTexture inputFrame;
+
+    protected override void Start()
+    {
+        base.Start();
+        inputFrame = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
+        inputFrame.enableRandomWrite = true;
+        inputFrame.Create();
+        player = GetComponent<VideoPlayer>();
+        player.targetTexture = inputFrame;
+        player.renderMode = VideoRenderMode.RenderTexture;
+        player.Play();
+    }
+
+    protected override void UpdateRenderParams()
+    {
+        base.UpdateRenderParams();
+        patternShader.SetInt("height", inputFrame.height);
+        patternShader.SetInt("width", inputFrame.width);
+        patternShader.SetTexture(kernelId, "InputTex", inputFrame);
+    }
+}
