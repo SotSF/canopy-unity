@@ -9,6 +9,9 @@ float hue;
 float saturation;
 float brightness;
 
+uint height;
+uint width;
+
 //Color space functions taken from Ian Taylor's work at http://www.chilliant.com/rgb2hsv.html
 float Epsilon = 1e-10;
 float3 RGBtoHCV(in float3 RGB)
@@ -62,18 +65,21 @@ void returnColorData(in uint2 pixel, in float3 color) {
     dataBuffer[75 * pixel.y + pixel.x] = color;
 }
 
-[numthreads(8, 8, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
-{
-    // go from pixelSpace to normalized world space
-    // sample texture from normalized world space
+float2 worldspace(in uint2 pixel, in float width) {
+    // go from pixelSpace to width-normalized world space
     float pi = 3.14159265;
     float2 center = float2(0, 0);
     float apexRadius = 0.332f;
     float stripLength = 2.5f;
-    float normalizedX = ((stripLength*id.x / 75.0f)+ apexRadius)/(stripLength + apexRadius);
 
-    /*float2 worldspace = (rotate(float2(normalizedX, 0), center, 2 * pi*(id.y / 96.0f))/2)+0.5f;*/
-    float4 color = InputTex[id.xy];
+    float normalizedX = ((stripLength*pixel.x / 75.0f) + apexRadius) / (stripLength + apexRadius);
+    return (width*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (width / 2);
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 cartesian = worldspace(id.xy, width);
+    float4 color = InputTex[cartesian];
     returnColorData(id.xy, color.rgb);
 }
