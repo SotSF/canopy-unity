@@ -10,7 +10,7 @@ public class PatternManager : MonoBehaviour
     public static PatternManager instance { get; private set; }
     public Material canopyMaterial;
 
-    public Light lightCaster;
+    private Light lightCaster;
 
     public Pattern basePatternComponent;
 
@@ -47,6 +47,7 @@ public class PatternManager : MonoBehaviour
         patterns = GetComponentsInChildren<Pattern>();
         Invoke("ChooseRandomPattern", .1f);
         StartCoroutine(CheckForAPI());
+        lightCaster = Canopy.instance.GetComponentInChildren<Light>();
     }
     public void ChooseRandomPattern()
     {
@@ -81,26 +82,39 @@ public class PatternManager : MonoBehaviour
         ComputeShader patternShader = AssetDatabase.LoadAssetAtPath<ComputeShader>(destShaderFile);
         patternObj.transform.SetParent(transform);
         patternObj.transform.localPosition = Vector3.zero;
+        patternObj.transform.localScale = Vector3.one;
         patternObj.patternShader = patternShader;
-
-        patternObj.name = "NewPatternDisplay";
+        
+        patternObj.name = "NewPattern";
         AssetDatabase.SaveAssets();
         ArrangePatternDisplays();
     }
 #endif 
     public void ArrangePatternDisplays()
     {
-        const int margin = 10;
+        const int margin = 8;
         int ySpacing = Constants.NUM_STRIPS + margin;
         int xSpacing = Constants.PIXELS_PER_STRIP + margin;
         var patterns = GetComponentsInChildren<Pattern>();
 
-        
+        int currentY = 0;
+        int currentX = 0;
+
+        int maxY = 8;
+
         for (int i = 0; i < patterns.Length; i++)
         {
             var pattern = patterns[i];
             var rect = pattern.GetComponent<RectTransform>();
-            //rect.anchoredPosition
+            rect.anchoredPosition = new Vector2(currentX * xSpacing, -currentY * ySpacing);
+            if (currentY == maxY-1)
+            {
+                currentY = 0;
+                currentX++;
+            } else
+            {
+                currentY++;
+            }
         }
     }
 

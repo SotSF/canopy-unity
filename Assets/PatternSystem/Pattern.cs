@@ -123,7 +123,7 @@ public class Pattern : MonoBehaviour
             patternShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
             if (presenting)
             {
-                 PresentPattern();
+                PresentPattern();
             }
         }
     }
