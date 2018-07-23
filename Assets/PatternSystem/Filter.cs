@@ -10,11 +10,8 @@ public class Filter : MonoBehaviour {
     public ComputeShader outputShader;
     public RenderTexture[] textureBuffers;
 
-    public bool yes;
-    public Vector3 rgb;
-
     protected int kernelId = 0;
-
+    
     private RenderTexture newRenderTexture()
     {
         RenderTexture tex = new RenderTexture(Constants.PIXELS_PER_STRIP + 1, Constants.NUM_STRIPS, 24);
@@ -25,8 +22,10 @@ public class Filter : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        // Initialize the swapping rendertextures.
         textureBuffers = new RenderTexture[] { newRenderTexture(), newRenderTexture() };
 
+        // Set the input and output textures for each of the shaders, swapping each time.
         for (int i = 0; i < filterShaders.Count; i++)
         {
             int input = i % 2 == 0 ? 0 : 1;
@@ -34,6 +33,17 @@ public class Filter : MonoBehaviour {
             filterShaders[i].SetTexture(kernelId, "InputTex", textureBuffers[input]);
             filterShaders[i].SetTexture(kernelId, "OutputTex", textureBuffers[output]);
         }
+
+        // Set the pattern texture to the output texture of the last output texture.
+        RenderTexture patternTexture = (filterShaders.Count - 1) % 2 == 0 ? textureBuffers[1] : textureBuffers[0];
+
+        // Apply the texture to a material and apply that material to the mesh renderer.
+        Material patternMaterial = new Material(Shader.Find("PatternDisplayShaderGraph"));
+        foreach (string tex in patternMaterial.GetTexturePropertyNames())
+        {
+            patternMaterial.SetTexture(tex, patternTexture);
+        }
+        GetComponent<MeshRenderer>().sharedMaterial = patternMaterial;
 	}
 	
 	// Update is called once per frame
