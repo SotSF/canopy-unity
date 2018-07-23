@@ -74,8 +74,8 @@ public class Controls: MonoBehaviour
             transform.localRotation = originalRotation * xQuaternion * yQuaternion;
         } else
         {
-            Quaternion xQuaternion = Quaternion.AngleAxis(rotationX, Vector3.up);
-            Quaternion yQuaternion = Quaternion.AngleAxis(rotationY, Vector3.left);
+            Quaternion xQuaternion = Quaternion.AngleAxis(rotationX, Vector3.forward);
+            Quaternion yQuaternion = Quaternion.AngleAxis(rotationY, Vector3.right);
             Canopy.instance.UpdateRotation(xQuaternion * yQuaternion);
         }
 
