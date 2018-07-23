@@ -33,6 +33,11 @@ public class Pattern : MonoBehaviour
 
     private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
 
+    public void SelectThisPattern()
+    {
+        manager.SelectPattern(this);
+    }
+
     protected virtual void Start()
     {
         manager = GetComponentInParent<PatternManager>();

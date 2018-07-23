@@ -53,7 +53,7 @@ public class PatternManager : MonoBehaviour
         System.Random rand = new System.Random();
         SelectPattern(patterns[rand.Next(patterns.Length)]);
     }
-    void SelectPattern(Pattern pattern)
+    public void SelectPattern(Pattern pattern)
     {
         if (pattern != null)
         {
@@ -90,14 +90,17 @@ public class PatternManager : MonoBehaviour
 #endif 
     public void ArrangePatternDisplays()
     {
-
+        const int margin = 10;
+        int ySpacing = Constants.NUM_STRIPS + margin;
+        int xSpacing = Constants.PIXELS_PER_STRIP + margin;
         var patterns = GetComponentsInChildren<Pattern>();
-        float theta = 0;
-        Vector3 offset = 4.2f*Vector3.forward;
+
+        
         for (int i = 0; i < patterns.Length; i++)
         {
             var pattern = patterns[i];
-            pattern.transform.localPosition = Quaternion.Euler(0, theta, 0) * offset;
+            var rect = pattern.GetComponent<RectTransform>();
+            //rect.anchoredPosition
         }
     }
 

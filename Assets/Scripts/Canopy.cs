@@ -21,7 +21,8 @@ public class Canopy: MonoBehaviour
     private Coroutine animRoutine;
     private Quaternion originalRotation;
 
-    private Vector3 controlViewPosition = new Vector3(.75f, 1.6f, 3.3f);
+    private Vector3 controlViewCanopyPosition = new Vector3(.75f, 1.6f, 3.3f);
+    private Vector3 controlViewCameraPosition = new Vector3(0, 1.6f, 0);
 
     public int numStrips = 96;
     public int pixelsPerStrip = 75;
@@ -50,9 +51,9 @@ public class Canopy: MonoBehaviour
     {
         //originalRotation = Quaternion.Euler(90, 0, 0);
         Controls.instance.ResetRotation();
-        originalRotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position) * Quaternion.Euler(180,0,0);
+        originalRotation = Quaternion.LookRotation(controlViewCanopyPosition - controlViewCameraPosition) * Quaternion.Euler(90,0,0);
         var rotate = Animations.LocalQuatLerp(transform, originalRotation);
-        var trans = Animations.LocalPositionLerp(transform, controlViewPosition);
+        var trans = Animations.LocalPositionLerp(transform, controlViewCanopyPosition);
         this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
     }
     public void UpdateRotation(Quaternion rotation)
@@ -163,8 +164,8 @@ public class Canopy: MonoBehaviour
     private IEnumerable<Vector3> GetVerts(int stripIndex, int pixelIndex, Vector2[] catenaryOffsets)
     {
         Quaternion stripRotation = GetRotation(stripIndex);
-        int a = pixelIndex > 0 ? pixelIndex - 1 : pixelIndex;
-        int b = pixelIndex > 0 ? pixelIndex : pixelIndex + 1;
+        //int a = pixelIndex > 0 ? pixelIndex - 1 : pixelIndex;
+        //int b = pixelIndex > 0 ? pixelIndex : pixelIndex + 1;
         //var diff = catenaryOffsets[b] - catenaryOffsets[a];
 
         //float angle = -Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
