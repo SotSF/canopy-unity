@@ -8,7 +8,6 @@ using UnityEngine;
 public class FilterChain : MonoBehaviour {
 
     public List<ComputeShader> filterShaders;
-    public ComputeShader outputShader;
     public RenderTexture[] textureBuffers;
 
     [Serializable]
@@ -73,7 +72,7 @@ public class FilterChain : MonoBehaviour {
     public void Apply(RenderTexture tex)
     {
         Graphics.Blit(tex, textureBuffers[0]);
-        filterShaders[0].SetTexture(0, "InputTex", textureBuffers[0]);
+        //filterShaders[0].SetTexture(0, "InputTex", textureBuffers[0]);
         RunShaders();
     }
 
@@ -84,10 +83,6 @@ public class FilterChain : MonoBehaviour {
         foreach (ComputeShader shader in filterShaders)
         {
             shader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
-        }
-        if (outputShader != null)
-        {
-            outputShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
         }
 	}
 }
