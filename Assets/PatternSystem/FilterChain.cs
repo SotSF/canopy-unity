@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 [System.Serializable]
-public class Filter : MonoBehaviour {
+public class FilterChain : MonoBehaviour {
 
     public List<ComputeShader> filterShaders;
     public ComputeShader outputShader;
