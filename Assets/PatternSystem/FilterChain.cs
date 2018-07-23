@@ -14,11 +14,13 @@ public class FilterChain : MonoBehaviour {
     public struct FilterParams
     {
         public Vector3 multiply;
+        public Vector3 HSV;
     }
     public FilterParams filterParams;
 
     protected int kernelId = 0;
     public RenderTexture outputTexture;
+    private ComputeBuffer paramsBuffer;
 
     private RenderTexture newRenderTexture()
     {
@@ -28,12 +30,12 @@ public class FilterChain : MonoBehaviour {
         return tex;
     }
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
         // Initialize the swapping rendertextures.
         textureBuffers = new RenderTexture[] { newRenderTexture(), newRenderTexture() };
 
-        ComputeBuffer paramsBuffer;
         unsafe
         {
             paramsBuffer = new ComputeBuffer(1, sizeof(FilterParams));
@@ -41,39 +43,36 @@ public class FilterChain : MonoBehaviour {
         paramsBuffer.SetData(new FilterParams[] { filterParams });
 
         // Set the input and output textures for each of the shaders, swapping each time.
-        for (int i = 0; i < filterShaders.Count; i++)
+        int count = filterShaders.Count;
+        for (int i = 0; i < count; i++)
         {
-            int input = ((i % 2) == 0) ? 0 : 1;
-            int output = ((i % 2) == 0) ? 1 : 0;
-
-            // Instantiate another instance of the passed in shader so the memory isn't shared.
-            // https://forum.unity.com/threads/multiple-instances-of-same-compute-shader-is-it-possible.506961/
-            filterShaders[i] = Instantiate(filterShaders[i]);
-
-            filterShaders[i].SetTexture(kernelId, "InputTex", textureBuffers[input]);
-            filterShaders[i].SetTexture(kernelId, "OutputTex", textureBuffers[output]);
-
-            filterShaders[i].SetBuffer(kernelId, "Params", paramsBuffer);
+            registerShader(filterShaders[i], i);
         }
-
-        // Set the pattern texture to the output texture of the last output texture.
         outputTexture = (filterShaders.Count - 1) % 2 == 0 ? textureBuffers[1] : textureBuffers[0];
+    }
 
-        //// Apply the texture to a material and apply that material to the mesh renderer.
-        //Material patternMaterial = new Material(Shader.Find("PatternDisplayShaderGraph"));
-        //patternMaterial.name = gameObject.name + "_filterchain";
-        //foreach (string tex in patternMaterial.GetTexturePropertyNames())
-        //{
-        //    patternMaterial.SetTexture(tex, patternTexture);
-        //}
-        //GetComponent<MeshRenderer>().sharedMaterial = patternMaterial;
-	}
+    void registerShader(ComputeShader shader)
+    {
+        filterShaders.Add(Instantiate(shader));
+        registerShader(filterShaders[filterShaders.Count - 1]);
+    }
 
-    public void Apply(RenderTexture tex)
+    void registerShader(ComputeShader shader, int i)
+    {
+        int input = ((i % 2) == 0) ? 0 : 1;
+        int output = ((i % 2) == 0) ? 1 : 0;
+
+        filterShaders[i].SetTexture(kernelId, "InputTex", textureBuffers[input]);
+        filterShaders[i].SetTexture(kernelId, "OutputTex", textureBuffers[output]);
+        filterShaders[i].SetBuffer(kernelId, "Params", paramsBuffer);
+    }
+
+    public RenderTexture Apply(RenderTexture tex)
     {
         Graphics.Blit(tex, textureBuffers[0]);
         //filterShaders[0].SetTexture(0, "InputTex", textureBuffers[0]);
         RunShaders();
+        return outputTexture;
     }
 
     // Update is called once per frame

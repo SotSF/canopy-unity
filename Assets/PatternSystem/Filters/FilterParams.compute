@@ -1,5 +1,6 @@
 ﻿struct FilterParams {
 	float3 mult;
+	float3 hsv;
 };
 
 RWStructuredBuffer<FilterParams> Params;
