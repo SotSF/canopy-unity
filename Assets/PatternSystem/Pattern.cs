@@ -49,6 +49,8 @@ public class Pattern : MonoBehaviour
         RawImage image = GetComponent<RawImage>();
         image.texture = patternTexture;
 
+        filterChain = GetComponent<FilterChain>();
+
         kernelId = patternShader.FindKernel("CSMain");
         patternShader.SetTexture(kernelId, "Frame", patternTexture);
         dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, FLOAT_BYTES * VEC3_LENGTH);

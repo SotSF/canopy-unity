@@ -19,6 +19,7 @@ public class FilterChain : MonoBehaviour {
     public FilterParams filterParams;
 
     protected int kernelId = 0;
+    public RenderTexture outputTexture;
 
     private RenderTexture newRenderTexture()
     {
@@ -57,16 +58,16 @@ public class FilterChain : MonoBehaviour {
         }
 
         // Set the pattern texture to the output texture of the last output texture.
-        RenderTexture patternTexture = (filterShaders.Count - 1) % 2 == 0 ? textureBuffers[1] : textureBuffers[0];
+        outputTexture = (filterShaders.Count - 1) % 2 == 0 ? textureBuffers[1] : textureBuffers[0];
 
-        // Apply the texture to a material and apply that material to the mesh renderer.
-        Material patternMaterial = new Material(Shader.Find("PatternDisplayShaderGraph"));
-        patternMaterial.name = gameObject.name + "_filterchain";
-        foreach (string tex in patternMaterial.GetTexturePropertyNames())
-        {
-            patternMaterial.SetTexture(tex, patternTexture);
-        }
-        GetComponent<MeshRenderer>().sharedMaterial = patternMaterial;
+        //// Apply the texture to a material and apply that material to the mesh renderer.
+        //Material patternMaterial = new Material(Shader.Find("PatternDisplayShaderGraph"));
+        //patternMaterial.name = gameObject.name + "_filterchain";
+        //foreach (string tex in patternMaterial.GetTexturePropertyNames())
+        //{
+        //    patternMaterial.SetTexture(tex, patternTexture);
+        //}
+        //GetComponent<MeshRenderer>().sharedMaterial = patternMaterial;
 	}
 
     public void Apply(RenderTexture tex)
