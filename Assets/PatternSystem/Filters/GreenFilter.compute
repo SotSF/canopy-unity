@@ -11,5 +11,5 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 {
 	// TODO: insert actual code here!
 
-	OutputTex[id.xy] = float4(InputTex[id.xy].r, .5, 0, 1);
+	OutputTex[id.xy] = float4(InputTex[id.xy].r, .5, InputTex[id.xy].b, 1);
 }

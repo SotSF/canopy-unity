@@ -19,7 +19,7 @@ public class FilterChain : MonoBehaviour {
     public FilterParams filterParams;
 
     protected int kernelId = 0;
-    
+
     private RenderTexture newRenderTexture()
     {
         RenderTexture tex = new RenderTexture(Constants.PIXELS_PER_STRIP + 1, Constants.NUM_STRIPS, 24);
@@ -43,8 +43,13 @@ public class FilterChain : MonoBehaviour {
         // Set the input and output textures for each of the shaders, swapping each time.
         for (int i = 0; i < filterShaders.Count; i++)
         {
-            int input = i % 2 == 0 ? 0 : 1;
-            int output = i % 2 == 0 ? 1 : 0;
+            int input = ((i % 2) == 0) ? 0 : 1;
+            int output = ((i % 2) == 0) ? 1 : 0;
+
+            // Instantiate another instance of the passed in shader so the memory isn't shared.
+            // https://forum.unity.com/threads/multiple-instances-of-same-compute-shader-is-it-possible.506961/
+            filterShaders[i] = Instantiate(filterShaders[i]);
+
             filterShaders[i].SetTexture(kernelId, "InputTex", textureBuffers[input]);
             filterShaders[i].SetTexture(kernelId, "OutputTex", textureBuffers[output]);
 
@@ -56,15 +61,23 @@ public class FilterChain : MonoBehaviour {
 
         // Apply the texture to a material and apply that material to the mesh renderer.
         Material patternMaterial = new Material(Shader.Find("PatternDisplayShaderGraph"));
+        patternMaterial.name = gameObject.name + "_filterchain";
         foreach (string tex in patternMaterial.GetTexturePropertyNames())
         {
             patternMaterial.SetTexture(tex, patternTexture);
         }
         GetComponent<MeshRenderer>().sharedMaterial = patternMaterial;
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+    public void Apply(RenderTexture tex)
+    {
+        Graphics.Blit(tex, textureBuffers[0]);
+        filterShaders[0].SetTexture(0, "InputTex", textureBuffers[0]);
+        RunShaders();
+    }
+
+    // Update is called once per frame
+    void RunShaders () {
         int groupx_size = Constants.PIXELS_PER_STRIP + (8 - (Constants.PIXELS_PER_STRIP % 8));
         int groupy_size = Constants.NUM_STRIPS + (8 - (Constants.NUM_STRIPS % 8));
         foreach (ComputeShader shader in filterShaders)

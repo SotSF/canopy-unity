@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class Pattern : MonoBehaviour
 {
     public ComputeShader patternShader;
-
+    private FilterChain filterChain;
     protected Material patternMaterial;
 
     [HideInInspector]
@@ -125,6 +125,11 @@ public class Pattern : MonoBehaviour
             {
                 PresentPattern();
             }
+        }
+
+        if (filterChain != null)
+        {
+            filterChain.Apply(patternTexture);
         }
     }
 
