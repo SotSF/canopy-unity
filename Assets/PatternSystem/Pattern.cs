@@ -42,14 +42,23 @@ public class Pattern : MonoBehaviour
     {
         manager = GetComponentInParent<PatternManager>();
 
-        patternTexture = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
-        patternTexture.enableRandomWrite = true;
-        patternTexture.Create();
+        filterChain = GetComponent<FilterChain>();
+
+        if (filterChain != null)
+        {
+            patternTexture = filterChain.outputTexture;
+        }
+        else
+        {
+            patternTexture = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
+            patternTexture.enableRandomWrite = true;
+            patternTexture.Create();
+        }
 
         RawImage image = GetComponent<RawImage>();
+
         image.texture = patternTexture;
 
-        filterChain = GetComponent<FilterChain>();
 
         kernelId = patternShader.FindKernel("CSMain");
         patternShader.SetTexture(kernelId, "Frame", patternTexture);
