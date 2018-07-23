@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -9,6 +10,13 @@ public class FilterChain : MonoBehaviour {
     public List<ComputeShader> filterShaders;
     public ComputeShader outputShader;
     public RenderTexture[] textureBuffers;
+
+    [Serializable]
+    public struct FilterParams
+    {
+        public Vector3 multiply;
+    }
+    public FilterParams filterParams;
 
     protected int kernelId = 0;
     
@@ -25,6 +33,13 @@ public class FilterChain : MonoBehaviour {
         // Initialize the swapping rendertextures.
         textureBuffers = new RenderTexture[] { newRenderTexture(), newRenderTexture() };
 
+        ComputeBuffer paramsBuffer;
+        unsafe
+        {
+            paramsBuffer = new ComputeBuffer(1, sizeof(FilterParams));
+        }
+        paramsBuffer.SetData(new FilterParams[] { filterParams });
+
         // Set the input and output textures for each of the shaders, swapping each time.
         for (int i = 0; i < filterShaders.Count; i++)
         {
@@ -32,6 +47,8 @@ public class FilterChain : MonoBehaviour {
             int output = i % 2 == 0 ? 1 : 0;
             filterShaders[i].SetTexture(kernelId, "InputTex", textureBuffers[input]);
             filterShaders[i].SetTexture(kernelId, "OutputTex", textureBuffers[output]);
+
+            filterShaders[i].SetBuffer(kernelId, "Params", paramsBuffer);
         }
 
         // Set the pattern texture to the output texture of the last output texture.

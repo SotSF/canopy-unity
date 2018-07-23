@@ -1,0 +1,5 @@
+﻿struct FilterParams {
+	float3 mult;
+};
+
+RWStructuredBuffer<FilterParams> Params;
