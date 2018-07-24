@@ -52,5 +52,5 @@ void CSMain(uint3 id : SV_DispatchThreadID)
                             1);
     // Color the "Result" image and put it in the general dataBuffer
     Frame[id.xy] = brightness*color;
-    dataBuffer[75*id.y + id.x] = brightness*color;
+    dataBuffer[75*id.y + id.x] = brightness*color.rgb;
 }

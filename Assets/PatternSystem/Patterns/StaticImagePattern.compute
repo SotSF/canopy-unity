@@ -1,0 +1,99 @@
+﻿#pragma kernel CSMain
+
+Texture2D<float4> InputTex;
+RWTexture2D<float4> Frame;
+RWStructuredBuffer<float3> dataBuffer;
+
+float timeSeconds;
+float hue;
+float saturation;
+float brightness;
+float period;
+float cycleCount;
+
+uint width;
+uint height;
+
+//Color space functions taken from Ian Taylor's work at http://www.chilliant.com/rgb2hsv.html
+float Epsilon = 1e-10;
+float3 RGBtoHCV(in float3 RGB)
+{
+    // Based on work by Sam Hocevar and Emil Persson
+    float4 P = (RGB.g < RGB.b) ? float4(RGB.bg, -1.0, 2.0 / 3.0) : float4(RGB.gb, 0.0, -1.0 / 3.0);
+    float4 Q = (RGB.r < P.x) ? float4(P.xyw, RGB.r) : float4(RGB.r, P.yzx);
+    float C = Q.x - min(Q.w, Q.y);
+    float H = abs((Q.w - Q.y) / (6 * C + Epsilon) + Q.z);
+    return float3(H, C, Q.x);
+}
+
+float3 HUEtoRGB(in float H)
+{
+    float R = abs(H * 6 - 3) - 1;
+    float G = 2 - abs(H * 6 - 2);
+    float B = 2 - abs(H * 6 - 4);
+    return saturate(float3(R, G, B));
+}
+
+float3 HSVtoRGB(in float3 HSV)
+{
+    float3 RGB = HUEtoRGB(HSV.x);
+    return ((RGB - 1) * HSV.y + 1) * HSV.z;
+}
+
+float3 RGBtoHSV(in float3 RGB)
+{
+    float3 HCV = RGBtoHCV(RGB);
+    float S = HCV.y / (HCV.z + Epsilon);
+    return float3(HCV.x, S, HCV.z);
+}
+
+//This function rotates a point (uint2 xy) theta degrees around a center point
+float2 rotate(in uint2 xy, in float2 center, in float theta)
+{
+    float r = distance(center, xy);
+    float startAngle = atan2(xy.y - center.y, xy.x - center.x);
+    float newX = center.x + r * cos(theta + startAngle);
+    float newY = center.y + r * sin(theta + startAngle);
+    return float2(newX, newY);
+}
+
+//Transform a color into HSV space, apply global parameters to it
+float3 applyHSVTransforms(in float3 color) {
+    color = RGBtoHSV(color);
+    return HSVtoRGB(float3((color.x + hue) % 1, (color.y*saturation), color.z*brightness));
+}
+
+// Color the "Frame" image and put it in the general dataBuffer
+void returnColorData(in uint2 pixel, in float3 color) {
+    color = applyHSVTransforms(color);
+    Frame[pixel.xy] = float4(color, 1);
+    dataBuffer[75 * pixel.y + pixel.x] = color;
+}
+
+float2 rotate(in float2 xy, in float2 center, in float theta)
+{
+    float r = distance(center, xy);
+    float startAngle = atan2(xy.y - center.y, xy.x - center.x);
+    float newX = center.x + r * cos(theta + startAngle);
+    float newY = center.y + r * sin(theta + startAngle);
+    return float2(newX, newY);
+}
+
+float2 worldspace(in uint2 pixel, in float2 dimensions) {
+    // go from pixelSpace to width-normalized world space
+    float pi = 3.14159265;
+    float2 center = float2(0, 0);
+    float apexRadius = 0.332f;
+    float stripLength = 2.5f;
+    float normalizedDimension = dimensions.x > dimensions.y ? dimensions.y : dimensions.x;
+    float normalizedX = ((stripLength*pixel.x / 75.0f) + apexRadius) / (stripLength + apexRadius);
+    return (normalizedDimension*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (normalizedDimension / 2);
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 newOffsets = worldspace(id.xy, float2(width, height));
+    float4 color = InputTex[newOffsets];
+    returnColorData(id.xy, color.xyz);
+}

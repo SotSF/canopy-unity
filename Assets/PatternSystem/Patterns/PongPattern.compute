@@ -34,11 +34,11 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 	if (((abs(radius - id.x) < 3) && (abs(stripIndex - id.y) < 3)) || id.x > 70){
 		float4 color = float4(1, 1, 1, 1);
 		Frame[id.xy] = brightness * color;
-		dataBuffer[75 * id.y + id.x] = brightness * color;
+		dataBuffer[75 * id.y + id.x] = brightness * color.rgb;
 	}
 	else {
 		float4 color = brightness * float4(id.x/75.0, 0, 0, 1);
-		dataBuffer[75 * id.y + id.x] = color;
+		dataBuffer[75 * id.y + id.x] = color.rgb;
 		Frame[id.xy] = color;
 	}
 }
