@@ -10,10 +10,10 @@ public class UIController : MonoBehaviour
 {
     public static UIController instance;
 
-    public RectTransform controlBase;
-    public RectTransform inputBase;
-    public RectTransform sliderBase;
-    public RectTransform toggleBase;
+    public RectTransform controlBasePrefab;
+    public RectTransform inputBasePrefab;
+    public RectTransform sliderBasePrefab;
+    public RectTransform toggleBasePrefab;
 
     [Tooltip("Objects which should only be displayed in simulator mode")]
     public Transform[] simulationOnlyObjects;
@@ -88,16 +88,18 @@ public class UIController : MonoBehaviour
         }
         foreach (PatternParameter param in pattern.parameters)
         {
-            RectTransform rect = Instantiate(controlBase);
-            UIControl control = rect.GetComponent<UIControl>();
-            Text label = rect.Find("Name").GetComponent<Text>();
-            label.text = param.name;
-            control.attachParameter(param);
-            rect.SetParent(controlsNode, false);
-            rect.anchoredPosition = anchored;
-            // Update layout
-            rows++;
-            anchored += new Vector2(0, rowHeight);
+            if (param.controllable) {
+                RectTransform controlBase = Instantiate(controlBasePrefab, controlsNode);
+                UIControl control = controlBase.GetComponent<UIControl>();
+                Text label = controlBase.Find("ControlElements/Label").GetComponent<Text>();
+                RectTransform anchor = controlBase.Find("ControlElements/ControlAnchor").GetComponent<RectTransform>();
+                label.text = param.name;
+                control.attachParameter(param, anchor);
+                controlBase.SetParent(controlsNode, false);
+                controlBase.anchoredPosition = anchored;
+                rows++;
+                anchored -= new Vector2(0, rowHeight);
+            }
         }
     }
 

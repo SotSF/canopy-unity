@@ -24,6 +24,7 @@ namespace sotsf.canopy.patterns
     {
         public string name;
         public ParamType paramType;
+        public bool controllable;
         public bool useRange;
         public float minFloat;
         public float maxFloat;

@@ -7,31 +7,32 @@ using UnityEngine.UI;
 
 public class UIControl : MonoBehaviour
 {
-    public void attachParameter(PatternParameter param)
+    public void attachParameter(PatternParameter param, RectTransform parent)
     {
         RectTransform control;
         switch (param.paramType)
         {
             case (ParamType.FLOAT):
-                if (param.useRange)
-                {
-                    control = Instantiate(UIController.instance.sliderBase);
-                } else
-                {
-                    control = Instantiate(UIController.instance.inputBase);
-                }
-                break;
             case (ParamType.INT):
-                if (param.useRange)
-                {
-                    control = Instantiate(UIController.instance.sliderBase);
-                } else
-                {
-                    control = Instantiate(UIController.instance.inputBase);
+                var prefab = param.useRange ? UIController.instance.sliderBasePrefab : UIController.instance.inputBasePrefab;
+                control = Instantiate(prefab, parent);
+                if (param.useRange){
+                    var slider = control.GetComponent<Slider>();
+                    if (param.paramType == ParamType.INT){
+                        slider.minValue = param.minInt;
+                        slider.maxValue = param.maxInt;
+                        slider.value = param.defaultInt;
+                        slider.wholeNumbers = true;
+                    } else {
+                        slider.minValue = param.minFloat;
+                        slider.maxValue = param.maxFloat;
+                        slider.value = param.defaultFloat;
+                        slider.wholeNumbers = false;
+                    }
                 }
                 break;
             case (ParamType.BOOL):
-                control = Instantiate(UIController.instance.toggleBase);
+                control = Instantiate(UIController.instance.toggleBasePrefab, parent);
                 break;
             case (ParamType.TEXTURE):
                 //Display texture input?
