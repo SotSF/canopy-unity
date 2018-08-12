@@ -31,7 +31,7 @@ float2 rotate(uint2 xy, float2 center, float theta)
 // you pass in X/Y/Z values - this program will use 64 threads concurrently
 // and each one will get an X/Y value representing a pixel in the output image that
 // it works on ("uint3 id")
-[numthreads(8, 8, 1)]
+[numthreads(25, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float pi = 3.14159265f;

@@ -4,12 +4,11 @@ using System;
 
 public class PatternInputGenerator : MonoBehaviour
 {
-    static PatternInputGenerator _instance;
-    public static PatternInputGenerator instance { get { return _instance; } }
+    public static PatternInputGenerator instance { get; private set; }
 
     private void Awake()
     {
-        _instance = this;
+        instance = this;
     }
 
     #region inputGenerators

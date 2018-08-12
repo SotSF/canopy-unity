@@ -4,6 +4,7 @@ using System.Linq;
 using System;
 using UnityEditor;
 using UnityEngine.Networking;
+using sotsf.canopy.patterns;
 
 public class PatternManager : MonoBehaviour
 {
@@ -66,6 +67,7 @@ public class PatternManager : MonoBehaviour
             {
                 canopyMaterial.SetTexture(tex, pattern.patternTexture);
             }
+            UIController.instance.UpdateUIControls(pattern);
         }
         activePattern.presenting = true;
     }

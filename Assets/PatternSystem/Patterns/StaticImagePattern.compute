@@ -90,7 +90,7 @@ float2 worldspace(in uint2 pixel, in float2 dimensions) {
     return (normalizedDimension*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (normalizedDimension / 2);
 }
 
-[numthreads(8, 8, 1)]
+[numthreads(25, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float2 newOffsets = worldspace(id.xy, float2(width, height));

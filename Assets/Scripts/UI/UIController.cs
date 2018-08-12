@@ -3,27 +3,29 @@ using System.Collections;
 using UnityEngine.UI;
 using Lightsale.Animation;
 using Lightsale.Utility;
+using sotsf.canopy.patterns;
+using System.Collections.Generic;
 
 public class UIController : MonoBehaviour
 {
-    public struct SliderDefinition
-    {
-        public string name;
-        public float min;
-        public float max;
-        public float start;
-    }
-
     public static UIController instance;
 
-    public SliderDefinition[] sliders;
+    public RectTransform controlBase;
+    public RectTransform inputBase;
+    public RectTransform sliderBase;
+    public RectTransform toggleBase;
 
     [Tooltip("Objects which should only be displayed in simulator mode")]
     public Transform[] simulationOnlyObjects;
 
+    //public UIControl controlBase;
+    public RectTransform controlsNode;
+
     [HideInInspector]
     public bool inSimulatorMode = true;
     private bool inHighPerformanceMode = false;
+
+    public bool sendToAPI { get { return sendToAPIToggle.isOn; } }
 
     private Button viewModeButton;
     private Button performanceModeButton;
@@ -32,17 +34,15 @@ public class UIController : MonoBehaviour
     private Vector3 controllerCameraPosition = new Vector3(0, 1.6f, 0);
     private Coroutine animationRoutine;
 
+    private Toggle sendToAPIToggle;
 
     private void Awake()
     {
         instance = this;
-    }
-
-    private void Start()
-    {
         viewModeButton = transform.Find("ControlButtons/ViewModeButton").GetComponent<Button>();
         performanceModeButton = transform.Find("ControlButtons/PerformanceModeButton").GetComponent<Button>();
         canopyLight = Canopy.instance.GetComponentInChildren<Light>();
+        sendToAPIToggle = transform.Find("ControlButtons/SendToCanopyToggle").GetComponentInChildren<Toggle>();
     }
 
     //Performance mode controls (only render single active pattern)
@@ -67,6 +67,37 @@ public class UIController : MonoBehaviour
         } else
         {
             EnterHighQualityMode();
+        }
+    }
+
+
+    // Update the displayed UI controls (sliders, etc) to match a given Pattern's
+    // input parameters
+    public void UpdateUIControls(Pattern pattern)
+    {
+        //Rect position = new Rect();
+        var controls = controlsNode.GetComponentsInChildren<UIControl>();
+        // Destroy old controls
+
+        Vector2 anchored = new Vector2(0, 0);
+        const int rowHeight = 30;
+        int rows = 0;
+        foreach (UIControl control in controls)
+        {
+            Destroy(control.gameObject);
+        }
+        foreach (PatternParameter param in pattern.parameters)
+        {
+            RectTransform rect = Instantiate(controlBase);
+            UIControl control = rect.GetComponent<UIControl>();
+            Text label = rect.Find("Name").GetComponent<Text>();
+            label.text = param.name;
+            control.attachParameter(param);
+            rect.SetParent(controlsNode, false);
+            rect.anchoredPosition = anchored;
+            // Update layout
+            rows++;
+            anchored += new Vector2(0, rowHeight);
         }
     }
 

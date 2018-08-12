@@ -20,7 +20,7 @@ int gameOfLifeSample(int2 id, int x, int y) {
 	return InputTex[coords].r > ALIVE_THRESHOLD ? 1 : 0;
 }
 
-[numthreads(8, 8, 1)]
+[numthreads(25, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
 	int neighbors = 0;

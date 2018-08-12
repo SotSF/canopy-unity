@@ -6,7 +6,7 @@
 Texture2D<float4> InputTex;
 RWTexture2D<float4> Frame;
 
-[numthreads(8, 8, 1)]
+[numthreads(25, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
 	Frame[id.xy] = InputTex[id.xy];

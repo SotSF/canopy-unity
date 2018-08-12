@@ -6,146 +6,182 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System;
 
-public class Pattern : MonoBehaviour
+namespace sotsf.canopy.patterns
 {
-    public ComputeShader patternShader;
-    private FilterChain filterChain;
-    protected Material patternMaterial;
-
-    [HideInInspector]
-    public RenderTexture patternTexture;
-    [HideInInspector]
-    public bool presenting;
-
-    protected Dictionary<string, float> renderParams = new Dictionary<string, float>();
-
-    protected PatternManager manager;
-    protected ComputeBuffer dataBuffer;
-    protected Vector3[] colorData;
-
-    protected byte[] pixelBuffer;
-
-    protected int kernelId;
-
-    protected const int FLOAT_BYTES = 4;
-    protected const int VEC3_LENGTH = 3;
-
-    private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
-
-    public void SelectThisPattern()
-    {
-        manager.SelectPattern(this);
+    public enum ParamType
+    {      
+        FLOAT,
+        FLOAT4,
+        BOOL,
+        INT,
+        TEXTURE
     }
 
-    protected virtual void Start()
+    [Serializable]
+    public class PatternParameter
     {
-        manager = GetComponentInParent<PatternManager>();
-
-        filterChain = GetComponent<FilterChain>();
-
-        if (filterChain != null)
-        {
-            patternTexture = filterChain.outputTexture;
-        }
-        else
-        {
-            patternTexture = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
-            patternTexture.enableRandomWrite = true;
-            patternTexture.Create();
-        }
-
-        RawImage image = GetComponent<RawImage>();
-
-        image.texture = patternTexture;
-
-
-        kernelId = patternShader.FindKernel("CSMain");
-        patternShader.SetTexture(kernelId, "Frame", patternTexture);
-        dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, FLOAT_BYTES * VEC3_LENGTH);
-        colorData = new Vector3[Constants.NUM_LEDS];
-        pixelBuffer = new byte[colorData.Length * 3];
-        patternShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
-
+        public string name;
+        public ParamType paramType;
+        public bool useRange;
+        public float minFloat;
+        public float maxFloat;
+        public float minInt;
+        public float maxInt;
+        public float defaultFloat;
+        public int defaultInt;
+        public bool defaultBool;
+        public Vector4 defaultVector;
+        public Texture2D defaultTexture;
     }
 
-    protected void PresentPattern()
+    public class Pattern : MonoBehaviour
     {
-        dataBuffer.GetData(colorData);
+        public PatternParameter[] parameters = new PatternParameter[] {
+            new PatternParameter(){paramType = ParamType.FLOAT, name="Hue", useRange=true, minFloat=-1,maxFloat=1},
+            new PatternParameter(){paramType = ParamType.FLOAT, name="Saturation", useRange=true, minFloat=-1,maxFloat=1},
+            new PatternParameter(){paramType = ParamType.FLOAT, name="Brightness", useRange=true, minFloat=0,maxFloat=1},
+            new PatternParameter(){paramType = ParamType.FLOAT, name="Period", useRange=true, minFloat=0.1f,maxFloat=45},
+            new PatternParameter(){paramType = ParamType.FLOAT, name="Cycles", useRange=true, minFloat=0.1f,maxFloat=45},
+        };
 
-        if (manager.pusherConnected)
+        public ComputeShader patternShader;
+        private FilterChain filterChain;
+        protected Material patternMaterial;
+
+        [HideInInspector]
+        public RenderTexture patternTexture;
+        [HideInInspector]
+        public bool presenting;
+
+        protected Dictionary<string, float> renderParams = new Dictionary<string, float>();
+
+        protected PatternManager manager;
+        protected ComputeBuffer dataBuffer;
+        protected Vector3[] colorData;
+
+        protected byte[] pixelBuffer;
+
+        protected int kernelId;
+
+        protected const int FLOAT_BYTES = 4;
+        protected const int VEC3_LENGTH = 3;
+
+        private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
+
+        public void SelectThisPattern()
         {
-            for (int i = 0; i < colorData.Length*3; i += 3)
+            manager.SelectPattern(this);
+        }
+
+        protected virtual void Start()
+        {
+            manager = GetComponentInParent<PatternManager>();
+
+            filterChain = GetComponent<FilterChain>();
+
+            if (filterChain != null)
             {
-                pixelBuffer[i] = (byte)(colorData[i / 3].x * 255);
-                pixelBuffer[i + 1] = (byte)(colorData[i / 3].y * 255);
-                pixelBuffer[i + 2] = (byte)(colorData[i / 3].z * 255);
+                patternTexture = filterChain.outputTexture;
             }
-            var request = new UnityWebRequest(pixelEndpoint, "POST");
-            request.uploadHandler = new UploadHandlerRaw(pixelBuffer);
-            request.SendWebRequest();
+            else
+            {
+                patternTexture = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
+                patternTexture.enableRandomWrite = true;
+                patternTexture.Create();
+            }
+
+            RawImage image = GetComponent<RawImage>();
+
+            image.texture = patternTexture;
+
+
+            kernelId = patternShader.FindKernel("CSMain");
+            patternShader.SetTexture(kernelId, "Frame", patternTexture);
+            dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, FLOAT_BYTES * VEC3_LENGTH);
+            colorData = new Vector3[Constants.NUM_LEDS];
+            pixelBuffer = new byte[colorData.Length * 3];
+            patternShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
         }
 
-        if (!manager.highPerformance)
+        protected void PresentPattern()
         {
-            int count = 0;
-            Vector3 avg = Vector3.one;
-            for (int i = 0; i < colorData.Length; i++)
+            dataBuffer.GetData(colorData);
+
+            if (manager.pusherConnected && UIController.instance.sendToAPI)
             {
-                if (!(float.IsNaN(colorData[i].x) || float.IsNaN(colorData[i].y) || float.IsNaN(colorData[i].z)))
+                for (int i = 0; i < colorData.Length*3; i += 3)
                 {
-                    avg += colorData[i];
-                    count++;
+                    pixelBuffer[i] = (byte)(colorData[i / 3].x * 255);
+                    pixelBuffer[i + 1] = (byte)(colorData[i / 3].y * 255);
+                    pixelBuffer[i + 2] = (byte)(colorData[i / 3].z * 255);
                 }
-                else
+                var request = new UnityWebRequest(pixelEndpoint, "POST");
+                request.uploadHandler = new UploadHandlerRaw(pixelBuffer);
+                request.SendWebRequest();
+            }
+
+            if (!manager.highPerformance)
+            {
+                int count = 0;
+                Vector3 avg = Vector3.one;
+                for (int i = 0; i < colorData.Length; i++)
                 {
-                    //Note the NaN?
+                    if (!(float.IsNaN(colorData[i].x) || float.IsNaN(colorData[i].y) || float.IsNaN(colorData[i].z)))
+                    {
+                        avg += colorData[i];
+                        count++;
+                    }
+                    else
+                    {
+                        //Note the NaN?
+                    }
+                }
+                avg /= count;
+                manager.SetLightColor(new Color(avg.x, avg.y, avg.z));
+            }
+        }
+
+        protected virtual void UpdateRenderParams()
+        {
+            renderParams["timeSeconds"] = Time.time;
+            renderParams["period"] = manager.period;
+            renderParams["cycleCount"] = manager.cycles;
+            renderParams["brightness"] = manager.brightness + manager.brightnessMod;
+            renderParams["hue"] = manager.hue;
+            renderParams["saturation"] = manager.saturation;
+        }
+
+        // Update is called once per frame
+        protected virtual void Update()
+        {
+            if (!manager.highPerformance || presenting)
+            {
+                UpdateRenderParams();
+                foreach (string param in renderParams.Keys)
+                {
+                    patternShader.SetFloat(param, renderParams[param]);
+                }
+
+                //Execute pattern shader
+                //25 and 16 are the thread group sizes, which evenly divide 75 and 96
+                patternShader.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
+                if (presenting)
+                {
+                    PresentPattern();
                 }
             }
-            avg /= count;
-            manager.SetLightColor(new Color(avg.x, avg.y, avg.z));
-        }
-    }
 
-    protected virtual void UpdateRenderParams()
-    {
-        renderParams["timeSeconds"] = Time.time;
-        renderParams["period"] = manager.period;
-        renderParams["cycleCount"] = manager.cycles;
-        renderParams["brightness"] = manager.brightness + manager.brightnessMod;
-        renderParams["hue"] = manager.hue;
-        renderParams["saturation"] = manager.saturation;
-    }
-
-    // Update is called once per frame
-    protected virtual void Update()
-    {
-        if (!manager.highPerformance || presenting)
-        {
-            UpdateRenderParams();
-            foreach (string param in renderParams.Keys)
+            if (filterChain != null)
             {
-                patternShader.SetFloat(param, renderParams[param]);
-            }
-
-            //Execute pattern shader
-            int groupx_size = Constants.PIXELS_PER_STRIP + (8 - (Constants.PIXELS_PER_STRIP % 8));
-            int groupy_size = Constants.NUM_STRIPS + (8 - (Constants.NUM_STRIPS % 8));
-            patternShader.Dispatch(kernelId, groupx_size / 8, groupy_size / 8, 1);
-            if (presenting)
-            {
-                PresentPattern();
+                filterChain.Apply(patternTexture);
             }
         }
 
-        if (filterChain != null)
+        private void OnDestroy()
         {
-            filterChain.Apply(patternTexture);
+            dataBuffer.Release();
         }
-    }
-
-    private void OnDestroy()
-    {
-        dataBuffer.Release();
     }
 }

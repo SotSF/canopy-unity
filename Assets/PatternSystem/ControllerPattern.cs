@@ -2,20 +2,23 @@
 using System.Collections;
 using System;
 
-public class ControllerPattern : Pattern
+namespace sotsf.canopy.patterns
 {
-    public Func<float> rightStickX = PatternInputGenerator.XboxInput(XboxController.ControlInput.rightStickX);
-    public Func<float> rightStickY = PatternInputGenerator.XboxInput(XboxController.ControlInput.rightStickY);
-    public Func<float> leftStickX = PatternInputGenerator.XboxInput(XboxController.ControlInput.leftStickX);
-    public Func<float> leftStickY = PatternInputGenerator.XboxInput(XboxController.ControlInput.leftStickY);
-
-
-    protected override void UpdateRenderParams()
+    public class ControllerPattern : Pattern
     {
-        base.UpdateRenderParams();
-        renderParams["rightStickX"] = rightStickX();
-        renderParams["rightStickY"] = rightStickY();
-        renderParams["leftStickX"] = leftStickX();
-        renderParams["leftStickY"] = leftStickY();
+        public Func<float> rightStickX = PatternInputGenerator.XboxInput(XboxController.ControlInput.rightStickX);
+        public Func<float> rightStickY = PatternInputGenerator.XboxInput(XboxController.ControlInput.rightStickY);
+        public Func<float> leftStickX = PatternInputGenerator.XboxInput(XboxController.ControlInput.leftStickX);
+        public Func<float> leftStickY = PatternInputGenerator.XboxInput(XboxController.ControlInput.leftStickY);
+
+
+        protected override void UpdateRenderParams()
+        {
+            base.UpdateRenderParams();
+            renderParams["rightStickX"] = rightStickX();
+            renderParams["rightStickY"] = rightStickY();
+            renderParams["leftStickX"] = leftStickX();
+            renderParams["leftStickY"] = leftStickY();
+        }
     }
 }

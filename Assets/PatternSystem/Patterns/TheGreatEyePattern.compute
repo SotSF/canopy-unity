@@ -34,7 +34,7 @@ float2 worldspace(in uint2 pixel, in float width) {
     return (width*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (width / 2);
 }
 
-[numthreads(8, 8, 1)]
+[numthreads(25, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
 	float2 newOffsets = float2(id.x + leftStickX * (75 / 2.0) + (128/2.0 -75/2.0), id.y + leftStickY * (96 / 2.0) + (128/2.0 - 96/2.0));
