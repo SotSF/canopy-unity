@@ -159,11 +159,65 @@ namespace sotsf.canopy.patterns
         {
             if (!manager.highPerformance || presenting)
             {
-                UpdateRenderParams();
-                foreach (string param in renderParams.Keys)
+                // UpdateRenderParams();
+                var uiControlMap = UIController.instance.uiControlMap;
+                foreach (PatternParameter param in parameters)
                 {
-                    patternShader.SetFloat(param, renderParams[param]);
+                    if (param.controllable) {
+                        if (!uiControlMap.ContainsKey(param.name))
+                            continue;
+                        UIControl control = uiControlMap[param.name];
+                        switch (param.paramType)
+                        {
+                            case ParamType.BOOL:
+                                bool boolValue = control.getBool();
+                                patternShader.SetBool(param.name, boolValue);
+                                break;
+                            case ParamType.FLOAT:
+                                float floatValue = control.getFloat();
+                                patternShader.SetFloat(param.name, floatValue);
+                                break;
+                            case ParamType.FLOAT4:
+                                // Not implemented
+                                break;
+                            case ParamType.INT:
+                                // Not implemented
+                                break;
+                            case ParamType.TEXTURE:
+                                // Not implemented
+                                break;
+                            default:
+                                // EEK!
+                                break;
+                        }
+                    } else {
+                        switch (param.name)
+                        {
+                            case "timeSeconds":
+                                patternShader.SetFloat(param.name, Time.time);
+                                break;
+                            case "period":
+                                patternShader.SetFloat(param.name, manager.period);
+                                break;
+                            case "cycleCount":
+                                patternShader.SetFloat(param.name, manager.cycles);
+                                break;
+                            case "brightness":
+                                patternShader.SetFloat(param.name, manager.brightness + manager.brightnessMod);
+                                break;
+                            case "hue":
+                                patternShader.SetFloat(param.name, manager.hue);
+                                break;
+                            case "saturation":
+                                patternShader.SetFloat(param.name, manager.saturation);
+                                break;
+                        }
+                    }
                 }
+                //foreach (string param in renderParams.Keys)
+                //{
+                //    patternShader.SetFloat(param, renderParams[param]);
+                //}
 
                 //Execute pattern shader
                 //25 and 16 are the thread group sizes, which evenly divide 75 and 96

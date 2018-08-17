@@ -7,9 +7,9 @@ using UnityEngine.UI;
 
 public class UIControl : MonoBehaviour
 {
+    RectTransform control;
     public void attachParameter(PatternParameter param, RectTransform parent)
     {
-        RectTransform control;
         switch (param.paramType)
         {
             case (ParamType.FLOAT):
@@ -38,5 +38,17 @@ public class UIControl : MonoBehaviour
                 //Display texture input?
                 break;
         }
+    }
+
+    public float getFloat()
+    {
+        Slider slider = control.GetComponent<Slider>();
+        return slider.value;
+    }
+
+    public bool getBool()
+    {
+        Toggle toggle = control.GetComponent<Toggle>();
+        return toggle.isOn;
     }
 }
