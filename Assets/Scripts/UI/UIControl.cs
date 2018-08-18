@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using sotsf.canopy.patterns;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class UIControl : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class UIControl : MonoBehaviour
                 var prefab = param.useRange ? UIController.instance.sliderBasePrefab : UIController.instance.inputBasePrefab;
                 control = Instantiate(prefab, parent);
                 if (param.useRange){
-                    var slider = control.GetComponent<Slider>();
+                    var slider = control.GetComponentInChildren<Slider>();
                     if (param.paramType == ParamType.INT){
                         slider.minValue = param.minInt;
                         slider.maxValue = param.maxInt;
@@ -42,13 +43,13 @@ public class UIControl : MonoBehaviour
 
     public float getFloat()
     {
-        Slider slider = control.GetComponent<Slider>();
+        Slider slider = control.GetComponentInChildren<Slider>();
         return slider.value;
     }
 
     public bool getBool()
     {
-        Toggle toggle = control.GetComponent<Toggle>();
+        Toggle toggle = control.GetComponentInChildren<Toggle>();
         return toggle.isOn;
     }
 }

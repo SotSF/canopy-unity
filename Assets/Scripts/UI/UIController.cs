@@ -102,7 +102,13 @@ public class UIController : MonoBehaviour
                 control.attachParameter(param, anchor);
                 controlBase.SetParent(controlsNode, false);
                 controlBase.anchoredPosition = anchored;
-                rows++;
+                if (param.paramType == ParamType.FLOAT4)
+                {
+                    rows += 4;
+                } else
+                {
+                    rows++;
+                }
                 anchored -= new Vector2(0, rowHeight);
 
                 uiControlMap[param.name] = control;
