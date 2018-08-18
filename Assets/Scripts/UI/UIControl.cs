@@ -9,6 +9,7 @@ using UnityEngine.EventSystems;
 public class UIControl : MonoBehaviour
 {
     RectTransform control;
+    Text sliderLabel;
     public void attachParameter(PatternParameter param, RectTransform parent)
     {
         switch (param.paramType)
@@ -18,6 +19,7 @@ public class UIControl : MonoBehaviour
                 var prefab = param.useRange ? UIController.instance.sliderBasePrefab : UIController.instance.inputBasePrefab;
                 control = Instantiate(prefab, parent);
                 if (param.useRange){
+                    sliderLabel = control.Find("ValueDisplay").GetComponent<Text>();
                     var slider = control.GetComponentInChildren<Slider>();
                     if (param.paramType == ParamType.INT){
                         slider.minValue = param.minInt;
@@ -36,20 +38,31 @@ public class UIControl : MonoBehaviour
                 control = Instantiate(UIController.instance.toggleBasePrefab, parent);
                 break;
             case (ParamType.TEXTURE):
-                //Display texture input?
+                control = Instantiate(UIController.instance.textureBasePrefab, parent);
                 break;
         }
     }
 
-    public float getFloat()
+    public void UpdateSliderLabel(float val)
+    {
+        sliderLabel.text = String.Format("{0:F2}", val);
+    }
+
+    public float GetFloat()
     {
         Slider slider = control.GetComponentInChildren<Slider>();
         return slider.value;
     }
 
-    public bool getBool()
+    public bool GetBool()
     {
         Toggle toggle = control.GetComponentInChildren<Toggle>();
         return toggle.isOn;
+    }
+
+    public Texture GetTexture()
+    {
+        TextureSelector textureSelector = control.GetComponentInChildren<TextureSelector>();
+        return textureSelector.tex;
     }
 }

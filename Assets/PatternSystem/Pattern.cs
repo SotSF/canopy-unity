@@ -170,11 +170,11 @@ namespace sotsf.canopy.patterns
                         switch (param.paramType)
                         {
                             case ParamType.BOOL:
-                                bool boolValue = control.getBool();
+                                bool boolValue = control.GetBool();
                                 patternShader.SetBool(param.name, boolValue);
                                 break;
                             case ParamType.FLOAT:
-                                float floatValue = control.getFloat();
+                                float floatValue = control.GetFloat();
                                 patternShader.SetFloat(param.name, floatValue);
                                 break;
                             case ParamType.FLOAT4:
@@ -184,6 +184,7 @@ namespace sotsf.canopy.patterns
                                 // Not implemented
                                 break;
                             case ParamType.TEXTURE:
+                                Texture texValue = control.GetTexture();
                                 // Not implemented
                                 break;
                             default:

@@ -7,14 +7,14 @@ using UnityEngine.UI;
 public class TextureTile : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public static GameObject dragObject;
-    public Texture tex;
+    public Texture tex {
+        get
+        {
+            return GetComponentInChildren<RawImage>().texture;
+        }
+    }
 
     Vector3 dragStart;
-
-    private void Start()
-    {
-        tex = GetComponentInChildren<RawImage>().texture;
-    }
 
     public void OnBeginDrag(PointerEventData eventData)
     {

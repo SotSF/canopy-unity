@@ -14,6 +14,7 @@ public class UIController : MonoBehaviour
     public RectTransform inputBasePrefab;
     public RectTransform sliderBasePrefab;
     public RectTransform toggleBasePrefab;
+    public RectTransform textureBasePrefab;
 
     [Tooltip("Objects which should only be displayed in simulator mode")]
     public Transform[] simulationOnlyObjects;
@@ -37,7 +38,7 @@ public class UIController : MonoBehaviour
     private Coroutine animationRoutine;
 
     private Toggle sendToAPIToggle;
-
+    
 
     private void Awake()
     {
