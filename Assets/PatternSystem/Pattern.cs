@@ -34,7 +34,7 @@ namespace sotsf.canopy.patterns
         public int defaultInt;
         public bool defaultBool;
         public Vector4 defaultVector;
-        public Texture2D defaultTexture;
+        public Texture defaultTexture;
     }
 
     public class Pattern : MonoBehaviour
@@ -185,6 +185,17 @@ namespace sotsf.canopy.patterns
                                 break;
                             case ParamType.TEXTURE:
                                 Texture texValue = control.GetTexture();
+                                if (texValue != null)
+                                {
+                                    patternShader.SetInt("height", texValue.height);
+                                    patternShader.SetInt("width", texValue.width);
+                                    patternShader.SetTexture(kernelId, param.name, texValue);
+                                } else
+                                {
+                                    patternShader.SetInt("height", param.defaultTexture.height);
+                                    patternShader.SetInt("width", param.defaultTexture.width);
+                                    patternShader.SetTexture(kernelId, param.name, param.defaultTexture);
+                                }
                                 // Not implemented
                                 break;
                             default:

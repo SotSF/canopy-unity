@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class TextureSelector : MonoBehaviour, IDropHandler {
 
-    public Texture tex;
+    public Texture tex = null;
     RawImage imageDisplay;
 
     void Start () {

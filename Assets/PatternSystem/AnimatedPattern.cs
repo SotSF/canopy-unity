@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Video;
 
@@ -20,6 +21,8 @@ namespace sotsf.canopy.patterns
             player.targetTexture = inputFrame;
             player.renderMode = VideoRenderMode.RenderTexture;
             player.Play();
+            var texparam = parameters.Where((p) => p.name == "InputTex").First();
+            texparam.defaultTexture = inputFrame;
         }
 
         protected override void UpdateRenderParams()

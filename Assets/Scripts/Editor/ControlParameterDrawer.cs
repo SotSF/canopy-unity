@@ -69,7 +69,7 @@ public class PatternParameterDrawer : PropertyDrawer
         //1 row for name + type
         //1 row for controllable
         int rowcount = 2;
-        if (param.controllable){
+        if (param != null && param.controllable){
             rowcount++;
             if (IsNumeric(param))
             {
@@ -123,7 +123,7 @@ public class PatternParameterDrawer : PropertyDrawer
         var controllableProp = property.FindPropertyRelative("controllable");
         EditorGUI.PropertyField(controllableRect, controllableProp);
         rowsFilled++;
-        if (param.controllable){
+        if (param != null && param.controllable){
             if (IsNumeric(param))
             {
                 var rangeRect = new Rect(position.x, YOffset(rowsFilled, position.y), width, rowHeight);
