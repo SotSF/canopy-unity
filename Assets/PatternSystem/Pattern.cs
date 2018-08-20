@@ -36,10 +36,10 @@ namespace sotsf.canopy.patterns
         public Vector4 defaultVector;
         public Texture defaultTexture;
         private float currentFloat;
-        private bool floatIsSet;
+        private bool floatIsSet = false;
         private int currentInt;
         private bool currentBool;
-        private bool boolIsSet;
+        private bool boolIsSet = false;
         private Vector4 currentVector;
         private Texture currentTexture;
 

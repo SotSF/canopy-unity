@@ -28,7 +28,6 @@ public class UIControl : MonoBehaviour
                 if (param.useRange){
                     sliderLabel = control.Find("ValueDisplay").GetComponent<Text>();
                     slider = control.GetComponentInChildren<Slider>();
-                    slider.onValueChanged.AddListener(param.SetFloat);
                     slider.onValueChanged.AddListener(UpdateSliderLabel);
                     if (param.paramType == ParamType.INT){
                         slider.minValue = param.minInt;
@@ -38,9 +37,10 @@ public class UIControl : MonoBehaviour
                     } else {
                         slider.minValue = param.minFloat;
                         slider.maxValue = param.maxFloat;
-                        slider.value = param.defaultFloat;
+                        slider.value = param.GetFloat();
                         slider.wholeNumbers = false;
                     }
+                    slider.onValueChanged.AddListener(param.SetFloat);
                 } else
                 {
                     input = control.GetComponentInChildren<InputField>();
@@ -56,6 +56,7 @@ public class UIControl : MonoBehaviour
                 control = Instantiate(UIController.instance.textureBasePrefab, parent);
                 texSelector = control.GetComponentInChildren<TextureSelector>();
                 texSelector.textureSelected.AddListener(SetTexture);
+                texSelector.SelectTexture(param.GetTexture());
                 break;
         }
     }
