@@ -75,7 +75,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     if (x < 0) {
         x += width;
     }
-    float2 newOffset = float2(x, id.y);
+    float2 newOffset = float2(x, id.y%height);
     float4 color = InputTex[newOffset];
     returnColorData(id.xy, color.rgb);
 }
