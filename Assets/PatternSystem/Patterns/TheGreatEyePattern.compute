@@ -4,15 +4,12 @@ Texture2D<float4> InputTex;
 RWTexture2D<float4> Frame;
 RWStructuredBuffer<float3> dataBuffer;
 
-float timeSeconds;
-float brightness;
-float period;
-float cycleCount;
+uint height;
+uint width;
 
-float rightStickX;
-float rightStickY;
-float leftStickX;
-float leftStickY;
+float brightness;
+float horizontalAxis;
+float verticalAxis;
 
 float2 rotate(in float2 xy, in float2 center, in float theta)
 {
@@ -37,8 +34,8 @@ float2 worldspace(in uint2 pixel, in float width) {
 [numthreads(25, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-	float2 newOffsets = float2(id.x + leftStickX * (75 / 2.0) + (128/2.0 -75/2.0), id.y + leftStickY * (96 / 2.0) + (128/2.0 - 96/2.0));
-    newOffsets = worldspace(newOffsets, 128);
+	float2 newOffsets = float2(id.x + horizontalAxis * (75 / 2.0) + (height/2.0 -75/2.0), id.y + verticalAxis * (96 / 2.0) + (width/2.0 - 96/2.0));
+    newOffsets = worldspace(newOffsets, width);
 	float4 color = InputTex[newOffsets];
 
 	// Color the "Result" image and put it in the general dataBuffer

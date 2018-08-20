@@ -35,16 +35,73 @@ namespace sotsf.canopy.patterns
         public bool defaultBool;
         public Vector4 defaultVector;
         public Texture defaultTexture;
+        private float currentFloat;
+        private bool floatIsSet;
+        private int currentInt;
+        private bool currentBool;
+        private bool boolIsSet;
+        private Vector4 currentVector;
+        private Texture currentTexture;
+
+        public void SetTexture(Texture tex)
+        {
+            currentTexture = tex;
+        }
+        public void SetFloat(float fl)
+        {
+            currentFloat = fl;
+            floatIsSet = true;
+        }
+        public void SetBool(bool val)
+        {
+            currentBool = val;
+            boolIsSet = true;
+        }
+
+        public bool GetBool()
+        {
+            if (boolIsSet)
+            {
+                return currentBool;
+            }
+            else
+            {
+                return defaultBool;
+            }
+        }
+
+        public Texture GetTexture()
+        {
+            if (currentTexture != null)
+            {
+                return currentTexture;
+            } else
+            {
+                return defaultTexture;
+            }
+        }
+        public float GetFloat()
+        {
+            if (name == "timeSeconds")
+            {
+                return Time.time;
+            }
+            if (floatIsSet)
+            {
+                return currentFloat;
+            } else
+            {
+                return defaultFloat;
+            }
+        }
     }
 
     public class Pattern : MonoBehaviour
     {
         public PatternParameter[] parameters = new PatternParameter[] {
-            new PatternParameter(){paramType = ParamType.FLOAT, name="Hue", useRange=true, minFloat=-1,maxFloat=1},
-            new PatternParameter(){paramType = ParamType.FLOAT, name="Saturation", useRange=true, minFloat=-1,maxFloat=1},
+            new PatternParameter(){paramType = ParamType.FLOAT, name="Hue", useRange=true, minFloat=0,maxFloat=1},
+            new PatternParameter(){paramType = ParamType.FLOAT, name="Saturation", useRange=true, minFloat=0,maxFloat=1},
             new PatternParameter(){paramType = ParamType.FLOAT, name="Brightness", useRange=true, minFloat=0,maxFloat=1},
-            new PatternParameter(){paramType = ParamType.FLOAT, name="Period", useRange=true, minFloat=0.1f,maxFloat=45},
-            new PatternParameter(){paramType = ParamType.FLOAT, name="Cycles", useRange=true, minFloat=0.1f,maxFloat=45},
         };
 
         public ComputeShader patternShader;
@@ -163,73 +220,32 @@ namespace sotsf.canopy.patterns
                 var uiControlMap = UIController.instance.uiControlMap;
                 foreach (PatternParameter param in parameters)
                 {
-                    if (param.controllable) {
-                        if (!uiControlMap.ContainsKey(param.name))
-                            continue;
-                        UIControl control = uiControlMap[param.name];
-                        switch (param.paramType)
-                        {
-                            case ParamType.BOOL:
-                                bool boolValue = control.GetBool();
-                                patternShader.SetBool(param.name, boolValue);
-                                break;
-                            case ParamType.FLOAT:
-                                float floatValue = control.GetFloat();
-                                patternShader.SetFloat(param.name, floatValue);
-                                break;
-                            case ParamType.FLOAT4:
-                                // Not implemented
-                                break;
-                            case ParamType.INT:
-                                // Not implemented
-                                break;
-                            case ParamType.TEXTURE:
-                                Texture texValue = control.GetTexture();
-                                if (texValue != null)
-                                {
-                                    patternShader.SetInt("height", texValue.height);
-                                    patternShader.SetInt("width", texValue.width);
-                                    patternShader.SetTexture(kernelId, param.name, texValue);
-                                } else
-                                {
-                                    patternShader.SetInt("height", param.defaultTexture.height);
-                                    patternShader.SetInt("width", param.defaultTexture.width);
-                                    patternShader.SetTexture(kernelId, param.name, param.defaultTexture);
-                                }
-                                // Not implemented
-                                break;
-                            default:
-                                // EEK!
-                                break;
-                        }
-                    } else {
-                        switch (param.name)
-                        {
-                            case "timeSeconds":
-                                patternShader.SetFloat(param.name, Time.time);
-                                break;
-                            case "period":
-                                patternShader.SetFloat(param.name, manager.period);
-                                break;
-                            case "cycleCount":
-                                patternShader.SetFloat(param.name, manager.cycles);
-                                break;
-                            case "brightness":
-                                patternShader.SetFloat(param.name, manager.brightness + manager.brightnessMod);
-                                break;
-                            case "hue":
-                                patternShader.SetFloat(param.name, manager.hue);
-                                break;
-                            case "saturation":
-                                patternShader.SetFloat(param.name, manager.saturation);
-                                break;
-                        }
+                    switch (param.paramType)
+                    {
+                        case ParamType.BOOL:
+                            patternShader.SetBool(param.name, param.GetBool());
+                            break;
+                        case ParamType.FLOAT:
+                            patternShader.SetFloat(param.name, param.GetFloat());
+                            break;
+                        case ParamType.FLOAT4:
+                            // Not implemented
+                            break;
+                        case ParamType.INT:
+                            // Not implemented
+                            break;
+                        case ParamType.TEXTURE:
+                            Texture texValue = param.GetTexture();
+                            patternShader.SetInt("height", texValue.height);
+                            patternShader.SetInt("width", texValue.width);
+                            patternShader.SetTexture(kernelId, param.name, texValue);
+                            // Not implemented
+                            break;
+                        default:
+                            // EEK!
+                            break;
                     }
                 }
-                //foreach (string param in renderParams.Keys)
-                //{
-                //    patternShader.SetFloat(param, renderParams[param]);
-                //}
 
                 //Execute pattern shader
                 //25 and 16 are the thread group sizes, which evenly divide 75 and 96

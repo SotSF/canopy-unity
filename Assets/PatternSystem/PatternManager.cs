@@ -46,7 +46,8 @@ public class PatternManager : MonoBehaviour
     void Start()
     {
         patterns = GetComponentsInChildren<Pattern>();
-        Invoke("ChooseRandomPattern", .1f);
+        //Invoke("ChooseRandomPattern", .1f);
+        SelectPattern(patterns[0]);
         StartCoroutine(CheckForAPI());
         lightCaster = Canopy.instance.GetComponentInChildren<Light>();
     }

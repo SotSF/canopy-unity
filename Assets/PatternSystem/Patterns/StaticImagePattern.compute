@@ -4,12 +4,12 @@ Texture2D<float4> InputTex;
 RWTexture2D<float4> Frame;
 RWStructuredBuffer<float3> dataBuffer;
 
-float timeSeconds;
 float hue;
 float saturation;
 float brightness;
+
 float period;
-float cycleCount;
+uint count;
 
 uint width;
 uint height;

@@ -68,7 +68,8 @@ public class PatternParameterDrawer : PropertyDrawer
     {
         //1 row for name + type
         //1 row for controllable
-        int rowcount = 2;
+        //1 row for default
+        int rowcount = 3;
         if (param != null && param.controllable){
             rowcount++;
             if (IsNumeric(param))
