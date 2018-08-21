@@ -19,8 +19,6 @@ public class UIController : MonoBehaviour
     [Tooltip("Objects which should only be displayed in simulator mode")]
     public Transform[] simulationOnlyObjects;
 
-    public Dictionary<string, UIControl> uiControlMap;
-
     //public UIControl controlBase;
     public RectTransform controlsNode;
 
@@ -43,7 +41,6 @@ public class UIController : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        uiControlMap = new Dictionary<string, UIControl>();
         viewModeButton = transform.Find("ControlButtons/ViewModeButton").GetComponent<Button>();
         performanceModeButton = transform.Find("ControlButtons/PerformanceModeButton").GetComponent<Button>();
         canopyLight = Canopy.instance.GetComponentInChildren<Light>();
@@ -82,7 +79,6 @@ public class UIController : MonoBehaviour
     {
         //Rect position = new Rect();
         var controls = controlsNode.GetComponentsInChildren<UIControl>();
-        uiControlMap = new Dictionary<string, UIControl>();
         // Destroy old controls
 
         Vector2 anchored = new Vector2(0, 0);
@@ -111,9 +107,15 @@ public class UIController : MonoBehaviour
                     rows++;
                 }
                 anchored -= new Vector2(0, rowHeight);
-
-                uiControlMap[param.name] = control;
             }
+        }
+        // if AnimatedPattern, show 'next' button
+        // ugly hardcoded hack but w/e
+        if (pattern.GetType() == typeof(AnimatedPattern))
+        {
+            var animPattern = pattern as AnimatedPattern;
+            var nextButton = Instantiate(animPattern.nextButton, controlsNode).GetComponent<Button>();
+            nextButton.onClick.AddListener(animPattern.Next);
         }
     }
 

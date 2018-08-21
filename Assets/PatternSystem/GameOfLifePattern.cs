@@ -28,11 +28,6 @@ namespace sotsf.canopy.patterns
             swapShader.SetTexture(kernelId, "Frame", renderTexture);
         }
 
-        protected override void UpdateRenderParams()
-        {
-            base.UpdateRenderParams();
-        }
-
         protected override void Update()
         {
             base.Update();

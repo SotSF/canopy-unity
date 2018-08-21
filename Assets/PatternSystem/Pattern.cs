@@ -201,23 +201,11 @@ namespace sotsf.canopy.patterns
             }
         }
 
-        protected virtual void UpdateRenderParams()
-        {
-            renderParams["timeSeconds"] = Time.time;
-            renderParams["period"] = manager.period;
-            renderParams["cycleCount"] = manager.cycles;
-            renderParams["brightness"] = manager.brightness + manager.brightnessMod;
-            renderParams["hue"] = manager.hue;
-            renderParams["saturation"] = manager.saturation;
-        }
-
         // Update is called once per frame
         protected virtual void Update()
         {
             if (!manager.highPerformance || presenting)
             {
-                // UpdateRenderParams();
-                var uiControlMap = UIController.instance.uiControlMap;
                 foreach (PatternParameter param in parameters)
                 {
                     switch (param.paramType)

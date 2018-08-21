@@ -12,9 +12,8 @@ namespace sotsf.canopy.patterns
         public Func<float> leftStickY = PatternInputGenerator.XboxInput(XboxController.ControlInput.leftStickY);
 
 
-        protected override void UpdateRenderParams()
+        protected virtual void UpdateRenderParams()
         {
-            base.UpdateRenderParams();
             renderParams["rightStickX"] = rightStickX();
             renderParams["rightStickY"] = rightStickY();
             renderParams["leftStickX"] = leftStickX();

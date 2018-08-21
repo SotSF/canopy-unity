@@ -11,7 +11,6 @@ namespace sotsf.canopy.patterns
 
         protected override void UpdateRenderParams()
         {
-            base.UpdateRenderParams();
             patternShader.SetInt("height", tex.height);
             patternShader.SetInt("width", tex.width);
             patternShader.SetTexture(kernelId, "InputTex", tex);

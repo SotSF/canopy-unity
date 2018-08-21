@@ -57,9 +57,8 @@ namespace sotsf.canopy.patterns
             }
         }
 
-        protected override void UpdateRenderParams()
+        protected void UpdateRenderParams()
         {
-            base.UpdateRenderParams();
             // Read input from XboxController.instance
             // update paddle state, ball state
             // set values on shader
