@@ -68,9 +68,33 @@ void returnColorData(in uint2 pixel, in float3 color) {
     dataBuffer[75 * pixel.y + pixel.x] = color;
 }
 
+float2 scalenormalized(in uint2 pixel, in float2 dimensions) {
+    // normalize based on image width
+    float2 center = float2(0, 0);
+    float apexRadius = 0.332f;
+    float stripLength = 2.5f;
+    float normalizedDimension = dimensions.x > dimensions.y ? dimensions.y : dimensions.x;
+    float normalizedX = ((stripLength*pixel.x / 75.0f) + apexRadius) / (stripLength + apexRadius);
+}
+
 [numthreads(25, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
+    // If height < max y (96), do %height to fill blank space w/ repeat
+    // if height/width >> dimensions (75x96), scale image to fit
+    //float x = id.x;
+    //float y = id.y;
+    //if (width > 75) {
+
+    //}
+    //else {
+
+    //}
+    //if (height > 96) {
+
+    //} else {
+    //    y %= height;
+    //}
     float x = (id.x + (timeSeconds*speed * 50)) % width;
     if (x < 0) {
         x += width;
