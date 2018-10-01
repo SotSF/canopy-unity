@@ -30,9 +30,11 @@ namespace NodeEditorFramework.TextureComposer
 					newTex.GetPixel(0, 0);
 					tex = newTex;
 				}
-				catch (UnityException)
+				catch (UnityException e)
 				{ // Texture is not readable
 					Debug.LogError("Texture is not readable!");
+                    Debug.Log(e.Message);
+                    Debug.Log(e.StackTrace);
 				}
 				NodeEditor.curNodeCanvas.OnNodeChange(this);
 			}

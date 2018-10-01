@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 public static class MathUtils
 {
@@ -181,5 +182,21 @@ public static class MathUtils
     static float dg(float s, float d)
     {
         return (float)(2 * Math.Cosh(s * d / 2) * d / (2 * s) - (2 * Math.Sinh(s * d / 2) / Mathf.Pow(s, 2)));
+    }
+
+
+    public static List<int> PrimeFactors(int number)
+    {
+        var primes = new List<int>();
+
+        for (int div = 2; div <= number/2; div++)
+        {
+            while (number % div == 0)
+            {
+                primes.Add(div);
+                number = number / div;
+            }
+        }
+        return primes;
     }
 }

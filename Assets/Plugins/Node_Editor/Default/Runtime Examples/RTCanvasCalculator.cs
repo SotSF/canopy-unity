@@ -32,11 +32,34 @@ namespace NodeEditorFramework.Standard
 			DebugOutputResults ();
 		}
 
-		/// <summary>
-		/// Debugs the values of all possible output nodes
-		/// Could be done more precisely but it atleast shows how to get them
-		/// </summary>
-		private void DebugOutputResults () 
+        public bool ContinueCalculation(Node node)
+        {
+            if (node.calculated && !node.AllowRecursion)
+            { // Already calulated
+                return true;
+            }
+            if (node.ancestorsCalculated() && node.Calculate())
+            { // Calculation was successful
+                node.calculated = true;
+                if (node.ContinueCalculation)
+                { // Continue with children
+                    for (int i = 0; i < node.outputPorts.Count; i++)
+                    {
+                        ConnectionPort outPort = node.outputPorts[i];
+                        for (int t = 0; t < outPort.connections.Count; t++)
+                            ContinueCalculation(outPort.connections[t].body);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Debugs the values of all possible output nodes
+        /// Could be done more precisely but it atleast shows how to get them
+        /// </summary>
+        private void DebugOutputResults () 
 		{
 			AssureCanvas ();
 			Debug.Log ("Calculating '" + canvas.saveName + "':");

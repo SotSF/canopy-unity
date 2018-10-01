@@ -29,12 +29,17 @@ public class HSVNode : Node
     private int kernelId;
     private Vector4 HSV;
     public RenderTexture outputTex;
+    private Vector2Int outputSize = Vector2Int.zero;
 
     private void Awake()
     {
         HSVShader = Resources.Load<ComputeShader>("Filters/HSVFilter");
         kernelId = HSVShader.FindKernel("CSMain");
-        outputTex = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
+    }
+
+    private void InitializeRenderTexture()
+    {
+        outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
         outputTex.enableRandomWrite = true;
         outputTex.Create();
     }
@@ -64,14 +69,28 @@ public class HSVNode : Node
         if (!textureInputKnob.connected() || tex == null)
         { // Reset outputs if no texture is available
             textureOutputKnob.ResetValue();
+            outputSize = Vector2Int.zero;
             return true;
         }
-        HSV = new Vector4(hueKnob.GetValue<float>(), satKnob.GetValue<float>(), valKnob.GetValue<float>());
+
+        var inputSize = new Vector2Int(tex.width, tex.height);
+        if (inputSize != outputSize)
+        {
+            outputSize = inputSize;
+            InitializeRenderTexture();
+        }
+
+        HSV = new Vector4(hueKnob.GetValue<float>(), 
+                          satKnob.GetValue<float>(), 
+                          valKnob.GetValue<float>());
+
         //Execute HSV compute shader here
         HSVShader.SetVector("HSV", HSV);
         HSVShader.SetTexture(kernelId, "OutputTex", outputTex);
-        HSVShader.SetTexture(kernelId, "InputTex", textureInputKnob.GetValue<Texture>());
-        HSVShader.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
+        HSVShader.SetTexture(kernelId, "InputTex", tex);
+        var threadGroupX = Mathf.CeilToInt(tex.width / 16.0f);
+        var threadGroupY = Mathf.CeilToInt(tex.height / 16.0f);
+        HSVShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
 
         // Assign output channels
         textureOutputKnob.SetValue(outputTex);
