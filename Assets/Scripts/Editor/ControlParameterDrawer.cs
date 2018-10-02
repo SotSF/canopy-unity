@@ -93,7 +93,6 @@ public class PatternParameterDrawer : PropertyDrawer
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         PatternParameter param = PropToParam(property);
-        int totalRows = GetRows(param);
         int rowsFilled = 0;
         var lineRect = new Rect(position.x, position.y+0.5f, position.width, 0.5f);
         EditorGUI.DrawRect(lineRect, Color.black);

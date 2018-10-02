@@ -64,7 +64,7 @@ public class Controls: MonoBehaviour
 
 
 
-        if (UIController.instance.inSimulatorMode)
+        if (UIController.instance != null && UIController.instance.inSimulatorMode)
         {
             rotationX = ClampAngle(rotationX, minimumX, maximumX);
             rotationY = ClampAngle(rotationY, minimumY, maximumY);

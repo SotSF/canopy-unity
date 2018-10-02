@@ -1,5 +1,6 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
+using NodeEditorFramework.Utilities;
 using Oscillators;
 using UnityEngine;
 
@@ -11,10 +12,10 @@ public class OscillatorNode : Node
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "Oscillator"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    public override Vector2 DefaultSize { get { return new Vector2(220, 150); } }
 
-    [ValueConnectionKnob("Frequency", Direction.In, typeof(float))]
-    public ValueConnectionKnob freqInputKnob;
+    [ValueConnectionKnob("Period", Direction.In, typeof(float))]
+    public ValueConnectionKnob periodInputKnob;
 
     [ValueConnectionKnob("Amplitude", Direction.In, typeof(float))]
     public ValueConnectionKnob amplInputKnob;
@@ -26,10 +27,12 @@ public class OscillatorNode : Node
     public ValueConnectionKnob outputKnob;
 
     public Oscillator oscParams;
+    private float period, amplitude, phase;
 
     private void Awake()
     {
-        oscParams = new Oscillator(0.5f,1,0);
+        period = 2; amplitude = 1; phase = 0;
+        oscParams = new Oscillator(period, amplitude, phase);
         OscillatorManager.instance.Register(this);
     }
 
@@ -37,14 +40,27 @@ public class OscillatorNode : Node
     {
         GUILayout.BeginHorizontal();
 
+        //Input pins & internal controls
         GUILayout.BeginVertical();
-        freqInputKnob.DisplayLayout();
+        periodInputKnob.DisplayLayout();
+        if (!periodInputKnob.connected())
+        {
+            period = RTEditorGUI.Slider(period, 0.01f, 50);
+        }
         amplInputKnob.DisplayLayout();
+        if (!amplInputKnob.connected())
+        {
+            amplitude = RTEditorGUI.FloatField(amplitude);
+        }
         phaseInputKnob.DisplayLayout();
+        if (!phaseInputKnob.connected())
+        {
+            phase = RTEditorGUI.Slider(phase, 0, 2 * Mathf.PI);
+        }
         GUILayout.EndVertical();
 
+        //Output pin
         outputKnob.DisplayLayout();
-
         GUILayout.EndHorizontal();
 
         if (GUI.changed)
@@ -53,22 +69,24 @@ public class OscillatorNode : Node
 
     public override bool Calculate()
     {
-        var newFreq = freqInputKnob.GetValue<float>();
-        var newAmpl = amplInputKnob.GetValue<float>();
-        newAmpl = newAmpl != 0 ? newAmpl : 1;
-        var newPhase = phaseInputKnob.GetValue<float>();
-        if (newFreq != oscParams.frequency || 
-            newAmpl != oscParams.amplitude || 
-            newPhase != oscParams.phase)
+        var newPeriod = periodInputKnob.connected() ? periodInputKnob.GetValue<float>() : period;
+        var newAmpl   = amplInputKnob.connected()   ? amplInputKnob.GetValue<float>()   : amplitude;
+        var newPhase  = phaseInputKnob.connected()  ? phaseInputKnob.GetValue<float>()  : phase;
+        if (newPeriod != oscParams.period || 
+            newAmpl   != oscParams.amplitude || 
+            newPhase  != oscParams.phase)
         {
-            if (newFreq != oscParams.frequency)
+            if (newPeriod != oscParams.period)
             {
                 //Find a phase such that the oscillator won't instantaneously jump in amplitude
                 //If phase and freq change on the same Calculate()... we pick freq.
                 float t = Time.time;
-                newPhase = 2 * Mathf.PI * t - (oscParams.frequency /newFreq) * (2 * Mathf.PI * t - oscParams.phase);
+                newPhase = 2 * Mathf.PI * t - (newPeriod / oscParams.period) * (2 * Mathf.PI * t - oscParams.phase);
             }
-            oscParams = new Oscillator(newFreq, newAmpl, newPhase);
+            period = newPeriod;
+            amplitude = newAmpl;
+            phase = newPhase;
+            oscParams = new Oscillator(period, amplitude, phase);
             OscillatorManager.instance.Register(this);
         }
         float value = OscillatorManager.instance.GetValue(this);

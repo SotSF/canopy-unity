@@ -3,14 +3,14 @@ using NodeEditorFramework.TextureComposer;
 using UnityEngine;
 
 
-[Node(false, "Pattern/HSVNode")]
+[Node(false, "Filter/HSV")]
 public class HSVNode : Node
 {
     public const string ID = "hsvNode";
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "HSV"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    public override Vector2 DefaultSize { get { return new Vector2(100, 100); } }
 
     [ValueConnectionKnob("Texture", Direction.In, typeof(Texture))]
     public ValueConnectionKnob textureInputKnob;
@@ -33,7 +33,7 @@ public class HSVNode : Node
 
     private void Awake()
     {
-        HSVShader = Resources.Load<ComputeShader>("Filters/HSVFilter");
+        HSVShader = Resources.Load<ComputeShader>("FilterShaders/HSVFilter");
         kernelId = HSVShader.FindKernel("CSMain");
     }
 

@@ -1,7 +1,7 @@
 ﻿#pragma kernel CSMain
 
 struct oscillator {
-    float freq;
+    float period;
     float ampl;
     float phase;
 };
@@ -14,5 +14,5 @@ RWStructuredBuffer<float> valueBuffer;
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     oscillator osc = paramBuffer[id.x];
-    valueBuffer[id.x] = osc.ampl * sin(osc.freq * (2 * 3.14159 * (time - osc.phase)));
+    valueBuffer[id.x] = osc.ampl * sin( (2 * 3.14159 * time - osc.phase) / osc.period );
 }

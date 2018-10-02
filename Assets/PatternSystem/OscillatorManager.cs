@@ -9,14 +9,14 @@ namespace Oscillators
     [Serializable]
     public struct Oscillator
     {
-        public float frequency;
+        public float period;
         public float amplitude;
         public float phase;
 
-        public Oscillator(float freq, float ampl, float phase)
+        public Oscillator(float period, float amplitude, float phase)
         {
-            frequency = freq;
-            amplitude = ampl;
+            this.period = period;
+            this.amplitude = amplitude;
             this.phase = phase;
         }
     }

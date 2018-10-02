@@ -11,7 +11,7 @@ namespace NodeEditorFramework.Standard
 		public override string GetID { get { return ID; } }
 
 		public override string Title { get { return "Input Node"; } }
-		public override Vector2 DefaultSize { get { return new Vector2(200, 50); } }
+		public override Vector2 DefaultSize { get { return new Vector2(100, 50); } }
 
 		[ValueConnectionKnob("Value", Direction.Out, "Float")]
 		public ValueConnectionKnob outputKnob;
