@@ -33,7 +33,8 @@ public class OscillatorNode : Node
     {
         period = 2; amplitude = 1; phase = 0;
         oscParams = new Oscillator(period, amplitude, phase);
-        OscillatorManager.instance.Register(this);
+        if (Application.isPlaying)
+            OscillatorManager.instance.Register(this);
     }
 
     public override void NodeGUI()
@@ -86,10 +87,21 @@ public class OscillatorNode : Node
             period = newPeriod;
             amplitude = newAmpl;
             phase = newPhase;
-            oscParams = new Oscillator(period, amplitude, phase);
-            OscillatorManager.instance.Register(this);
+            if (Application.isPlaying)
+            {
+                oscParams = new Oscillator(period, amplitude, phase);
+                OscillatorManager.instance.Register(this);
+            }
         }
-        float value = OscillatorManager.instance.GetValue(this);
+        float value;
+        if (Application.isPlaying)
+        {
+            value = OscillatorManager.instance.GetValue(this);
+        }
+        else
+        {
+            value = Mathf.Sin((2 * Mathf.PI - phase) / period) * amplitude;
+        }
         outputKnob.SetValue(value);
         return true;
     }
