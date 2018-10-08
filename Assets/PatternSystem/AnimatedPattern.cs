@@ -26,7 +26,6 @@ namespace sotsf.canopy.patterns
             Next();
             var texparam = parameters.Where((p) => p.name == "InputTex").First();
             texparam.defaultTexture = inputFrame;
-            
         }
 
         public void Next()

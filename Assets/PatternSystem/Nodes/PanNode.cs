@@ -32,8 +32,8 @@ public class PanNode : Node
     private Vector2Int outputSize = Vector2Int.zero;
     private Vector2 offset = Vector2.zero;
 
-    bool smoothTransitions;
-    float speed, angle;
+    public bool smoothTransitions;
+    public float speed, angle;
 
     private void Awake()
     {
@@ -79,6 +79,7 @@ public class PanNode : Node
         { // Reset outputs if no texture is available
             textureOutputKnob.ResetValue();
             outputSize = Vector2Int.zero;
+            outputTex.Release();
             return true;
         }
 

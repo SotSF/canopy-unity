@@ -170,7 +170,7 @@ namespace NodeEditorFramework.Standard
 #if UNITY_EDITOR
 		private void LoadCanvas()
 		{
-			string path = UnityEditor.EditorUtility.OpenFilePanel("Load Node Canvas", NodeEditor.editorPath + "Resources/Saves/", "asset");
+			string path = UnityEditor.EditorUtility.OpenFilePanel("Load Node Canvas", "Assets/PatternSystem/Resources/CanvasSaves", "asset");
 			if (!path.Contains(Application.dataPath))
 			{
 				if (!string.IsNullOrEmpty(path))
@@ -212,7 +212,7 @@ namespace NodeEditorFramework.Standard
 
 		private void SaveCanvasAs()
 		{
-			string panelPath = NodeEditor.editorPath + "Resources/Saves/";
+			string panelPath = "Assets/PatternSystem/Resources/CanvasSaves";
 			if (canvasCache.nodeCanvas != null && !string.IsNullOrEmpty(canvasCache.nodeCanvas.savePath))
 				panelPath = canvasCache.nodeCanvas.savePath;
 			string path = UnityEditor.EditorUtility.SaveFilePanelInProject("Save Node Canvas", "Node Canvas", "asset", "", panelPath);

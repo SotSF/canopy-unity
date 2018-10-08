@@ -27,7 +27,7 @@ public class OscillatorNode : Node
     public ValueConnectionKnob outputKnob;
 
     public Oscillator oscParams;
-    private float period, amplitude, phase;
+    public float period, amplitude, phase;
 
     private void Awake()
     {
