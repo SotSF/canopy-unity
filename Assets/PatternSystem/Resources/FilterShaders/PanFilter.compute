@@ -44,33 +44,25 @@ float4 bilerp(float4 p0q0, float4 p1q0, float4 p0q1, float4 p1q1, float2 offset)
 [numthreads(16, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-    uint2 dimensions = uint2(width, height);
     float r = (speed * width * frameTime);
-    float2 lastPosition = float2(offset.x + id.x, offset.y + id.y);
-    float2 motionVector = float2(r * cos(theta), r * sin(theta));
-    float2 newPosition = (lastPosition + motionVector) % dimensions;
-    if (newPosition.x < 0) {
-        newPosition.x += width;
+    float2 newOffset = float2((offset.x + id.x + r * cos(theta)) % width,
+                              (offset.y + id.y + r * sin(theta)) % height);
+    if (newOffset.x < 0) {
+        newOffset.x += width;
     }
-    if (newPosition.y < 0){
-        newPosition.y += height;
+    if (newOffset.y < 0){
+        newOffset.y += height;
     }
     if (smoothTransitions) {
         // Optionally bilerp for smooth transitions between pixels
-        uint2 base = floor(newPosition);
-        uint lastX = frac(lastPosition.x) > .5 ? ceil(lastPosition.x) : floor(lastPosition.x);
-        uint lastY = frac(lastPosition.y) > .5 ? ceil(lastPosition.y) : floor(lastPosition.y);
-        uint newX = newPosition.x > lastPosition.x ? ceil(newPosition.x) : floor(newPosition.x);
-        uint newY = frac(newPosition.y) > .5 ? ceil(newPosition.y) : floor(newPosition.y);
-        // First, pick closest pixel by integer (lastPosition)
-        // Next, pick closest pixel in direction of travel (newPosition)
-        // Then lerp?
-        float4 p0q0 = InputTex[uint2(lastX, lastY)];
-        float4 p0q1 = InputTex[uint2(newX, newY)];
-        //float4 p1q0 = InputTex[(base + uint2(1, 0)) % dimensions];
-        //float4 p1q1 = InputTex[(base + uint2(1, 1)) % dimensions];
+        uint2 base = ceil(newOffset);
+        uint2 dimensions = uint2(width, height);
+        float4 p0q0 = InputTex[base];
+        float4 p0q1 = InputTex[(base + uint2(0, 1)) % dimensions];
+        float4 p1q0 = InputTex[(base + uint2(1, 0)) % dimensions];
+        float4 p1q1 = InputTex[(base + uint2(1, 1)) % dimensions];
 
-        OutputTex[id.xy] = lerp(p0q0, p0q1, );
+        OutputTex[id.xy] = bilerp(p0q0, p0q1, p1q0, p1q1, newOffset);
     }
     else {
         OutputTex[id.xy] = InputTex[newOffset];
