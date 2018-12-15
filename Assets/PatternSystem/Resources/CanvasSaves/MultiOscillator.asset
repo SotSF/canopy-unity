@@ -392,6 +392,9 @@ MonoBehaviour:
     period: 2
     amplitude: 1
     phase: 0
+  period: 2
+  amplitude: 1
+  phase: 0
 --- !u!114 &114544273570439610
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -448,7 +451,10 @@ MonoBehaviour:
   oscParams:
     period: 2
     amplitude: 1
-    phase: 0.027537802
+    phase: 0
+  period: 2
+  amplitude: 1
+  phase: 0
 --- !u!114 &114614175830302756
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -637,6 +643,9 @@ MonoBehaviour:
   angleInputKnob: {fileID: 114614175830302756}
   textureOutputKnob: {fileID: 114423221357023814}
   outputTex: {fileID: 0}
+  smoothTransitions: 0
+  speed: 0
+  angle: 0
 --- !u!114 &114938548272787338
 MonoBehaviour:
   m_ObjectHideFlags: 1
