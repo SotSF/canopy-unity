@@ -12,64 +12,46 @@ MonoBehaviour:
   m_Name: LastSession
   m_EditorClassIdentifier: 
   editorStates:
-  - {fileID: 114470621916563262}
+  - {fileID: 114466287789063752}
   saveName: Assets\PatternSystem\Resources\CanvasSaves\HSV
   savePath: Assets\PatternSystem\Resources\CanvasSaves\HSV.asset
   livesInScene: 0
   nodes:
-  - {fileID: 114571587327488152}
-  - {fileID: 114705440225295470}
-  - {fileID: 114403640143915954}
-  - {fileID: 114921926951734850}
-  - {fileID: 114830108615211786}
-  - {fileID: 114372340184020254}
-  - {fileID: 114361919085987732}
-  - {fileID: 114401569693565106}
-  - {fileID: 114655160467371290}
-  - {fileID: 114030633008649718}
-  - {fileID: 114194579839142678}
-  - {fileID: 114927269080401308}
-  - {fileID: 114599563126725830}
-  - {fileID: 114764570473031680}
-  - {fileID: 114091633656393976}
-  groups: []
---- !u!114 &114000248074708342
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Value
-  m_EditorClassIdentifier: 
-  body: {fileID: 114403640143915954}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: Float
-  _connections:
-  - {fileID: 114165991414135434}
-  side: 2
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114030633008649718
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3dd50b389073b148b5ec10e419dc073, type: 3}
-  m_Name: Input Node
-  m_EditorClassIdentifier: 
-  position: {x: -460, y: -240}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: 114467912273773572}
-  value: 0.5
---- !u!114 &114032518393828920
+  - {fileID: 114848259843942404}
+  - {fileID: 114637339764205546}
+  - {fileID: 114892829080189336}
+  - {fileID: 114506016974334034}
+  - {fileID: 114496870926076472}
+  - {fileID: 114310864678589444}
+  - {fileID: 114281702975623204}
+  - {fileID: 114165650004321408}
+  - {fileID: 114514708651376278}
+  - {fileID: 114146975376449404}
+  - {fileID: 114741796979259814}
+  - {fileID: 114869230158613628}
+  - {fileID: 114504786771942922}
+  - {fileID: 114659137337500338}
+  - {fileID: 114097808380546828}
+  - {fileID: 114336119333426754}
+  - {fileID: 114586178778689914}
+  groups:
+  - rect:
+      serializedVersion: 2
+      x: -767.60004
+      y: -732.8002
+      width: 157
+      height: 1000.00006
+    title: Textures
+    _color: {r: 0.2264151, g: 0.2264151, b: 0.2264151, a: 1}
+  - rect:
+      serializedVersion: 2
+      x: -571.6
+      y: -488.20016
+      width: 293.2
+      height: 167.2
+    title: HSV
+    _color: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 1}
+--- !u!114 &114081760702287750
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -80,79 +62,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: Texture
   m_EditorClassIdentifier: 
-  body: {fileID: 114921926951734850}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114866650558618916}
-  side: 2
-  sidePosition: 27.9
-  sideOffset: 0
---- !u!114 &114058669147487246
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Input 2
-  m_EditorClassIdentifier: 
-  body: {fileID: 114599563126725830}
+  body: {fileID: 114741796979259814}
   direction: 1
   maxConnectionCount: 0
-  styleID: Float
-  _connections: []
-  side: 4
-  sidePosition: 46
-  sideOffset: 0
---- !u!114 &114091633656393976
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dae6fef3a21029b4ca9eff712d62ae4d, type: 3}
-  m_Name: Oscillator
-  m_EditorClassIdentifier: 
-  position: {x: -403.4, y: -650.6}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  periodInputKnob: {fileID: 114151609717357948}
-  amplInputKnob: {fileID: 114786809635428598}
-  phaseInputKnob: {fileID: 114991794772973984}
-  outputKnob: {fileID: 114440724273186902}
-  oscParams:
-    period: 2
-    amplitude: 1
-    phase: 0
-  period: 2
-  amplitude: 1
-  phase: 0
---- !u!114 &114113022288081138
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
-  m_EditorClassIdentifier: 
-  body: {fileID: 114571587327488152}
-  direction: 2
-  maxConnectionCount: 1
   styleID: UnityEngine.Texture
-  _connections: []
-  side: 2
-  sidePosition: 28
+  _connections:
+  - {fileID: 114318595144583092}
+  side: 4
+  sidePosition: 28.5
   sideOffset: 0
---- !u!114 &114151609717357948
+--- !u!114 &114090459126284628
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -163,15 +82,171 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: Period
   m_EditorClassIdentifier: 
-  body: {fileID: 114091633656393976}
+  body: {fileID: 114165650004321408}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
   _connections: []
   side: 4
-  sidePosition: 28
+  sidePosition: 28.5
   sideOffset: 0
---- !u!114 &114165991414135434
+--- !u!114 &114097808380546828
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
+  m_Name: Texture Input
+  m_EditorClassIdentifier: 
+  position: {x: -747.2, y: -141.80013}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114114744042129080}
+  tex: {fileID: 2800000, guid: d1bbcbf7956598a459bf2e4b2e539aa7, type: 3}
+--- !u!114 &114114744042129080
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Texture
+  m_EditorClassIdentifier: 
+  body: {fileID: 114097808380546828}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114114858003877736
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Texture
+  m_EditorClassIdentifier: 
+  body: {fileID: 114848259843942404}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 114978652332139114}
+  side: 4
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114131956455808198
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Output
+  m_EditorClassIdentifier: 
+  body: {fileID: 114165650004321408}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: 114270945363238622}
+  - {fileID: 114514146494148854}
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114146975376449404
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3dd50b389073b148b5ec10e419dc073, type: 3}
+  m_Name: Input Node
+  m_EditorClassIdentifier: 
+  position: {x: -561.3995, y: -389.19946}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114892440701118760}
+  value: 1
+--- !u!114 &114157544180601206
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Angle
+  m_EditorClassIdentifier: 
+  body: {fileID: 114869230158613628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: 114824165132414712}
+  side: 4
+  sidePosition: 84.5
+  sideOffset: 0
+--- !u!114 &114165650004321408
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dae6fef3a21029b4ca9eff712d62ae4d, type: 3}
+  m_Name: Oscillator
+  m_EditorClassIdentifier: 
+  position: {x: -337.80096, y: -744.20105}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  periodInputKnob: {fileID: 114090459126284628}
+  amplInputKnob: {fileID: 114178829803321146}
+  phaseInputKnob: {fileID: 114489968333781564}
+  outputKnob: {fileID: 114131956455808198}
+  oscParams:
+    period: 2
+    amplitude: 1
+    phase: 0
+  period: 2
+  amplitude: 1
+  phase: 0
+--- !u!114 &114178829803321146
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Amplitude
+  m_EditorClassIdentifier: 
+  body: {fileID: 114165650004321408}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 65.5
+  sideOffset: 0
+--- !u!114 &114192662633046102
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,16 +257,340 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: V
   m_EditorClassIdentifier: 
-  body: {fileID: 114921926951734850}
+  body: {fileID: 114741796979259814}
   direction: 1
   maxConnectionCount: 0
   styleID: Float
   _connections:
-  - {fileID: 114000248074708342}
+  - {fileID: 114892440701118760}
   side: 4
-  sidePosition: 81
+  sidePosition: 85.5
   sideOffset: 0
---- !u!114 &114194579839142678
+--- !u!114 &114261175437999890
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: In
+  m_EditorClassIdentifier: 
+  body: {fileID: 114869230158613628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 114648550983476660}
+  side: 4
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114270945363238622
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Input 1
+  m_EditorClassIdentifier: 
+  body: {fileID: 114496870926076472}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: Float
+  _connections:
+  - {fileID: 114131956455808198}
+  side: 4
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114281702975623204
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
+  m_Name: Texture Input
+  m_EditorClassIdentifier: 
+  position: {x: -741.7988, y: -585.99927}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114762749307605476}
+  tex: {fileID: 2800000, guid: 52e4e565ea7a25f4a9fe23c4e0d14878, type: 3}
+--- !u!114 &114310864678589444
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
+  m_Name: Texture Input
+  m_EditorClassIdentifier: 
+  position: {x: -741.7988, y: -695.9994}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114966612835148784}
+  tex: {fileID: 2800000, guid: 6216c46e75a1ab04089961ef40758686, type: 3}
+--- !u!114 &114318595144583092
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Texture
+  m_EditorClassIdentifier: 
+  body: {fileID: 114336119333426754}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 114081760702287750}
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114336119333426754
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
+  m_Name: Texture Input
+  m_EditorClassIdentifier: 
+  position: {x: -740, y: -480}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114318595144583092}
+  tex: {fileID: 2800000, guid: fd4d50181c9d26d459f22347f799e93c, type: 3}
+--- !u!114 &114368111994233802
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: 
+  body: {fileID: 114892829080189336}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 114782935389269940}
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114441644048012908
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: H
+  m_EditorClassIdentifier: 
+  body: {fileID: 114741796979259814}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: Float
+  _connections: []
+  side: 4
+  sidePosition: 47.5
+  sideOffset: 0
+--- !u!114 &114466287789063752
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
+  m_Name: MainEditorState
+  m_EditorClassIdentifier: 
+  canvas: {fileID: 0}
+  parentEditor: {fileID: 0}
+  selectedNode: {fileID: 114586178778689914}
+  panOffset: {x: -35.200043, y: 415.8001}
+  zoom: 1.4
+--- !u!114 &114489968333781564
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Phase
+  m_EditorClassIdentifier: 
+  body: {fileID: 114165650004321408}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 103.5
+  sideOffset: 0
+--- !u!114 &114496870926076472
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27a65ad2b155f0d40838ed81292e4df7, type: 3}
+  m_Name: Calc Node
+  m_EditorClassIdentifier: 
+  position: {x: -83.19978, y: -686.0002}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  type: 0
+  input1Knob: {fileID: 114270945363238622}
+  input2Knob: {fileID: 114712901737958432}
+  outputKnob: {fileID: 114824165132414712}
+  Input1Val: -0.9450896
+  Input2Val: -0.8
+--- !u!114 &114504786771942922
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
+  m_Name: Texture Input
+  m_EditorClassIdentifier: 
+  position: {x: -750, y: -370}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114993074100536906}
+  tex: {fileID: 2800000, guid: 37ffe2bf52ffa73408f9fe17b6f84c27, type: 3}
+--- !u!114 &114506016974334034
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f5df92d12f07d45a4fcfb96e1b36d8, type: 3}
+  m_Name: Display Node
+  m_EditorClassIdentifier: 
+  position: {x: -71.40018, y: -756.69965}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  inputKnob: {fileID: 114514146494148854}
+--- !u!114 &114514146494148854
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Value
+  m_EditorClassIdentifier: 
+  body: {fileID: 114506016974334034}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: Float
+  _connections:
+  - {fileID: 114131956455808198}
+  side: 4
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114514708651376278
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3dd50b389073b148b5ec10e419dc073, type: 3}
+  m_Name: Input Node
+  m_EditorClassIdentifier: 
+  position: {x: -561.5995, y: -439.59943}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114523282427694766}
+  value: 0.5
+--- !u!114 &114523282427694766
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Value
+  m_EditorClassIdentifier: 
+  body: {fileID: 114514708651376278}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: Float
+  _connections:
+  - {fileID: 114837519937503188}
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114586178778689914
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3469be317986434faaea3445fa2db15, type: 3}
+  m_Name: Canopy
+  m_EditorClassIdentifier: 
+  position: {x: 334.80005, y: -515.20013}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureInputKnob: {fileID: 114861949557720326}
+  textureOutputKnob: {fileID: 114981039630363130}
+--- !u!114 &114588135468639570
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Speed
+  m_EditorClassIdentifier: 
+  body: {fileID: 114869230158613628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 47.5
+  sideOffset: 0
+--- !u!114 &114637339764205546
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -205,8 +604,8 @@ MonoBehaviour:
   position: {x: 170, y: -310}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  inputKnob: {fileID: 114533191704480684}
---- !u!114 &114212473983306334
+  inputKnob: {fileID: 114782935389269940}
+--- !u!114 &114648550983476660
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -217,36 +616,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: Texture
   m_EditorClassIdentifier: 
-  body: {fileID: 114401569693565106}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections: []
-  side: 2
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114317914237144968
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: 
-  body: {fileID: 114372340184020254}
+  body: {fileID: 114741796979259814}
   direction: 2
   maxConnectionCount: 1
   styleID: UnityEngine.Texture
   _connections:
-  - {fileID: 114658776724966472}
-  - {fileID: 114901069615308744}
+  - {fileID: 114261175437999890}
   side: 2
-  sidePosition: 27.9
+  sidePosition: 28.5
   sideOffset: 0
---- !u!114 &114329020615619892
+--- !u!114 &114659137337500338
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
+  m_Name: Texture Input
+  m_EditorClassIdentifier: 
+  position: {x: -746.5985, y: -256.80008}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: 114861629793798220}
+  tex: {fileID: 2800000, guid: 71316b85e67194248964d02ba3b1ee32, type: 3}
+--- !u!114 &114712901737958432
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -255,17 +650,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: H
+  m_Name: Input 2
   m_EditorClassIdentifier: 
-  body: {fileID: 114921926951734850}
+  body: {fileID: 114496870926076472}
   direction: 1
   maxConnectionCount: 0
   styleID: Float
   _connections: []
   side: 4
-  sidePosition: 46
+  sidePosition: 47.5
   sideOffset: 0
---- !u!114 &114361919085987732
+--- !u!114 &114741796979259814
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -273,15 +668,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
-  m_Name: Texture Input
+  m_Script: {fileID: 11500000, guid: 2e31cd2a224e09f489b2fff2316fb84e, type: 3}
+  m_Name: HSV
   m_EditorClassIdentifier: 
-  position: {x: -571.6, y: -389.8}
+  position: {x: -403.79993, y: -480.99945}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: 114371502803652980}
-  tex: {fileID: 2800000, guid: fd4d50181c9d26d459f22347f799e93c, type: 3}
---- !u!114 &114371502803652980
+  textureInputKnob: {fileID: 114081760702287750}
+  textureOutputKnob: {fileID: 114648550983476660}
+  hueKnob: {fileID: 114441644048012908}
+  satKnob: {fileID: 114837519937503188}
+  valKnob: {fileID: 114192662633046102}
+  outputTex: {fileID: 0}
+--- !u!114 &114762749307605476
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -292,16 +691,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: Texture
   m_EditorClassIdentifier: 
-  body: {fileID: 114361919085987732}
+  body: {fileID: 114281702975623204}
   direction: 2
   maxConnectionCount: 1
   styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114810770261890676}
+  _connections: []
   side: 2
-  sidePosition: 28
+  sidePosition: 28.5
   sideOffset: 0
---- !u!114 &114372340184020254
+--- !u!114 &114782935389269940
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -309,53 +707,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25abfb7554c262a4aa8225fba868d02f, type: 3}
-  m_Name: Pan
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Texture
   m_EditorClassIdentifier: 
-  position: {x: -151.80002, y: -489.6}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 114866650558618916}
-  speedInputKnob: {fileID: 114712327184874660}
-  angleInputKnob: {fileID: 114640921407092060}
-  textureOutputKnob: {fileID: 114317914237144968}
-  outputTex: {fileID: 0}
-  smoothTransitions: 0
-  speed: 0
-  angle: -1.762855
---- !u!114 &114401569693565106
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
-  m_Name: Texture Input
-  m_EditorClassIdentifier: 
-  position: {x: -570, y: -500}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: 114212473983306334}
-  tex: {fileID: 2800000, guid: 52e4e565ea7a25f4a9fe23c4e0d14878, type: 3}
---- !u!114 &114403640143915954
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3dd50b389073b148b5ec10e419dc073, type: 3}
-  m_Name: Input Node
-  m_EditorClassIdentifier: 
-  position: {x: -460, y: -192}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: 114000248074708342}
-  value: 1
---- !u!114 &114440724273186902
+  body: {fileID: 114637339764205546}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 114368111994233802}
+  side: 4
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114824165132414712
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -366,129 +730,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: Output
   m_EditorClassIdentifier: 
-  body: {fileID: 114091633656393976}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: 114935708387750684}
-  - {fileID: 114827793060892054}
-  side: 2
-  sidePosition: 27.9
-  sideOffset: 0
---- !u!114 &114467912273773572
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Value
-  m_EditorClassIdentifier: 
-  body: {fileID: 114030633008649718}
+  body: {fileID: 114496870926076472}
   direction: 2
   maxConnectionCount: 1
   styleID: Float
   _connections:
-  - {fileID: 114646265773444278}
+  - {fileID: 114157544180601206}
   side: 2
-  sidePosition: 28
+  sidePosition: 28.5
   sideOffset: 0
---- !u!114 &114470621916563262
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
-  m_Name: MainEditorState
-  m_EditorClassIdentifier: 
-  canvas: {fileID: 0}
-  parentEditor: {fileID: 0}
-  selectedNode: {fileID: 114091633656393976}
-  panOffset: {x: 250.79999, y: 417.4001}
-  zoom: 1.6
---- !u!114 &114533191704480684
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
-  m_EditorClassIdentifier: 
-  body: {fileID: 114194579839142678}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114657101892502520}
-  side: 4
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114571587327488152
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
-  m_Name: Texture Input
-  m_EditorClassIdentifier: 
-  position: {x: -570, y: -170}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: 114113022288081138}
-  tex: {fileID: 2800000, guid: 71316b85e67194248964d02ba3b1ee32, type: 3}
---- !u!114 &114599563126725830
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27a65ad2b155f0d40838ed81292e4df7, type: 3}
-  m_Name: Calc Node
-  m_EditorClassIdentifier: 
-  position: {x: -400, y: -440}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  type: 0
-  input1Knob: {fileID: 114935708387750684}
-  input2Knob: {fileID: 114058669147487246}
-  outputKnob: {fileID: 114739034838964836}
-  Input1Val: -0.9956973
-  Input2Val: -0.8
---- !u!114 &114640921407092060
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Angle
-  m_EditorClassIdentifier: 
-  body: {fileID: 114372340184020254}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: 114739034838964836}
-  side: 4
-  sidePosition: 82
-  sideOffset: 0
---- !u!114 &114646265773444278
+--- !u!114 &114837519937503188
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -499,239 +750,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: S
   m_EditorClassIdentifier: 
-  body: {fileID: 114921926951734850}
+  body: {fileID: 114741796979259814}
   direction: 1
   maxConnectionCount: 0
   styleID: Float
   _connections:
-  - {fileID: 114467912273773572}
+  - {fileID: 114523282427694766}
   side: 4
-  sidePosition: 64
+  sidePosition: 66.5
   sideOffset: 0
---- !u!114 &114655160467371290
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
-  m_Name: Texture Input
-  m_EditorClassIdentifier: 
-  position: {x: -570, y: -610}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: 114707409520463976}
-  tex: {fileID: 2800000, guid: 6216c46e75a1ab04089961ef40758686, type: 3}
---- !u!114 &114657101892502520
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: 
-  body: {fileID: 114927269080401308}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114533191704480684}
-  side: 2
-  sidePosition: 27.9
-  sideOffset: 0
---- !u!114 &114658776724966472
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
-  m_EditorClassIdentifier: 
-  body: {fileID: 114830108615211786}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114317914237144968}
-  side: 4
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114705440225295470
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0ac56f3bed79e4eb2fb40897222619, type: 3}
-  m_Name: Texture Input
-  m_EditorClassIdentifier: 
-  position: {x: -570, y: -280}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: 114786305029971254}
-  tex: {fileID: 2800000, guid: 37ffe2bf52ffa73408f9fe17b6f84c27, type: 3}
---- !u!114 &114707409520463976
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
-  m_EditorClassIdentifier: 
-  body: {fileID: 114655160467371290}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections: []
-  side: 2
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114712327184874660
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Speed
-  m_EditorClassIdentifier: 
-  body: {fileID: 114372340184020254}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 46
-  sideOffset: 0
---- !u!114 &114739034838964836
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Output
-  m_EditorClassIdentifier: 
-  body: {fileID: 114599563126725830}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: Float
-  _connections:
-  - {fileID: 114640921407092060}
-  side: 2
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114764570473031680
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39f5df92d12f07d45a4fcfb96e1b36d8, type: 3}
-  m_Name: Display Node
-  m_EditorClassIdentifier: 
-  position: {x: -55.399986, y: -665.1001}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  inputKnob: {fileID: 114827793060892054}
---- !u!114 &114786305029971254
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
-  m_EditorClassIdentifier: 
-  body: {fileID: 114705440225295470}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections: []
-  side: 2
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114786809635428598
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Amplitude
-  m_EditorClassIdentifier: 
-  body: {fileID: 114091633656393976}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 64
-  sideOffset: 0
---- !u!114 &114810770261890676
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
-  m_EditorClassIdentifier: 
-  body: {fileID: 114921926951734850}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114371502803652980}
-  side: 4
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114827793060892054
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Value
-  m_EditorClassIdentifier: 
-  body: {fileID: 114764570473031680}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: Float
-  _connections:
-  - {fileID: 114440724273186902}
-  side: 4
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114830108615211786
+--- !u!114 &114848259843942404
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -745,8 +773,27 @@ MonoBehaviour:
   position: {x: 160.8, y: -488.80002}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  inputKnob: {fileID: 114658776724966472}
---- !u!114 &114866650558618916
+  inputKnob: {fileID: 114114858003877736}
+--- !u!114 &114861629793798220
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Texture
+  m_EditorClassIdentifier: 
+  body: {fileID: 114659137337500338}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114861949557720326
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -757,16 +804,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: In
   m_EditorClassIdentifier: 
-  body: {fileID: 114372340184020254}
+  body: {fileID: 114586178778689914}
   direction: 1
   maxConnectionCount: 0
   styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114032518393828920}
+  _connections: []
   side: 4
-  sidePosition: 28
+  sidePosition: 28.5
   sideOffset: 0
---- !u!114 &114901069615308744
+--- !u!114 &114869230158613628
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -774,39 +820,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: In
+  m_Script: {fileID: 11500000, guid: 25abfb7554c262a4aa8225fba868d02f, type: 3}
+  m_Name: Pan
   m_EditorClassIdentifier: 
-  body: {fileID: 114927269080401308}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 114317914237144968}
-  side: 4
-  sidePosition: 28
-  sideOffset: 0
---- !u!114 &114921926951734850
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e31cd2a224e09f489b2fff2316fb84e, type: 3}
-  m_Name: HSV
-  m_EditorClassIdentifier: 
-  position: {x: -319.6, y: -295.2}
+  position: {x: -126.60092, y: -515.6023}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 114810770261890676}
-  textureOutputKnob: {fileID: 114032518393828920}
-  hueKnob: {fileID: 114329020615619892}
-  satKnob: {fileID: 114646265773444278}
-  valKnob: {fileID: 114165991414135434}
+  textureInputKnob: {fileID: 114261175437999890}
+  speedInputKnob: {fileID: 114588135468639570}
+  angleInputKnob: {fileID: 114157544180601206}
+  textureOutputKnob: {fileID: 114978652332139114}
   outputTex: {fileID: 0}
---- !u!114 &114927269080401308
+  smoothTransitions: 0
+  speed: 0
+  angle: -1.59785
+--- !u!114 &114892440701118760
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Value
+  m_EditorClassIdentifier: 
+  body: {fileID: 114146975376449404}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: Float
+  _connections:
+  - {fileID: 114192662633046102}
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114892829080189336
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -820,10 +868,10 @@ MonoBehaviour:
   position: {x: 50, y: -310}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 114901069615308744}
-  textureOutputKnob: {fileID: 114657101892502520}
+  textureInputKnob: {fileID: 114922607093879610}
+  textureOutputKnob: {fileID: 114368111994233802}
   outputTex: {fileID: 0}
---- !u!114 &114935708387750684
+--- !u!114 &114922607093879610
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -832,18 +880,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Input 1
+  m_Name: In
   m_EditorClassIdentifier: 
-  body: {fileID: 114599563126725830}
+  body: {fileID: 114892829080189336}
   direction: 1
   maxConnectionCount: 0
-  styleID: Float
+  styleID: UnityEngine.Texture
   _connections:
-  - {fileID: 114440724273186902}
+  - {fileID: 114978652332139114}
   side: 4
-  sidePosition: 28
+  sidePosition: 28.5
   sideOffset: 0
---- !u!114 &114991794772973984
+--- !u!114 &114966612835148784
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -852,13 +900,72 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Phase
+  m_Name: Texture
   m_EditorClassIdentifier: 
-  body: {fileID: 114091633656393976}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
+  body: {fileID: 114310864678589444}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
   _connections: []
-  side: 4
-  sidePosition: 99
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114978652332139114
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: 
+  body: {fileID: 114869230158613628}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 114114858003877736}
+  - {fileID: 114922607093879610}
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114981039630363130
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: 
+  body: {fileID: 114586178778689914}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 2
+  sidePosition: 28.5
+  sideOffset: 0
+--- !u!114 &114993074100536906
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Texture
+  m_EditorClassIdentifier: 
+  body: {fileID: 114504786771942922}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 2
+  sidePosition: 28.5
   sideOffset: 0
