@@ -123,9 +123,6 @@ namespace sotsf.canopy.patterns
 
         protected int kernelId;
 
-        protected const int FLOAT_BYTES = 4;
-        protected const int VEC3_LENGTH = 3;
-
         private readonly System.Uri pixelEndpoint = new System.Uri("http://localhost:8080/api/renderbytes");
 
         public void SelectThisPattern()
@@ -157,7 +154,7 @@ namespace sotsf.canopy.patterns
 
             kernelId = patternShader.FindKernel("CSMain");
             patternShader.SetTexture(kernelId, "Frame", patternTexture);
-            dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, FLOAT_BYTES * VEC3_LENGTH);
+            dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
             colorData = new Vector3[Constants.NUM_LEDS];
             pixelBuffer = new byte[colorData.Length * 3];
             patternShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
