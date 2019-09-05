@@ -39,6 +39,8 @@ public class PanNode : Node
     {
         PanShader = Resources.Load<ComputeShader>("FilterShaders/PanFilter");
         kernelId = PanShader.FindKernel("CSMain");
+        if (Application.isPlaying)
+            TickingNodeManager.instance.Register(this);
     }
 
     private void InitializeRenderTexture()
