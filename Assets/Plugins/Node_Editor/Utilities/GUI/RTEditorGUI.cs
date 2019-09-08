@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 using Object = UnityEngine.Object;
 
-namespace NodeEditorFramework.Utilities 
+namespace NodeEditorFramework.Utilities
 {
-	public static class RTEditorGUI 
+	public static class RTEditorGUI
 	{
 
 		#region GUI Proportioning Utilities
@@ -45,7 +45,7 @@ namespace NodeEditorFramework.Utilities
 			return new Rect (source.x + indent, source.y, source.width - indent, source.height);
 		}
 
-		private static float getLabelWidth () 
+		private static float getLabelWidth ()
 		{
 			#if UNITY_EDITOR
 			return UnityEditor.EditorGUIUtility.labelWidth;
@@ -56,7 +56,7 @@ namespace NodeEditorFramework.Utilities
 			#endif
 		}
 
-		private static float getFieldWidth () 
+		private static float getFieldWidth ()
 		{
 			#if UNITY_EDITOR
 			return UnityEditor.EditorGUIUtility.fieldWidth;
@@ -116,7 +116,7 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// A GUI Function which simulates the default seperator
 		/// </summary>
-		public static void Seperator () 
+		public static void Seperator ()
 		{
 			setupSeperator ();
 			GUILayout.Box (GUIContent.none, seperator, new GUILayoutOption[] { GUILayout.Height (1) });
@@ -125,16 +125,16 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// A GUI Function which simulates the default seperator
 		/// </summary>
-		public static void Seperator (Rect rect) 
+		public static void Seperator (Rect rect)
 		{
 			setupSeperator ();
 			GUI.Box (new Rect (rect.x, rect.y, rect.width, 1), GUIContent.none, seperator);
 		}
 
 		private static GUIStyle seperator;
-		private static void setupSeperator () 
+		private static void setupSeperator ()
 		{
-			if (seperator == null) 
+			if (seperator == null)
 			{
 				seperator = new GUIStyle();
 				seperator.normal.background = ColorToTex (1, new Color (0.6f, 0.6f, 0.6f));
@@ -149,13 +149,13 @@ namespace NodeEditorFramework.Utilities
 
 		private static Stack<bool> changeStack = new Stack<bool> ();
 
-		public static void BeginChangeCheck () 
+		public static void BeginChangeCheck ()
 		{
 			changeStack.Push (GUI.changed);
 			GUI.changed = false;
 		}
 
-		public static bool EndChangeCheck () 
+		public static bool EndChangeCheck ()
 		{
 			bool changed = GUI.changed;
 			if (changeStack.Count > 0)
@@ -189,7 +189,7 @@ namespace NodeEditorFramework.Utilities
 
 		public static bool Foldout (bool foldout, GUIContent content, params GUILayoutOption[] options)
 		{
-			#if UNITY_EDITOR 
+			#if UNITY_EDITOR
 			if (!Application.isPlaying)
 				return UnityEditor.EditorGUILayout.Foldout (foldout, content);
 			#endif
@@ -198,7 +198,7 @@ namespace NodeEditorFramework.Utilities
 
 		public static bool Foldout (bool foldout, GUIContent content, GUIStyle style, params GUILayoutOption[] options)
 		{
-			#if UNITY_EDITOR 
+			#if UNITY_EDITOR
 			if (!Application.isPlaying)
 				return UnityEditor.EditorGUILayout.Foldout (foldout, content, style);
 			#endif
@@ -218,7 +218,7 @@ namespace NodeEditorFramework.Utilities
 
 		public static bool Toggle (bool toggle, GUIContent content, params GUILayoutOption[] options)
 		{
-			#if UNITY_EDITOR 
+			#if UNITY_EDITOR
 			if (!Application.isPlaying)
 				return UnityEditor.EditorGUILayout.ToggleLeft (content, toggle, options);
 			#endif
@@ -227,7 +227,7 @@ namespace NodeEditorFramework.Utilities
 
 		public static bool Toggle (bool toggle, GUIContent content, GUIStyle style, params GUILayoutOption[] options)
 		{
-			#if UNITY_EDITOR 
+			#if UNITY_EDITOR
 			if (!Application.isPlaying)
 				return UnityEditor.EditorGUILayout.ToggleLeft (content, toggle, style, options);
 			#endif
@@ -294,7 +294,7 @@ namespace NodeEditorFramework.Utilities
 
 
 		/// <summary>
-		/// Slider to select from a set range of powers for a given base value. 
+		/// Slider to select from a set range of powers for a given base value.
 		/// Operates on the final value, rounds it to the next power and displays it.
 		/// </summary>
 		public static int MathPowerSlider (GUIContent label, int baseValue, int value, int minPow, int maxPow, params GUILayoutOption[] options)
@@ -304,7 +304,7 @@ namespace NodeEditorFramework.Utilities
 			return (int)Math.Pow (baseValue, power);
 		}
 		/// <summary>
-		/// Slider to select from a set range of powers for a given base value. 
+		/// Slider to select from a set range of powers for a given base value.
 		/// Operates on the raw power but displays the final calculated value.
 		/// </summary>
 		public static int MathPowerSliderRaw (GUIContent label, int baseValue, int power, int minPow, int maxPow, params GUILayoutOption[] options)
@@ -322,28 +322,28 @@ namespace NodeEditorFramework.Utilities
 		#region Int Fields and Slider Wrappers
 
 		/// <summary>
-		/// An integer slider that emulates the EditorGUILayout version. 
+		/// An integer slider that emulates the EditorGUILayout version.
 		/// HorizontalSlider with a label prefixed and an additional int field thereafter if desired.
 		/// </summary>
-		public static int IntSlider (string label, int value, int minValue, int maxValue, params GUILayoutOption[] options) 
+		public static int IntSlider (string label, int value, int minValue, int maxValue, params GUILayoutOption[] options)
 		{
 			return (int)Slider (new GUIContent (label), value, minValue, maxValue, options);
 		}
 
 		/// <summary>
-		/// An integer slider that emulates the EditorGUILayout version. 
+		/// An integer slider that emulates the EditorGUILayout version.
 		/// HorizontalSlider with a label prefixed and an additional int field thereafter if desired.
 		/// </summary>
-		public static int IntSlider (GUIContent label, int value, int minValue, int maxValue, params GUILayoutOption[] options) 
+		public static int IntSlider (GUIContent label, int value, int minValue, int maxValue, params GUILayoutOption[] options)
 		{
 			return (int)Slider (label, value, minValue, maxValue, options);
 		}
 
 		/// <summary>
-		/// An integer slider that emulates the EditorGUILayout version. 
+		/// An integer slider that emulates the EditorGUILayout version.
 		/// HorizontalSlider with a label prefixed and an additional int field thereafter if desired.
 		/// </summary>
-		public static int IntSlider (int value, int minValue, int maxValue, params GUILayoutOption[] options) 
+		public static int IntSlider (int value, int minValue, int maxValue, params GUILayoutOption[] options)
 		{
 			return (int)Slider (GUIContent.none, value, minValue, maxValue, options);
 		}
@@ -377,28 +377,28 @@ namespace NodeEditorFramework.Utilities
 		#region Float Slider
 
 		/// <summary>
-		/// A slider that emulates the EditorGUILayout version. 
+		/// A slider that emulates the EditorGUILayout version.
 		/// HorizontalSlider with an additional float field thereafter.
 		/// </summary>
-		public static float Slider (float value, float minValue, float maxValue, params GUILayoutOption[] options) 
+		public static float Slider (float value, float minValue, float maxValue, params GUILayoutOption[] options)
 		{
 			return Slider (GUIContent.none, value, minValue, maxValue, options);
 		}
 
 		/// <summary>
-		/// A slider that emulates the EditorGUILayout version. 
+		/// A slider that emulates the EditorGUILayout version.
 		/// HorizontalSlider with a label prefixed and an additional float field thereafter if desired.
 		/// </summary>
-		public static float Slider (string label, float value, float minValue, float maxValue, params GUILayoutOption[] options) 
+		public static float Slider (string label, float value, float minValue, float maxValue, params GUILayoutOption[] options)
 		{
 			return Slider (new GUIContent (label), value, minValue, maxValue, options);
 		}
 
 		/// <summary>
-		/// A slider that emulates the EditorGUILayout version. 
+		/// A slider that emulates the EditorGUILayout version.
 		/// HorizontalSlider with a label prefixed and an additional float field thereafter if desired.
 		/// </summary>
-		public static float Slider (GUIContent label, float value, float minValue, float maxValue, params GUILayoutOption[] options) 
+		public static float Slider (GUIContent label, float value, float minValue, float maxValue, params GUILayoutOption[] options)
 		{
 			#if UNITY_EDITOR
 			if (!Application.isPlaying)
@@ -494,7 +494,7 @@ namespace NodeEditorFramework.Utilities
 				activeFloatFieldString = strValue;
 				activeFloatFieldLastValue = value;
 			}
-			else if (!active && recorded) 
+			else if (!active && recorded)
 			{ // Lost focus this frame
 				activeFloatField = -1;
 				if (!parsed)
@@ -507,7 +507,7 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Forces to parse to float by cleaning string if necessary
 		/// </summary>
-		public static float ForceParse (this string str) 
+		public static float ForceParse (this string str)
 		{
 			// try parse
 			float value;
@@ -517,7 +517,7 @@ namespace NodeEditorFramework.Utilities
 			// Clean string if it could not be parsed
 			bool recordedDecimalPoint = false;
 			List<char> strVal = new List<char> (str);
-			for (int cnt = 0; cnt < strVal.Count; cnt++) 
+			for (int cnt = 0; cnt < strVal.Count; cnt++)
 			{
 				UnicodeCategory type = CharUnicodeInfo.GetUnicodeCategory (str[cnt]);
 				if (type != UnicodeCategory.DecimalDigitNumber)
@@ -617,7 +617,7 @@ namespace NodeEditorFramework.Utilities
 				return UnityEditor.EditorGUILayout.ObjectField (label, obj, typeof (T), allowSceneObjects) as T;
 			#endif
 			bool open = false;
-			if (obj.GetType () == typeof(Texture2D)) 
+			if (obj != null && obj.GetType () == typeof(Texture2D))
 			{
 				GUILayout.BeginHorizontal ();
 				GUILayout.Label (label);
@@ -642,17 +642,17 @@ namespace NodeEditorFramework.Utilities
 
 		// TODO: Implement RT Popup
 
-		public static System.Enum EnumPopup (System.Enum selected) 
+		public static System.Enum EnumPopup (System.Enum selected)
 		{
 			return EnumPopup (GUIContent.none, selected);
 		}
 
-		public static System.Enum EnumPopup (string label, System.Enum selected) 
+		public static System.Enum EnumPopup (string label, System.Enum selected)
 		{
 			return EnumPopup (new GUIContent (label), selected);
 		}
 
-		public static System.Enum EnumPopup (GUIContent label, System.Enum selected) 
+		public static System.Enum EnumPopup (GUIContent label, System.Enum selected)
 		{
 			#if UNITY_EDITOR
 			if (!Application.isPlaying)
@@ -663,7 +663,7 @@ namespace NodeEditorFramework.Utilities
 			return selected;
 		}
 
-		public static int Popup (GUIContent label, int selected, string[] displayedOptions) 
+		public static int Popup (GUIContent label, int selected, string[] displayedOptions)
 		{
 			#if UNITY_EDITOR
 			if (!Application.isPlaying)
@@ -683,7 +683,7 @@ namespace NodeEditorFramework.Utilities
 			return selected;
 		}
 
-		public static int Popup (string label, int selected, string[] displayedOptions) 
+		public static int Popup (string label, int selected, string[] displayedOptions)
 		{
 			#if UNITY_EDITOR
 			if (!Application.isPlaying)
@@ -693,7 +693,7 @@ namespace NodeEditorFramework.Utilities
 			return selected;
 		}
 
-		public static int Popup (int selected, string[] displayedOptions) 
+		public static int Popup (int selected, string[] displayedOptions)
 		{
 			return Popup ("", selected, displayedOptions);
 		}
@@ -705,7 +705,7 @@ namespace NodeEditorFramework.Utilities
 		private static Material lineMaterial;
 		private static Texture2D lineTexture;
 
-		private static void SetupLineMat (Texture tex, Color col) 
+		private static void SetupLineMat (Texture tex, Color col)
 		{
 			if (lineMaterial == null)
 			{
@@ -752,14 +752,14 @@ namespace NodeEditorFramework.Utilities
 
 			// Calculate bezier points
 			Vector2[] bezierPoints = new Vector2[segmentCount+1];
-			for (int pointCnt = 0; pointCnt <= segmentCount; pointCnt++) 
+			for (int pointCnt = 0; pointCnt <= segmentCount; pointCnt++)
 				bezierPoints[pointCnt] = GetBezierPoint ((float)pointCnt/segmentCount, startPos, endPos, startTan, endTan);
 			// Draw polygon line from the bezier points
 			DrawPolygonLine (bezierPoints, col, tex, width);
 		}
 
 		/// <summary>
-		/// Draws a clipped polygon line from the given points. 
+		/// Draws a clipped polygon line from the given points.
 		/// If width is 1, tex is ignored; Else if tex is null, a anti-aliased texture tinted with col will be used; else, col is ignored and tex is used.
 		/// </summary>
 		public static void DrawPolygonLine (Vector2[] points, Color col, Texture2D tex, float width = 1)
@@ -784,7 +784,7 @@ namespace NodeEditorFramework.Utilities
 
 			Vector2 curPoint = points[0], nextPoint, perpendicular;
 			bool clippedP0, clippedP1;
-			for (int pointCnt = 1; pointCnt < points.Length; pointCnt++) 
+			for (int pointCnt = 1; pointCnt < points.Length; pointCnt++)
 			{
 				nextPoint = points[pointCnt];
 
@@ -827,7 +827,7 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Calculates the optimal bezier segment count for the given bezier
 		/// </summary>
-		private static int CalculateBezierSegmentCount (Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan) 
+		private static int CalculateBezierSegmentCount (Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan)
 		{
 			float straightFactor = Vector2.Angle (startTan-startPos, endPos-startPos) * Vector2.Angle (endTan-endPos, startPos-endPos) * (endTan.magnitude+startTan.magnitude);
 			straightFactor = 2 + Mathf.Pow (straightFactor / 400, 0.125f); // 1/8
@@ -839,7 +839,7 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Calculates the normalized perpendicular vector of the give line
 		/// </summary>
-		private static Vector2 CalculateLinePerpendicular (Vector2 startPos, Vector2 endPos) 
+		private static Vector2 CalculateLinePerpendicular (Vector2 startPos, Vector2 endPos)
 		{
 			return new Vector2 (endPos.y-startPos.y, startPos.x-endPos.x).normalized;
 		}
@@ -847,7 +847,7 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Calculates the normalized perpendicular vector for the pointPos interpolated with its two neighbours prevPos and nextPos
 		/// </summary>
-		private static Vector2 CalculatePointPerpendicular (Vector2 prevPos, Vector2 pointPos, Vector2 nextPos) 
+		private static Vector2 CalculatePointPerpendicular (Vector2 prevPos, Vector2 pointPos, Vector2 nextPos)
 		{
 			return CalculateLinePerpendicular (pointPos, pointPos + (nextPos-prevPos));
 		}
@@ -855,21 +855,21 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Gets the point of the bezier at t
 		/// </summary>
-		private static Vector2 GetBezierPoint (float t, Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan) 
+		private static Vector2 GetBezierPoint (float t, Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan)
 		{
 			float rt = 1 - t;
 			float rtt = rt * t;
 
-			return startPos  * rt*rt*rt + 
-				startTan * 3 * rt * rtt + 
-				endTan   * 3 * rtt * t + 
+			return startPos  * rt*rt*rt +
+				startTan * 3 * rt * rtt +
+				endTan   * 3 * rtt * t +
 				endPos   * t*t*t;
 		}
 
 		/// <summary>
 		/// Adds a line sgement to the GL buffer. Useed in a row to create a line
 		/// </summary>
-		private static void DrawLineSegment (Vector2 point, Vector2 perpendicular) 
+		private static void DrawLineSegment (Vector2 point, Vector2 perpendicular)
 		{
 			GL.TexCoord2 (0, 0);
 			GL.Vertex (point - perpendicular);
@@ -992,10 +992,10 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Create a 1x1 tex with color col
 		/// </summary>
-		public static Texture2D ColorToTex (int pxSize, Color col) 
+		public static Texture2D ColorToTex (int pxSize, Color col)
 		{
 			Color[] texCols = new Color[pxSize*pxSize];
-			for (int px = 0; px < pxSize*pxSize; px++) 
+			for (int px = 0; px < pxSize*pxSize; px++)
 				texCols[px] = col;
 			Texture2D tex = new Texture2D (pxSize, pxSize);
 			tex.SetPixels (texCols);
@@ -1006,11 +1006,11 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Tint the texture with the color. It's advised to use ResourceManager.GetTintedTexture to account for doubles.
 		/// </summary>
-		public static Texture2D Tint (Texture2D tex, Color color) 
+		public static Texture2D Tint (Texture2D tex, Color color)
 		{
 			Texture2D tintedTex = UnityEngine.Object.Instantiate (tex);
-			for (int x = 0; x < tex.width; x++) 
-				for (int y = 0; y < tex.height; y++) 
+			for (int x = 0; x < tex.width; x++)
+				for (int y = 0; y < tex.height; y++)
 					tintedTex.SetPixel (x, y, tex.GetPixel (x, y) * color);
 			tintedTex.Apply ();
 			return tintedTex;
@@ -1019,7 +1019,7 @@ namespace NodeEditorFramework.Utilities
 		/// <summary>
 		/// Rotates the texture Counter-Clockwise, 'quarterSteps' specifying the times
 		/// </summary>
-		public static Texture2D RotateTextureCCW (Texture2D tex, int quarterSteps) 
+		public static Texture2D RotateTextureCCW (Texture2D tex, int quarterSteps)
 		{
 			if (tex == null)
 				return null;
@@ -1028,7 +1028,7 @@ namespace NodeEditorFramework.Utilities
 			int width = tex.width, height = tex.height;
 			Color[] col = tex.GetPixels ();
 			Color[] rotatedCol = new Color[width*height];
-			for (int itCnt = 0; itCnt < quarterSteps; itCnt++) 
+			for (int itCnt = 0; itCnt < quarterSteps; itCnt++)
 			{ // For each iteration, perform rotation of 90 degrees
 				for (int x = 0; x < width; x++)
 					for (int y = 0; y < height; y++)
