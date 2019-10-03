@@ -1,4 +1,5 @@
 using NodeEditorFramework;
+using NodeEditorFramework.Utilities;
 using UnityEngine;
 
 [Node(false, "Filter/Kaleidoscope")]
@@ -8,13 +9,16 @@ public class KaleidoscopeNode : Node
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "Kaleidoscope"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(75, 75); } }
+    public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture))]
     public ValueConnectionKnob textureInputKnob;
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture))]
     public ValueConnectionKnob textureOutputKnob;
+
+    [ValueConnectionKnob("Kaleidoscope", Direction.In, typeof(int))]
+    public ValueConnectionKnob reflectionsInputKnob;
 
     private ComputeShader KaleidoscopeShader;
     private int kernelId;
@@ -23,8 +27,8 @@ public class KaleidoscopeNode : Node
     private Vector2Int outputSize = Vector2Int.zero;
     public int yReflections;
 
-    // TODO: make this a changeable field
-    public const int KALEIDOSCOPE_FACTOR = 4;
+    public int reflections = 4;
+    public int previousReflections = 4;
 
     private void Awake()
     {
@@ -45,6 +49,12 @@ public class KaleidoscopeNode : Node
 
         GUILayout.BeginVertical();
         textureInputKnob.DisplayLayout();
+
+        reflectionsInputKnob.DisplayLayout(new GUIContent("Reflections", "The number of reflections"));
+        if (!reflectionsInputKnob.connected())
+        {
+            reflections = RTEditorGUI.IntSlider(reflections, 1, 10);
+        }
         GUILayout.EndVertical();
 
         textureOutputKnob.DisplayLayout();
@@ -65,9 +75,10 @@ public class KaleidoscopeNode : Node
             return true;
         }
 
-        if (outputSize.x == 0 || outputSize.y == 0)
+        if (outputSize.x == 0 || outputSize.y == 0 || reflections != previousReflections)
         {
-            outputSize = new Vector2Int(tex.width, tex.height * KALEIDOSCOPE_FACTOR);
+            outputSize = new Vector2Int(tex.width, tex.height * reflections);
+            previousReflections = reflections;
             InitializeRenderTexture();
             Debug.Log("tex.height");
             Debug.Log(tex.height);
@@ -77,7 +88,6 @@ public class KaleidoscopeNode : Node
         //Execute compute shader
         KaleidoscopeShader.SetInt("width", tex.width);
         KaleidoscopeShader.SetInt("height", tex.height);
-        KaleidoscopeShader.SetInt("factor", KALEIDOSCOPE_FACTOR);
         KaleidoscopeShader.SetTexture(kernelId, "InputTex", tex);
         KaleidoscopeShader.SetTexture(kernelId, "OutputTex", outputTex);
         var threadGroupX = Mathf.CeilToInt(outputTex.width / 16.0f);
