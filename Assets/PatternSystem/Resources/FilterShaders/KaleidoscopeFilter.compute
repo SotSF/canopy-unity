@@ -13,16 +13,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     uint x = id.x;
     uint y = id.y;
 
-    // Forward pattern
-    // for (uint i = 0; i < factor; i += 2) {
-    //     OutputTex[uint2(x, i * height + y)] = InputTex[id.xy];
-    // }
-
-    // Reflected pattern
-    // for (uint i = 1; i < factor; i += 2) {
-    //     OutputTex[uint2(x, (i + 1) * height - y - 1)] = InputTex[id.xy];
-    // }
-
     if (floor(y / height) % 2 == 0) {
         OutputTex[id.xy] = InputTex[uint2(x, y % height)];
     } else {
