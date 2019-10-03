@@ -80,8 +80,8 @@ public class KaleidoscopeNode : Node
         KaleidoscopeShader.SetInt("factor", KALEIDOSCOPE_FACTOR);
         KaleidoscopeShader.SetTexture(kernelId, "InputTex", tex);
         KaleidoscopeShader.SetTexture(kernelId, "OutputTex", outputTex);
-        var threadGroupX = Mathf.CeilToInt(tex.width / 16.0f);
-        var threadGroupY = Mathf.CeilToInt(tex.height / 16.0f);
+        var threadGroupX = Mathf.CeilToInt(outputTex.width / 16.0f);
+        var threadGroupY = Mathf.CeilToInt(outputTex.height / 16.0f);
         KaleidoscopeShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
 
         // Assign output channels
