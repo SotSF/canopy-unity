@@ -42,7 +42,7 @@ namespace NodeEditorFramework.TextureComposer
 		{
 			if (options == null || options.Length == 0)
 				options = new GUILayoutOption[] { GUILayout.ExpandWidth(false) };
-			float aspect = tex == null || tex.height <= 0 || tex.width <= 0 ? 1 : (tex.height / tex.width);
+			float aspect = tex == null || tex.height <= 0 || tex.width <= 0 ? 1 : ((float)tex.height / tex.width);
 			Rect rect = style == null ?
 				GUILayoutUtility.GetRect(size, size * aspect, options) :
 				GUILayoutUtility.GetRect(size, size * aspect, style, options);
