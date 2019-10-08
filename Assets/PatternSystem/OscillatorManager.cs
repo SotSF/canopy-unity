@@ -2,7 +2,6 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
-using NodeEditorFramework.Standard;
 
 namespace Oscillators
 {
@@ -37,8 +36,6 @@ namespace Oscillators
         private int kernelId;
         private int count;
 
-        private RTCanvasCalculator calc;
-
         float lastTick = 0;
 
         private void Awake()
@@ -49,7 +46,6 @@ namespace Oscillators
             kernelId = oscillatorShader.FindKernel("CSMain");
             oscillatorParams = new Oscillator[0];
             oscillatorValues = new float[0];
-            calc = GetComponent<RTCanvasCalculator>();
         }
 
         void InitializeComputeBuffers()
@@ -73,11 +69,6 @@ namespace Oscillators
                 var threadGroups = Mathf.CeilToInt(oscillatorValues.Length / 32.0f);
                 oscillatorShader.Dispatch(kernelId, threadGroups, 1, 1);
                 oscillatorValueBuffer.GetData(oscillatorValues);
-                foreach (var node in indexMap.Keys)
-                {
-                    node.ClearCalculation();
-                    calc.ContinueCalculation(node);
-                }
             }
         }
 
