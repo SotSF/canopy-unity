@@ -9,7 +9,6 @@ public class AnimatedNode : TickingNode
 {
     public const string ID = "animatedNode";
     public override string GetID { get { return ID; } }
-    public override bool ticks { get { return true; } }
     public override string Title { get { return "Animated"; } }
     public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
 
