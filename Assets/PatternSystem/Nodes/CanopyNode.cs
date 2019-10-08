@@ -43,7 +43,16 @@ public class CanopyNode : Node
         InitializeOutputTexture();
         arrayFormatter.SetBuffer(kernelId, "dataBuffer", dataBuffer);
         arrayFormatter.SetTexture(kernelId, "OutputTex", outputTex);
-        RenderToCanopySimulation(outputTex);
+        if (Application.isPlaying)
+        {
+            RenderToCanopySimulation(outputTex);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (dataBuffer != null)
+            dataBuffer.Release();
     }
 
     private void InitializeOutputTexture()
