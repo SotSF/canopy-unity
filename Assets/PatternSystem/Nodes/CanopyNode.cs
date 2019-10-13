@@ -1,9 +1,8 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
-using System.Collections.Generic;
 using UnityEngine;
-
+using System;
 
 [Node(false, "Canopy/Main")]
 public class CanopyNode : Node
@@ -133,9 +132,11 @@ public class CanopyNode : Node
                 Vector2 offset = new Vector2(0,0);
                 Graphics.Blit(tex, kaleidoscopeElementTexture, scale, offset);
                 arrayFormatter.SetTexture(kernelId, "InputTex", kaleidoscopeElementTexture);
+                arrayFormatter.SetInt("height", Math.Min(tex.height, Constants.NUM_STRIPS / 2 - 1));
             } else {
                 // Otherwise, send the unchanged input texture to the compute shader
                 arrayFormatter.SetTexture(kernelId, "InputTex", tex);
+                arrayFormatter.SetInt("height", tex.height);
             }
 
             //Execute compute shader
@@ -144,7 +145,6 @@ public class CanopyNode : Node
             arrayFormatter.SetBool("fitX", fitX);
             arrayFormatter.SetBool("fitY", fitY);
             arrayFormatter.SetInt("width", tex.width);
-            arrayFormatter.SetInt("height", tex.height);
 
             arrayFormatter.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
             dataBuffer.GetData(colorData);

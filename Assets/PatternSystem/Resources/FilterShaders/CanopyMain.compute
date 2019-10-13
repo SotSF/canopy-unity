@@ -41,14 +41,13 @@ float2 scale(in uint2 pixel, in float2 dimensions) {
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float2 coord = id.xy;
+    uint x = id.x;
+    uint y = id.y;
     if (polarize) {
         coord = worldspace(coord, float2(width, height));
     }
 
     if (seamless) {
-        uint x = id.x;
-        uint y = id.y;
-
         if (floor(y / height) % 2 == 0) {
             OutputTex[id.xy] = InputTex[uint2(x, y % height)];
         } else {
