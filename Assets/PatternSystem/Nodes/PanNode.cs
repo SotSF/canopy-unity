@@ -81,7 +81,8 @@ public class PanNode : Node
         { // Reset outputs if no texture is available
             textureOutputKnob.ResetValue();
             outputSize = Vector2Int.zero;
-            outputTex.Release();
+            if (outputTex != null)
+                outputTex.Release();
             return true;
         }
 
