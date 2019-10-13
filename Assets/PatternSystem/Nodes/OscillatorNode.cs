@@ -6,7 +6,7 @@ using UnityEngine;
 
 
 [Node(false, "Inputs/Oscillator")]
-public class OscillatorNode : Node
+public class OscillatorNode : TickingNode
 {
     public const string ID = "oscillatorNode";
     public override string GetID { get { return ID; } }
@@ -31,7 +31,7 @@ public class OscillatorNode : Node
 
     private void Awake()
     {
-        period = 2; amplitude = 1; phase = 0;
+        if (period == 0) period = 2;
         oscParams = new Oscillator(period, amplitude, phase);
         if (Application.isPlaying)
             OscillatorManager.instance.Register(this);

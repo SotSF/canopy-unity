@@ -5,13 +5,12 @@ using UnityEngine;
 using UnityEngine.Video;
 
 [Node(false, "Texture/InputAnimated")]
-public class AnimatedNode : Node
+public class AnimatedNode : TickingNode
 {
     public const string ID = "animatedNode";
     public override string GetID { get { return ID; } }
-
     public override string Title { get { return "Animated"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(75, 75); } }
+    public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture))]
     public ValueConnectionKnob textureOutputKnob;
@@ -20,6 +19,8 @@ public class AnimatedNode : Node
     private Vector2Int outputSize = Vector2Int.zero;
     private VideoPlayer player;
 
+    float playbackSpeed = 1;
+
     int nextIndex = 0;
     int currentIndex = 0;
     VideoClip[] animatedTextures;
@@ -27,8 +28,13 @@ public class AnimatedNode : Node
     private void Awake()
     {
         animatedTextures = Resources.LoadAll<VideoClip>("AnimatedTextures");
-        player = GameObject.Find("VideoManager").GetComponent<VideoPlayer>();
-        SelectClip();
+        if (Application.isPlaying)
+        {
+            player = GameObject.Find("VideoManager").GetComponent<VideoPlayer>();
+            player.prepareCompleted += (e) => { player.Play(); };
+            SelectClip();
+        }
+
     }
 
     public void NextClip()
@@ -44,7 +50,7 @@ public class AnimatedNode : Node
         InitializeRenderTexture();
         player.targetTexture = outputTex;
         currentIndex = index;
-        player.Play();
+        player.Prepare();
     }
 
     private void InitializeRenderTexture()
@@ -56,11 +62,26 @@ public class AnimatedNode : Node
 
     public override void NodeGUI()
     {
+        GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
-        nextIndex = RTEditorGUI.IntSlider(nextIndex, 0, animatedTextures.Length);
-        textureOutputKnob.DisplayLayout();
-
+        if (GUILayout.Button("Previous"))
+        {
+            nextIndex = currentIndex == 0 ? animatedTextures.Length - 1 : currentIndex - 1;
+        };
+        if (GUILayout.Button("Next"))
+        {
+            nextIndex = (currentIndex + 1) % animatedTextures.Length;
+        };
         GUILayout.EndHorizontal();
+        GUILayout.Box(outputTex, GUILayout.MaxHeight(64));
+        var newSpeed = RTEditorGUI.Slider(playbackSpeed, 0.1f, 4);
+        if (newSpeed != playbackSpeed)
+        {
+            playbackSpeed = newSpeed;
+            player.playbackSpeed = playbackSpeed;
+        }
+        textureOutputKnob.DisplayLayout();
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

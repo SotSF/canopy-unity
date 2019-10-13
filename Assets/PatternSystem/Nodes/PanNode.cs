@@ -5,8 +5,7 @@ using UnityEngine;
 
 
 [Node(false, "Filter/Pan")]
-public class PanNode : Node
-{
+public class PanNode : TickingNode { 
     public const string ID = "panNode";
     public override string GetID { get { return ID; } }
 
@@ -39,8 +38,6 @@ public class PanNode : Node
     {
         PanShader = Resources.Load<ComputeShader>("FilterShaders/PanFilter");
         kernelId = PanShader.FindKernel("CSMain");
-        if (Application.isPlaying)
-            TickingNodeManager.instance.Register(this);
     }
 
     private void InitializeRenderTexture()
@@ -66,6 +63,13 @@ public class PanNode : Node
             angle = RTEditorGUI.Slider(angle, 0, 6.2831f);
         }
         smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(string.Format("Offset: ({0}, {1})", offset.x, offset.y));
+        if (GUILayout.Button("Reset"))
+        {
+            offset = Vector2.zero;
+        }
+        GUILayout.EndHorizontal();
         GUILayout.EndVertical();
         textureOutputKnob.DisplayLayout();
         GUILayout.EndHorizontal();

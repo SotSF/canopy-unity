@@ -10,6 +10,7 @@ namespace NodeEditorFramework.Standard
 	{
 		// Startup-canvas, cache and interface
 		public NodeCanvas canvas;
+        public NodeCanvas workingCanvas { get { return canvasCache == null ? null : canvasCache.nodeCanvas; } }
 		public string loadSceneName;
 		private NodeEditorUserCache canvasCache;
 		private NodeEditorInterface editorInterface;

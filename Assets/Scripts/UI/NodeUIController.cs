@@ -6,6 +6,7 @@ using Lightsale.Utility;
 
 public class NodeUIController : MonoBehaviour
 {
+    public static NodeUIController instance;
     public RTNodeEditor nodeCanvas;
     public float minimizeTime;
     public Material canopyMaterial;
@@ -15,6 +16,11 @@ public class NodeUIController : MonoBehaviour
     Rect originalRootRect;
     bool minimized = false;
     private Coroutine toggleVisibilityRoutine;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     private void Start()
     {

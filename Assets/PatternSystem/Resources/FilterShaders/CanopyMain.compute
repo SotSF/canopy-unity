@@ -5,6 +5,8 @@ RWStructuredBuffer<float3> dataBuffer;
 RWTexture2D<float4> OutputTex;
 
 bool polarize;
+bool fitX;
+bool fitY;
 
 uint width;
 uint height;
@@ -18,8 +20,8 @@ float2 rotate(in float2 xy, in float2 center, in float theta)
     return float2(newX, newY);
 }
 
+// go from pixelSpace to width-normalized world space
 float2 worldspace(in uint2 pixel, in float2 dimensions) {
-    // go from pixelSpace to width-normalized world space
     float pi = 3.14159265;
     float2 center = float2(0, 0);
     float apexRadius = 0.332f;
@@ -27,6 +29,11 @@ float2 worldspace(in uint2 pixel, in float2 dimensions) {
     float normalizedDimension = dimensions.x > dimensions.y ? dimensions.y : dimensions.x;
     float normalizedX = ((stripLength*pixel.x / 75.0f) + apexRadius) / (stripLength + apexRadius);
     return (normalizedDimension*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (normalizedDimension / 2);
+}
+
+// go from arbitrary input tex size to a scaled-to-canopy size
+float2 scale(in uint2 pixel, in float2 dimensions) {
+    /*float normalizedDimension = dimensions.x > dimensions.y ? dimensions.y : dimensions.x;*/
 }
 
 [numthreads(25, 16, 1)]

@@ -1,6 +1,7 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -11,7 +12,7 @@ public class CanopyNode : Node
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "Canopy"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(400, 250); } }
+    public override Vector2 DefaultSize { get { return new Vector2(250, 250); } }
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture))]
     public ValueConnectionKnob textureInputKnob;
@@ -23,7 +24,6 @@ public class CanopyNode : Node
     private Camera canopyCam;
     private RenderTexture camTex;
     private Vector2Int outputSize = Vector2Int.zero;
-
     private RenderTexture outputTex;
     private ComputeShader arrayFormatter;
     private ComputeBuffer dataBuffer;
@@ -31,19 +31,31 @@ public class CanopyNode : Node
     private int kernelId;
     private bool polarize;
     private bool scale;
+    private bool fitX;
+    private bool fitY;
+    private Light lightCaster;
 
     private void Awake()
     {
         Debug.Log("CanopyMain awoke");
-        arrayFormatter = Resources.Load<ComputeShader>("FilterShaders/CanopyMain");
-        kernelId = arrayFormatter.FindKernel("CSMain");
-        dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
-        colorData = new Vector3[Constants.NUM_LEDS];
+        if (Application.isPlaying)
+        {
+            arrayFormatter = Resources.Load<ComputeShader>("FilterShaders/CanopyMain");
+            kernelId = arrayFormatter.FindKernel("CSMain");
+            dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
+            colorData = new Vector3[Constants.NUM_LEDS];
+            InitializeOutputTexture();
+            arrayFormatter.SetBuffer(kernelId, "dataBuffer", dataBuffer);
+            arrayFormatter.SetTexture(kernelId, "OutputTex", outputTex);
+            lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
+            RenderToCanopySimulation(outputTex);
+        }
+    }
 
-        InitializeOutputTexture();
-        arrayFormatter.SetBuffer(kernelId, "dataBuffer", dataBuffer);
-        arrayFormatter.SetTexture(kernelId, "OutputTex", outputTex);
-        RenderToCanopySimulation(outputTex);
+    private void OnDestroy()
+    {
+        if (dataBuffer != null)
+            dataBuffer.Release();
     }
 
     private void InitializeOutputTexture()
@@ -61,8 +73,23 @@ public class CanopyNode : Node
         GUILayout.BeginVertical();
         textureInputKnob.DisplayLayout();
 
+        GUILayout.BeginHorizontal();
         polarize = RTEditorGUI.Toggle(polarize, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
-        //scale = RTEditorGUI.Toggle(scale, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
+        if (RTEditorGUI.Toggle(fitX, new GUIContent("Fit X", "Scale the input to fit the canopy in X"))){
+            fitX = true;
+            fitY = false;
+        } else
+        {
+            fitX = false;
+        }
+        if (RTEditorGUI.Toggle(fitY, new GUIContent("Fit Y", "Scale the input to fit the canopy in Y"))) {
+            fitX = false;
+            fitY = true;
+        } else
+        {
+            fitY = false;
+        }
+        GUILayout.EndHorizontal();
 
         RTTextureViz.DrawTexture(textureInputKnob.GetValue<Texture>(), 64);
         GUILayout.Label("input");
@@ -82,34 +109,49 @@ public class CanopyNode : Node
 
     public void RenderToCanopySimulation(Texture texture)
     {
-        Material canopyMaterial = GameObject.Find("NodeUI").GetComponent<NodeUIController>().canopyMaterial;
-        var textures = canopyMaterial.GetTexturePropertyNames();
-        foreach (string tex in textures)
-        {
-            canopyMaterial.SetTexture(tex, texture);
-        }
+        var canopyMaterial = NodeUIController.instance.canopyMaterial;
+        canopyMaterial.SetTexture("_Frame", texture);
     }
 
     public override bool Calculate()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
-        if (tex != null) {
+        if (tex != null)
+        {
             //Execute compute shader
             arrayFormatter.SetBool("polarize", polarize);
+            arrayFormatter.SetBool("fitX", fitX);
+            arrayFormatter.SetBool("fitY", fitY);
             arrayFormatter.SetTexture(kernelId, "InputTex", tex);
             arrayFormatter.SetInt("width", tex.width);
             arrayFormatter.SetInt("height", tex.height);
 
             arrayFormatter.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
+            dataBuffer.GetData(colorData);
+            SetLightColor();
             // Assign output channels
             textureOutputKnob.SetValue(outputTex);
-        }   
-        
-        // Open questions:
-        // Do polarization unwrap / scaling for canopy size within this
-        // node? or expect it to be done already via node editor stuff
-
-
+        }
         return true;
+    }
+
+    private void SetLightColor()
+    {
+        Vector3 avg = Vector3.zero;
+        int litPixelCount = 0;
+        foreach (var pixel in colorData)
+        {
+            if (pixel.x + pixel.y + pixel.z > .5)
+            {
+                avg += pixel;
+                litPixelCount++;
+            }
+        }
+        avg /= litPixelCount;
+        Color c = new Color(avg.x, avg.y, avg.z);
+        if (lightCaster != null && (!float.IsNaN(c.r) && !float.IsNaN(c.g) && !float.IsNaN(c.b) && !float.IsNaN(c.a)))
+        {
+            lightCaster.color = Color.Lerp(lightCaster.color, c, 0.5f);
+        }
     }
 }
