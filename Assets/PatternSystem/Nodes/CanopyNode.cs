@@ -23,6 +23,7 @@ public class CanopyNode : Node
 
     private Camera canopyCam;
     private RenderTexture camTex;
+    private RenderTexture kaleidoscopeElementTexture;
     private Vector2Int outputSize = Vector2Int.zero;
     private RenderTexture outputTex;
     private ComputeShader arrayFormatter;
@@ -30,7 +31,7 @@ public class CanopyNode : Node
     private Vector3[] colorData;
     private int kernelId;
     private bool polarize;
-    private bool scale;
+    private bool seamless;
     private bool fitX;
     private bool fitY;
     private Light lightCaster;
@@ -44,12 +45,13 @@ public class CanopyNode : Node
             kernelId = arrayFormatter.FindKernel("CSMain");
             dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
             colorData = new Vector3[Constants.NUM_LEDS];
-            InitializeOutputTexture();
+            InitializeTextures();
             arrayFormatter.SetBuffer(kernelId, "dataBuffer", dataBuffer);
             arrayFormatter.SetTexture(kernelId, "OutputTex", outputTex);
             lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
             RenderToCanopySimulation(outputTex);
         }
+
     }
 
     private void OnDestroy()
@@ -58,8 +60,13 @@ public class CanopyNode : Node
             dataBuffer.Release();
     }
 
-    private void InitializeOutputTexture()
+    private void InitializeTextures()
     {
+        // Create a texture that is half of the canopy size
+        kaleidoscopeElementTexture = new RenderTexture(75, 48, 24);
+        kaleidoscopeElementTexture.enableRandomWrite = true;
+        kaleidoscopeElementTexture.Create();
+
         //outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
         outputTex = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
         outputTex.enableRandomWrite = true;
@@ -75,6 +82,7 @@ public class CanopyNode : Node
 
         GUILayout.BeginHorizontal();
         polarize = RTEditorGUI.Toggle(polarize, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
+        seamless = RTEditorGUI.Toggle(seamless, new GUIContent("Seamless", "Apply a kaleidoscope effect such that the output is seamless"));
         if (RTEditorGUI.Toggle(fitX, new GUIContent("Fit X", "Scale the input to fit the canopy in X"))){
             fitX = true;
             fitY = false;
@@ -118,11 +126,23 @@ public class CanopyNode : Node
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (tex != null)
         {
+            if (!polarize && seamless) {
+                // If in seamless mode, copy and crop the input texture into the kaleidoscope
+                // element texture and send to the compute shader
+                Vector2 scale = new Vector2(1, 1);
+                Vector2 offset = new Vector2(0,0);
+                Graphics.Blit(tex, kaleidoscopeElementTexture, scale, offset);
+                arrayFormatter.SetTexture(kernelId, "InputTex", kaleidoscopeElementTexture);
+            } else {
+                // Otherwise, send the unchanged input texture to the compute shader
+                arrayFormatter.SetTexture(kernelId, "InputTex", tex);
+            }
+
             //Execute compute shader
             arrayFormatter.SetBool("polarize", polarize);
+            arrayFormatter.SetBool("seamless", seamless);
             arrayFormatter.SetBool("fitX", fitX);
             arrayFormatter.SetBool("fitY", fitY);
-            arrayFormatter.SetTexture(kernelId, "InputTex", tex);
             arrayFormatter.SetInt("width", tex.width);
             arrayFormatter.SetInt("height", tex.height);
 
