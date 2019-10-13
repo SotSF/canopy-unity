@@ -31,8 +31,10 @@ public class AnimatedNode : TickingNode
         if (Application.isPlaying)
         {
             player = GameObject.Find("VideoManager").GetComponent<VideoPlayer>();
+            player.prepareCompleted += (e) => { player.Play(); };
             SelectClip();
         }
+
     }
 
     public void NextClip()
@@ -48,7 +50,7 @@ public class AnimatedNode : TickingNode
         InitializeRenderTexture();
         player.targetTexture = outputTex;
         currentIndex = index;
-        player.Play();
+        player.Prepare();
     }
 
     private void InitializeRenderTexture()

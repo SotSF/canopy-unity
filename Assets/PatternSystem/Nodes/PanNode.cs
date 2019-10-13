@@ -63,6 +63,13 @@ public class PanNode : TickingNode {
             angle = RTEditorGUI.Slider(angle, 0, 6.2831f);
         }
         smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(string.Format("Offset: ({0}, {1})", offset.x, offset.y));
+        if (GUILayout.Button("Reset"))
+        {
+            offset = Vector2.zero;
+        }
+        GUILayout.EndHorizontal();
         GUILayout.EndVertical();
         textureOutputKnob.DisplayLayout();
         GUILayout.EndHorizontal();
