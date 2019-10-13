@@ -5,21 +5,16 @@ RWTexture2D<float4> OutputTex;
 
 uint width;
 uint height;
-uint factor;
 
 [numthreads(16, 16, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    float x = id.xy.x;
-    float y = id.xy.y;
+    uint x = id.x;
+    uint y = id.y;
 
-    // Forward pattern
-    for (uint i = 0; i < factor; i += 2) {
-        OutputTex[float2(x, float(i * height) + float(y))] = InputTex[id.xy];
-    }
-
-    // Reflected pattern
-    for (uint i = 1; i < factor; i += 2) {
-        OutputTex[float2(x, (i * height) + height - float(y) - 1)] = InputTex[id.xy];
+    if (floor(y / height) % 2 == 0) {
+        OutputTex[id.xy] = InputTex[uint2(x, y % height)];
+    } else {
+        OutputTex[id.xy] = InputTex[uint2(x, height - y % height)];
     }
 }
