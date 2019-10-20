@@ -322,10 +322,10 @@ namespace NodeEditorFramework
 			float knobSize = 0;
 			List<ConnectionKnob> verticalKnobs = connectionKnobs.Where (x => x.side == NodeSide.Bottom || x.side == NodeSide.Top).ToList ();
 			if (verticalKnobs.Count > 0)
-				knobSize = verticalKnobs.Max ((ConnectionKnob knob) => knob.GetGUIKnob ().xMax - nodeRect.xMin);
-			size.x = Math.Max (knobSize, MinSize.x);
-			
-			autoSize = size;
+                knobSize = verticalKnobs.Max((ConnectionKnob knob) => knob.GetCanvasSpaceKnob().xMax - nodeRect.xMin);
+            size.x = Math.Max(knobSize, Math.Max(nodeGUIHeight.x, MinSize.x));
+
+            autoSize = size;
 			NodeEditor.RepaintClients ();
 		}
 
