@@ -12,7 +12,7 @@ namespace NodeEditorFramework.TextureComposer
 		public override Vector2 MinSize { get { return new Vector2(150, 50); } }
 		public override bool AutoLayout { get { return true; } }
 
-		[ValueConnectionKnob("Texture", Direction.In, typeof(Texture))]
+		[ValueConnectionKnob("Texture", Direction.In, typeof(Texture), NodeSide.Top, 20)]
 		public ValueConnectionKnob inputKnob;
 
 		[System.NonSerialized]

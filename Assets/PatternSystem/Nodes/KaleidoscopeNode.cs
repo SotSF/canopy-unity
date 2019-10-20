@@ -11,10 +11,10 @@ public class KaleidoscopeNode : Node
     public override string Title { get { return "Kaleidoscope"; } }
     public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
 
-    [ValueConnectionKnob("In", Direction.In, typeof(Texture))]
+    [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
 
-    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture))]
+    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
     [ValueConnectionKnob("Kaleidoscope", Direction.In, typeof(int))]

@@ -12,8 +12,11 @@ public class PanNode : TickingNode {
     public override string Title { get { return "Pan"; } }
     public override Vector2 DefaultSize { get { return new Vector2(200, 150); } }
 
-    [ValueConnectionKnob("In", Direction.In, typeof(Texture))]
+    [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
+
+    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
+    public ValueConnectionKnob textureOutputKnob;
 
     [ValueConnectionKnob("Speed", Direction.In, typeof(float))]
     public ValueConnectionKnob speedInputKnob;
@@ -21,10 +24,8 @@ public class PanNode : TickingNode {
     [ValueConnectionKnob("Angle", Direction.In, typeof(float))]
     public ValueConnectionKnob angleInputKnob;
 
-    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture))]
-    public ValueConnectionKnob textureOutputKnob;
 
-    private ComputeShader PanShader;
+    private ComputeShader panShader;
     private int kernelId;
     public RenderTexture outputTex;
 
@@ -36,8 +37,8 @@ public class PanNode : TickingNode {
 
     private void Awake()
     {
-        PanShader = Resources.Load<ComputeShader>("FilterShaders/PanFilter");
-        kernelId = PanShader.FindKernel("CSMain");
+        panShader = Resources.Load<ComputeShader>("FilterShaders/PanFilter");
+        kernelId = panShader.FindKernel("CSMain");
     }
 
     private void InitializeRenderTexture()
@@ -52,6 +53,7 @@ public class PanNode : TickingNode {
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         textureInputKnob.DisplayLayout();
+        
         speedInputKnob.DisplayLayout(new GUIContent("Speed", "The speed to pan in image widths/second"));
         if (!speedInputKnob.connected())
         {
@@ -72,6 +74,8 @@ public class PanNode : TickingNode {
         GUILayout.EndHorizontal();
         GUILayout.EndVertical();
         textureOutputKnob.DisplayLayout();
+        this.TimedDebugFmt("Input knob style ID: {0}", 2, textureInputKnob.styleID);
+        this.TimedDebugFmt("Output knob style ID: {0}", 2, textureOutputKnob.styleID);
         GUILayout.EndHorizontal();
 
         if (GUI.changed)
@@ -101,6 +105,7 @@ public class PanNode : TickingNode {
 
         var r = speed * tex.width * Time.deltaTime;
         offset += new Vector2(r * Mathf.Cos(angle), r * Mathf.Sin(angle));
+
         if (offset.x > tex.width/2)
         {
             offset.x = -tex.width / 2;
@@ -117,19 +122,19 @@ public class PanNode : TickingNode {
         }
 
         //Execute compute shader
-        PanShader.SetInt("width", tex.width);
-        PanShader.SetInt("height", tex.height);
-        PanShader.SetBool("smoothTransitions", smoothTransitions);
-        PanShader.SetFloat("theta", angle);
-        PanShader.SetFloat("time", Time.time);
-        PanShader.SetFloat("speed", speed);
-        PanShader.SetFloats("offset", offset.x, offset.y);
-        PanShader.SetFloat("frameTime", Time.deltaTime);
-        PanShader.SetTexture(kernelId, "OutputTex", outputTex);
-        PanShader.SetTexture(kernelId, "InputTex", tex);
+        panShader.SetInt("width", tex.width);
+        panShader.SetInt("height", tex.height);
+        panShader.SetBool("smoothTransitions", smoothTransitions);
+        panShader.SetFloat("theta", angle);
+        panShader.SetFloat("time", Time.time);
+        panShader.SetFloat("speed", speed);
+        panShader.SetFloats("offset", offset.x, offset.y);
+        panShader.SetFloat("frameTime", Time.deltaTime);
+        panShader.SetTexture(kernelId, "OutputTex", outputTex);
+        panShader.SetTexture(kernelId, "InputTex", tex);
         var threadGroupX = Mathf.CeilToInt(tex.width / 16.0f);
         var threadGroupY = Mathf.CeilToInt(tex.height / 16.0f);
-        PanShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
+        panShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
 
         // Assign output channels
         textureOutputKnob.SetValue(outputTex);

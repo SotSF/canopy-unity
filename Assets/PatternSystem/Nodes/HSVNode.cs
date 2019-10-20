@@ -12,10 +12,10 @@ public class HSVNode : Node
     public override string Title { get { return "HSV"; } }
     public override Vector2 DefaultSize { get { return new Vector2(100, 100); } }
 
-    [ValueConnectionKnob("Texture", Direction.In, typeof(Texture))]
+    [ValueConnectionKnob("Texture", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
 
-    [ValueConnectionKnob("Texture", Direction.Out, typeof(Texture))]
+    [ValueConnectionKnob("Texture", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
     [ValueConnectionKnob("H", Direction.In, "Float")]

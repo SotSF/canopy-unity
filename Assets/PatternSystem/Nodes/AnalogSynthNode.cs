@@ -19,7 +19,7 @@ public class AnalogSynthNode: Node
     [ValueConnectionKnob("Phase", Direction.In, typeof(float))]
     public ValueConnectionKnob phaseInputKnob;
 
-    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture))]
+    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
     public float period, amplitude, phase;

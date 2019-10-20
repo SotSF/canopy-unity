@@ -12,7 +12,7 @@ public class AnimatedNode : TickingNode
     public override string Title { get { return "Animated"; } }
     public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
 
-    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture))]
+    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
     public RenderTexture outputTex;
