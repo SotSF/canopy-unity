@@ -10,12 +10,12 @@ public class PanNode : TickingNode {
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "Pan"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(200, 150); } }
+    public override Vector2 DefaultSize { get { return new Vector2(200, 175); } }
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
 
-    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
+    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 100)]
     public ValueConnectionKnob textureOutputKnob;
 
     [ValueConnectionKnob("Speed", Direction.In, typeof(float))]
@@ -43,6 +43,10 @@ public class PanNode : TickingNode {
 
     private void InitializeRenderTexture()
     {
+        if (outputTex != null)
+        {
+            outputTex.Release();
+        }
         outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
         outputTex.enableRandomWrite = true;
         outputTex.Create();
@@ -50,7 +54,7 @@ public class PanNode : TickingNode {
 
     public override void NodeGUI()
     {
-        GUILayout.BeginHorizontal();
+        //GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         textureInputKnob.DisplayLayout();
         
@@ -66,17 +70,15 @@ public class PanNode : TickingNode {
         }
         smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
         GUILayout.BeginHorizontal();
-        GUILayout.Label(string.Format("Offset: ({0}, {1})", offset.x, offset.y));
+        GUILayout.Label(string.Format("Offset: ({0:0.00}, {1:0.00})", offset.x, offset.y));
         if (GUILayout.Button("Reset"))
         {
             offset = Vector2.zero;
         }
         GUILayout.EndHorizontal();
-        GUILayout.EndVertical();
         textureOutputKnob.DisplayLayout();
-        this.TimedDebugFmt("Input knob style ID: {0}", 2, textureInputKnob.styleID);
-        this.TimedDebugFmt("Output knob style ID: {0}", 2, textureOutputKnob.styleID);
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+        //GUILayout.EndHorizontal();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
