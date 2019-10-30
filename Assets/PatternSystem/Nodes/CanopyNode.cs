@@ -11,7 +11,7 @@ public class CanopyNode : Node
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "Canopy"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(250, 250); } }
+    public override Vector2 DefaultSize { get { return new Vector2(250, 160); } }
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
@@ -74,10 +74,10 @@ public class CanopyNode : Node
 
     public override void NodeGUI()
     {
-        GUILayout.BeginHorizontal();
-
+        float edgeOffset = 35;
         GUILayout.BeginVertical();
-        textureInputKnob.DisplayLayout();
+        //textureInputKnob.DisplayLayout();
+        textureInputKnob.SetPosition(edgeOffset);
 
         GUILayout.BeginHorizontal();
         polarize = RTEditorGUI.Toggle(polarize, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
@@ -96,19 +96,31 @@ public class CanopyNode : Node
         {
             fitY = false;
         }
+
         GUILayout.EndHorizontal();
+        var lastBox = GUILayoutUtility.GetLastRect();
+        Rect inOutTextureBox = new Rect(lastBox.x + 15, lastBox.yMax + 4, 220, 80);
+        Rect textureArea = new Rect(inOutTextureBox);
+        textureArea.y += 30;
+        //GUILayout.BeginArea(InOutTextureBox);
+        GUILayout.BeginArea(textureArea);
+        GUILayout.BeginHorizontal();
+        GUI.Box(new Rect(0,0, 220, 80), "Foo");
+        GUILayout.Box(textureInputKnob.GetValue<Texture>(), GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
+        GUILayout.FlexibleSpace();
+        //RTTextureViz.DrawTexture(textureInputKnob.GetValue<Texture>(), 64);
 
-        RTTextureViz.DrawTexture(textureInputKnob.GetValue<Texture>(), 64);
-        GUILayout.Label("input");
-
-        RTTextureViz.DrawTexture(outputTex, 64);
-        GUILayout.Label("output");
-
+        //RTTextureViz.DrawTexture(outputTex, 64);
+        GUILayout.Box(outputTex, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
+        GUILayout.EndHorizontal();
+        GUILayout.EndArea();
+        //textureOutputKnob.DisplayLayout();
+        var rightSideOffset = DefaultSize.x - edgeOffset;
+        this.TimedDebugFmt("Calc'd offset: {0}", 2, rightSideOffset);
+        textureOutputKnob.SetPosition(rightSideOffset);
         GUILayout.EndVertical();
 
-        textureOutputKnob.DisplayLayout();
 
-        GUILayout.EndHorizontal();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
