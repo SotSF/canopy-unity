@@ -1,0 +1,150 @@
+﻿#pragma kernel advect
+#pragma kernel jacobi
+#pragma kernel divergence
+#pragma kernel clearPressure
+#pragma kernel gradientDiff
+#pragma kernel boundary
+#pragma kernel applyForce
+
+#define ZERO_2D float2(0,0)
+#define LEFT_2D float2(-1,0)
+#define RIGHT_2D float2(1,0)
+#define UP_2D float2(0,1)
+#define DOWN_2D float2(0,-1)
+#define HALF_2D float2(0.5, 0.5)
+#define HALF_3D float3(0.5, 0.5, 0.5)
+
+float timestep;
+
+uint width;
+uint height;
+
+Texture2D<float4> uField;        // Typically the velocity field
+Texture2D<float4> vField;
+float gridNormalizingFactor;     // aka RDX, reciprocal of dx, grid scale
+
+float boundaryScale;
+
+float jacobiAlpha;
+float jacobiRBeta;
+
+float forceRadius;
+float forceMag;
+uint forceX;
+uint forceY;
+
+RWTexture2D<float4> Result;
+SamplerState pointClampSampler;
+
+float4 bilerp(float4 p0q0, float4 p1q0, float4 p0q1, float4 p1q1, float2 offset)
+{
+    float a = offset.x % 1; // Get Interpolation factor for X direction.
+
+    float4 q0 = lerp(p0q0, p1q0, a); // Interpolates top row in X direction.
+    float4 q1 = lerp(p0q1, p1q1, a); // Interpolates bottom row in X direction.
+
+    float b = offset.y % 1; // Get Interpolation factor for Y direction.
+    return lerp(q0, q1, b); // Interpolate in Y direction.
+}
+
+/* Take velocity field as u, apply advection to vField*/
+[numthreads(16, 16, 1)]
+void advect(uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = id.xy - timestep * gridNormalizingFactor * (uField[id.xy].xy);
+
+    uint2 base = floor(pos);
+    float4 p0q0 = vField[base];
+    float4 p0q1 = vField[base + uint2(0, 1)];
+    float4 p1q0 = vField[base + uint2(1, 0)];
+    float4 p1q1 = vField[base + uint2(1, 1)];
+    float4 result = bilerp(p0q0, p0q1, p1q0, p1q1, pos);
+    Result[id.xy] = result;
+}
+
+/* Apply a splat force*/
+[numthreads(16, 16, 1)]
+void applySplat(uint3 id : SV_DispatchThreadID)
+{
+    float4 force = forceMag * timestep * (((id.x - forceX) * (id.x - forceX) + (id.y - forceY) * (id.y - forceY)) / forceRadius);
+    float4 result = uField[id.xy] + force;
+    Result[id.xy] = result;
+}
+
+/* Apply a texture force*/
+[numthreads(16, 16, 1)]
+void applyForce(uint3 id : SV_DispatchThreadID)
+{
+    float4 result = uField[id.xy] + 100000*((vField[id.xy] - float4(0.5,0.5,0,0)) * 2);
+    result.z = 0;
+    result.a = 1;
+    Result[id.xy] = result;
+}
+
+/* Take jacobi fields x and b as u and v, solve one iteration*/
+[numthreads(16,16,1)]
+void jacobi(uint3 id : SV_DispatchThreadID)
+{
+    uint2 border = uint2(width, height) - uint2(1, 1);
+    // left, right, bottom, and top x samples
+    float4 xL = uField[id.xy + LEFT_2D];
+    float4 xR = uField[id.xy + RIGHT_2D];
+    float4 xU = uField[id.xy + UP_2D];
+    float4 xD = uField[id.xy + DOWN_2D];
+
+    // b sample, from center
+    float4 bC = vField[id.xy];
+
+    // evaluate Jacobi iteration
+    float4 result = (xL + xR + xD + xU + jacobiAlpha * bC)* jacobiRBeta;
+    Result[id.xy] = result;
+}
+
+/* Clear the pressure field of a scalar field set*/
+[numthreads(16,16,1)]
+void clearPressure(uint3 id: SV_DispatchThreadID)
+{
+    float4 val = uField[id.xy];
+    val.x = 0;
+    Result[id.xy] = val;
+}
+
+/* Compute divergence of u field (typically velocity)*/
+[numthreads(16, 16, 1)]
+void divergence(uint3 id : SV_DispatchThreadID)
+{
+    float4 wL = uField[id.xy + LEFT_2D];
+    float4 wR = uField[id.xy + RIGHT_2D];
+    float4 wU = uField[id.xy + UP_2D];
+    float4 wD = uField[id.xy + DOWN_2D];
+
+    float4 result = (0.5 * gridNormalizingFactor) * ((wR.x - wL.x) + (wU.y - wD.y));
+    Result[id.xy] = result;
+}
+
+/* Compute gradient difference of first scalar field of v and u (ie velocity)*/
+[numthreads(16, 16, 1)]
+void gradientDiff(uint3 id : SV_DispatchThreadID)
+{
+    // Extract pressure channel from v field.x
+    float pL = vField[id.xy + LEFT_2D].x;
+    float pR = vField[id.xy + RIGHT_2D].x;
+    float pU = vField[id.xy + UP_2D].x;
+    float pD = vField[id.xy + DOWN_2D].x;
+                      
+    float4 updatedVelocity = uField[id.xy];
+    updatedVelocity.xy -= (0.5 * gridNormalizingFactor) * float2(pR - pL, pU - pD);
+    Result[id.xy] = updatedVelocity;
+}
+
+/* Compute boundary conditions*/
+[numthreads(16,16,1)]
+void boundary(uint3 id : SV_DispatchThreadID)
+{
+    float4 value = id.x == 0          ? boundaryScale * uField[id.xy + RIGHT_2D]
+                 : id.x == width - 1  ? boundaryScale * uField[id.xy + LEFT_2D]
+                 : id.y == 0          ? boundaryScale * uField[id.xy + UP_2D]
+                 : id.y == height - 1 ? boundaryScale * uField[id.xy + DOWN_2D]
+                 : uField[id.xy];
+    Result[id.xy] = value;
+}
