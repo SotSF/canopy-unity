@@ -39,6 +39,10 @@ public class HSVNode : Node
 
     private void InitializeRenderTexture()
     {
+        if (outputTex != null)
+        {
+            outputTex.Release();
+        }
         outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
         outputTex.enableRandomWrite = true;
         outputTex.Create();
@@ -68,6 +72,8 @@ public class HSVNode : Node
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || tex == null)
         { // Reset outputs if no texture is available
+            if (outputTex != null)
+                outputTex.Release();
             textureOutputKnob.ResetValue();
             outputSize = Vector2Int.zero;
             return true;
