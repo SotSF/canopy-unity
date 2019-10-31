@@ -132,6 +132,8 @@ namespace NodeEditorFramework
 				ConnectionPortManager.UpdateConnectionPorts(node);
 				foreach (ConnectionPort port in node.connectionPorts)
 					port.Validate(node);
+                ConnectionPortManager.UpdatePortLists(node);
+                ConnectionPortManager.UpdateRepresentativePortLists(node);
 			}
 
 			// Check EditorStates

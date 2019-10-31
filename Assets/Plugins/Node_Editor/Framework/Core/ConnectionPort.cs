@@ -327,6 +327,11 @@ namespace NodeEditorFramework
 			GenerateColor();
 		}
 
+        public void SetColor(Color c)
+        {
+            color = c;
+        }
+
 		public void GenerateColor ()
 		{ // Generate consistent color for a type - using string because it delivers greater variety of colors than type hashcode
 			color = NodeEditorGUI.RandomColorHSV(Identifier.GetHashCode(), 0, 1, 0.6f, 0.8f, 0.8f, 1.4f);
