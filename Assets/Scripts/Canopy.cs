@@ -30,6 +30,7 @@ public class Canopy: MonoBehaviour
     const int pixelsPerMeter = 30;
 
     const int maxVerts = 65000;
+    public bool simulatorMode = false;
 
     //private int numLEDs = numStrips * pixelsPerStrip;
 
@@ -46,6 +47,7 @@ public class Canopy: MonoBehaviour
         var rotate = Animations.LocalQuatLerp(transform, originalRotation);
         var trans = Animations.LocalPositionLerp(transform, new Vector3(0, 4, 0));
         this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
+        simulatorMode = true;
     }
     public void EnterControllerMode()
     {
@@ -55,6 +57,7 @@ public class Canopy: MonoBehaviour
         var rotate = Animations.LocalQuatLerp(transform, originalRotation);
         var trans = Animations.LocalPositionLerp(transform, controlViewCanopyPosition);
         this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
+        simulatorMode = false;
     }
     public void UpdateRotation(Quaternion rotation)
     {

@@ -47,9 +47,12 @@ public class Controls: MonoBehaviour
     void Update()
     {
 
-        float x = Input.GetAxis("Horizontal") * Time.deltaTime * speed;
-        float z = Input.GetAxis("Vertical") * Time.deltaTime * speed;
-        transform.position += Quaternion.Euler(0,transform.localRotation.eulerAngles.y,0) * new Vector3(x, 0, z);
+        if (Canopy.instance.simulatorMode)
+        {
+            float x = Input.GetAxis("Horizontal") * Time.deltaTime * speed;
+            float z = Input.GetAxis("Vertical") * Time.deltaTime * speed;
+            transform.position += Quaternion.Euler(0,transform.localRotation.eulerAngles.y,0) * new Vector3(x, 0, z);
+        }
 
         //If mouse mode?
         if (Input.GetMouseButton(1))
