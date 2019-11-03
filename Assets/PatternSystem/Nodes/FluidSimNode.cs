@@ -31,6 +31,7 @@ public class FluidSimNode : TickingNode
     private int clearPressureKernel;
     private int boundaryKernel;
     private int forceKernel;
+    private int dyeKernel;
 
     // Uses two channels (R,G) to store the 2vector field U(x,y)
     private RenderTexture velocityField;
@@ -44,7 +45,7 @@ public class FluidSimNode : TickingNode
     private RenderTexture divergenceField;
     private RenderTexture scaledBuffer;
 
-    private Vector2Int outputSize = new Vector2Int(256,256);
+    private Vector2Int outputSize = new Vector2Int(256, 256);
     private RenderTextureFormat rtFmt = RenderTextureFormat.ARGBFloat;
 
     private RenderTexture MakeRenderTexture()
@@ -70,6 +71,17 @@ public class FluidSimNode : TickingNode
         scaledBuffer = MakeRenderTexture();
     }
 
+    private void ClearRenderTextures()
+    {
+        RenderTexture.active = velocityField;
+        GL.Clear(true, true, Color.black);
+        RenderTexture.active = pressureField;
+        GL.Clear(true, true, Color.black);
+        RenderTexture.active = dyeField;
+        GL.Clear(true, true, Color.black);
+        RenderTexture.active = null;
+    }
+
     private void OnDestroy()
     {
         RenderTexture[] textures = { outputTex, velocityField, pressureField, dyeField, resultField, divergenceField, scaledBuffer };
@@ -91,6 +103,7 @@ public class FluidSimNode : TickingNode
         clearPressureKernel = fluidSimShader.FindKernel("clearPressure");
         boundaryKernel = fluidSimShader.FindKernel("boundary");
         forceKernel = fluidSimShader.FindKernel("applyForce");
+        dyeKernel = fluidSimShader.FindKernel("applyDye");
         InitializeRenderTextures();
         ClearRenderTextures();
     }
@@ -101,7 +114,7 @@ public class FluidSimNode : TickingNode
         velocityInputKnob.SetPosition(140);
         dyeInputKnob.SetPosition(40);
         GUILayout.BeginHorizontal();
-        
+
         string cmd = running ? "Stop" : "Run";
         if (GUILayout.Button(cmd))
         {
@@ -109,7 +122,11 @@ public class FluidSimNode : TickingNode
         }
         if (GUILayout.Button("Apply dye"))
         {
-            Graphics.Blit(dyeInputKnob.GetValue<Texture>(), dyeField);
+            Graphics.Blit(dyeInputKnob.GetValue<Texture>(), scaledBuffer);
+            fluidSimShader.SetTexture(dyeKernel, "uField", dyeField);
+            fluidSimShader.SetTexture(dyeKernel, "vField", scaledBuffer);
+            ExecuteShader(dyeKernel);
+            Graphics.Blit(resultField, dyeField);
         }
         if (GUILayout.Button("Apply velocity"))
         {
@@ -122,6 +139,7 @@ public class FluidSimNode : TickingNode
         if (GUILayout.Button("Reset"))
         {
             ClearRenderTextures();
+            running = false;
         }
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
@@ -133,17 +151,6 @@ public class FluidSimNode : TickingNode
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
-    }
-
-    private void ClearRenderTextures()
-    {
-        RenderTexture.active = velocityField;
-        GL.Clear(true, true, Color.black);
-        RenderTexture.active = pressureField;
-        GL.Clear(true, true, Color.black);
-        RenderTexture.active = dyeField;
-        GL.Clear(true, true, Color.black);
-        RenderTexture.active = null;
     }
 
     private void ExecuteShader(int kernel)
@@ -169,9 +176,9 @@ public class FluidSimNode : TickingNode
         Graphics.Blit(resultField, velocityField);
 
         // Compute diffusion
-        //var n = 0.000001f;
-        //fluidSimShader.SetFloat("jacobiAlpha", (dx2) / (n*Time.deltaTime));
-        //fluidSimShader.SetFloat("jacobiRBeta", 1.0f / (4+(dx2) / (n*Time.deltaTime)));
+        //var n = 1f;
+        //fluidSimShader.SetFloat("jacobiAlpha", (dx2) / (n * Time.deltaTime));
+        //fluidSimShader.SetFloat("jacobiRBeta", 1.0f / (4 + (dx2) / (n * Time.deltaTime)));
         //for (int i = 0; i < 20; i++)
         //{
         //    fluidSimShader.SetTexture(jacobiKernel, "vField", velocityField);
