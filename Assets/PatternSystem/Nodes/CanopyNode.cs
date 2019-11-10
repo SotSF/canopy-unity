@@ -25,14 +25,14 @@ public class CanopyNode : Node
     private RenderTexture kaleidoscopeElementTexture;
     private Vector2Int outputSize = Vector2Int.zero;
     private RenderTexture outputTex;
-    private ComputeShader arrayFormatter;
+    private ComputeShader canopyMainShader;
     private ComputeBuffer dataBuffer;
     private Vector3[] colorData;
     private int kernelId;
-    private bool polarize;
-    private bool seamless;
-    private bool fitX;
-    private bool fitY;
+    public bool polarize;
+    public bool seamless;
+    public bool fitX;
+    public bool fitY;
     private Light lightCaster;
 
     private void Awake()
@@ -40,13 +40,13 @@ public class CanopyNode : Node
         Debug.Log("CanopyMain awoke");
         if (Application.isPlaying)
         {
-            arrayFormatter = Resources.Load<ComputeShader>("FilterShaders/CanopyMain");
-            kernelId = arrayFormatter.FindKernel("CSMain");
+            canopyMainShader = Resources.Load<ComputeShader>("FilterShaders/CanopyMain");
+            kernelId = canopyMainShader.FindKernel("CanopyMain");
             dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
             colorData = new Vector3[Constants.NUM_LEDS];
             InitializeTextures();
-            arrayFormatter.SetBuffer(kernelId, "dataBuffer", dataBuffer);
-            arrayFormatter.SetTexture(kernelId, "OutputTex", outputTex);
+            canopyMainShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
+            canopyMainShader.SetTexture(kernelId, "OutputTex", outputTex);
             lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
             RenderToCanopySimulation(outputTex);
         }
@@ -69,6 +69,8 @@ public class CanopyNode : Node
         //outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
         outputTex = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
         outputTex.enableRandomWrite = true;
+        //outputTex.filterMode = FilterMode.Bilinear;
+        //outputTex.wrapMode = TextureWrapMode.Repeat;
         outputTex.Create();
     }
 
@@ -116,7 +118,6 @@ public class CanopyNode : Node
         GUILayout.EndArea();
         //textureOutputKnob.DisplayLayout();
         var rightSideOffset = DefaultSize.x - edgeOffset;
-        this.TimedDebugFmt("Calc'd offset: {0}", 2, rightSideOffset);
         textureOutputKnob.SetPosition(rightSideOffset);
         GUILayout.EndVertical();
 
@@ -143,22 +144,22 @@ public class CanopyNode : Node
                 Vector2 scale = new Vector2(1, 1);
                 Vector2 offset = new Vector2(0,0);
                 Graphics.Blit(tex, kaleidoscopeElementTexture, scale, offset);
-                arrayFormatter.SetTexture(kernelId, "InputTex", kaleidoscopeElementTexture);
-                arrayFormatter.SetInt("height", Math.Min(tex.height, Constants.NUM_STRIPS / 2 - 1));
+                canopyMainShader.SetTexture(kernelId, "InputTex", kaleidoscopeElementTexture);
+                canopyMainShader.SetInt("height", Math.Min(tex.height, Constants.NUM_STRIPS / 2 - 1));
             } else {
                 // Otherwise, send the unchanged input texture to the compute shader
-                arrayFormatter.SetTexture(kernelId, "InputTex", tex);
-                arrayFormatter.SetInt("height", tex.height);
+                canopyMainShader.SetTexture(kernelId, "InputTex", tex);
+                canopyMainShader.SetInt("height", tex.height);
             }
 
             //Execute compute shader
-            arrayFormatter.SetBool("polarize", polarize);
-            arrayFormatter.SetBool("seamless", seamless);
-            arrayFormatter.SetBool("fitX", fitX);
-            arrayFormatter.SetBool("fitY", fitY);
-            arrayFormatter.SetInt("width", tex.width);
+            canopyMainShader.SetBool("polarize", polarize);
+            canopyMainShader.SetBool("seamless", seamless);
+            canopyMainShader.SetBool("fitX", fitX);
+            canopyMainShader.SetBool("fitY", fitY);
+            canopyMainShader.SetInt("width", tex.width);
 
-            arrayFormatter.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
+            canopyMainShader.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
             dataBuffer.GetData(colorData);
             SetLightColor();
             // Assign output channels

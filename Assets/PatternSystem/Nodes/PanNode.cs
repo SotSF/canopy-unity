@@ -26,19 +26,26 @@ public class PanNode : TickingNode {
 
 
     private ComputeShader panShader;
-    private int kernelId;
+    private int bilinearMirrorKernel;
+    private int bilinearRepeatKernel;
+    private int pointMirrorKernel;
+    private int pointRepeatKernel;
     public RenderTexture outputTex;
 
     private Vector2Int outputSize = Vector2Int.zero;
     private Vector2 offset = Vector2.zero;
 
     public bool smoothTransitions;
+    public bool mirror;
     public float speed, angle;
 
     private void Awake()
     {
         panShader = Resources.Load<ComputeShader>("FilterShaders/PanFilter");
-        kernelId = panShader.FindKernel("CSMain");
+        bilinearMirrorKernel = panShader.FindKernel("BilinearMirror");
+        bilinearRepeatKernel = panShader.FindKernel("BilinearRepeat");
+        pointMirrorKernel = panShader.FindKernel("PointMirror");
+        pointRepeatKernel = panShader.FindKernel("PointRepeat");
     }
 
     private void InitializeRenderTexture()
@@ -56,7 +63,6 @@ public class PanNode : TickingNode {
     {
         //GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
-        textureInputKnob.DisplayLayout();
         
         speedInputKnob.DisplayLayout(new GUIContent("Speed", "The speed to pan in image widths/second"));
         if (!speedInputKnob.connected())
@@ -68,7 +74,10 @@ public class PanNode : TickingNode {
         {
             angle = RTEditorGUI.Slider(angle, 0, 6.2831f);
         }
+        GUILayout.BeginHorizontal();
         smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
+        mirror = RTEditorGUI.Toggle(mirror, new GUIContent("Mirror", "Use mirror wraping at texture edges"));
+        GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
         GUILayout.Label(string.Format("Offset: ({0:0.00}, {1:0.00})", offset.x, offset.y));
         if (GUILayout.Button("Reset"))
@@ -76,7 +85,6 @@ public class PanNode : TickingNode {
             offset = Vector2.zero;
         }
         GUILayout.EndHorizontal();
-        textureOutputKnob.DisplayLayout();
         GUILayout.EndVertical();
         //GUILayout.EndHorizontal();
 
@@ -105,38 +113,52 @@ public class PanNode : TickingNode {
         speed = speedInputKnob.connected() ? speedInputKnob.GetValue<float>() : speed;
         angle = angleInputKnob.connected() ? angleInputKnob.GetValue<float>() : angle;
 
+
+        // Keep offset bounded by (2x) dimensions so that floating point coverage doesn't decrease
+        // over long pans. use 2x so that mirrored textures don't jump on resetting the offset
         var r = speed * tex.width * Time.deltaTime;
         offset += new Vector2(r * Mathf.Cos(angle), r * Mathf.Sin(angle));
-
-        if (offset.x > tex.width/2)
+        Vector2 mirrorSafeBounds = 2*new Vector2(tex.width-1, tex.height-1);
+        if (offset.x > mirrorSafeBounds.x)
         {
-            offset.x = -tex.width / 2;
-        } else if (offset.x < -tex.width / 2)
-        {
-            offset.x = tex.width / 2;
+            offset.x -= mirrorSafeBounds.x;
         }
-        if (offset.y > tex.height / 2)
+        else if (offset.x < -mirrorSafeBounds.x)
         {
-            offset.y = -tex.height / 2;
-        } else if (offset.y < -tex.height / 2)
+            offset.x += mirrorSafeBounds.x;
+        }
+        if (offset.y > mirrorSafeBounds.y)
         {
-            offset.y = tex.height / 2;
+            offset.y -= mirrorSafeBounds.y;
+        }
+        else if (offset.y < -mirrorSafeBounds.y)
+        {
+            offset.y += mirrorSafeBounds.y;
         }
 
-        //Execute compute shader
+        int panKernel = 0;
+        if (smoothTransitions && mirror)
+        {
+            panKernel = bilinearMirrorKernel;
+        } else if (smoothTransitions && !mirror)
+        {
+            panKernel = bilinearRepeatKernel;
+        } else if (!smoothTransitions && mirror)
+        {
+            panKernel = pointMirrorKernel;
+        } else if (!smoothTransitions && !mirror)
+        {
+            panKernel = pointRepeatKernel;
+        }
+
         panShader.SetInt("width", tex.width);
         panShader.SetInt("height", tex.height);
-        panShader.SetBool("smoothTransitions", smoothTransitions);
-        panShader.SetFloat("theta", angle);
-        panShader.SetFloat("time", Time.time);
-        panShader.SetFloat("speed", speed);
         panShader.SetFloats("offset", offset.x, offset.y);
-        panShader.SetFloat("frameTime", Time.deltaTime);
-        panShader.SetTexture(kernelId, "OutputTex", outputTex);
-        panShader.SetTexture(kernelId, "InputTex", tex);
+        panShader.SetTexture(panKernel, "OutputTex", outputTex);
+        panShader.SetTexture(panKernel, "InputTex", tex);
         var threadGroupX = Mathf.CeilToInt(tex.width / 16.0f);
         var threadGroupY = Mathf.CeilToInt(tex.height / 16.0f);
-        panShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
+        panShader.Dispatch(panKernel, threadGroupX, threadGroupY, 1);
 
         // Assign output channels
         textureOutputKnob.SetValue(outputTex);

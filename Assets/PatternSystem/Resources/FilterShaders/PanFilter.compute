@@ -1,70 +1,49 @@
-﻿#pragma kernel CSMain
+﻿#pragma kernel BilinearMirror
+#pragma kernel BilinearRepeat
+#pragma kernel PointMirror
+#pragma kernel PointRepeat
+
 Texture2D<float4> InputTex;
 RWTexture2D<float4> OutputTex;
 
-//Time in seconds
-float time;
-float frameTime;
-
-//Speed in imageWidths/second
-float speed;
-
-//Pan direction in radians
-float theta;
-
-// Accumulated offset
 float2 offset;
 
 uint width;
 uint height;
 
-bool smoothTransitions;
+SamplerState SmpPointRepeat;
+SamplerState SmpPointMirror;
+SamplerState SmpLinearRepeat;
+SamplerState SmpLinearMirror;
 
-//This function rotates a point (uint2 xy) theta radians around a center point
-float2 rotate(in uint2 xy, in float2 center, in float theta)
+[numthreads(16, 16, 1)]
+void BilinearMirror(uint3 id : SV_DispatchThreadID)
 {
-    float r = distance(center, xy);
-    float startAngle = atan2(xy.y - center.y, xy.x - center.x);
-    float newX = center.x + r * cos(theta + startAngle);
-    float newY = center.y + r * sin(theta + startAngle);
-    return float2(newX, newY);
-}
-
-float4 bilerp(float4 p0q0, float4 p1q0, float4 p0q1, float4 p1q1, float2 offset)
-{
-    float a = offset.x % 1; // Get Interpolation factor for X direction.
-
-    float4 q0 = lerp(p0q0, p1q0, a); // Interpolates top row in X direction.
-    float4 q1 = lerp(p0q1, p1q1, a); // Interpolates bottom row in X direction.
-
-    float b = offset.y % 1; // Get Interpolation factor for Y direction.
-    return lerp(q0, q1, b); // Interpolate in Y direction.
+    float2 newOffset = id.xy + offset;
+    uint2 maxDimensions = uint2(width-1, height-1);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearMirror, newOffset / maxDimensions, 0);
 }
 
 [numthreads(16, 16, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
+void BilinearRepeat(uint3 id : SV_DispatchThreadID)
 {
-    float r = (speed * width * frameTime);
-    float2 newOffset = float2((offset.x + id.x + r * cos(theta)) % width,
-                              (offset.y + id.y + r * sin(theta)) % height);
-    if (newOffset.x < 0) {
-        newOffset.x += width;
-    }
-    if (newOffset.y < 0){
-        newOffset.y += height;
-    }
-    if (smoothTransitions) {
-        // Optionally bilerp for smooth transitions between pixels
-        uint2 base = ceil(newOffset);
-        uint2 dimensions = uint2(width, height);
-        float4 p0q0 = InputTex[base];
-        float4 p0q1 = InputTex[(base + uint2(0, 1)) % dimensions];
-        float4 p1q0 = InputTex[(base + uint2(1, 0)) % dimensions];
-        float4 p1q1 = InputTex[(base + uint2(1, 1)) % dimensions];
+    float2 newOffset = id.xy + offset;
+    uint2 maxDimensions = uint2(width - 1, height - 1);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearRepeat, newOffset / maxDimensions, 0);
+}
 
-        OutputTex[id.xy] = bilerp(p0q0, p0q1, p1q0, p1q1, newOffset);
-    }
-    else {
-        OutputTex[id.xy] = InputTex[newOffset];
-    }
+[numthreads(16, 16, 1)]
+void PointMirror(uint3 id : SV_DispatchThreadID)
+{
+    float2 newOffset = floor(id.xy + offset);
+    uint2 maxDimensions = uint2(width - 1, height - 1);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointMirror, newOffset / maxDimensions, 0);
+}
+
+[numthreads(16, 16, 1)]
+void PointRepeat(uint3 id : SV_DispatchThreadID)
+{
+    float2 newOffset = floor(id.xy + offset);
+    uint2 maxDimensions = uint2(width - 1, height - 1);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointRepeat, newOffset / maxDimensions, 0);
 }

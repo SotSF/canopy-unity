@@ -1,4 +1,5 @@
-﻿#pragma kernel CSMain
+﻿#pragma kernel CanopyMain
+#pragma kernel CanopySeamless
 
 Texture2D<float4> InputTex;
 RWStructuredBuffer<float3> dataBuffer;
@@ -9,10 +10,16 @@ bool seamless;
 bool fitX;
 bool fitY;
 
+SamplerState SmpPointRepeat;
+SamplerState SmpPointMirror;
+SamplerState SmpLinearRepeat;
+SamplerState SmpLinearMirror;
+
 uint width;
 uint height;
 
-float2 rotate(in float2 xy, in float2 center, in float theta)
+/* Rotates a coordinate xy about a center point by theta degrees*/
+float2 rotate(float2 xy, float2 center, float theta)
 {
     float r = distance(center, xy);
     float startAngle = atan2(xy.y - center.y, xy.x - center.x);
@@ -21,40 +28,51 @@ float2 rotate(in float2 xy, in float2 center, in float theta)
     return float2(newX, newY);
 }
 
-// go from pixelSpace to width-normalized world space
-float2 worldspace(in uint2 pixel, in float2 dimensions) {
+/* Transforms a pixel coordinate in 75x96 canopy space, where 
+ * x in [0,74] specifies distance from the center along a strip, and
+ * y in [0,95] specifies the strip's position around the circle, to
+ * the texture coordinate such that the physical pixel matches
+ * its position in a standard 2D layout, using the Canopy's physical
+ * parameters to inform the transformation. */
+float2 canopyDepolarize(uint2 pixel, float2 dimensions) {
     float pi = 3.14159265;
     float2 center = float2(0, 0);
-    float apexRadius = 0.332f;
-    float stripLength = 2.5f;
-    float normalizedDimension = dimensions.x > dimensions.y ? dimensions.y : dimensions.x;
-    float normalizedX = ((stripLength*pixel.x / 75.0f) + apexRadius) / (stripLength + apexRadius);
-    return (normalizedDimension*rotate(float2(normalizedX, 0), center, 2 * pi*(pixel.y / 96.0f)) / 2) + (normalizedDimension / 2);
+    float apexRadius = 0.332f;    // Radius of the dark center in meters
+    float stripLength = 2.5f;     // Length of the strips in meters
+    float normalizedStripAngle = pixel.y / 96.0f;  // Strip angle around center in [0-1) 
+                                                   // 0 and 2pi are the same angle so we don't fully cover [0-1]
+    float normalizedPixelStripPosition = pixel.x / 74.0f; // position along strip in [0-1]
+    float normalizedX = ((stripLength*normalizedPixelStripPosition) + apexRadius) / (stripLength + apexRadius);
+    float2 rotatedPixel = rotate(float2(normalizedX, 0), center, 2 * pi * normalizedStripAngle);
+    float normalizedDimension = min(dimensions.x, dimensions.y);
+    return (normalizedDimension*rotatedPixel / 2) + (normalizedDimension / 2);
 }
 
 // go from arbitrary input tex size to a scaled-to-canopy size
-float2 scale(in uint2 pixel, in float2 dimensions) {
+float2 scale(uint2 pixel, float2 dimensions) {
     /*float normalizedDimension = dimensions.x > dimensions.y ? dimensions.y : dimensions.x;*/
 }
 
 [numthreads(25, 16, 1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
+void CanopySeamless(uint3 id : SV_DispatchThreadID) 
 {
-    float2 coord = id.xy;
-    uint x = id.x;
-    uint y = id.y;
-    if (polarize) {
-        coord = worldspace(coord, float2(width, height));
-    }
+    float2 maxDimensions = uint2(width - 1, height - 1);
+    bool inMirrorBlock = floor(id.y / height) % 2 == 0;
+    float y = inMirrorBlock ? id.y % height : height - id.y % height;
+    float4 result = InputTex.SampleLevel(SmpPointRepeat, uint2(id.x, y)/maxDimensions, 0);
+    OutputTex[id.xy] = result;
+    dataBuffer[75 * id.y + id.x] = result.xyz;
+}
 
-    if (seamless) {
-        if (floor(y / height) % 2 == 0) {
-            OutputTex[id.xy] = InputTex[uint2(x, y % height)];
-        } else {
-            OutputTex[id.xy] = InputTex[uint2(x, height - y % height)];
-        }
-    } else {
-        OutputTex[id.xy] = InputTex[coord];
+[numthreads(25, 16, 1)]
+void CanopyMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 maxDimensions = uint2(width - 1, height - 1);
+    float2 coord = id.xy;
+    if (polarize) {
+        coord = canopyDepolarize(coord, float2(width, height));
     }
-    dataBuffer[75 * id.y  + id.x] = InputTex[coord];
+    float4 result = InputTex.SampleLevel(SmpPointRepeat, coord/maxDimensions, 0);
+    OutputTex[id.xy] = result;
+    dataBuffer[75 * id.y  + id.x] = result.xyz;
 }

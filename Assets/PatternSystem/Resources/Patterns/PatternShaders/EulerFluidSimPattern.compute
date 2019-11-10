@@ -5,11 +5,13 @@
 #pragma kernel divergence
 #pragma kernel clearPressure
 #pragma kernel gradientDiff
-#pragma kernel boundary
 #pragma kernel applyForce
 #pragma kernel applyDye
+#pragma kernel horizontalBoundary
+#pragma kernel verticalBoundary
 
 
+#define ONE_2D float2(1,1)
 #define ZERO_2D float2(0,0)
 #define LEFT_2D float2(-1,0)
 #define RIGHT_2D float2(1,0)
@@ -40,63 +42,48 @@ uint forceX;
 uint forceY;
 
 RWTexture2D<float4> Result;
-SamplerState pointClampSampler;
-
-float4 bilerp(float4 p0q0, float4 p1q0, float4 p0q1, float4 p1q1, float2 offset)
-{
-    float a = offset.x % 1; // Get Interpolation factor for X direction.
-
-    float4 q0 = lerp(p0q0, p1q0, a); // Interpolates top row in X direction.
-    float4 q1 = lerp(p0q1, p1q1, a); // Interpolates bottom row in X direction.
-
-    float b = offset.y % 1; // Get Interpolation factor for Y direction.
-    return lerp(q0, q1, b); // Interpolate in Y direction.
-}
+RWStructuredBuffer<float4> dataBuffer;
+SamplerState SmpLinearClamp;
 
 /* Take velocity field as u, apply advection to vField*/
-[numthreads(16, 16, 1)]
+[numthreads(127, 2, 1)]
 void advect(uint3 id : SV_DispatchThreadID)
 {
-    float advectMax = 1000000;
-    float2 pos = id.xy - timestep * gridNormalizingFactor * (uField[id.xy].xy);
-    uint2 bounds = uint2(width, height) - uint2(1, 1);
-    uint2 base = floor(pos);
-    float4 p0q0 = vField[clamp(base, ZERO_2D, bounds)];
-    float4 p0q1 = vField[clamp(base + uint2(0, 1), ZERO_2D, bounds)];
-    float4 p1q0 = vField[clamp(base + uint2(1, 0), ZERO_2D, bounds)];
-    float4 p1q1 = vField[clamp(base + uint2(1, 1), ZERO_2D, bounds)];
-    float4 result = bilerp(p0q0, p0q1, p1q0, p1q1, pos);
-    bool4 nans = isnan(result);
+    float advectMax = 240000;
+    float2 coord = id.xy + ONE_2D;
+    float2 pos = coord - timestep * (uField[coord].xy) * gridNormalizingFactor;
+    float2 bounds = float2(width - 1, height - 1);
+    uint2 base = floor(pos - float2(0.5, 0.5));
+    float4 result = vField.SampleLevel(SmpLinearClamp, pos * gridNormalizingFactor, 0);
     bool4 infs = isinf(result);
-    float x = nans.x || infs.x ? 0 : clamp(result.x, -advectMax, advectMax);
-    float y = nans.y || infs.y ? 0 : clamp(result.y, -advectMax, advectMax);
-    float z = nans.z || infs.z ? 0 : clamp(result.z, -advectMax, advectMax);
-    float w = nans.w || infs.w ? 0 : clamp(result.w, -advectMax, advectMax);
-    Result[id.xy] = float4(x,y,z,w);
-}
-
-/* Apply a splat force*/
-[numthreads(16, 16, 1)]
-void applySplat(uint3 id : SV_DispatchThreadID)
-{
-    float4 force = forceMag * timestep * (((id.x - forceX) * (id.x - forceX) + (id.y - forceY) * (id.y - forceY)) / forceRadius);
-    float4 result = uField[id.xy] + force;
-    Result[id.xy] = result;
+    float x = infs.x ? 0 : clamp(result.x, -advectMax, advectMax);
+    float y = infs.y ? 0 : clamp(result.y, -advectMax, advectMax);
+    float z = infs.z ? 0 : clamp(result.z, -advectMax, advectMax);
+    float w = infs.w ? 0 : clamp(result.w, -advectMax, advectMax);
+    Result[coord] = float4(x,y,z,w);
+    /*Result[id.xy] = result;*/
+     /*"Debug" output*/
+    if (id.x == width-1 && id.y == height-1) {
+        dataBuffer[0] = result;
+        /*dataBuffer[1] = result;*/
+    }
 }
 
 /* Apply a texture force*/
-[numthreads(16, 16, 1)]
+[numthreads(127, 2, 1)]
 void applyForce(uint3 id : SV_DispatchThreadID)
 {
     // hue = angle
     // value = magnitude
-    float3 hsv = RGBtoHSV(vField[id.xy].rgb);
-    float magnitude = hsv.z * 200000;
-    float angle = isnan(hsv.x) ? 0 : hsv.x;
+    float2 coord = id.xy + ONE_2D;
+    float maxForce = 80000;
+    float3 hsv = RGBtoHSV(vField[coord].rgb);
+    float magnitude = isinf(hsv.z) ? maxForce : hsv.z *maxForce;
+    float angle = isnan(hsv.x) || isinf(hsv.x) ? 0 : hsv.x;
     float x = cos(2 * PI * angle) * magnitude;
     float y = sin(2 * PI * angle) * magnitude;
     float4 result = float4(x, y, 0, 1);
-    Result[id.xy] = uField[id.xy] + result;
+    Result[coord] = uField[coord] + result;
 }
 
 /* Apply a new dye layer*/
@@ -106,31 +93,24 @@ void applyDye(uint3 id : SV_DispatchThreadID)
     Result[id.xy] = saturate(uField[id.xy] + vField[id.xy]);
 }
 
-void applyForceOld(uint3 id : SV_DispatchThreadID)
-{
-    float4 result = uField[id.xy] + 100000 * ((vField[id.xy] - float4(0.5, 0.5, 0, 0)) * 2);
-    result.z = 0;
-    result.a = 1;
-    Result[id.xy] = result;
-}
-
 /* Take jacobi fields x and b as u and v, solve one iteration*/
-[numthreads(16, 16, 1)]
+[numthreads(127, 2, 1)]
 void jacobi(uint3 id : SV_DispatchThreadID)
 {
-    uint2 bounds = uint2(width, height) - uint2(1, 1);
+    float2 coord = id.xy + ONE_2D;
+    uint2 bounds = uint2(width, height) - uint2(2, 2);
     // left, right, bottom, and top x samples
-    float4 xL = uField[clamp(id.xy + LEFT_2D, ZERO_2D, bounds)];
-    float4 xR = uField[clamp(id.xy + RIGHT_2D, ZERO_2D, bounds)];
-    float4 xU = uField[clamp(id.xy + UP_2D, ZERO_2D, bounds)];
-    float4 xD = uField[clamp(id.xy + DOWN_2D, ZERO_2D, bounds)];
+    float4 xL = uField[clamp(coord + LEFT_2D, ZERO_2D, bounds)];
+    float4 xR = uField[clamp(coord + RIGHT_2D, ZERO_2D, bounds)];
+    float4 xU = uField[clamp(coord + UP_2D, ZERO_2D, bounds)];
+    float4 xD = uField[clamp(coord + DOWN_2D, ZERO_2D, bounds)];
 
     // b sample, from center
-    float4 bC = vField[id.xy];
+    float4 bC = vField[coord];
 
     // evaluate Jacobi iteration
     float4 result = (xL + xR + xD + xU + jacobiAlpha * bC) * jacobiRBeta;
-    Result[id.xy] = result;
+    Result[coord] = result;
 }
 
 /* Clear the pressure field of a scalar field set*/
@@ -143,43 +123,50 @@ void clearPressure(uint3 id: SV_DispatchThreadID)
 }
 
 /* Compute divergence of u field (typically velocity)*/
-[numthreads(16, 16, 1)]
+[numthreads(127, 2, 1)]
 void divergence(uint3 id : SV_DispatchThreadID)
 {
+    float2 coord = id.xy + ONE_2D;
     uint2 bounds = uint2(width, height) - uint2(1, 1);
-    float4 wL = uField[clamp(id.xy + LEFT_2D, ZERO_2D, bounds)];
-    float4 wR = uField[clamp(id.xy + RIGHT_2D, ZERO_2D, bounds)];
-    float4 wU = uField[clamp(id.xy + UP_2D, ZERO_2D, bounds)];
-    float4 wD = uField[clamp(id.xy + DOWN_2D, ZERO_2D, bounds)];
+    float4 wL = uField[clamp(coord + LEFT_2D, ZERO_2D, bounds)];
+    float4 wR = uField[clamp(coord + RIGHT_2D, ZERO_2D, bounds)];
+    float4 wU = uField[clamp(coord + UP_2D, ZERO_2D, bounds)];
+    float4 wD = uField[clamp(coord + DOWN_2D, ZERO_2D, bounds)];
 
     float4 result = (0.5 * gridNormalizingFactor) * ((wR.x - wL.x) + (wU.y - wD.y));
-    Result[id.xy] = result;
+    Result[coord] = result;
 }
 
 /* Compute gradient difference of first scalar field of v and u (ie velocity)*/
-[numthreads(16, 16, 1)]
+[numthreads(127, 2, 1)]
 void gradientDiff(uint3 id : SV_DispatchThreadID)
 {
+    float2 coord = id.xy + ONE_2D;
     uint2 bounds = uint2(width, height) - uint2(1, 1);
     // Extract pressure channel from v field.x
-    float pL = vField[clamp(id.xy + LEFT_2D, ZERO_2D, bounds)].x;
-    float pR = vField[clamp(id.xy + RIGHT_2D, ZERO_2D, bounds)].x;
-    float pU = vField[clamp(id.xy + UP_2D, ZERO_2D, bounds)].x;
-    float pD = vField[clamp(id.xy + DOWN_2D, ZERO_2D, bounds)].x;
+    float pL = vField[clamp(coord + LEFT_2D, ZERO_2D, bounds)].x;
+    float pR = vField[clamp(coord + RIGHT_2D, ZERO_2D, bounds)].x;
+    float pU = vField[clamp(coord + UP_2D, ZERO_2D, bounds)].x;
+    float pD = vField[clamp(coord + DOWN_2D, ZERO_2D, bounds)].x;
 
-    float4 updatedVelocity = uField[id.xy];
+    float4 updatedVelocity = uField[coord];
     updatedVelocity.xy -= (0.5 * gridNormalizingFactor) * float2(pR - pL, pU - pD);
-    Result[id.xy] = updatedVelocity;
+    Result[coord] = updatedVelocity;
 }
 
 /* Compute boundary conditions*/
-[numthreads(16, 16, 1)]
-void boundary(uint3 id : SV_DispatchThreadID)
+[numthreads(256,2,1)]
+void horizontalBoundary(uint3 id : SV_DispatchThreadID)
 {
-    float4 value = id.x == 0 ? boundaryScale * uField[id.xy + RIGHT_2D]
-        : id.x == width - 1 ? boundaryScale * uField[id.xy + LEFT_2D]
-        : id.y == 0 ? boundaryScale * uField[id.xy + UP_2D]
-        : id.y == height - 1 ? boundaryScale * uField[id.xy + DOWN_2D]
-        : uField[id.xy];
-    Result[id.xy] = value;
+    uint2 coord = uint2(id.x, id.y * (height - 1));
+    uint2 offset = coord + uint2(0, -2*id.y+1);
+    Result[coord] = boundaryScale * Result[offset];
+}
+
+[numthreads(2,256,1)]
+void verticalBoundary(uint3 id: SV_DispatchThreadID)
+{
+    uint2 coord = uint2(id.x * (width - 1), id.y);
+    uint2 offset = coord + uint2(-2*id.x + 1, 0);
+    Result[coord] = boundaryScale * Result[offset];
 }

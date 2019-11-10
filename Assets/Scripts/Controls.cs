@@ -102,11 +102,11 @@ public class Controls: MonoBehaviour
         if (Input.GetKeyDown(aIndex))
         {
             // Pressed 'A' on controller
-            PatternManager.instance.NextPattern();
+            Debug.Log("A pressed");
         }
         if (Input.GetKeyDown(bIndex))
         {
-            PatternManager.instance.PreviousPattern();
+            Debug.Log("B pressed");
         }
     }
 }

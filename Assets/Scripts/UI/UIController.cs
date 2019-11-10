@@ -45,6 +45,7 @@ public class UIController : MonoBehaviour
         performanceModeButton = transform.Find("ControlButtons/PerformanceModeButton").GetComponent<Button>();
         canopyLight = Canopy.instance.GetComponentInChildren<Light>();
         sendToAPIToggle = transform.Find("ControlButtons/SendToCanopyToggle").GetComponentInChildren<Toggle>();
+        Invoke("EnterControllerView", 0.5f);
     }
 
     //Performance mode controls (only render single active pattern)

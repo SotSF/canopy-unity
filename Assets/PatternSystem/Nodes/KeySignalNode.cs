@@ -51,8 +51,7 @@ public class KeySignalNode : TickingNode
                 elapsed = Mathf.Min(1, timeUp - timeDown) - (Time.time - timeUp);
             }
             var easedOutput = easingCurve.Evaluate(elapsed);
-            this.TimedDebugFmt("Elapsed: {0:0.00}, ease: {1:0.00}", 0.1f, elapsed, easedOutput);
-            signalOutputKnob.SetValue<float>(easedOutput);
+            signalOutputKnob.SetValue(easedOutput);
         }
         else
         {
