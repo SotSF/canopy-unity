@@ -1,43 +1,54 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
+using NodeEditorFramework.Utilities;
 using UnityEngine;
 
 
-[Node(false, "Pattern/Pattern")]
-public class PatternNode : Node
+abstract public class PatternNode : TickingNode
 {
-    public const string ID = "patternNode";
-    public override string GetID { get { return ID; } }
-
-    public override string Title { get { return "Pattern"; } }
     public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
 
-    [ValueConnectionKnob("Texture", Direction.In, "Texture")]
-    public ValueConnectionKnob textureInputKnob;
+     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 100)]
+    public ValueConnectionKnob textureOutputKnob;
 
-    [ValueConnectionKnob("Channel R", Direction.Out, "Channel")]
-    public ValueConnectionKnob channelRKnob;
-    [ValueConnectionKnob("Channel G", Direction.Out, "Channel")]
-    public ValueConnectionKnob channelGKnob;
-    [ValueConnectionKnob("Channel B", Direction.Out, "Channel")]
-    public ValueConnectionKnob channelBKnob;
-    [ValueConnectionKnob("Channel A", Direction.Out, "Channel")]
-    public ValueConnectionKnob channelAKnob;
+
+    private ComputeShader patternShader;
+    private int patternKernel;
+
+    public RenderTexture outputTex;
+
+    private Vector2Int outputSize = Vector2Int.zero;
+
+    private void Awake()
+    {
+        patternShader = Resources.Load<ComputeShader>(string.Format("PatternShaders/{0}Pattern}", GetID));
+        patternKernel = patternShader.FindKernel("PatternKernel");
+    }
+
+    private void InitializeRenderTexture()
+    {
+        if (outputTex != null)
+        {
+            outputTex.Release();
+        }
+        outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
+        outputTex.enableRandomWrite = true;
+        outputTex.Create();
+    }
 
     public override void NodeGUI()
     {
-        GUILayout.BeginHorizontal();
-
-        textureInputKnob.DisplayLayout();
-
+        //GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
-        channelRKnob.DisplayLayout();
-        channelGKnob.DisplayLayout();
-        channelBKnob.DisplayLayout();
-        channelAKnob.DisplayLayout();
-        GUILayout.EndVertical();
+        // Loop over control list dynamically? Or delegate to subclass?
 
+        // Draw output texture
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.Box(outputTex, GUILayout.MaxWidth(75), GUILayout.MaxHeight(96));
         GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+        //GUILayout.EndHorizontal();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
@@ -45,39 +56,17 @@ public class PatternNode : Node
 
     public override bool Calculate()
     {
-        Texture2D tex = textureInputKnob.GetValue<Texture2D>();
-        if (!textureInputKnob.connected() || tex == null)
-        { // Reset outputs if no texture is available
-            channelRKnob.ResetValue();
-            channelGKnob.ResetValue();
-            channelBKnob.ResetValue();
-            channelAKnob.ResetValue();
-            return true;
-        }
-
-        // Create new channels
-        float[,] channelR = new float[tex.width, tex.height];
-        float[,] channelG = new float[tex.width, tex.height];
-        float[,] channelB = new float[tex.width, tex.height];
-        float[,] channelA = new float[tex.width, tex.height];
-
-        for (int x = 0; x < tex.width; x++)
-        {
-            for (int y = 0; y < tex.height; y++)
-            { // Fill channels
-                Color col = tex.GetPixel(x, y);
-                channelR[x, y] = col.r;
-                channelG[x, y] = col.g;
-                channelB[x, y] = col.b;
-                channelA[x, y] = col.a;
-            }
-        }
+        patternShader.SetInt("width", outputTex.width);
+        patternShader.SetInt("height", outputTex.height);
+        patternShader.SetTexture(patternKernel, "OutputTex", outputTex);
+        uint x = 0, y = 0, z = 0;
+        patternShader.GetKernelThreadGroupSizes(patternKernel, x, y, z);
+        var threadGroupX = Mathf.CeilToInt(outputTex.width);
+        var threadGroupY = Mathf.CeilToInt(outputTex.height / 16.0f);
+        patternShader.Dispatch(patternKernel, threadGroupX, threadGroupY, 1);
 
         // Assign output channels
-        channelRKnob.SetValue(new Channel(tex.name + "_R", channelR));
-        channelGKnob.SetValue(new Channel(tex.name + "_G", channelG));
-        channelBKnob.SetValue(new Channel(tex.name + "_B", channelB));
-        channelAKnob.SetValue(new Channel(tex.name + "_A", channelA));
+        textureOutputKnob.SetValue(outputTex);
 
         return true;
     }
