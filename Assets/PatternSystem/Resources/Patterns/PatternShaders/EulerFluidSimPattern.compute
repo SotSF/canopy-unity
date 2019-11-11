@@ -159,7 +159,11 @@ void gradientDiff(uint3 id : SV_DispatchThreadID)
 void horizontalBoundary(uint3 id : SV_DispatchThreadID)
 {
     uint2 coord = uint2(id.x, id.y * (height - 1));
-    uint2 offset = coord + uint2(0, -2*id.y+1);
+    uint yOffset = -2 * id.y + 1;  // Either add or subtract 1 based on
+                                   // whether we're at the top (y=0) or
+                                   // bottom (y=1)
+    uint xOffset = id.x == 0 ? 1 : id.x == width - 1 ? -1 : 0;
+    uint2 offset = coord + uint2(xOffset, yOffset);
     Result[coord] = boundaryScale * Result[offset];
 }
 
@@ -167,6 +171,8 @@ void horizontalBoundary(uint3 id : SV_DispatchThreadID)
 void verticalBoundary(uint3 id: SV_DispatchThreadID)
 {
     uint2 coord = uint2(id.x * (width - 1), id.y);
-    uint2 offset = coord + uint2(-2*id.x + 1, 0);
+    uint xOffset = -2 * id.x + 1;
+    uint yOffset = id.y == 0 ? 1 : id.y == height - 1 ? -1 : 0;
+    uint2 offset = coord + uint2(xOffset, yOffset);
     Result[coord] = boundaryScale * Result[offset];
 }
