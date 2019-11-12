@@ -52,18 +52,10 @@ void advect(uint3 id : SV_DispatchThreadID)
     float advectMax = 240000;
     float2 coord = id.xy + ONE_2D;
     float2 pos = coord - timestep * (uField[coord].xy) * gridNormalizingFactor;
-    float2 bounds = float2(width - 1, height - 1);
-    uint2 base = floor(pos - float2(0.5, 0.5));
     float4 result = vField.SampleLevel(SmpLinearClamp, pos * gridNormalizingFactor, 0);
-    bool4 infs = isinf(result);
-    float x = infs.x ? 0 : clamp(result.x, -advectMax, advectMax);
-    float y = infs.y ? 0 : clamp(result.y, -advectMax, advectMax);
-    float z = infs.z ? 0 : clamp(result.z, -advectMax, advectMax);
-    float w = infs.w ? 0 : clamp(result.w, -advectMax, advectMax);
-    Result[coord] = float4(x,y,z,w);
-    /*Result[id.xy] = result;*/
+    Result[coord] = result;
      /*"Debug" output*/
-    if (id.x == width-1 && id.y == height-1) {
+    if (id.x == 0 && id.y == 0) {
         dataBuffer[0] = result;
         /*dataBuffer[1] = result;*/
     }
@@ -76,7 +68,7 @@ void applyForce(uint3 id : SV_DispatchThreadID)
     // hue = angle
     // value = magnitude
     float2 coord = id.xy + ONE_2D;
-    float maxForce = 80000;
+    float maxForce = 160000;
     float3 hsv = RGBtoHSV(vField[coord].rgb);
     float magnitude = isinf(hsv.z) ? maxForce : hsv.z *maxForce;
     float angle = isnan(hsv.x) || isinf(hsv.x) ? 0 : hsv.x;
@@ -100,10 +92,10 @@ void jacobi(uint3 id : SV_DispatchThreadID)
     float2 coord = id.xy + ONE_2D;
     uint2 bounds = uint2(width, height) - uint2(2, 2);
     // left, right, bottom, and top x samples
-    float4 xL = uField[clamp(coord + LEFT_2D, ZERO_2D, bounds)];
+    float4 xL = uField[clamp(coord + LEFT_2D,  ZERO_2D, bounds)];
     float4 xR = uField[clamp(coord + RIGHT_2D, ZERO_2D, bounds)];
-    float4 xU = uField[clamp(coord + UP_2D, ZERO_2D, bounds)];
-    float4 xD = uField[clamp(coord + DOWN_2D, ZERO_2D, bounds)];
+    float4 xU = uField[clamp(coord + UP_2D,    ZERO_2D, bounds)];
+    float4 xD = uField[clamp(coord + DOWN_2D,  ZERO_2D, bounds)];
 
     // b sample, from center
     float4 bC = vField[coord];
@@ -128,10 +120,10 @@ void divergence(uint3 id : SV_DispatchThreadID)
 {
     float2 coord = id.xy + ONE_2D;
     uint2 bounds = uint2(width, height) - uint2(1, 1);
-    float4 wL = uField[clamp(coord + LEFT_2D, ZERO_2D, bounds)];
+    float4 wL = uField[clamp(coord + LEFT_2D,  ZERO_2D, bounds)];
     float4 wR = uField[clamp(coord + RIGHT_2D, ZERO_2D, bounds)];
-    float4 wU = uField[clamp(coord + UP_2D, ZERO_2D, bounds)];
-    float4 wD = uField[clamp(coord + DOWN_2D, ZERO_2D, bounds)];
+    float4 wU = uField[clamp(coord + UP_2D,    ZERO_2D, bounds)];
+    float4 wD = uField[clamp(coord + DOWN_2D,  ZERO_2D, bounds)];
 
     float4 result = (0.5 * gridNormalizingFactor) * ((wR.x - wL.x) + (wU.y - wD.y));
     Result[coord] = result;
@@ -144,35 +136,47 @@ void gradientDiff(uint3 id : SV_DispatchThreadID)
     float2 coord = id.xy + ONE_2D;
     uint2 bounds = uint2(width, height) - uint2(1, 1);
     // Extract pressure channel from v field.x
-    float pL = vField[clamp(coord + LEFT_2D, ZERO_2D, bounds)].x;
+    float pL = vField[clamp(coord + LEFT_2D,  ZERO_2D, bounds)].x;
     float pR = vField[clamp(coord + RIGHT_2D, ZERO_2D, bounds)].x;
-    float pU = vField[clamp(coord + UP_2D, ZERO_2D, bounds)].x;
-    float pD = vField[clamp(coord + DOWN_2D, ZERO_2D, bounds)].x;
+    float pU = vField[clamp(coord + UP_2D,    ZERO_2D, bounds)].x;
+    float pD = vField[clamp(coord + DOWN_2D,  ZERO_2D, bounds)].x;
 
     float4 updatedVelocity = uField[coord];
     updatedVelocity.xy -= (0.5 * gridNormalizingFactor) * float2(pR - pL, pU - pD);
     Result[coord] = updatedVelocity;
 }
 
-/* Compute boundary conditions*/
+/* Compute boundary conditions - assumes shaders will be executed w threadgroups
+ * matching numthreads, such that horizontal boundaries see id.y == 0 and id.y == 1,
+ * vertical boundaries see id.x == 0 and id.x == 1, which are then scaled to the simulation
+ * width. */
 [numthreads(256,2,1)]
 void horizontalBoundary(uint3 id : SV_DispatchThreadID)
 {
     uint2 coord = uint2(id.x, id.y * (height - 1));
-    uint yOffset = -2 * id.y + 1;  // Either add or subtract 1 based on
-                                   // whether we're at the top (y=0) or
-                                   // bottom (y=1)
-    uint xOffset = id.x == 0 ? 1 : id.x == width - 1 ? -1 : 0;
-    uint2 offset = coord + uint2(xOffset, yOffset);
-    Result[coord] = boundaryScale * Result[offset];
-}
 
+    // Either add or subtract 1 based on whether we're at the top (y=0) or bottom (y=1)
+    uint yOffset = -2 * id.y + 1;  
+    // For the corners, offset toward the center
+    uint xOffset = id.x == 0 ? 1 : id.x == width - 1 ? -1 : 0;
+
+    uint2 offset = coord + uint2(xOffset, yOffset);
+    float4 result = boundaryScale * Result[offset];
+    result.a = 1;
+    Result[coord] = result;
+}
 [numthreads(2,256,1)]
 void verticalBoundary(uint3 id: SV_DispatchThreadID)
 {
     uint2 coord = uint2(id.x * (width - 1), id.y);
+
+    // Either add or subtract 1 based on whether we're at the left (x=0) or right (x=1)
     uint xOffset = -2 * id.x + 1;
+    // For the corners, offset toward the center
     uint yOffset = id.y == 0 ? 1 : id.y == height - 1 ? -1 : 0;
+
     uint2 offset = coord + uint2(xOffset, yOffset);
-    Result[coord] = boundaryScale * Result[offset];
+    float4 result = boundaryScale * Result[offset];
+    result.a = 1;
+    Result[coord] = result;
 }

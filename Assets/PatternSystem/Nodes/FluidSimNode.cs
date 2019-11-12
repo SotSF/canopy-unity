@@ -201,23 +201,12 @@ public class FluidSimNode : TickingNode
         //Apply velocity boundary
         ExecuteBoundaryShader(velocityField, -1);
 
-        //Apply dye boundary
-        ExecuteBoundaryShader(dyeField, 0);
-
-        // Advect dye
-        fluidSimShader.SetTexture(advectionKernel, "uField", velocityField);
-        fluidSimShader.SetTexture(advectionKernel, "vField", dyeField);
-        ExecuteInteriorShader(advectionKernel);
-        Graphics.Blit(resultField, dyeField);
-
         // Advect velocity
-        fluidSimShader.SetFloat("timestep", Time.deltaTime);
         fluidSimShader.SetFloat("gridNormalizingFactor", 1.0f / outputSize.x);
         fluidSimShader.SetTexture(advectionKernel, "uField", velocityField);
         fluidSimShader.SetTexture(advectionKernel, "vField", velocityField);
         ExecuteInteriorShader(advectionKernel);
         Graphics.Blit(resultField, velocityField);
-
         // Compute diffusion
         //var viscosity = 30f;
         //fluidSimShader.SetFloat("jacobiAlpha", (dx2) / (viscosity * Time.deltaTime));
@@ -267,6 +256,18 @@ public class FluidSimNode : TickingNode
         ExecuteInteriorShader(gradientDiffKernel);
         Graphics.Blit(resultField, velocityField);
 
+        dataBuffer.GetData(advectionData);
+        this.TimedDebugFmt("Velocity result [0,0]: {0}", 2, advectionData[0]);
+
+        //Apply dye boundary
+        ExecuteBoundaryShader(dyeField, 0);
+
+        // Advect dye
+        fluidSimShader.SetTexture(advectionKernel, "uField", velocityField);
+        fluidSimShader.SetTexture(advectionKernel, "vField", dyeField);
+        ExecuteInteriorShader(advectionKernel);
+        Graphics.Blit(resultField, dyeField);
+
         //Texture2D dbg = velocityField.ToTexture2D();
         //var colors = dbg.GetPixels();
         //StringBuilder builder = new StringBuilder();
@@ -282,10 +283,9 @@ public class FluidSimNode : TickingNode
     {
         if (running && Time.time - lastStep > 1/60f)
         {
+            fluidSimShader.SetFloat("timestep", Time.time - lastStep);
             lastStep = Time.time;
             SimulateFluid();
-            dataBuffer.GetData(advectionData);
-            this.TimedDebugFmt("Result: {0}", 2, advectionData[0]);
         }
         textureOutputKnob.SetValue<Texture>(dyeField);
         return true;
