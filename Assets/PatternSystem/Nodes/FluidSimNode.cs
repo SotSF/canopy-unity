@@ -3,19 +3,23 @@ using System.Collections;
 using NodeEditorFramework;
 using System.Collections.Generic;
 using System.Text;
+using NodeEditorFramework.Utilities;
 
 [Node(false, "Inputs/FluidSim")]
 public class FluidSimNode : TickingNode
 {
     public override string GetID => "FluidSimNode";
     public override string Title { get { return "FluidSim"; } }
-    public override Vector2 DefaultSize => new Vector2(620, 250);
+    public override Vector2 DefaultSize => new Vector2(620, 300);
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob velocityInputKnob;
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 60)]
     public ValueConnectionKnob dyeInputKnob;
+
+    [ValueConnectionKnob("dyeLevel", Direction.In, "Float")]
+    public ValueConnectionKnob dyeInputLevel;
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
@@ -95,6 +99,11 @@ public class FluidSimNode : TickingNode
             dataBuffer.Release();
     }
 
+    private void OnDisable()
+    {
+        OnDestroy();
+    }
+
 
     private void Awake()
     {
@@ -119,14 +128,20 @@ public class FluidSimNode : TickingNode
         ClearRenderTextures();
     }
 
+    bool useBoundaries = true;
+    bool continuousVelocity = false;
+    bool continuousDye = false;
+    
     bool clicked = false;
+    //float viscosity = 1;
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
         velocityInputKnob.SetPosition(140);
         dyeInputKnob.SetPosition(40);
-        GUILayout.BeginHorizontal();
 
+        // Top row simulation control buttons
+        GUILayout.BeginHorizontal();
         string cmd = running ? "Stop" : "Run";
         if (GUILayout.Button(cmd))
         {
@@ -135,20 +150,11 @@ public class FluidSimNode : TickingNode
         }
         if (GUILayout.Button("Apply dye"))
         {
-            Graphics.Blit(dyeInputKnob.GetValue<Texture>(), scaledBuffer);
-            fluidSimShader.SetTexture(dyeKernel, "uField", dyeField);
-            fluidSimShader.SetTexture(dyeKernel, "vField", scaledBuffer);
-            ExecuteFullTexShader(dyeKernel);
-            Graphics.Blit(resultField, dyeField);
+            AddDye();
         }
         if (GUILayout.Button("Apply velocity"))
         {
-            Graphics.Blit(velocityInputKnob.GetValue<Texture>(), scaledBuffer);
-            fluidSimShader.SetTexture(forceKernel, "uField", velocityField);
-            fluidSimShader.SetTexture(forceKernel, "vField", scaledBuffer);
-            ExecuteInteriorShader(forceKernel);
-            Graphics.Blit(resultField, velocityField);
-            ExecuteBoundaryShader(velocityField, -1);
+            ApplyVelocity();
         }
         if (GUILayout.Button("Reset"))
         {
@@ -156,6 +162,15 @@ public class FluidSimNode : TickingNode
             running = false;
         }
         GUILayout.EndHorizontal();
+
+        // parameters / buttons
+        GUILayout.BeginHorizontal();
+        useBoundaries = RTEditorGUI.Toggle(useBoundaries, new GUIContent("Bounded", "Bound at the borders"));
+        continuousVelocity = RTEditorGUI.Toggle(continuousVelocity, new GUIContent("Continuous Velocity", "Add velocity texture every frame"));
+        continuousDye = RTEditorGUI.Toggle(continuousDye, new GUIContent("Continuous dye", "Add dye every frame"));
+        //viscosity = RTEditorGUI.Slider(viscosity, 0.00001f, 100f);
+        GUILayout.EndHorizontal();
+        // Texture output
         GUILayout.BeginHorizontal();
         GUILayout.Box(dyeField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
         GUILayout.Box(velocityField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
@@ -165,6 +180,26 @@ public class FluidSimNode : TickingNode
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
+    }
+
+    private void AddDye()
+    {
+        fluidSimShader.SetFloat("dyeMultiplier", dyeInputLevel.GetValue<float>());
+        Graphics.Blit(dyeInputKnob.GetValue<Texture>(), scaledBuffer);
+        fluidSimShader.SetTexture(dyeKernel, "uField", dyeField);
+        fluidSimShader.SetTexture(dyeKernel, "vField", scaledBuffer);
+        ExecuteFullTexShader(dyeKernel);
+        Graphics.Blit(resultField, dyeField);
+    }
+
+    private void ApplyVelocity()
+    {
+        Graphics.Blit(velocityInputKnob.GetValue<Texture>(), scaledBuffer);
+        fluidSimShader.SetTexture(forceKernel, "uField", velocityField);
+        fluidSimShader.SetTexture(forceKernel, "vField", scaledBuffer);
+        ExecuteInteriorShader(forceKernel);
+        Graphics.Blit(resultField, velocityField);
+        ExecuteBoundaryShader(velocityField, -1);
     }
 
     private void ExecuteInteriorShader(int kernel)
@@ -183,11 +218,14 @@ public class FluidSimNode : TickingNode
 
     private void ExecuteBoundaryShader(RenderTexture field, float scale)
     {
-        fluidSimShader.SetFloat("boundaryScale", scale);
-        fluidSimShader.SetTexture(horizontalBoundaryKernel, "Result", field);
-        fluidSimShader.Dispatch(horizontalBoundaryKernel, 1, 2, 1);
-        fluidSimShader.SetTexture(verticalBoundaryKernel, "Result", field);
-        fluidSimShader.Dispatch(verticalBoundaryKernel, 2, 1, 1);
+        if (useBoundaries)
+        {
+            fluidSimShader.SetFloat("boundaryScale", scale);
+            fluidSimShader.SetTexture(horizontalBoundaryKernel, "Result", field);
+            fluidSimShader.Dispatch(horizontalBoundaryKernel, 1, 2, 1);
+            fluidSimShader.SetTexture(verticalBoundaryKernel, "Result", field);
+            fluidSimShader.Dispatch(verticalBoundaryKernel, 2, 1, 1);
+        }
     }
 
     private void SimulateFluid()
@@ -195,7 +233,8 @@ public class FluidSimNode : TickingNode
         float dx2 = outputSize.x * outputSize.x;
         fluidSimShader.SetInt("width", outputSize.x);
         fluidSimShader.SetInt("height", outputSize.y);
-        fluidSimShader.SetFloat("dissipation", 0.0f);
+        //fluidSimShader.SetFloat("dissipation", 0.0f);
+        fluidSimShader.SetFloat("timestep", timestep);
 
         //Apply velocity boundary
         ExecuteBoundaryShader(velocityField, -1);
@@ -204,18 +243,22 @@ public class FluidSimNode : TickingNode
         fluidSimShader.SetFloat("gridNormalizingFactor", 1.0f / (outputSize.x));
         fluidSimShader.SetTexture(advectionKernel, "uField", velocityField);
         fluidSimShader.SetTexture(advectionKernel, "vField", velocityField);
-        ExecuteInteriorShader(advectionKernel);
+        ExecuteFullTexShader(advectionKernel);
         Graphics.Blit(resultField, velocityField);
 
+        if (continuousVelocity)
+        {
+            ApplyVelocity();
+        }
+
         // Compute diffusion
-        //var viscosity = 30f;
-        //fluidSimShader.SetFloat("jacobiAlpha", (dx2) / (viscosity * Time.deltaTime));
-        //fluidSimShader.SetFloat("jacobiRBeta", 1.0f / (4 + (dx2) / (viscosity * Time.deltaTime)));
-        //for (int i = 0; i < 20; i++)
+        //fluidSimShader.SetFloat("jacobiAlpha", (dx2) / (viscosity * timestep));
+        //fluidSimShader.SetFloat("jacobiRBeta", 1.0f / (4 + (dx2) / (viscosity * timestep)));
+        //for (int i = 0; i < 60; i++)
         //{
         //    fluidSimShader.SetTexture(jacobiKernel, "vField", velocityField);
         //    fluidSimShader.SetTexture(jacobiKernel, "uField", velocityField);
-        //    ExecuteShader(jacobiKernel);
+        //    ExecuteInteriorShader(jacobiKernel);
         //    Graphics.Blit(resultField, velocityField);
         //}
 
@@ -269,7 +312,7 @@ public class FluidSimNode : TickingNode
         // Advect dye
         fluidSimShader.SetTexture(advectionKernel, "uField", velocityField);
         fluidSimShader.SetTexture(advectionKernel, "vField", dyeField);
-        ExecuteInteriorShader(advectionKernel);
+        ExecuteFullTexShader(advectionKernel);
         Graphics.Blit(resultField, dyeField);
 
         //Texture2D dbg = velocityField.ToTexture2D();
@@ -278,17 +321,22 @@ public class FluidSimNode : TickingNode
         //this.TimedDebug(builder.ToString(), 3);
     }
 
+    float timestep;
     float lastStep = 0;
     public override bool Calculate()
     {
+        if (continuousDye)
+        {
+            AddDye();
+        }
         if (running && Time.time - lastStep > 1/60f)
         {
             if (clicked)
             {
-                fluidSimShader.SetFloat("timestep", Time.deltaTime);
+                timestep = Time.deltaTime;
             } else
             {
-                fluidSimShader.SetFloat("timestep", Time.time - lastStep);
+                timestep = Time.time - lastStep;
             }
             lastStep = Time.time;
             SimulateFluid();

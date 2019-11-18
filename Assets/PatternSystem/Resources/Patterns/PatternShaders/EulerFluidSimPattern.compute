@@ -32,6 +32,8 @@ float gridNormalizingFactor;  // aka rdx, reciprocal of dx, grid scale
 float jacobiAlpha;
 float jacobiRBeta;
 
+float dyeMultiplier;
+
 float forceRadius;
 float forceMag;
 uint forceX;
@@ -42,14 +44,14 @@ RWStructuredBuffer<float4> dataBuffer;
 SamplerState SmpLinearClamp;
 
 /* Take velocity field as u, apply advection to vField*/
-[numthreads(127, 2, 1)]
+[numthreads(16, 16, 1)]
 void advect(uint3 id : SV_DispatchThreadID)
 {
     float advectMax = 240000;
-    float2 coord = id.xy + ONE_2D;
-    float2 bounds = float2(width, height);
+    /*float2 coord = id.xy + ONE_2D;*/
+    float2 coord = id.xy;
     float2 advectedPoint = coord - timestep * (uField[coord].xy) * gridNormalizingFactor;
-    float4 result = vField.SampleLevel(SmpLinearClamp, (advectedPoint+float2(.5,.5)) / bounds, 0);
+    float4 result = vField.SampleLevel(SmpLinearClamp, (advectedPoint+float2(.5,.5)) * gridNormalizingFactor, 0);
     Result[coord] = result;
 }
 
@@ -74,7 +76,7 @@ void applyForce(uint3 id : SV_DispatchThreadID)
 [numthreads(16, 16, 1)]
 void applyDye(uint3 id : SV_DispatchThreadID)
 {
-    Result[id.xy] = saturate(uField[id.xy] + vField[id.xy]);
+    Result[id.xy] = saturate(uField[id.xy] + dyeMultiplier*vField[id.xy]);
 }
 
 /* Take jacobi fields x and b as u and v, solve one iteration*/
@@ -111,7 +113,6 @@ void clearPressure(uint3 id: SV_DispatchThreadID)
 void divergence(uint3 id : SV_DispatchThreadID)
 {
     float2 coord = id.xy + ONE_2D;
-    uint2 bounds = uint2(width, height) - uint2(1, 1);
     float4 wL = uField[coord + LEFT_2D];
     float4 wR = uField[coord + RIGHT_2D];
     float4 wU = uField[coord + UP_2D];
@@ -126,7 +127,6 @@ void divergence(uint3 id : SV_DispatchThreadID)
 void gradientDiff(uint3 id : SV_DispatchThreadID)
 {
     float2 coord = id.xy + ONE_2D;
-    uint2 bounds = uint2(width, height) - uint2(1, 1);
     // Extract pressure channel from v field.x
     float pL = vField[coord + LEFT_2D].x;
     float pR = vField[coord + RIGHT_2D].x;
