@@ -21,7 +21,7 @@ public class CanopyNode : Node
 
 
     private Camera canopyCam;
-    private RenderTexture camTex;
+    //private RenderTexture camTex;
     private RenderTexture kaleidoscopeElementTexture;
     private Vector2Int outputSize = Vector2Int.zero;
     private RenderTexture outputTex;
@@ -55,8 +55,19 @@ public class CanopyNode : Node
 
     private void OnDestroy()
     {
+        RenderTexture[] textures = { outputTex, kaleidoscopeElementTexture };/*, camTex };*/
+        foreach (var t in textures)
+        {
+            if (t != null)
+                t.Release();
+        }
         if (dataBuffer != null)
             dataBuffer.Release();
+    }
+
+    private void OnDisable()
+    {
+        OnDestroy();
     }
 
     private void InitializeTextures()
