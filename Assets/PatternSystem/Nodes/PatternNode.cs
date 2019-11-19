@@ -54,17 +54,21 @@ abstract public class PatternNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
-    {
+    public void BindAndExecute(){
         patternShader.SetInt("width", outputTex.width);
         patternShader.SetInt("height", outputTex.height);
         patternShader.SetTexture(patternKernel, "OutputTex", outputTex);
-        uint tx, ty, tz;
+        uint tx,ty,tz;
         patternShader.GetKernelThreadGroupSizes(patternKernel, out tx, out ty, out tz);
-        var threadGroupX = Mathf.CeilToInt(outputTex.width);
-        var threadGroupY = Mathf.CeilToInt(outputTex.height / 16.0f);
+        var threadGroupX = Mathf.CeilToInt(outputTex.width / tx);
+        var threadGroupY = Mathf.CeilToInt(outputTex.height / ty);
         patternShader.Dispatch(patternKernel, threadGroupX, threadGroupY, 1);
+    }
 
+    public override bool Calculate()
+    {
+        // Bind the
+        BindAndExecute();
         // Assign output channels
         textureOutputKnob.SetValue(outputTex);
 
