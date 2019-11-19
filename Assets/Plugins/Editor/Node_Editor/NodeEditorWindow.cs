@@ -39,7 +39,7 @@ namespace NodeEditorFramework.Standard
 			return _editor;
 		}
 
-		/*
+        /*
 		/// <summary>
 		/// Assures that the canvas is opened when double-clicking a canvas asset
 		/// </summary>
@@ -55,8 +55,9 @@ namespace NodeEditorFramework.Standard
 			return false;
 		}
 		*/
-			
-		private void OnEnable()
+
+        [System.Obsolete]
+        private void OnEnable()
 		{
 			_editor = this;
 			NormalReInit();
@@ -71,8 +72,9 @@ namespace NodeEditorFramework.Standard
 			SceneView.onSceneGUIDelegate -= OnSceneGUI;
 			SceneView.onSceneGUIDelegate += OnSceneGUI;
 		}
-		
-		private void OnDestroy()
+
+        [System.Obsolete]
+        private void OnDestroy()
 		{
 			// Unsubscribe from events
 			NodeEditor.ClientRepaints -= Repaint;
