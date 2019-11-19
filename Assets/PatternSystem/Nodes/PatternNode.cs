@@ -59,8 +59,8 @@ abstract public class PatternNode : TickingNode
         patternShader.SetInt("width", outputTex.width);
         patternShader.SetInt("height", outputTex.height);
         patternShader.SetTexture(patternKernel, "OutputTex", outputTex);
-        uint x = 0, y = 0, z = 0;
-        patternShader.GetKernelThreadGroupSizes(patternKernel, x, y, z);
+        uint tx, ty, tz;
+        patternShader.GetKernelThreadGroupSizes(patternKernel, out tx, out ty, out tz);
         var threadGroupX = Mathf.CeilToInt(outputTex.width);
         var threadGroupY = Mathf.CeilToInt(outputTex.height / 16.0f);
         patternShader.Dispatch(patternKernel, threadGroupX, threadGroupY, 1);
