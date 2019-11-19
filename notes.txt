@@ -1,0 +1,26 @@
+- signals and inputs
+  - filter which takes [0,1] and rescales to [x,y]
+  - keyboard axis which takes two keys for +/- and gives [-1,1]
+  - latch which latches a value as it comes through
+  - latching slider which can nudge up/down given axis input
+  - spiking inputs
+  - beat trainer (press key at freq, latches frequency)
+  - signal generation: besides straight oscillator, use anim curves
+    - anim curve drawing shader to allow thumbnails etc
+  - animation curve driven 
+  - events?
+- xbox controller:
+  - make it do stuff
+- load assets off disk at runtime
+  - use native file window to pick new stuff
+  - use Application.datapath + folders to store / load textures / animatedtextures
+- patterns:
+  - spark trace
+  - keyboard (play keys around outside of circle, tuneable color parameters etc, use to feed fluid)
+- fluid sim:
+  - allow ink diffusion
+- code quality / refactoring
+  - base Pattern class, button/wizard (somewhere) to generate new shader+node
+    - if wizard, take in name / type (tex filter (tex in+out), tex pattern (tex out), signal filter (float in/out), signal generator (float out), etc)
+  - Finish implementing Singleton shit for managers
+  - put oscillation into nodes instead of stupid oscillator manager shit (compute buffer overhead is expensive)
