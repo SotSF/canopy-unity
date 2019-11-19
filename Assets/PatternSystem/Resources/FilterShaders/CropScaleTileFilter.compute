@@ -1,0 +1,46 @@
+﻿#pragma kernel TileKernel
+#pragma kernel MirrorKernel
+#pragma kernel CropScaleKernel
+
+Texture2D<float4> InputTex;
+RWTexture2D<float4> OutputTex;
+
+uint iWidth;
+uint iHeight;
+
+uint oWidth;
+uint oHeight;
+
+bool applyScale;
+
+SamplerState SmpLinearRepeat;
+SamplerState SmpLinearMirror;
+SamplerState SmpLinearClamp;
+
+[numthreads(16, 16, 1)]
+void CropScaleKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 dimensions = float2(iWidth, iHeight);
+    // if input is larger than output, crop
+    // if input is smaller than output, scale if scale selected, otherwise, fill black?
+    float newX = applyScale ? (iWidth / float(oWidth)) * id.x : id.x;
+    float newY = applyScale ? (iHeight / float(oHeight)) * id.y : id.y;
+    float4 black = float4(0,0,0,1);
+    float4 sampled = InputTex.SampleLevel(SmpLinearClamp, float2(newX, newY)/dimensions, 0);
+    bool outOfBounds = (id.x >= iWidth || id.y >= iHeight) && !applyScale;
+    OutputTex[id.xy] = !outOfBounds ? sampled : black;
+}
+
+[numthreads(16, 16, 1)]
+void MirrorKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 dimensions = float2(iWidth, iHeight);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearMirror, id.xy/dimensions, 0);
+}
+
+[numthreads(16, 16, 1)]
+void TileKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 dimensions = float2(iWidth, iHeight);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearRepeat, id.xy/dimensions, 0);
+}
