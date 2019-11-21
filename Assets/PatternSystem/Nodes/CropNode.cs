@@ -30,9 +30,9 @@ public class CropNode : Node
     public RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
-    private bool scale;
-    private bool tile;
-    private bool mirror;
+    public bool scale;
+    public bool tile;
+    public bool mirror;
     private int tileKernel;
     private int mirrorKernel;
     private int cropScaleKernel;
@@ -40,7 +40,7 @@ public class CropNode : Node
     private void Awake()
     {
         CropShader = Resources.Load<ComputeShader>("FilterShaders/CropScaleTileFilter");
-        // tileKernel = CropShader.FindKernel("TileKernel");
+        tileKernel = CropShader.FindKernel("TileKernel");
         mirrorKernel = CropShader.FindKernel("MirrorKernel");
         cropScaleKernel = CropShader.FindKernel("CropScaleKernel");
     }
@@ -98,7 +98,7 @@ public class CropNode : Node
             mirror = false;
         }
         GUILayout.EndHorizontal();
-        GUILayout.Box(outputTex, GUILayout.MaxHeight(64));
+        GUILayout.Box(outputTex, GUILayout.MaxHeight(64), GUILayout.MaxWidth(64));
         textureOutputKnob.DisplayLayout();
         GUILayout.EndVertical();
 
