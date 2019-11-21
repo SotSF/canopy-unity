@@ -194,12 +194,16 @@ public class FluidSimNode : TickingNode
 
     private void ApplyVelocity()
     {
-        Graphics.Blit(velocityInputKnob.GetValue<Texture>(), scaledBuffer);
-        fluidSimShader.SetTexture(forceKernel, "uField", velocityField);
-        fluidSimShader.SetTexture(forceKernel, "vField", scaledBuffer);
-        ExecuteInteriorShader(forceKernel);
-        Graphics.Blit(resultField, velocityField);
-        ExecuteBoundaryShader(velocityField, -1);
+        Texture input = velocityInputKnob.GetValue<Texture>();
+        if (input != null && input.width > 0)
+        {
+            Graphics.Blit(input, scaledBuffer);
+            fluidSimShader.SetTexture(forceKernel, "uField", velocityField);
+            fluidSimShader.SetTexture(forceKernel, "vField", scaledBuffer);
+            ExecuteInteriorShader(forceKernel);
+            Graphics.Blit(resultField, velocityField);
+            ExecuteBoundaryShader(velocityField, -1);
+        }
     }
 
     private void ExecuteInteriorShader(int kernel)
