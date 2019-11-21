@@ -29,7 +29,6 @@ public class UIController : MonoBehaviour
     public bool sendToAPI { get { return sendToAPIToggle.isOn; } }
 
     private Button viewModeButton;
-    private Button performanceModeButton;
     private Light canopyLight;
 
     private Vector3 controllerCameraPosition = new Vector3(0, 1.6f, 0);
@@ -42,35 +41,9 @@ public class UIController : MonoBehaviour
     {
         instance = this;
         viewModeButton = transform.Find("ControlButtons/ViewModeButton").GetComponent<Button>();
-        performanceModeButton = transform.Find("ControlButtons/PerformanceModeButton").GetComponent<Button>();
         canopyLight = Canopy.instance.GetComponentInChildren<Light>();
         sendToAPIToggle = transform.Find("ControlButtons/SendToCanopyToggle").GetComponentInChildren<Toggle>();
         Invoke("EnterControllerView", 0.5f);
-    }
-
-    //Performance mode controls (only render single active pattern)
-    public void EnterHighPerformanceMode()
-    {
-        PatternManager.instance.highPerformance = true;
-        canopyLight.enabled = false;
-        performanceModeButton.GetComponentInChildren<Text>().text = "Enter high quality mode";
-    }
-    public void EnterHighQualityMode()
-    {
-        PatternManager.instance.highPerformance = false;
-        canopyLight.enabled = true;
-        performanceModeButton.GetComponentInChildren<Text>().text = "Enter high performance mode";
-    }
-    public void TogglePerformanceMode()
-    {
-        inHighPerformanceMode = !inHighPerformanceMode;
-        if (inHighPerformanceMode)
-        {
-            EnterHighPerformanceMode();
-        } else
-        {
-            EnterHighQualityMode();
-        }
     }
 
 
@@ -91,7 +64,7 @@ public class UIController : MonoBehaviour
         }
         foreach (PatternParameter param in pattern.parameters)
         {
-            if (param.controllable) {
+            if (param.input) {
                 RectTransform controlBase = Instantiate(controlBasePrefab, controlsNode);
                 UIControl control = controlBase.GetComponent<UIControl>();
                 Text label = controlBase.Find("ControlElements/Label").GetComponent<Text>();
