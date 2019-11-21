@@ -67,7 +67,7 @@ public class PanNode : TickingNode {
         speedInputKnob.DisplayLayout(new GUIContent("Speed", "The speed to pan in image widths/second"));
         if (!speedInputKnob.connected())
         {
-            speed = RTEditorGUI.Slider(speed, -1, 1);
+            speed = RTEditorGUI.Slider(speed, -32, 32);
         }
         angleInputKnob.DisplayLayout(new GUIContent("Angle", "The angle to pan in radians"));
         if (!angleInputKnob.connected())
@@ -92,6 +92,7 @@ public class PanNode : TickingNode {
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
+    float lastStep = 0;
     public override bool Calculate()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
@@ -101,6 +102,16 @@ public class PanNode : TickingNode {
             outputSize = Vector2Int.zero;
             if (outputTex != null)
                 outputTex.Release();
+            return true;
+        }
+        // Guard against multiple Calculate()'s per frame
+        if (Time.time - lastStep > Time.deltaTime)
+        {
+            lastStep = Time.time;
+        }
+        else
+        {
+            textureOutputKnob.SetValue(outputTex);
             return true;
         }
 
@@ -116,7 +127,7 @@ public class PanNode : TickingNode {
 
         // Keep offset bounded by (2x) dimensions so that floating point coverage doesn't decrease
         // over long pans. use 2x so that mirrored textures don't jump on resetting the offset
-        var r = speed * tex.width * Time.deltaTime;
+        var r = speed * Time.deltaTime;
         offset += new Vector2(r * Mathf.Cos(angle), r * Mathf.Sin(angle));
         Vector2 mirrorSafeBounds = 2*new Vector2(tex.width-1, tex.height-1);
         if (offset.x > mirrorSafeBounds.x)

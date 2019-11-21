@@ -16,7 +16,7 @@ namespace sotsf.canopy.patterns
         FLOAT4,
         BOOL,
         INT,
-        TEXTURE
+        TEX
     }
 
     [Serializable]
@@ -24,7 +24,7 @@ namespace sotsf.canopy.patterns
     {
         public string name;
         public ParamType paramType;
-        public bool controllable;
+        public bool input;
         public bool useRange;
         public float minFloat;
         public float maxFloat;
@@ -219,7 +219,7 @@ namespace sotsf.canopy.patterns
                         case ParamType.INT:
                             // Not implemented
                             break;
-                        case ParamType.TEXTURE:
+                        case ParamType.TEX:
                             Texture texValue = param.GetTexture();
                             patternShader.SetInt("height", texValue.height);
                             patternShader.SetInt("width", texValue.width);

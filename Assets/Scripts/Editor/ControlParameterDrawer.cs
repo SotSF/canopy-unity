@@ -1,6 +1,7 @@
 ﻿using sotsf.canopy.patterns;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -13,7 +14,6 @@ public class PropertyDrawerUtility
     {
         var obj = fieldInfo.GetValue(property.serializedObject.targetObject);
         if (obj == null) { return null; }
-
         T actualObject = null;
         if (obj.GetType().IsArray)
         {
@@ -70,7 +70,7 @@ public class PatternParameterDrawer : PropertyDrawer
         //1 row for controllable
         //1 row for default
         int rowcount = 3;
-        if (param != null && param.controllable){
+        if (param != null && param.input){
             rowcount++;
             if (IsNumeric(param))
             {
@@ -120,10 +120,10 @@ public class PatternParameterDrawer : PropertyDrawer
 
         var controllableRect = new Rect(position.x, YOffset(rowsFilled, position.y),
                                         width, rowHeight);
-        var controllableProp = property.FindPropertyRelative("controllable");
+        var controllableProp = property.FindPropertyRelative("input");
         EditorGUI.PropertyField(controllableRect, controllableProp);
         rowsFilled++;
-        if (param != null && param.controllable){
+        if (param != null && param.input){
             if (IsNumeric(param))
             {
                 var rangeRect = new Rect(position.x, YOffset(rowsFilled, position.y), width, rowHeight);
@@ -165,7 +165,7 @@ public class PatternParameterDrawer : PropertyDrawer
                     case (ParamType.FLOAT4):
                         defaultProp = property.FindPropertyRelative("defaultVector");
                         break;
-                    case (ParamType.TEXTURE):
+                    case (ParamType.TEX):
                         defaultProp = property.FindPropertyRelative("defaultTexture");
                         break;
                     default:
