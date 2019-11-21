@@ -28,11 +28,10 @@ public class CanopyNode : Node
     private ComputeShader canopyMainShader;
     private ComputeBuffer dataBuffer;
     private Vector3[] colorData;
-    private int kernelId;
+    private int mainKernel;
+    private int seamlessKernel;
     public bool polarize;
     public bool seamless;
-    public bool fitX;
-    public bool fitY;
     private Light lightCaster;
 
     private void Awake()
@@ -41,12 +40,15 @@ public class CanopyNode : Node
         if (Application.isPlaying)
         {
             canopyMainShader = Resources.Load<ComputeShader>("FilterShaders/CanopyMain");
-            kernelId = canopyMainShader.FindKernel("CanopyMain");
+            mainKernel = canopyMainShader.FindKernel("CanopyMain");
+            seamlessKernel = canopyMainShader.FindKernel("CanopySeamless");
             dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
             colorData = new Vector3[Constants.NUM_LEDS];
             InitializeTextures();
-            canopyMainShader.SetBuffer(kernelId, "dataBuffer", dataBuffer);
-            canopyMainShader.SetTexture(kernelId, "OutputTex", outputTex);
+            canopyMainShader.SetBuffer(mainKernel, "dataBuffer", dataBuffer);
+            canopyMainShader.SetTexture(mainKernel, "OutputTex", outputTex);
+            canopyMainShader.SetBuffer(seamlessKernel, "dataBuffer", dataBuffer);
+            canopyMainShader.SetTexture(seamlessKernel, "OutputTex", outputTex);
             lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
             RenderToCanopySimulation(outputTex);
         }
@@ -95,20 +97,6 @@ public class CanopyNode : Node
         GUILayout.BeginHorizontal();
         polarize = RTEditorGUI.Toggle(polarize, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
         seamless = RTEditorGUI.Toggle(seamless, new GUIContent("Seamless", "Apply a kaleidoscope effect such that the output is seamless"));
-        if (RTEditorGUI.Toggle(fitX, new GUIContent("Fit X", "Scale the input to fit the canopy in X"))){
-            fitX = true;
-            fitY = false;
-        } else
-        {
-            fitX = false;
-        }
-        if (RTEditorGUI.Toggle(fitY, new GUIContent("Fit Y", "Scale the input to fit the canopy in Y"))) {
-            fitX = false;
-            fitY = true;
-        } else
-        {
-            fitY = false;
-        }
 
         GUILayout.EndHorizontal();
         var lastBox = GUILayoutUtility.GetLastRect();
@@ -149,25 +137,12 @@ public class CanopyNode : Node
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (tex != null)
         {
-            if (!polarize && seamless) {
-                // If in seamless mode, copy and crop the input texture into the kaleidoscope
-                // element texture and send to the compute shader
-                Vector2 scale = new Vector2(1, 1);
-                Vector2 offset = new Vector2(0,0);
-                Graphics.Blit(tex, kaleidoscopeElementTexture, scale, offset);
-                canopyMainShader.SetTexture(kernelId, "InputTex", kaleidoscopeElementTexture);
-                canopyMainShader.SetInt("height", Math.Min(tex.height, Constants.NUM_STRIPS / 2 - 1));
-            } else {
-                // Otherwise, send the unchanged input texture to the compute shader
-                canopyMainShader.SetTexture(kernelId, "InputTex", tex);
-                canopyMainShader.SetInt("height", tex.height);
-            }
+            int kernelId = seamless ? seamlessKernel : mainKernel;
+            canopyMainShader.SetTexture(kernelId, "InputTex", tex);
+            canopyMainShader.SetInt("height", tex.height);
 
             //Execute compute shader
             canopyMainShader.SetBool("polarize", polarize);
-            canopyMainShader.SetBool("seamless", seamless);
-            canopyMainShader.SetBool("fitX", fitX);
-            canopyMainShader.SetBool("fitY", fitY);
             canopyMainShader.SetInt("width", tex.width);
 
             canopyMainShader.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);

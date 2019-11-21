@@ -7,8 +7,6 @@ RWTexture2D<float4> OutputTex;
 
 bool polarize;
 bool seamless;
-bool fitX;
-bool fitY;
 
 SamplerState SmpPointRepeat;
 SamplerState SmpPointMirror;
@@ -56,10 +54,8 @@ float2 scale(uint2 pixel, float2 dimensions) {
 [numthreads(25, 16, 1)]
 void CanopySeamless(uint3 id : SV_DispatchThreadID) 
 {
-    float2 maxDimensions = uint2(width - 1, height - 1);
-    bool inMirrorBlock = floor(id.y / height) % 2 == 0;
-    float y = inMirrorBlock ? id.y % height : height - id.y % height;
-    float4 result = InputTex.SampleLevel(SmpPointRepeat, uint2(id.x, y)/maxDimensions, 0);
+    float2 maxDimensions = float2(width - 1, (height - 1)/2.0f);
+    float4 result = InputTex.SampleLevel(SmpLinearMirror, id.xy/maxDimensions, 0);
     OutputTex[id.xy] = result;
     dataBuffer[75 * id.y + id.x] = result.xyz;
 }
