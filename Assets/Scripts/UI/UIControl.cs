@@ -52,7 +52,7 @@ public class UIControl : MonoBehaviour
                 toggle = control.GetComponentInChildren<Toggle>();
                 toggle.onValueChanged.AddListener(param.SetBool);
                 break;
-            case (ParamType.TEXTURE):
+            case (ParamType.TEX):
                 control = Instantiate(UIController.instance.textureBasePrefab, parent);
                 texSelector = control.GetComponentInChildren<TextureSelector>();
                 texSelector.textureSelected.AddListener(SetTexture);
