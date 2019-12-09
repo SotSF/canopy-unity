@@ -21,6 +21,10 @@ public class FluidSimNode : TickingNode
     [ValueConnectionKnob("dyeLevel", Direction.In, "Float")]
     public ValueConnectionKnob dyeInputLevel;
 
+    [ValueConnectionKnob("timeMultiplier", Direction.In, "Float")]
+    public ValueConnectionKnob timeMultiplierKnob;
+    public float timeMultiplier = 1;
+
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
@@ -172,6 +176,15 @@ public class FluidSimNode : TickingNode
         GUILayout.EndHorizontal();
         // Texture output
         GUILayout.BeginHorizontal();
+        timeMultiplierKnob.DisplayLayout();
+        if (!timeMultiplierKnob.connected())
+        {
+            timeMultiplier = RTEditorGUI.Slider(timeMultiplier, -1, 1);
+        } else
+        {
+            timeMultiplier = timeMultiplierKnob.GetValue<float>();
+        }
+
         GUILayout.Box(dyeField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
         GUILayout.Box(velocityField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
         GUILayout.Box(pressureField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
@@ -238,7 +251,7 @@ public class FluidSimNode : TickingNode
         fluidSimShader.SetInt("width", outputSize.x);
         fluidSimShader.SetInt("height", outputSize.y);
         //fluidSimShader.SetFloat("dissipation", 0.0f);
-        fluidSimShader.SetFloat("timestep", timestep);
+        fluidSimShader.SetFloat("timestep", timeMultiplier * timestep);
 
         //Apply velocity boundary
         ExecuteBoundaryShader(velocityField, -1);
@@ -329,12 +342,12 @@ public class FluidSimNode : TickingNode
     float lastStep = 0;
     public override bool Calculate()
     {
-        if (continuousDye)
-        {
-            AddDye();
-        }
         if (running && Time.time - lastStep > 1/60f)
         {
+            if (continuousDye)
+            {
+                AddDye();
+            }
             if (clicked)
             {
                 timestep = Time.deltaTime;

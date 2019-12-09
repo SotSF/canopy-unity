@@ -79,13 +79,18 @@ void applyDye(uint3 id : SV_DispatchThreadID)
     Result[id.xy] = saturate(uField[id.xy] + dyeMultiplier*vField[id.xy]);
 }
 
+//threadgroup shared buffer for reducing tex sampling cost
+//groupshared float4 texSamples[127 * 2];
+
 /* Take jacobi fields x and b as u and v, solve one iteration*/
 [numthreads(127, 2, 1)]
-void jacobi(uint3 id : SV_DispatchThreadID)
+void jacobi(uint3 id : SV_DispatchThreadID, int gindex : SV_GroupIndex)
 {
     float2 coord = id.xy + ONE_2D;
     uint2 bounds = uint2(width, height) - uint2(1, 1);
     // left, right, bottom, and top x samples
+
+    /*GroupMemoryBarrierWithGroupSync();*/
     float4 xL = uField[coord + LEFT_2D];
     float4 xR = uField[coord + RIGHT_2D];
     float4 xU = uField[coord + UP_2D];
