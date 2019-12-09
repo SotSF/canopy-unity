@@ -20,5 +20,4 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
                            (sparkPoints[i].y - id.y) * (sparkPoints[i].y - id.y);
         sparkIntensity += hdrMultiplier * (sparkColor / (1 + sqDistance));
     }
-    returnColorData(id.xy, color);
 }
