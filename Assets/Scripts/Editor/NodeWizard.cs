@@ -13,7 +13,7 @@ public class NodeWizard : ScriptableWizard
         TickingNode
     }
 
-    public enum NodeStyle
+    public enum NodeTemplate
     {
         SignalGenerator,
         SignalFilter,
@@ -22,15 +22,24 @@ public class NodeWizard : ScriptableWizard
         Custom
     }
 
+    [Tooltip("The name the node will have.")]
     public string nodeName;
+
+    [Tooltip("Whether the node is ticking (ie update per frame) or not (update only when inputs change)")]
     public NodeType nodeType;
-    public NodeStyle style = NodeStyle.Custom;
+
+    [Tooltip("What template for generating input/output ports to use.")]
+    public NodeTemplate template = NodeTemplate.Custom;
+    [Tooltip("How big the node should be by default")]
     public Vector2 defaultSize = new Vector2(150, 100);
+    [Tooltip("Generate a matching ComputeShader?")]
     public bool generateShader;
+    [Tooltip("Inputs to the node. Increase the count to add more.")]
     public PatternParameter[] inputs;
+    [Tooltip("Outputs from the node. Increase the count to add more.")]
     public PatternParameter[] outputs;
 
-    private NodeStyle oldStyle = NodeStyle.Custom;
+    private NodeTemplate oldTemplate = NodeTemplate.Custom;
     private string patternDir = "Assets/PatternSystem/Patterns/";
 
     /* Source for the shader decls/body, to include wired-up parameters */
@@ -61,11 +70,11 @@ public class NodeWizard : ScriptableWizard
 
 [numthreads(16, 16, 1)]
 void PatternKernel(uint3 id : SV_DispatchThreadID)
-{
+{{
     // Declare a color which is solid red, return it.
     float4 result = float4(1,0,0,1);
-    {1};
-}
+    {1}
+}}
 ";
 
 
@@ -83,12 +92,12 @@ using NodeEditorFramework;
 using UnityEngine;
 
 public class {0}Node : {1}
-{
+{{
 
     public override string GetID => ""{0}+Node"";
-    public override string Title { get { return ""{0}""; } }
+    public override string Title {{ get {{ return ""{0}""; }} }}
 
-    public override Vector2 DefaultSize { get { return new Vector2({2}, {3}); } }
+    public override Vector2 DefaultSize {{ get {{ return new Vector2({2}, {3}); }} }}
 
     {4}
 
@@ -96,25 +105,27 @@ public class {0}Node : {1}
     
     {6}
 
-    public override void NodeGUI(){
+    public override void NodeGUI(){{
         GUILayout.BeginVertical();
         GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
-    }
+    }}
 
     public override bool Calculate()
-    {
+    {{
         return true;
-    }
-}
+    }}
+}}
 ";
  
     [MenuItem("Tools/NodeSystem/Create new Node")]
     static void CreateWizard()
     {
-        DisplayWizard<NodeWizard>("Create Node", "Create");
+        var wiz = DisplayWizard<NodeWizard>("Create Node", "Create", "Debug");
+        wiz.inputs = new PatternParameter[0];
+        wiz.outputs = new PatternParameter[0];
     }
 
     string GenerateNodeCode()
@@ -192,19 +203,25 @@ public class {0}Node : {1}
         AssetDatabase.Refresh();
         AssetDatabase.SaveAssets();
     }
-
+    private void OnWizardOtherButton()
+    {
+        Debug.Log("Shader:");
+        Debug.Log(GenerateShaderCode());
+        Debug.Log("Node:");
+        Debug.Log(GenerateNodeCode());
+    }
     void OnWizardUpdate()
     {
         helpString = "Create new node";
 
         PatternParameter sigInput=null, sigOutput=null, texInput=null, texOutput=null;
         // Add pattern parameters for a given set of styles.
-        if (style != oldStyle)
+        if (template != oldTemplate)
         {
-            oldStyle = style;
-            switch (style)
+            oldTemplate = template;
+            switch (template)
             {
-                case NodeStyle.SignalFilter:
+                case NodeTemplate.SignalFilter:
                     inputs = new PatternParameter[1];
                     outputs = new PatternParameter[1];
                     sigInput = new PatternParameter()
@@ -227,7 +244,7 @@ public class {0}Node : {1}
                     outputs[0] = sigOutput;
                     generateShader = false;
                     break;
-                case NodeStyle.SignalGenerator:
+                case NodeTemplate.SignalGenerator:
                     inputs = new PatternParameter[0];
                     outputs = new PatternParameter[1];
                     sigOutput = new PatternParameter()
@@ -242,7 +259,7 @@ public class {0}Node : {1}
                     outputs[0] = sigOutput;
                     generateShader = false;
                     break;
-                case NodeStyle.TextureFilter:
+                case NodeTemplate.TextureFilter:
                     inputs = new PatternParameter[1];
                     outputs = new PatternParameter[1];
                     texInput = new PatternParameter()
@@ -262,7 +279,7 @@ public class {0}Node : {1}
                     outputs[0] = texOutput;
                     generateShader = true;
                     break;
-                case NodeStyle.TextureGenerator:
+                case NodeTemplate.TextureGenerator:
                     inputs = new PatternParameter[0];
                     outputs = new PatternParameter[1];
                     texOutput = new PatternParameter()
@@ -275,15 +292,15 @@ public class {0}Node : {1}
                     outputs[0] = texOutput;
                     generateShader = true;
                     break;
-                case NodeStyle.Custom:
+                case NodeTemplate.Custom:
                     break;
             }
         }
-        foreach (var param in inputs)
+        if (inputs != null) foreach (var param in inputs)
         {
             param.input = true;
         }
-        foreach (var param in outputs)
+        if (outputs != null) foreach (var param in outputs)
         {
             param.input = false;
         }
