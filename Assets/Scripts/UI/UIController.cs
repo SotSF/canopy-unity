@@ -31,7 +31,7 @@ public class UIController : MonoBehaviour
     private Button viewModeButton;
     private Light canopyLight;
 
-    private Vector3 controllerCameraPosition = new Vector3(0, 1.6f, 0);
+    private Vector3 controllerCameraPosition = new Vector3(0.75f, 1.6f, 0);
     private Coroutine animationRoutine;
 
     private Toggle sendToAPIToggle;
@@ -96,6 +96,7 @@ public class UIController : MonoBehaviour
     //Viewing mode controls
     public void EnterSimulatorView()
     {
+        inSimulatorMode = true;
         foreach (Transform obj in simulationOnlyObjects)
         {
             obj.gameObject.SetActive(true);
@@ -105,6 +106,7 @@ public class UIController : MonoBehaviour
     }
     public void EnterControllerView()
     {
+        inSimulatorMode = false;
         foreach (Transform obj in simulationOnlyObjects)
         {
             obj.gameObject.SetActive(false);
@@ -117,13 +119,12 @@ public class UIController : MonoBehaviour
     }
     public void ToggleSimulatorView()
     {
-        inSimulatorMode = !inSimulatorMode;
         if (inSimulatorMode)
         {
-            EnterSimulatorView();
+            EnterControllerView();
         } else
         {
-            EnterControllerView();
+            EnterSimulatorView();
         }
     }
 

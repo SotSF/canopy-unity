@@ -3,12 +3,15 @@ using UnityEditor;
 using System.Collections;
 using NodeEditorFramework.Standard;
 using Lightsale.Utility;
+using NodeEditorFramework;
+using System.Collections.Generic;
 
 public class NodeUIController : MonoBehaviour
 {
     public static NodeUIController instance;
     public RTNodeEditor nodeCanvas;
     public float minimizeTime;
+    public Color textureFlowColor;
     public Material canopyMaterial;
     public AnimationCurve easingCurve;
 
@@ -20,6 +23,9 @@ public class NodeUIController : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        List<string> styleIDs = new List<string>();
+        //var x = ConnectionPortStyles.GetPortStyle("UnityEngine.Texture");
+        //x.SetColor(textureFlowColor);
     }
 
     private void Start()
