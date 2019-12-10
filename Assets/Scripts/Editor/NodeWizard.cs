@@ -155,7 +155,7 @@ public class {0}Node : {1}
             public ValueConnectionKnob {output.name}{dir}Knob;";
             inputPortDecls.AppendLine(nodePortDecl);
         }
-        code.Append("");
+        code.Append(nodeSource);
         return code.ToString();
     }
 

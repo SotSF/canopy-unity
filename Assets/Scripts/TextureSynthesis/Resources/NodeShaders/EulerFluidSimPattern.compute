@@ -1,0 +1,181 @@
+﻿#include "Assets/Scripts/TextureSynthesis/Resources/NodeShaders/HSV.compute"
+
+#pragma kernel advect
+#pragma kernel jacobi
+#pragma kernel divergence
+#pragma kernel clearPressure
+#pragma kernel gradientDiff
+#pragma kernel applyForce
+#pragma kernel applyDye
+#pragma kernel horizontalBoundary
+#pragma kernel verticalBoundary
+
+
+#define ONE_2D float2(1,1)
+#define ZERO_2D float2(0,0)
+#define LEFT_2D float2(-1,0)
+#define RIGHT_2D float2(1,0)
+#define UP_2D float2(0,1)
+#define DOWN_2D float2(0,-1)
+
+#define PI 3.14159265f
+
+float timestep;
+
+uint width;
+uint height;
+
+Texture2D<float4> uField;     // Typically the velocity field
+Texture2D<float4> vField;     // A secondary field to operate on
+float gridNormalizingFactor;  // aka rdx, reciprocal of dx, grid scale
+
+float jacobiAlpha;
+float jacobiRBeta;
+
+float dyeMultiplier;
+
+float forceRadius;
+float forceMag;
+uint forceX;
+uint forceY;
+
+RWTexture2D<float4> Result;
+RWStructuredBuffer<float4> dataBuffer;
+SamplerState SmpLinearClamp;
+
+/* Take velocity field as u, apply advection to vField*/
+[numthreads(16, 16, 1)]
+void advect(uint3 id : SV_DispatchThreadID)
+{
+    float advectMax = 240000;
+    /*float2 coord = id.xy + ONE_2D;*/
+    float2 coord = id.xy;
+    float2 advectedPoint = coord - timestep * (uField[coord].xy) * gridNormalizingFactor;
+    float4 result = vField.SampleLevel(SmpLinearClamp, (advectedPoint+float2(.5,.5)) * gridNormalizingFactor, 0);
+    Result[coord] = result;
+}
+
+/* Apply a texture force*/
+[numthreads(127, 2, 1)]
+void applyForce(uint3 id : SV_DispatchThreadID)
+{
+    // hue = angle
+    // value = magnitude
+    float2 coord = id.xy + ONE_2D;
+    float maxForce = 160000;
+    float3 hsv = RGBtoHSV(vField[coord].rgb);
+    float magnitude = isinf(hsv.z) ? maxForce : hsv.z *maxForce;
+    float angle = isnan(hsv.x) || isinf(hsv.x) ? 0 : hsv.x;
+    float x = cos(2 * PI * angle) * magnitude;
+    float y = sin(2 * PI * angle) * magnitude;
+    float4 result = float4(x, y, 0, 1);
+    Result[coord] = uField[coord] + result;
+}
+
+/* Apply a new dye layer*/
+[numthreads(16, 16, 1)]
+void applyDye(uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = saturate(uField[id.xy] + dyeMultiplier*vField[id.xy]);
+}
+
+//threadgroup shared buffer for reducing tex sampling cost
+//groupshared float4 texSamples[127 * 2];
+
+/* Take jacobi fields x and b as u and v, solve one iteration*/
+[numthreads(127, 2, 1)]
+void jacobi(uint3 id : SV_DispatchThreadID, int gindex : SV_GroupIndex)
+{
+    float2 coord = id.xy + ONE_2D;
+    uint2 bounds = uint2(width, height) - uint2(1, 1);
+    // left, right, bottom, and top x samples
+
+    /*GroupMemoryBarrierWithGroupSync();*/
+    float4 xL = uField[coord + LEFT_2D];
+    float4 xR = uField[coord + RIGHT_2D];
+    float4 xU = uField[coord + UP_2D];
+    float4 xD = uField[coord + DOWN_2D];
+
+    // b sample, from center
+    float4 bC = vField[coord];
+
+    // evaluate Jacobi iteration
+    float4 result = (xL + xR + xD + xU + jacobiAlpha * bC) * jacobiRBeta;
+    Result[coord] = result;
+}
+
+/* Clear the pressure field of a scalar field set*/
+[numthreads(16, 16, 1)]
+void clearPressure(uint3 id: SV_DispatchThreadID)
+{
+    float4 val = uField[id.xy];
+    val.x = 0;
+    Result[id.xy] = val;
+}
+
+/* Compute divergence of u field (typically velocity)*/
+[numthreads(127, 2, 1)]
+void divergence(uint3 id : SV_DispatchThreadID)
+{
+    float2 coord = id.xy + ONE_2D;
+    float4 wL = uField[coord + LEFT_2D];
+    float4 wR = uField[coord + RIGHT_2D];
+    float4 wU = uField[coord + UP_2D];
+    float4 wD = uField[coord + DOWN_2D];
+
+    float4 result = (0.5 * gridNormalizingFactor) * ((wR.x - wL.x) + (wU.y - wD.y));
+    Result[coord] = result;
+}
+
+/* Compute gradient difference of first scalar field of v and u (ie velocity)*/
+[numthreads(127, 2, 1)]
+void gradientDiff(uint3 id : SV_DispatchThreadID)
+{
+    float2 coord = id.xy + ONE_2D;
+    // Extract pressure channel from v field.x
+    float pL = vField[coord + LEFT_2D].x;
+    float pR = vField[coord + RIGHT_2D].x;
+    float pU = vField[coord + UP_2D].x;
+    float pD = vField[coord + DOWN_2D].x;
+
+    float4 updatedVelocity = uField[coord];
+    updatedVelocity.xy -= (0.5 * gridNormalizingFactor) * float2(pR - pL, pU - pD);
+    Result[coord] = updatedVelocity;
+}
+
+
+/* Compute boundary conditions - assumes shaders will be executed w threadgroups
+ * matching numthreads, such that horizontal boundaries see id.y == 0 and id.y == 1,
+ * vertical boundaries see id.x == 0 and id.x == 1, which are then scaled to the simulation
+ * width. */
+float boundaryScale;
+[numthreads(256,1,1)]
+void horizontalBoundary(uint3 id : SV_DispatchThreadID)
+{
+    int2 coord = int2(id.x, id.y * (height - 1));
+
+    // Either add or subtract 1 based on whether we're at the top (y=0) or bottom (y=1)
+    int yOffset = -2 * id.y + 1;  
+    // For the corners, offset toward the center
+    int xOffset = id.x == 0 ? 1 : id.x == width - 1 ? -1 : 0;
+
+    int2 offsetCoord = coord + int2(xOffset, yOffset);
+    float4 result = boundaryScale * Result[offsetCoord];
+    result.a = 1;
+    Result[coord] = result;
+}
+[numthreads(1,256,1)]
+void verticalBoundary(uint3 id: SV_DispatchThreadID)
+{
+    int2 coord = int2(id.x * (width - 1), id.y);
+
+    // Either add or subtract 1 based on whether we're at the left (x=0) or right (x=1)
+    int xOffset = -2 * id.x + 1;
+    // For the corners, offset toward the center
+    int yOffset = id.y == 0 ? 1 : id.y == height - 1 ? -1 : 0;
+
+    int2 offsetCoord = coord + int2(xOffset, yOffset);
+    float4 result = boundaryScale * Result[offsetCoord];
+    result.a = 1;
+    Result[coord] = result;
+}

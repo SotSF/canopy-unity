@@ -1,0 +1,20 @@
+#pragma kernel CSMain
+
+Texture2D<float4> InputTex;
+RWTexture2D<float4> OutputTex;
+
+uint width;
+uint height;
+
+[numthreads(16, 16, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    uint x = id.x;
+    uint y = id.y;
+
+    if (floor(y / height) % 2 == 0) {
+        OutputTex[id.xy] = InputTex[uint2(x, y % height)];
+    } else {
+        OutputTex[id.xy] = InputTex[uint2(x, height - y % height)];
+    }
+}
