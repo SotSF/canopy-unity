@@ -31,7 +31,7 @@ abstract public class PatternNode : TickingNode
         {
             outputTex.Release();
         }
-        outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
+        outputTex = new RenderTexture(outputSize.x, outputSize.y, 0);
         outputTex.enableRandomWrite = true;
         outputTex.Create();
     }

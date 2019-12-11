@@ -5,6 +5,10 @@ using sotsf.canopy.patterns;
 using System.Text;
 using System.Linq;
 
+/* Generates code for a new node & optional associated shader based on passed in parameters, 
+ * thus reducing boilerplate. Relies heavily on StringBuilders + csharp string interpolation, ie the 
+ * $"foo {bar.name}" form as well as multiline literals, ie the @"" form, and sometimes 
+ * their combination, ie $@"". */
 public class NodeWizard : ScriptableWizard
 {
     public enum NodeType
@@ -24,26 +28,332 @@ public class NodeWizard : ScriptableWizard
 
     [Tooltip("The name the node will have.")]
     public string nodeName;
-
-    [Tooltip("Whether the node is ticking (ie update per frame) or not (update only when inputs change)")]
+    [Tooltip("Whether the node is ticking (update per frame) or not (update only when inputs change)")]
     public NodeType nodeType;
-
-    [Tooltip("What template for generating input/output ports to use.")]
+    [Tooltip("What template for generating input/output ports to use. Filters take an input and produce an output; generators produce an output without an input.")]
     public NodeTemplate template = NodeTemplate.Custom;
     [Tooltip("How big the node should be by default")]
     public Vector2 defaultSize = new Vector2(150, 100);
-    [Tooltip("Generate a matching ComputeShader?")]
+    [Tooltip("Generate a matching ComputeShader? Usually used for rendering textures.")]
     public bool generateShader;
-    [Tooltip("Inputs to the node. Increase the count to add more.")]
+    [Header("Node inputs")]
+    [Tooltip("Inputs to the node. Increase the count to add more. More can be added manually post-creation.")]
     public PatternParameter[] inputs;
-    [Tooltip("Outputs from the node. Increase the count to add more.")]
+    [Header("Node outputs")]
+    [Tooltip("Outputs from the node. Increase the count to add more. More can be added manually post-creation.")]
     public PatternParameter[] outputs;
 
     private NodeTemplate oldTemplate = NodeTemplate.Custom;
-    private string patternDir = "Assets/PatternSystem/Patterns/";
+    private string shaderDir = "Assets/Scripts/TextureSynthesis/Resources/NodeShaders/";
+    private string nodeDir = "Assets/Scripts/TextureSynthesis/Nodes/";
 
-    /* Source for the shader decls/body, to include wired-up parameters */
+    #region NodeGeneration
 
+    private Dictionary<ParamType, string> paramCSharpTypes = new Dictionary<ParamType, string>() {
+        { ParamType.BOOL,  "bool"},
+        { ParamType.FLOAT, "float"},
+        { ParamType.INT,   "int"},
+        { ParamType.TEX,   "Texture"}
+    };
+
+    /* Generates the annotated I/O port declarations for the node*/
+    string GenerateNodePorts()
+    {
+        StringBuilder portDecls = new StringBuilder();
+        foreach (var input in inputs)
+        {
+            string dir = "In";
+            string side = input.paramType == ParamType.TEX ? "Top" : "Left";
+            string nodePortDecl = $@"
+    [ValueConnectionKnob(""{input.name}"", Direction.{dir}, typeof({paramCSharpTypes[input.paramType]}), NodeSide.{side})]
+    public ValueConnectionKnob {input.name}Knob;";
+            portDecls.AppendLine(nodePortDecl);
+        }
+        foreach (var output in outputs)
+        {
+            string dir = "Out";
+            string side = output.paramType == ParamType.TEX ? "Bottom" : "Right";
+            string nodePortDecl = $@"
+    [ValueConnectionKnob(""{output.name}"", Direction.{dir}, typeof({paramCSharpTypes[output.paramType]}), NodeSide.{side})]
+    public ValueConnectionKnob {output.name}Knob;";
+            portDecls.AppendLine(nodePortDecl);
+        }
+        return portDecls.ToString();
+    }
+
+    private static string shaderVarName = "patternShader";
+    private static string kernelVarName = "patternKernel";
+    private static string shaderKernelName = "PatternKernel";
+
+
+    /* Generates the member variable declarations for the Node */
+    string GenerateNodeVars()
+    {
+
+        StringBuilder varDecls = new StringBuilder();
+        if (generateShader)
+        {
+            varDecls.AppendLine($@"
+    private ComputeShader {shaderVarName};
+    private int {kernelVarName};");
+        }
+        if (hasTexOutputs)
+        {
+            varDecls.AppendLine("    private Vector2Int outputSize = Vector2Int.zero;");
+        }
+        foreach (var sliderInput in sliderInputs)
+        {
+            string initialVal = sliderInput.paramType == ParamType.INT ? sliderInput.defaultInt.ToString() : sliderInput.defaultFloat.ToString();
+            varDecls.AppendLine($"    private {paramCSharpTypes[sliderInput.paramType]} {sliderInput.name} = {initialVal};");
+        }
+        foreach (var numericOut in numericOutputs)
+        {
+            varDecls.AppendLine($"    private {paramCSharpTypes[numericOut.paramType]} {numericOut.name};");
+        }
+        foreach (var texOut in texOutputs)
+        {
+            varDecls.AppendLine($"    public RenderTexture {texOut.name};");
+        }
+        return varDecls.ToString();
+    }
+
+    /* Generates the node's Awake() method.
+     * Only necessary if the node has a matching compute shader that must be located*/
+    string GenerateNodeAwake()
+    {
+        string shaderPath = $"NodeShaders/{nodeName}{suffix}";
+        string awake = generateShader ? $@"
+    private void Awake(){{
+        {shaderVarName} = Resources.Load<ComputeShader>(""{shaderPath}"");
+        {kernelVarName} = {shaderVarName}.FindKernel(""{shaderKernelName}"");
+    }}
+" : "";
+        StringBuilder texInitializations = new StringBuilder();
+        foreach (var outTex in texOutputs)
+        {
+
+            string initializeTex = $@"
+        if ({outTex.name} != null)
+        {{
+            {outTex.name}.Release();
+        }}
+        {outTex.name} = new RenderTexture(outputSize.x, outputSize.y, 0);
+        {outTex.name}.enableRandomWrite = true;
+        {outTex.name}.Create();";
+
+            texInitializations.AppendLine(initializeTex);
+        }
+        string init = hasTexOutputs ? $@"
+    private void InitializeRenderTexture()
+    {{
+        {texInitializations.ToString()}
+    }}" : "";
+        return awake + init;
+    }
+
+    /* Generates the node's NodeGUI method */
+    string GenerateNodeGUI()
+    {
+        // Layout input tex knobs across top with SetPosition()
+        int j = 0;
+        int margin = 20;
+        StringBuilder inputTexKnobPlacements = new StringBuilder();
+        inputTexKnobPlacements.AppendLine();
+        foreach (var inputTex in texInputs)
+        {
+            int xOffset = margin + j * 40;
+            string knobPlacement = $"        {inputTex.name}Knob.SetPosition({xOffset});";
+            inputTexKnobPlacements.AppendLine(knobPlacement);
+            j++;
+        }
+
+        // Layout output tex knobs across bottom with SetPosition()
+        j = 0;
+        StringBuilder outputTexKnobPlacements = new StringBuilder();
+        outputTexKnobPlacements.AppendLine();
+        foreach (var outputTex in texOutputs)
+        {
+            int xOffset = (int)defaultSize.x - (margin + j * 40);
+            string knobPlacement = $"        {outputTex.name}Knob.SetPosition({xOffset});";
+            outputTexKnobPlacements.AppendLine(knobPlacement);
+            j++;
+        }
+
+        // Show sliders for params which useRange when not connected to an input
+        StringBuilder inputNumerics = new StringBuilder();
+        foreach (var inputNum in sliderInputs)
+        {
+            string rangeMin = inputNum.paramType == ParamType.INT ? inputNum.minInt.ToString() : inputNum.minFloat.ToString();
+            string rangeMax = inputNum.paramType == ParamType.INT ? inputNum.maxInt.ToString() : inputNum.maxFloat.ToString();
+            string inputGUI = $@"
+        {inputNum.name}Knob.DisplayLayout();
+        if (!{inputNum.name}Knob.connected())
+        {{
+            {inputNum.name} = RTEditorGUI.Slider({inputNum.name}, {rangeMin}, {rangeMax});
+        }} else
+        {{
+            {inputNum.name} = {inputNum.name}Knob.GetValue<{paramCSharpTypes[inputNum.paramType]}>();
+        }}";
+            inputNumerics.AppendLine(inputGUI);
+        }
+        int w = 64;
+        int h = 64;
+        StringBuilder outputTexVizBox = new StringBuilder();
+        if (hasTexOutputs)
+        {
+            outputTexVizBox.AppendLine($@"GUILayout.FlexibleSpace();
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.Box({texOutputs.First().name}, GUILayout.MaxWidth({w}), GUILayout.MaxHeight({h}));
+        GUILayout.EndHorizontal();
+        GUILayout.Space(4);");
+        }
+
+        string nodeGUI = $@"
+    public override void NodeGUI()
+    {{
+        {inputTexKnobPlacements.ToString()}
+        GUILayout.BeginVertical();
+        {inputNumerics.ToString()}
+        {outputTexVizBox.ToString()}
+        GUILayout.EndVertical();
+        {outputTexKnobPlacements.ToString()}
+        if (GUI.changed)
+            NodeEditor.curNodeCanvas.OnNodeChange(this);
+    }}";
+        return nodeGUI;
+    }
+
+    /* Generates the node's Calculate() method */
+    string GenerateCalculate()
+    {
+        // Generate the texture resetting code for filter-types where there is a tex input
+        StringBuilder texInputGuards = new StringBuilder();
+        var firstOut = hasTexOutputs ? texOutputs.First() : null;
+        string outputReset = firstOut != null ? $@"
+            if ({firstOut.name} != null)
+                {firstOut.name}.Release();" : "";
+
+        foreach (var inTex in texInputs)
+        {
+            texInputGuards.AppendLine($@"
+        Texture {inTex.name} = {inTex.name}Knob.GetValue<Texture>();
+        if (!{inTex.name}Knob.connected () || {inTex.name} == null)
+        {{
+            {firstOut.name}Knob.ResetValue();
+            outputSize = Vector2Int.zero;
+            {outputReset}
+            return true;
+        }}");
+        }
+
+        if (hasTexInputs && hasTexOutputs)
+        {
+            texInputGuards.AppendLine($@"        
+        var inputSize = new Vector2Int({texInputs.First().name}.width, {texInputs.First().name}.height);
+        if (inputSize != outputSize){{
+            outputSize = inputSize;
+            InitializeRenderTexture();
+        }}");
+        }
+
+        // Generate the numeric assignments for slider+port controlled vars
+        StringBuilder numericAssigns = new StringBuilder();
+        foreach (var numericInput in sliderInputs)
+        {
+            string assign = $"        {numericInput.name} = {numericInput.name}Knob.connected() ? {numericInput.name}Knob.GetValue<{paramCSharpTypes[numericInput.paramType]}>(): {numericInput.name};";
+            numericAssigns.AppendLine(assign);
+        }
+
+        // Bind vars to the shader (if it exists) and execute it
+        string bindAndExecute = "";
+        if (generateShader)
+        {
+            StringBuilder paramPasses = new StringBuilder();
+
+            // Bind default height/width params
+            if (hasTexOutputs)
+            {
+                paramPasses.AppendLine($"        {shaderVarName}.SetInt(\"width\", outputSize.x);");
+                paramPasses.AppendLine($"        {shaderVarName}.SetInt(\"height\", outputSize.y);");
+            }
+
+            // Bind int/float params
+            var passedNumerics = numericInputs.Where(i => i.passToShader);
+            foreach (var param in passedNumerics)
+            {
+                string method = "SetInt";
+                if (param.paramType == ParamType.FLOAT)
+                    method = "SetFloat";
+                string paramBinding = $"        {shaderVarName}.{method}(\"{param.name}\", {param.name});";
+                paramPasses.AppendLine(paramBinding);
+            }
+
+            // Bind tex params
+            var passedTextures = texInputs.Where(i => i.passToShader).ToList();
+            passedTextures.AddRange(texOutputs.Where(o => o.passToShader));
+            foreach (var param in passedTextures)
+            {
+                string texBinding = $"        {shaderVarName}.SetTexture({kernelVarName}, \"{param.name}\", {param.name});";
+                paramPasses.AppendLine(texBinding);
+            }
+            bindAndExecute = $@"{paramPasses.ToString()}
+        uint tx,ty,tz;
+        patternShader.GetKernelThreadGroupSizes({kernelVarName}, out tx, out ty, out tz);
+        var threadGroupX = Mathf.CeilToInt(((float)outputSize.x) / tx);
+        var threadGroupY = Mathf.CeilToInt(((float)outputSize.y) / ty);
+        {shaderVarName}.Dispatch({kernelVarName}, threadGroupX, threadGroupY, 1);";
+        }
+
+        // Assign node output values
+        StringBuilder outputAssigns = new StringBuilder();
+        foreach (var output in outputs)
+        {
+            outputAssigns.AppendLine($"        {output.name}Knob.SetValue({output.name});");
+        }
+
+        // Generate full method 
+        string calculate = $@"
+    public override bool Calculate()
+    {{
+{texInputGuards}
+{numericAssigns.ToString()}
+{bindAndExecute}
+{outputAssigns.ToString()}
+        return true;
+    }}";
+        return calculate;
+    }
+
+
+    /* Generate the code representing the full Node file */
+    string GenerateNodeFullCode()
+    {
+        string parentClass = nodeType == NodeType.TickingNode ? "TickingNode" : "Node";
+        return $@"
+using NodeEditorFramework;
+using NodeEditorFramework.Utilities;
+using UnityEngine;
+
+[Node(false, ""{suffix}/{nodeName}"")]
+public class {nodeName}Node : {parentClass}
+{{
+    public override string GetID => ""{nodeName}Node"";
+    public override string Title {{ get {{ return ""{nodeName}""; }} }}
+
+    public override Vector2 DefaultSize {{ get {{ return new Vector2({defaultSize.x}, {defaultSize.y}); }} }}
+
+    {GenerateNodePorts()}
+    {GenerateNodeVars()}
+    {GenerateNodeAwake()}
+    {GenerateNodeGUI()}
+    {GenerateCalculate()}
+}}
+";
+    }
+    #endregion
+
+    #region ShaderGeneration
     // {0}: var name
     // {1}: optional RW declaration modifier for tex params
     private Dictionary<ParamType, string> paramShaderDecls = new Dictionary<ParamType, string>() {
@@ -51,13 +361,6 @@ public class NodeWizard : ScriptableWizard
         { ParamType.FLOAT, "float {0};"},
         { ParamType.INT,   "int {0};"},
         { ParamType.TEX,   "{1}Texture2D<float4> {0};"}
-    };
-
-    private Dictionary<ParamType, string> paramCSharpTypes = new Dictionary<ParamType, string>() {
-        { ParamType.BOOL,  "bool"},
-        { ParamType.FLOAT, "float"},
-        { ParamType.INT,   "int"},
-        { ParamType.TEX,   "Texture"}
     };
 
 
@@ -76,101 +379,18 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
     {1}
 }}
 ";
-
-
-    /* Source for the node decls/body, to include input/output ports etc */
-
-    // {0}: nodeName
-    // {1}: nodeType
-    // {2}: size.x
-    // {3}: size.y
-    // {4}: portDeclarations
-    // {5}: paramDeclarations
-    // {6}: Awake/InitializeRenderTexture declaration: initialize pattern shader (resources.load)/kernel, optionally assign outputTex
-    private string nodeSource = @"
-using NodeEditorFramework;
-using UnityEngine;
-
-public class {0}Node : {1}
-{{
-
-    public override string GetID => ""{0}+Node"";
-    public override string Title {{ get {{ return ""{0}""; }} }}
-
-    public override Vector2 DefaultSize {{ get {{ return new Vector2({2}, {3}); }} }}
-
-    {4}
-
-    {5}
-    
-    {6}
-
-    public override void NodeGUI(){{
-        GUILayout.BeginVertical();
-        GUILayout.EndVertical();
-
-        if (GUI.changed)
-            NodeEditor.curNodeCanvas.OnNodeChange(this);
-    }}
-
-    public override bool Calculate()
-    {{
-        return true;
-    }}
-}}
-";
- 
-    [MenuItem("Tools/NodeSystem/Create new Node")]
-    static void CreateWizard()
-    {
-        var wiz = DisplayWizard<NodeWizard>("Create Node", "Create", "Debug");
-        wiz.inputs = new PatternParameter[0];
-        wiz.outputs = new PatternParameter[0];
-    }
-
-    string GenerateNodeCode()
-    {
-        StringBuilder code = new StringBuilder();
-
-        // {0}: param name
-        // {1}: In/Out direction
-        // {2}: C# param type (Texture, float, etc)
-        // {3}: Node side (Bottom, Left, etc)
-        StringBuilder inputPortDecls = new StringBuilder();
-        foreach (var input in inputs)
-        {
-            string dir = "In";
-            string side = input.paramType == ParamType.TEX ? "Top" : "Left";
-            string nodePortDecl = $@"
-            [ValueConnectionKnob(""{input.name}"", Direction.{dir}, typeof({paramCSharpTypes[input.paramType]}), NodeSide.{side})]
-            public ValueConnectionKnob {input.name}{dir}Knob;";
-            inputPortDecls.AppendLine(nodePortDecl);
-        }
-        foreach (var output in outputs)
-        {
-            string dir = "In";
-            string side = output.paramType == ParamType.TEX ? "Top" : "Left";
-            string nodePortDecl = $@"
-            [ValueConnectionKnob(""{output.name}"", Direction.{dir}, typeof({paramCSharpTypes[output.paramType]}), NodeSide.{side})]
-            public ValueConnectionKnob {output.name}{dir}Knob;";
-            inputPortDecls.AppendLine(nodePortDecl);
-        }
-        code.Append(nodeSource);
-        return code.ToString();
-    }
-
     string GenerateShaderCode()
     {
         StringBuilder inputDecls = new StringBuilder();
         StringBuilder outputDecls = new StringBuilder();
-        foreach (var input in inputs)
+        foreach (var input in inputs.Where(i => i.passToShader))
         {
             if (input.paramType == ParamType.TEX)
                 inputDecls.AppendLine(string.Format(paramShaderDecls[input.paramType], input.name, ""));
             else
                 inputDecls.AppendLine(string.Format(paramShaderDecls[input.paramType], input.name));
         }
-        foreach (var output in outputs)
+        foreach (var output in outputs.Where(o => o.passToShader))
         {
             if (output.paramType == ParamType.TEX)
                 outputDecls.AppendLine(string.Format(paramShaderDecls[output.paramType], output.name, "RW"));
@@ -183,7 +403,16 @@ public class {0}Node : {1}
         {
             returnDecl = $"{outputTextures.First().name}[id.xy] = result;";
         }
-        return string.Format(shaderSource, inputDecls.ToString() + outputDecls.ToString(), returnDecl);   
+        return string.Format(shaderSource, inputDecls.ToString() + outputDecls.ToString(), returnDecl);
+    }
+    #endregion
+
+    [MenuItem("Tools/NodeSystem/Create new Node")]
+    static void CreateWizard()
+    {
+        var wiz = DisplayWizard<NodeWizard>("Create Node", "Create", "Debug");
+        wiz.inputs = new PatternParameter[0];
+        wiz.outputs = new PatternParameter[0];
     }
 
     void OnWizardCreate()
@@ -193,23 +422,36 @@ public class {0}Node : {1}
             Debug.LogError("Node name is required!");
             return;
         }
-        string sourceShaderFile = patternDir + "Rotate.compute";
-        string destShaderFile = patternDir + "NewPattern.compute";
-
         if (generateShader)
         {
-            System.IO.File.Copy(sourceShaderFile, destShaderFile, true);
+            System.IO.File.WriteAllText($"{shaderDir}/{nodeName}{suffix}.compute", GenerateShaderCode());
         }
+        System.IO.File.WriteAllText($"{nodeDir}/{nodeName}Node.cs", GenerateNodeFullCode());
         AssetDatabase.Refresh();
         AssetDatabase.SaveAssets();
     }
+
     private void OnWizardOtherButton()
     {
-        Debug.Log("Shader:");
-        Debug.Log(GenerateShaderCode());
-        Debug.Log("Node:");
-        Debug.Log(GenerateNodeCode());
+        if (generateShader)
+            Debug.Log("Shader:\n\n" + GenerateShaderCode());
+        Debug.Log("Node:\n\n" + GenerateNodeFullCode());
     }
+
+    /* Properties for quick access to various types of input/outputs */
+    IEnumerable<PatternParameter> texInputs => inputs.Where(i => i.paramType == ParamType.TEX);
+    bool hasTexInputs => texInputs.Count() > 0;
+
+    IEnumerable<PatternParameter> texOutputs => outputs.Where(o => o.paramType == ParamType.TEX);
+    bool hasTexOutputs => texOutputs.Count() > 0;
+
+    IEnumerable<PatternParameter> numericInputs => inputs.Where(i => i.paramType == ParamType.INT || i.paramType == ParamType.FLOAT);
+    IEnumerable<PatternParameter> sliderInputs => numericInputs.Where(i => i.useRange);
+    bool hasSliderInputs => sliderInputs.Count() > 0;
+
+    IEnumerable<PatternParameter> numericOutputs => outputs.Where(o => o.paramType == ParamType.INT || o.paramType == ParamType.FLOAT);
+    string suffix => hasTexInputs && hasTexOutputs ? "Filter" : "Pattern";
+
     void OnWizardUpdate()
     {
         helpString = "Create new node";
@@ -222,11 +464,12 @@ public class {0}Node : {1}
             switch (template)
             {
                 case NodeTemplate.SignalFilter:
+                    defaultSize = new Vector2(150, 100);
                     inputs = new PatternParameter[1];
                     outputs = new PatternParameter[1];
                     sigInput = new PatternParameter()
                     {
-                        name = "InputSignal",
+                        name = "inputSignal",
                         input = true,
                         paramType = ParamType.FLOAT,
                         useRange = true,
@@ -235,7 +478,7 @@ public class {0}Node : {1}
                     };
                     sigOutput = new PatternParameter()
                     {
-                        name = "OutputSignal",
+                        name = "outputSignal",
                         input = false,
                         paramType = ParamType.FLOAT,
                         useRange = false,
@@ -245,11 +488,12 @@ public class {0}Node : {1}
                     generateShader = false;
                     break;
                 case NodeTemplate.SignalGenerator:
+                    defaultSize = new Vector2(150, 100);
                     inputs = new PatternParameter[0];
                     outputs = new PatternParameter[1];
                     sigOutput = new PatternParameter()
                     {
-                        name = "OutputSignal",
+                        name = "outputSignal",
                         input = true,
                         paramType = ParamType.FLOAT,
                         useRange = true,
@@ -260,18 +504,21 @@ public class {0}Node : {1}
                     generateShader = false;
                     break;
                 case NodeTemplate.TextureFilter:
+                    defaultSize = new Vector2(200, 200);
                     inputs = new PatternParameter[1];
                     outputs = new PatternParameter[1];
                     texInput = new PatternParameter()
                     {
-                        name = "InputTex",
+                        name = "inputTex",
                         input = true,
+                        passToShader = true,
                         paramType = ParamType.TEX,
                     };
                     texOutput = new PatternParameter()
                     {
-                        name = "OutputTex",
+                        name = "outputTex",
                         input = false,
+                        passToShader = true,
                         paramType = ParamType.TEX,
                         useRange = false,
                     };
@@ -280,12 +527,14 @@ public class {0}Node : {1}
                     generateShader = true;
                     break;
                 case NodeTemplate.TextureGenerator:
+                    defaultSize = new Vector2(200, 200);
                     inputs = new PatternParameter[0];
                     outputs = new PatternParameter[1];
                     texOutput = new PatternParameter()
                     {
-                        name = "OutputTex",
+                        name = "outputTex",
                         input = false,
+                        passToShader = true,
                         paramType = ParamType.TEX,
                         useRange = false,
                     };

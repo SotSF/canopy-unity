@@ -118,10 +118,14 @@ public class PatternParameterDrawer : PropertyDrawer
         EditorGUI.PropertyField(typeRect, typeProp, GUIContent.none);
         rowsFilled++;
 
-        var controllableRect = new Rect(position.x, YOffset(rowsFilled, position.y),
-                                        width, rowHeight);
-        var controllableProp = property.FindPropertyRelative("input");
-        EditorGUI.PropertyField(controllableRect, controllableProp);
+        //var controllableRect = new Rect(position.x, YOffset(rowsFilled, position.y),
+        //                                width, rowHeight);
+        //var controllableProp = property.FindPropertyRelative("input");
+        //EditorGUI.PropertyField(controllableRect, controllableProp);
+        //rowsFilled++;
+        var passToShaderRect = new Rect(position.x, YOffset(rowsFilled, position.y), width, rowHeight);
+        var passToShaderProp = property.FindPropertyRelative("passToShader");
+        EditorGUI.PropertyField(passToShaderRect, passToShaderProp);
         rowsFilled++;
         if (param != null && param.input){
             if (IsNumeric(param))
@@ -149,30 +153,31 @@ public class PatternParameterDrawer : PropertyDrawer
                     EditorGUI.PropertyField(maxRect, maxProp, new GUIContent("Max"));
                     rowsFilled++;
                 }
-            }
-            var defaultRect = new Rect(position.x, YOffset(rowsFilled, position.y), position.width, rowHeight);
-            SerializedProperty defaultProp;
-            if (param != null)
-            {
-                switch (param.paramType)
+
+                var defaultRect = new Rect(position.x, YOffset(rowsFilled, position.y), position.width, rowHeight);
+                SerializedProperty defaultProp;
+                if (param != null)
                 {
-                    case (ParamType.BOOL):
-                        defaultProp = property.FindPropertyRelative("defaultBool");
-                        break;
-                    case (ParamType.INT):
-                        defaultProp = property.FindPropertyRelative("defaultInt");
-                        break;
-                    case (ParamType.FLOAT4):
-                        defaultProp = property.FindPropertyRelative("defaultVector");
-                        break;
-                    case (ParamType.TEX):
-                        defaultProp = property.FindPropertyRelative("defaultTexture");
-                        break;
-                    default:
-                        defaultProp = property.FindPropertyRelative("defaultFloat");
-                        break;
+                    switch (param.paramType)
+                    {
+                        case (ParamType.BOOL):
+                            defaultProp = property.FindPropertyRelative("defaultBool");
+                            break;
+                        case (ParamType.INT):
+                            defaultProp = property.FindPropertyRelative("defaultInt");
+                            break;
+                        case (ParamType.FLOAT4):
+                            defaultProp = property.FindPropertyRelative("defaultVector");
+                            break;
+                        case (ParamType.TEX):
+                            defaultProp = property.FindPropertyRelative("defaultTexture");
+                            break;
+                        default:
+                            defaultProp = property.FindPropertyRelative("defaultFloat");
+                            break;
+                    }
+                    EditorGUI.PropertyField(defaultRect, defaultProp, new GUIContent("Default"));
                 }
-                EditorGUI.PropertyField(defaultRect, defaultProp, new GUIContent("Default"));
             }
         }
         EditorGUI.EndProperty();
