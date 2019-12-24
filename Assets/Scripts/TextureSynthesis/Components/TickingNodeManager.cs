@@ -4,6 +4,7 @@ using UnityEngine;
 using NodeEditorFramework.Standard;
 using NodeEditorFramework;
 using System.Linq;
+using SecretFire.TextureSynth;
 
 public class TickingNodeManager : MonoBehaviour
 {
