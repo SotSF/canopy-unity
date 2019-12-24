@@ -81,9 +81,9 @@ public class NodeWizard : ScriptableWizard
         return portDecls.ToString();
     }
 
-    private static string shaderVarName = "patternShader";
-    private static string kernelVarName = "patternKernel";
-    private static string shaderKernelName = "PatternKernel";
+    private string shaderVarName = "patternShader";
+    private string kernelVarName = "patternKernel";
+    private string shaderKernelName = "PatternKernel";
 
 
     /* Generates the member variable declarations for the Node */
@@ -91,6 +91,7 @@ public class NodeWizard : ScriptableWizard
     {
 
         StringBuilder varDecls = new StringBuilder();
+        varDecls.AppendLine();
         if (generateShader)
         {
             varDecls.AppendLine($@"
@@ -132,16 +133,14 @@ public class NodeWizard : ScriptableWizard
         foreach (var outTex in texOutputs)
         {
 
-            string initializeTex = $@"
+            texInitializations.AppendLine($@"
         if ({outTex.name} != null)
         {{
             {outTex.name}.Release();
         }}
         {outTex.name} = new RenderTexture(outputSize.x, outputSize.y, 0);
         {outTex.name}.enableRandomWrite = true;
-        {outTex.name}.Create();";
-
-            texInitializations.AppendLine(initializeTex);
+        {outTex.name}.Create();");
         }
         string init = hasTexOutputs ? $@"
     private void InitializeRenderTexture()
@@ -158,25 +157,31 @@ public class NodeWizard : ScriptableWizard
         int j = 0;
         int margin = 20;
         StringBuilder inputTexKnobPlacements = new StringBuilder();
-        inputTexKnobPlacements.AppendLine();
-        foreach (var inputTex in texInputs)
+        if (hasTexInputs)
         {
-            int xOffset = margin + j * 40;
-            string knobPlacement = $"        {inputTex.name}Knob.SetPosition({xOffset});";
-            inputTexKnobPlacements.AppendLine(knobPlacement);
-            j++;
+            inputTexKnobPlacements.AppendLine();
+            foreach (var inTex in texInputs)
+            {
+                int xOffset = margin + j * 40;
+                string knobPlacement = $"        {inTex.name}Knob.SetPosition({xOffset});";
+                inputTexKnobPlacements.AppendLine(knobPlacement);
+                j++;
+            }
         }
 
         // Layout output tex knobs across bottom with SetPosition()
         j = 0;
         StringBuilder outputTexKnobPlacements = new StringBuilder();
-        outputTexKnobPlacements.AppendLine();
-        foreach (var outputTex in texOutputs)
+        if (hasTexOutputs)
         {
-            int xOffset = (int)defaultSize.x - (margin + j * 40);
-            string knobPlacement = $"        {outputTex.name}Knob.SetPosition({xOffset});";
-            outputTexKnobPlacements.AppendLine(knobPlacement);
-            j++;
+            outputTexKnobPlacements.AppendLine();
+            foreach (var outTex in texOutputs)
+            {
+                int xOffset = (int)defaultSize.x - (margin + j * 40);
+                string knobPlacement = $"        {outTex.name}Knob.SetPosition({xOffset});";
+                outputTexKnobPlacements.AppendLine(knobPlacement);
+                j++;
+            }
         }
 
         // Show sliders for params which useRange when not connected to an input
@@ -333,6 +338,7 @@ public class NodeWizard : ScriptableWizard
         return $@"
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 [Node(false, ""{suffix}/{nodeName}"")]
@@ -363,22 +369,7 @@ public class {nodeName}Node : {parentClass}
         { ParamType.TEX,   "{1}Texture2D<float4> {0};"}
     };
 
-
-    // {0}: param declarations
-    // {1}: return declaration
-    private string shaderSource = @"
-#pragma kernel PatternKernel
-
-{0}
-
-[numthreads(16, 16, 1)]
-void PatternKernel(uint3 id : SV_DispatchThreadID)
-{{
-    // Declare a color which is solid red, return it.
-    float4 result = float4(1,0,0,1);
-    {1}
-}}
-";
+    /* Generates a basic shader with the wired in parameters. */
     string GenerateShaderCode()
     {
         StringBuilder inputDecls = new StringBuilder();
@@ -403,10 +394,23 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
         {
             returnDecl = $"{outputTextures.First().name}[id.xy] = result;";
         }
-        return string.Format(shaderSource, inputDecls.ToString() + outputDecls.ToString(), returnDecl);
+        return $@"
+#pragma kernel PatternKernel
+
+{inputDecls.ToString()}
+{outputDecls.ToString()}
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{{
+    // Declare a color which is solid red, return it.
+    float4 result = float4(1,0,0,1);
+    {returnDecl}
+}}
+";
     }
     #endregion
 
+    /* Adds the Unity Tools menu item for the wizard*/
     [MenuItem("Tools/NodeSystem/Create new Node")]
     static void CreateWizard()
     {
