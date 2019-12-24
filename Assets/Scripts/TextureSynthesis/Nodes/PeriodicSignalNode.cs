@@ -2,16 +2,17 @@
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
 using Oscillators;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 
 [Node(false, "Inputs/Oscillator")]
-public class OscillatorNode : TickingNode
+public class PeriodicSignalNode : TickingNode
 {
-    public const string ID = "oscillatorNode";
+    public const string ID = "periodicSignal";
     public override string GetID { get { return ID; } }
 
-    public override string Title { get { return "Oscillator"; } }
+    public override string Title { get { return "PeriodicSignal"; } }
     public override Vector2 DefaultSize { get { return new Vector2(220, 150); } }
 
     [ValueConnectionKnob("Period", Direction.In, typeof(float))]
@@ -43,21 +44,23 @@ public class OscillatorNode : TickingNode
 
         //Input pins & internal controls
         GUILayout.BeginVertical();
-        periodInputKnob.DisplayLayout();
-        if (!periodInputKnob.connected())
-        {
-            period = RTEditorGUI.Slider(period, 0.01f, 50);
-        }
+        //periodInputKnob.DisplayLayout();
+        //if (!periodInputKnob.connected())
+        //{
+        //    period = RTEditorGUI.Slider(period, 0.01f, 50);
+        //}
+        KnobOrSlider(ref period, 0.01f, 50, periodInputKnob);
         amplInputKnob.DisplayLayout();
         if (!amplInputKnob.connected())
         {
             amplitude = RTEditorGUI.FloatField(amplitude);
         }
-        phaseInputKnob.DisplayLayout();
-        if (!phaseInputKnob.connected())
-        {
-            phase = RTEditorGUI.Slider(phase, 0, 2 * Mathf.PI);
-        }
+        //phaseInputKnob.DisplayLayout();
+        //if (!phaseInputKnob.connected())
+        //{
+        //    phase = RTEditorGUI.Slider(phase, 0, 2 * Mathf.PI);
+        //}
+        KnobOrSlider(ref phase, 0, 2 * Mathf.PI, phaseInputKnob);
         GUILayout.EndVertical();
 
         //Output pin
