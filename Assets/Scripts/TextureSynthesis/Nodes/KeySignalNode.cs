@@ -6,6 +6,7 @@ using System.Text;
 using System;
 using System.Linq;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 
 [Node(false, "KeyboardControls/KeySignal")]
 public class KeySignalNode : TickingNode

@@ -4,6 +4,7 @@ using NodeEditorFramework;
 using System.Collections.Generic;
 using System.Text;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 
 [Node(false, "Inputs/FluidSim")]
 public class FluidSimNode : TickingNode
@@ -174,8 +175,7 @@ public class FluidSimNode : TickingNode
         continuousDye = RTEditorGUI.Toggle(continuousDye, new GUIContent("Continuous dye", "Add dye every frame"));
         //viscosity = RTEditorGUI.Slider(viscosity, 0.00001f, 100f);
         GUILayout.EndHorizontal();
-        // Texture output
-        GUILayout.BeginHorizontal();
+        // Time control
         timeMultiplierKnob.DisplayLayout();
         if (!timeMultiplierKnob.connected())
         {
@@ -184,6 +184,8 @@ public class FluidSimNode : TickingNode
         {
             timeMultiplier = timeMultiplierKnob.GetValue<float>();
         }
+        // Texture output
+        GUILayout.BeginHorizontal();
 
         GUILayout.Box(dyeField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
         GUILayout.Box(velocityField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));

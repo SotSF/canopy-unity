@@ -81,9 +81,6 @@ public class VortexGeneratorNode : Node
     {
         GUILayout.BeginVertical();
 
-
-
-
         GUILayout.BeginHorizontal(GUILayout.MaxHeight(40));
         //GUILayout.Label(new GUIContent("Turbulence factor", "The offset of the normal angle per point"));
         turbIntensityKnob.DisplayLayout();

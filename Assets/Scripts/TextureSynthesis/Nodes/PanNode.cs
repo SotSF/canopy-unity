@@ -1,6 +1,7 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 

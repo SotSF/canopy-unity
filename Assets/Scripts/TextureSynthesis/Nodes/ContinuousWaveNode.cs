@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using NodeEditorFramework;
+using SecretFire.TextureSynth;
 
 [Node(false, "Pattern/ContinuousWaves")]
 public class ContinuousWaveNode : TickingNode
