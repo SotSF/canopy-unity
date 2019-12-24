@@ -32,7 +32,7 @@ namespace Oscillators
         private Oscillator[] oscillatorParams;
         private float[] oscillatorValues;
 
-        private Dictionary<OscillatorNode, int> indexMap;
+        private Dictionary<PeriodicSignalNode, int> indexMap;
         private int kernelId;
         private int count;
 
@@ -42,7 +42,7 @@ namespace Oscillators
         {
             instance = this;
             oscillatorShader = Resources.Load<ComputeShader>("NodeShaders/OscillatorShader");
-            indexMap = new Dictionary<OscillatorNode, int>();
+            indexMap = new Dictionary<PeriodicSignalNode, int>();
             kernelId = oscillatorShader.FindKernel("CSMain");
             oscillatorParams = new Oscillator[0];
             oscillatorValues = new float[0];
@@ -78,7 +78,7 @@ namespace Oscillators
             UpdateOscillators();
         }
 
-        public void Register(OscillatorNode node)
+        public void Register(PeriodicSignalNode node)
         {
             if (!indexMap.ContainsKey(node))
             {
@@ -108,7 +108,7 @@ namespace Oscillators
                 oscillatorValueBuffer.Release();
         }
 
-        public  float GetValue(OscillatorNode node)
+        public  float GetValue(PeriodicSignalNode node)
         {
             if (!indexMap.ContainsKey(node))
             {
