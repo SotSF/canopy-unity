@@ -10,87 +10,121 @@ using UnityEngine;
 [Node(false, "Pattern/CustomMIDIKeyArray")]
 public class CustomMIDIKeyArrayNode : Node
 {
-    public struct MIDIKeyData
+    public struct MIDINote
     {
-        public float value;
+        public MIDINote(MidiChannel ch, int n)
+        {
+            note = n;
+            channel = ch;
+        }
         public int note;
         public MidiChannel channel;
     }
 
     public override string GetID => "CustomMIDIKeyArrayNode";
     public override string Title { get { return "CustomMIDIKeyArray"; } }
-
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    public override bool AutoLayout => true;
+    public override Vector2 MinSize => noteToValue != null ? new Vector2(120, noteToValue.Count * 30 + 40) : new Vector2(120, 70);
 
     bool binding = false;
     public bool bound = false;
 
-    public List<MIDIKeyData> keys;
+    public Dictionary<MIDINote, float> noteToValue;
 
     private void Awake()
     {
         if (bound)
         {
-            
+            // Attach delegates
+        } else
+        {
+            noteToValue = new Dictionary<MIDINote, float>();
         }
+    }
+
+    void BeginBinding()
+    {
+        MidiMaster.noteOnDelegate += BindMIDIKey;
+        binding = true;
+    }
+    
+    void FinishBinding()
+    {
+        MidiMaster.noteOnDelegate -= BindMIDIKey;
+        MidiMaster.noteOnDelegate += ReceiveKeyDown;
+        MidiMaster.noteOffDelegate += ReceiveKeyUp;
+        binding = false;
+        bound = true;
+    }
+
+    void Unbind()
+    {
+        MidiMaster.noteOnDelegate -= ReceiveKeyDown;
+        MidiMaster.noteOffDelegate -= ReceiveKeyUp;
+        noteToValue.Clear();
+        bound = false;
     }
 
     void BindMIDIKey(MidiJack.MidiChannel chan, int note, float velocity)
     {
-        var newkey = new MIDIKeyData() { channel = chan, note = note, value = velocity };
-        keys.Add(newkey);
-        MidiMaster.noteOnDelegate -= BindMIDIKey;
-        MidiMaster.noteOnDelegate += ReceiveKeyDown;
-        MidiMaster.noteOffDelegate += ReceiveKeyUp;
+        var newNote = new MIDINote(chan, note);
+        noteToValue[newNote] = velocity;
+        // Create ports here
     }
 
     private void ReceiveKeyUp(MidiChannel channel, int note)
     {
-        if (keys.Where(k => k.note == note && k.channel == channel).Count() > 0) { }
-        if (channel == this.channel && note == this.note)
-            value = 0;
+        var midiNote = new MIDINote(channel, note);
+        if (noteToValue.ContainsKey(midiNote))
+        {
+            noteToValue[midiNote] = 0;
+        }
     }
 
     private void ReceiveKeyDown(MidiChannel channel, int note, float velocity)
     {
-        if (channel == this.channel && note == this.note)
-            value = velocity;
+        var midiNote = new MIDINote(channel, note);
+        if (noteToValue.ContainsKey(midiNote))
+        {
+            noteToValue[midiNote] = velocity;
+        }
     }
 
     public override void NodeGUI()
     {
-        GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         if (!bound && !binding)
         {
-            if (GUILayout.Button("Bind input key"))
+            if (GUILayout.Button("Bind input MIDI keys"))
             {
-                MidiMaster.noteOnDelegate += BindMIDIKey;
-                binding = true;
+                BeginBinding();
             }
         }
         else
         {
             if (bound)
             {
-                string label = string.Format("{0} note {1}: {2:0.00}", channel.ToString(), note, value);
-                GUILayout.Label(label);
                 if (GUILayout.Button("Unbind"))
                 {
-                    MidiMaster.noteOnDelegate -= ReceiveKeyDown;
-                    MidiMaster.noteOffDelegate -= ReceiveKeyUp;
-                    note = 0;
-                    bound = false;
+                    Unbind();
                 }
             }
             else
             {
-                GUILayout.Label("Press key to bind");
+                GUILayout.Label("Press MIDI keys to bind them");
+                if (GUILayout.Button("Finish binding"))
+                {
+                    FinishBinding();
+                }
+            }
+            // Loop over dynamic ports and show them
+            foreach(var note in noteToValue.Keys)
+            {
+                string label = string.Format("{0} note {1}: {2:0.00}", note.channel.ToString(), note.note, noteToValue[note]);
+                GUILayout.Label(label);
             }
         }
         GUILayout.EndVertical();
-        valueKnob.DisplayLayout();
-        GUILayout.EndHorizontal();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
@@ -98,7 +132,6 @@ public class CustomMIDIKeyArrayNode : Node
 
     public override bool Calculate()
     {
-        valueKnob.SetValue(value);
         return true;
     }
 }
