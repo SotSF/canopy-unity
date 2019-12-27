@@ -21,22 +21,29 @@ public class MathExprNode : Node
     [ValueConnectionKnob("output", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputKnob;
 
-    public string expr;
+    private string lastexpr = "";
+    public string stringexpr;
 
     private float a, b;
     private float output;
     private Interpreter interpreter;
+    private Lambda exprFunc;
 
     private void Awake()
     {
         interpreter = new Interpreter();
+        MathWrapper.SetInterpreterEnv(interpreter);
     }
 
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
-        expr = RTEditorGUI.TextField(expr);
-
+        stringexpr = RTEditorGUI.TextField(stringexpr);
+        if (stringexpr != lastexpr)
+        {
+            lastexpr = stringexpr;
+            Parse();
+        }
         //Knob display
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
@@ -53,27 +60,65 @@ public class MathExprNode : Node
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public struct MathWrapper{
-        public float Lerp(float a, float b, float t)
-        {
-            return Mathf.Lerp(a, b, t);
-        }
-    }
-
-    public override bool Calculate()
+    private void Parse()
     {
-        if (expr != null && expr != "")
+        if (stringexpr != null && stringexpr != "")
         {
             try
             {
-                interpreter.SetVariable("Mathf", new MathWrapper());
-                interpreter.SetVariable("a", aKnob.GetValue<float>());
-                interpreter.SetVariable("b", bKnob.GetValue<float>());
-                output = interpreter.Eval<float>(expr);
+                var parameters = new[] { new Parameter("a", typeof(float)),
+                                         new Parameter("b", typeof(float))};
+                exprFunc = interpreter.Parse(stringexpr, parameters);
             }
-            catch {
-                // do nothing, this is normal when typing in an expression
-                //Debug.Log("Bad expr in MathExpr node");
+            catch
+            {
+                exprFunc = null;
+            }
+        }
+    }
+
+    public static class MathWrapper{
+        public delegate float UnaryMathFunc(float a);
+        public delegate float BinaryMathFunc(float a, float b);
+        public delegate float TrinaryMathFunc(float a, float b, float c);
+        
+        public static void SetInterpreterEnv(Interpreter interp)
+        {
+            interp.SetFunction("abs", (UnaryMathFunc)Mathf.Abs);
+            interp.SetFunction("acos", (UnaryMathFunc)Mathf.Acos);
+            interp.SetFunction("asin", (UnaryMathFunc)Mathf.Asin);
+            interp.SetFunction("atan2", (BinaryMathFunc)Mathf.Atan2);
+            interp.SetFunction("clamp", (TrinaryMathFunc)Mathf.Clamp);
+            interp.SetFunction("cos", (UnaryMathFunc)Mathf.Cos);
+            interp.SetFunction("exp", (UnaryMathFunc)Mathf.Exp);
+            interp.SetFunction("invlerp", (TrinaryMathFunc)Mathf.InverseLerp);
+            interp.SetFunction("log", (BinaryMathFunc)Mathf.Log);
+            interp.SetFunction("log10", (UnaryMathFunc)Mathf.Log10);
+            interp.SetFunction("lerp", (TrinaryMathFunc)Mathf.Lerp);
+            interp.SetFunction("lerpangle", (TrinaryMathFunc)Mathf.LerpAngle);
+            interp.SetFunction("max", (BinaryMathFunc)Mathf.Max);
+            interp.SetFunction("min", (BinaryMathFunc)Mathf.Min);
+            interp.SetFunction("pow", (BinaryMathFunc)Mathf.Pow);
+            interp.SetFunction("sin", (UnaryMathFunc)Mathf.Sin);
+            interp.SetFunction("sqrt", (UnaryMathFunc)Mathf.Sqrt);
+            interp.SetFunction("tan", (UnaryMathFunc)Mathf.Tan);
+            interp.SetVariable("pi", Mathf.PI);
+            interp.SetVariable("rad2deg", Mathf.Rad2Deg);
+            interp.SetVariable("deg2rad", Mathf.Deg2Rad);
+        }
+    }
+
+
+    public override bool Calculate()
+    {
+        if (exprFunc != null)
+        {
+            try
+            {
+                output = (float) exprFunc.Invoke(aKnob.GetValue<float>(), bKnob.GetValue<float>());
+            } catch 
+            {
+                // Do nothing
             }
         }
         outputKnob.SetValue(output);
