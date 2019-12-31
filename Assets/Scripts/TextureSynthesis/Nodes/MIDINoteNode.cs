@@ -6,11 +6,11 @@ using SecretFire.TextureSynth;
 using System;
 using UnityEngine;
 
-[Node(false, "MIDI/MidiKnob")]
-public class MIDIKnobNode : TickingNode
+[Node(false, "MIDI/MIDINote")]
+public class MIDINoteNode : TickingNode
 {
-    public override string GetID => "MIDIKnobNode";
-    public override string Title { get { return "MIDIKnob"; } }
+    public override string GetID => "MIDINoteNode";
+    public override string Title { get { return "MIDINote"; } }
 
     public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
 
@@ -21,32 +21,38 @@ public class MIDIKnobNode : TickingNode
     public ValueConnectionKnob valueKnob;
 
     public float value;
-    public bool normalize = true;
-    public int knobNumber;
+    public int note;
     public MidiChannel channel;
 
     private void Awake()
     {
         if (bound)
         {
-            BindMIDIKnob(channel, knobNumber, value);
+            BindMIDINote(channel, note, value);
         }
     }
 
-    void BindMIDIKnob(MidiJack.MidiChannel chan, int knob, float val)
+    void BindMIDINote(MidiJack.MidiChannel chan, int note, float velocity)
     {
         channel = chan;
-        knobNumber = knob;
-        MidiMaster.knobDelegate -= BindMIDIKnob;
-        MidiMaster.knobDelegate += ReceiveMIDIMessage;
+        this.note = note;
+        MidiMaster.noteOnDelegate -= BindMIDINote;
+        MidiMaster.noteOnDelegate += ReceiveNoteDown;
+        MidiMaster.noteOffDelegate += ReceiveNoteUp;
         binding = false;
         bound = true;
     }
 
-    void ReceiveMIDIMessage(MidiChannel chan, int knob, float val)
+    private void ReceiveNoteUp(MidiChannel channel, int note)
     {
-        if (chan == channel && knob == knobNumber)
-            value = val;
+        if (channel == this.channel && note == this.note)
+            value = 0;
+    }
+
+    private void ReceiveNoteDown(MidiChannel channel, int note, float velocity)
+    {
+        if (channel == this.channel && note == this.note)
+            value = velocity;
     }
 
     public override void NodeGUI()
@@ -55,9 +61,9 @@ public class MIDIKnobNode : TickingNode
         GUILayout.BeginVertical();
         if (!bound && !binding)
         {
-            if (GUILayout.Button("Bind input knob"))
+            if (GUILayout.Button("Bind input note"))
             {
-                MidiMaster.knobDelegate += BindMIDIKnob;
+                MidiMaster.noteOnDelegate += BindMIDINote;
                 binding = true;
             }
         }
@@ -65,18 +71,19 @@ public class MIDIKnobNode : TickingNode
         {
             if (bound)
             {
-                string label = string.Format("{0} knob {1}: {2:0.00}", channel.ToString(), knobNumber, value);
+                string label = string.Format("{0} note {1}: {2:0.00}", channel.ToString(), note, value);
                 GUILayout.Label(label);
                 if (GUILayout.Button("Unbind"))
                 {
-                    MidiMaster.knobDelegate -= ReceiveMIDIMessage;
-                    knobNumber = 0;
+                    MidiMaster.noteOnDelegate -= ReceiveNoteDown;
+                    MidiMaster.noteOffDelegate -= ReceiveNoteUp;
+                    note = 0;
                     bound = false;
                 }
             }
             else
             {
-                GUILayout.Label("Adjust knob to bind");
+                GUILayout.Label("Play note to bind");
             }
         }
         GUILayout.EndVertical();
@@ -86,7 +93,7 @@ public class MIDIKnobNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
+
     public override bool Calculate()
     {
         valueKnob.SetValue(value);
