@@ -3,6 +3,7 @@ using DynamicExpresso;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
+using System;
 using UnityEngine;
 
 [Node(false, "Float/MathExpr")]
@@ -50,6 +51,7 @@ public class MathExprNode : Node
         aKnob.DisplayLayout();
         bKnob.DisplayLayout();
         GUILayout.EndVertical();
+        GUILayout.Label(string.Format("Result: {0:0.000}", output));
         outputKnob.DisplayLayout();
         GUILayout.EndHorizontal();
 
@@ -115,10 +117,10 @@ public class MathExprNode : Node
         {
             try
             {
-                output = (float) exprFunc.Invoke(aKnob.GetValue<float>(), bKnob.GetValue<float>());
-            } catch 
+                output = float.Parse(exprFunc.Invoke(aKnob.GetValue<float>(), bKnob.GetValue<float>()).ToString());
+            } catch (Exception e)
             {
-                // Do nothing
+                //Debug.Log(e);
             }
         }
         outputKnob.SetValue(output);
