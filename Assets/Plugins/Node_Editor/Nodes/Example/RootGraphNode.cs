@@ -3,7 +3,7 @@ using NodeEditorFramework.Utilities;
 
 namespace NodeEditorFramework.Standard
 {
-	[Node (false, "Example/Graph Root")]
+	[Node (true, "Example/Graph Root")]
 	public class RootGraphNode : Node 
 	{
 		public const string ID = "rootGraphNode";
