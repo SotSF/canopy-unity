@@ -1,9 +1,11 @@
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Filter/CropTileScale")]
-public class CropNode : Node
+public class CropNode : TextureSynthNode
 {
     public const string ID = "cropTileScale";
     public override string GetID { get { return ID; } }
@@ -30,12 +32,11 @@ public class CropNode : Node
     public RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
-    public bool scale;
-    public bool tile;
-    public bool mirror;
     private int tileKernel;
     private int mirrorKernel;
     private int cropScaleKernel;
+    [SerializeField]
+    public Dictionary<string, bool> edgeWrapMode;
 
     private void Awake()
     {
@@ -43,6 +44,14 @@ public class CropNode : Node
         tileKernel = CropShader.FindKernel("TileKernel");
         mirrorKernel = CropShader.FindKernel("MirrorKernel");
         cropScaleKernel = CropShader.FindKernel("CropScaleKernel");
+        if (edgeWrapMode == null)
+        {
+            edgeWrapMode = new Dictionary<string, bool>() {
+                { "scale", false },
+                { "tile", false },
+                { "mirror", false } 
+            };
+        }
     }
 
     private void InitializeRenderTexture()
@@ -76,27 +85,7 @@ public class CropNode : Node
         // Strategy for in size < out size: choose scale/tile/mirror, default is fill black/alpha
         // Strategy for out size < in size: default crop, allow scale
         GUILayout.BeginHorizontal();
-        if (RTEditorGUI.Toggle(scale, new GUIContent("Scale", "Scale to given width/height"))){
-            scale = true;
-            tile = false;
-            mirror = false;
-        } else {
-            scale = false;
-        }
-        if (RTEditorGUI.Toggle(tile, new GUIContent("Tile", "Tile texture onto larger canvas"))){
-            tile = true;
-            scale = false;
-            mirror = false;
-        } else {
-            tile = false;
-        }
-        if (RTEditorGUI.Toggle(mirror, new GUIContent("Mirror", "Mirror texture onto larger canvas"))){
-            mirror = true;
-            scale = false;
-            tile = false;
-        } else {
-            mirror = false;
-        }
+        RadioButtons(edgeWrapMode);
         GUILayout.EndHorizontal();
         GUILayout.Box(outputTex, GUILayout.MaxHeight(64), GUILayout.MaxWidth(64));
         textureOutputKnob.DisplayLayout();
@@ -116,9 +105,10 @@ public class CropNode : Node
             return true;
         }
         int kernelID = 0;
-        if (tile){
+        if (edgeWrapMode["tile"]){
             kernelID = tileKernel;
-        } else if (mirror){
+        } else if (edgeWrapMode["mirror"])
+        {
             kernelID = mirrorKernel;
         } else {
             kernelID = cropScaleKernel;
@@ -134,7 +124,7 @@ public class CropNode : Node
         CropShader.SetInt("iHeight", inputTex.height);
         CropShader.SetInt("oWidth", outputTex.width);
         CropShader.SetInt("oHeight", outputTex.height);
-        CropShader.SetBool("applyScale", scale);
+        CropShader.SetBool("applyScale", edgeWrapMode["scale"]);
         var threadGroupX = Mathf.CeilToInt(outputTex.width / 16.0f);
         var threadGroupY = Mathf.CeilToInt(outputTex.height / 16.0f);
         CropShader.Dispatch(kernelID, threadGroupX, threadGroupY, 1);
