@@ -8,7 +8,7 @@ using System.Linq;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 
-[Node(false, "KeyboardControls/KeySignal")]
+[Node(false, "Signal/KeySignal")]
 public class KeySignalNode : TickingNode
 {
     public override string GetID => "KeySignal";

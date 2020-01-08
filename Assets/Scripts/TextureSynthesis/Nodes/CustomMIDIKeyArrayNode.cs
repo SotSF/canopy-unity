@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[Node(false, "Pattern/CustomMIDIKeyArray")]
+[Node(false, "MIDI/CustomMIDIKeyArray")]
 public class CustomMIDIKeyArrayNode : Node
 {
     public struct MIDINote

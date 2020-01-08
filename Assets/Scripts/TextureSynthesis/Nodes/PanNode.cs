@@ -19,11 +19,15 @@ public class PanNode : TickingNode {
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 100)]
     public ValueConnectionKnob textureOutputKnob;
 
+
     [ValueConnectionKnob("Speed", Direction.In, typeof(float))]
     public ValueConnectionKnob speedInputKnob;
 
     [ValueConnectionKnob("Angle", Direction.In, typeof(float))]
     public ValueConnectionKnob angleInputKnob;
+
+    [ValueConnectionKnob("Reset", Direction.In, typeof(bool))]
+    public ValueConnectionKnob resetKnob;
 
 
     private ComputeShader panShader;
@@ -64,24 +68,15 @@ public class PanNode : TickingNode {
     {
         //GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
-        
-        speedInputKnob.DisplayLayout(new GUIContent("Speed", "The speed to pan in image widths/second"));
-        if (!speedInputKnob.connected())
-        {
-            speed = RTEditorGUI.Slider(speed, -32, 32);
-        }
-        angleInputKnob.DisplayLayout(new GUIContent("Angle", "The angle to pan in radians"));
-        if (!angleInputKnob.connected())
-        {
-            angle = RTEditorGUI.Slider(angle, 0, 6.2831f);
-        }
+        FloatKnobOrSlider(ref speed, -50, 50, speedInputKnob);
+        FloatKnobOrSlider(ref angle, 0, 2 * Mathf.PI, angleInputKnob);
         GUILayout.BeginHorizontal();
         smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
         mirror = RTEditorGUI.Toggle(mirror, new GUIContent("Mirror", "Use mirror wraping at texture edges"));
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
         GUILayout.Label(string.Format("Offset: ({0:0.00}, {1:0.00})", offset.x, offset.y));
-        if (GUILayout.Button("Reset"))
+        if (EventKnobOrButton("Reset", resetKnob))
         {
             offset = Vector2.zero;
         }

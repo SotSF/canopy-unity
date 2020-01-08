@@ -4,7 +4,7 @@ using NodeEditorFramework.Utilities;
 using UnityEngine;
 
 
-[Node(false, "Inputs/API")]
+[Node(false, "Signal/API")]
 public class ApiNode : Node
 {
     public const string ID = "apiNode";

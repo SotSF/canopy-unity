@@ -5,7 +5,7 @@ using SecretFire.TextureSynth;
 using UnityEngine;
 using UnityEngine.Video;
 
-[Node(false, "Texture/InputAnimated")]
+[Node(false, "Texture/AnimatedTexture")]
 public class AnimatedNode : TickingNode
 {
     public const string ID = "animatedNode";

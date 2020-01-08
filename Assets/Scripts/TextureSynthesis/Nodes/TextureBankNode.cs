@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NodeEditorFramework.TextureComposer;
 
-[Node(false, "Inputs/Textures")]
+[Node(false, "Texture/TextureBank")]
 public class TextureBankNode : Node
 {
     public const string ID = "TextureBankNode";

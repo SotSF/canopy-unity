@@ -5,7 +5,7 @@ using NodeEditorFramework.Utilities;
 using UnityEngine;
 using UnityEngine.Video;
 
-[Node(false, "Texture/VortexGenerator")]
+[Node(false, "Pattern/VortexGenerator")]
 public class VortexGeneratorNode : Node
 {
     public const string ID = "vortexGeneratorNode";
