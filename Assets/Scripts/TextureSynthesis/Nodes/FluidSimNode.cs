@@ -6,7 +6,7 @@ using System.Text;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 
-[Node(false, "Inputs/FluidSim")]
+[Node(false, "Pattern/FluidSim")]
 public class FluidSimNode : TickingNode
 {
     public override string GetID => "FluidSimNode";
@@ -30,8 +30,13 @@ public class FluidSimNode : TickingNode
     public ValueConnectionKnob textureOutputKnob;
 
     public RenderTexture outputTex;
+    public float timestep;
 
-    private bool running = false;
+    public bool useBoundaries = true;
+    public bool continuousVelocity = false;
+    public bool continuousDye = false;
+    public bool running = false;
+
     private ComputeShader fluidSimShader;
     private int advectionKernel;
     private int jacobiKernel;
@@ -132,10 +137,6 @@ public class FluidSimNode : TickingNode
         InitializeRenderTextures();
         ClearRenderTextures();
     }
-
-    bool useBoundaries = true;
-    bool continuousVelocity = false;
-    bool continuousDye = false;
     
     bool clicked = false;
     //float viscosity = 1;
@@ -340,7 +341,7 @@ public class FluidSimNode : TickingNode
         //this.TimedDebug(builder.ToString(), 3);
     }
 
-    float timestep;
+    
     float lastStep = 0;
     public override bool Calculate()
     {
