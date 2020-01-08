@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using sotsf.canopy.patterns;
 using System.Text;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 /* Generates code for a new node & optional associated shader based on passed in parameters, 
  * thus reducing boilerplate. Relies heavily on StringBuilders + csharp string interpolation, ie the 
@@ -78,7 +79,7 @@ public class NodeWizard : ScriptableWizard
     public ValueConnectionKnob {output.name}Knob;";
             portDecls.AppendLine(nodePortDecl);
         }
-        return portDecls.ToString();
+        return CollapseMultilines(portDecls.ToString());
     }
 
     private string shaderVarName = "patternShader";
@@ -89,7 +90,6 @@ public class NodeWizard : ScriptableWizard
     /* Generates the member variable declarations for the Node */
     string GenerateNodeVars()
     {
-
         StringBuilder varDecls = new StringBuilder();
         varDecls.AppendLine();
         if (generateShader)
@@ -115,7 +115,7 @@ public class NodeWizard : ScriptableWizard
         {
             varDecls.AppendLine($"    public RenderTexture {texOut.name};");
         }
-        return varDecls.ToString();
+        return CollapseMultilines(varDecls.ToString());
     }
 
     /* Generates the node's Awake() method.
@@ -147,7 +147,7 @@ public class NodeWizard : ScriptableWizard
     {{
         {texInitializations.ToString()}
     }}" : "";
-        return awake + init;
+        return CollapseMultilines(awake + init);
     }
 
     /* Generates the node's NodeGUI method */
@@ -226,7 +226,7 @@ public class NodeWizard : ScriptableWizard
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }}";
-        return nodeGUI;
+        return CollapseMultilines(nodeGUI);
     }
 
     /* Generates the node's Calculate() method */
@@ -327,21 +327,37 @@ public class NodeWizard : ScriptableWizard
 {outputAssigns.ToString()}
         return true;
     }}";
-        return calculate;
+        return CollapseMultilines(calculate);
     }
 
+    /* Removes the multiple empty lines left behind when a given section of code isn't generated */
+    string CollapseMultilines(string input, int depth = 1)
+    {
+        switch (depth)
+        {
+            case 0:
+                input = Regex.Replace(input, @"(\s*((\r\n)|(\n))){3}", "\r\n\r\n");
+                break;
+            case 1:
+                input = Regex.Replace(input, @"(\s*((\r\n)|(\n))){2,}", "\r\n");
+                break;
+
+        }
+        return input;
+    }
 
     /* Generate the code representing the full Node file */
     string GenerateNodeFullCode()
     {
+        string menuFolder = (!hasTexInputs && !hasTexOutputs) ? "Signal" : hasTexInputs ? "Filter" : "Pattern";
         string parentClass = nodeType == NodeType.TickingNode ? "TickingNode" : "Node";
-        return $@"
+        string fullNode =  $@"
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 using UnityEngine;
 
-[Node(false, ""{suffix}/{nodeName}"")]
+[Node(false, ""{menuFolder}/{nodeName}"")]
 public class {nodeName}Node : {parentClass}
 {{
     public override string GetID => ""{nodeName}Node"";
@@ -356,6 +372,7 @@ public class {nodeName}Node : {parentClass}
     {GenerateCalculate()}
 }}
 ";
+        return CollapseMultilines(fullNode, 0);
     }
     #endregion
 
