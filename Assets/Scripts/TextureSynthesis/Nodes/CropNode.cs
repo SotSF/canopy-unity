@@ -36,6 +36,7 @@ public class CropNode : TextureSynthNode
     private int mirrorKernel;
     private int cropScaleKernel;
 
+    [SerializeField]
     public RadioButtonSet edgeWrapMode;
 
     private void Awake()
@@ -44,7 +45,7 @@ public class CropNode : TextureSynthNode
         tileKernel = CropShader.FindKernel("TileKernel");
         mirrorKernel = CropShader.FindKernel("MirrorKernel");
         cropScaleKernel = CropShader.FindKernel("CropScaleKernel");
-        if (edgeWrapMode == null)
+        if (edgeWrapMode == null || edgeWrapMode.names.Count == 0)
         {
             edgeWrapMode = new RadioButtonSet("tile", "mirror", "scale");
         }
