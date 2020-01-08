@@ -3,9 +3,47 @@ using System.Collections;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using System.Collections.Generic;
+using System;
 
 namespace SecretFire.TextureSynth
 {
+    [Serializable]
+    public class RadioButtonSet
+    {
+        public List<bool> values;
+        public List<string> names;
+
+        public RadioButtonSet(params string[] optionNames)
+        {
+            names = new List<string>(optionNames);
+            values = new List<bool>();
+            for (int i = 0; i < names.Count; i++)
+            {
+                values.Add(false);
+            }
+        }
+
+        public bool IsSelected(string name)
+        {
+            for (int i = 0; i < names.Count; i++)
+            {
+                if (names[i] == name)
+                {
+                    return values[i];
+                }
+            }
+            return false;
+        }
+
+        public void SelectOption(int index)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                values[i] = (i == index);
+            }
+        }
+    }
+
     public abstract class TextureSynthNode : Node
     {
         protected void FloatKnobOrSlider(ref float val, float min, float max, ValueConnectionKnob knob)
@@ -29,24 +67,18 @@ namespace SecretFire.TextureSynth
             }
         }
 
-        protected Dictionary<string, bool> RadioButtons(Dictionary<string, bool> buttons)
+        protected void RadioButtons(RadioButtonSet buttons)
         {
-            List<string> keys = new List<string>(buttons.Keys);
-            foreach (var name in keys)
+            for (int i = 0; i < buttons.names.Count; i++)
             {
-                if (RTEditorGUI.Toggle(buttons[name], name))
+                if (RTEditorGUI.Toggle(buttons.values[i], buttons.names[i]))
                 {
-                    foreach (var subname in keys)
-                    {
-                        // Set all values except the selected one to false
-                        buttons[subname] = subname == name;
-                    }
+                    buttons.SelectOption(i);
                 } else
                 {
-                    buttons[name] = false;
+                    buttons.values[i] = false;
                 }
             }
-            return buttons;
         }
 
         protected bool EventKnobOrButton(string label, ValueConnectionKnob knob)

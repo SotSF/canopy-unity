@@ -35,8 +35,8 @@ public class CropNode : TextureSynthNode
     private int tileKernel;
     private int mirrorKernel;
     private int cropScaleKernel;
-    [SerializeField]
-    public Dictionary<string, bool> edgeWrapMode;
+
+    public RadioButtonSet edgeWrapMode;
 
     private void Awake()
     {
@@ -46,11 +46,7 @@ public class CropNode : TextureSynthNode
         cropScaleKernel = CropShader.FindKernel("CropScaleKernel");
         if (edgeWrapMode == null)
         {
-            edgeWrapMode = new Dictionary<string, bool>() {
-                { "scale", false },
-                { "tile", false },
-                { "mirror", false } 
-            };
+            edgeWrapMode = new RadioButtonSet("tile", "mirror", "scale");
         }
     }
 
@@ -105,9 +101,9 @@ public class CropNode : TextureSynthNode
             return true;
         }
         int kernelID = 0;
-        if (edgeWrapMode["tile"]){
+        if (edgeWrapMode.IsSelected("tile")){
             kernelID = tileKernel;
-        } else if (edgeWrapMode["mirror"])
+        } else if (edgeWrapMode.IsSelected("mirror"))
         {
             kernelID = mirrorKernel;
         } else {
@@ -124,7 +120,7 @@ public class CropNode : TextureSynthNode
         CropShader.SetInt("iHeight", inputTex.height);
         CropShader.SetInt("oWidth", outputTex.width);
         CropShader.SetInt("oHeight", outputTex.height);
-        CropShader.SetBool("applyScale", edgeWrapMode["scale"]);
+        CropShader.SetBool("applyScale", edgeWrapMode.IsSelected("scale"));
         var threadGroupX = Mathf.CeilToInt(outputTex.width / 16.0f);
         var threadGroupY = Mathf.CeilToInt(outputTex.height / 16.0f);
         CropShader.Dispatch(kernelID, threadGroupX, threadGroupY, 1);
