@@ -6,7 +6,7 @@ using SecretFire.TextureSynth;
 using UnityEngine;
 
 
-[Node(false, "Inputs/Oscillator")]
+[Node(false, "Signal/PeriodicSignal")]
 public class PeriodicSignalNode : TickingNode
 {
     public const string ID = "periodicSignal";
@@ -44,23 +44,13 @@ public class PeriodicSignalNode : TickingNode
 
         //Input pins & internal controls
         GUILayout.BeginVertical();
-        //periodInputKnob.DisplayLayout();
-        //if (!periodInputKnob.connected())
-        //{
-        //    period = RTEditorGUI.Slider(period, 0.01f, 50);
-        //}
-        KnobOrSlider(ref period, 0.01f, 50, periodInputKnob);
+        FloatKnobOrSlider(ref period, 0.01f, 50, periodInputKnob);
         amplInputKnob.DisplayLayout();
         if (!amplInputKnob.connected())
         {
             amplitude = RTEditorGUI.FloatField(amplitude);
         }
-        //phaseInputKnob.DisplayLayout();
-        //if (!phaseInputKnob.connected())
-        //{
-        //    phase = RTEditorGUI.Slider(phase, 0, 2 * Mathf.PI);
-        //}
-        KnobOrSlider(ref phase, 0, 2 * Mathf.PI, phaseInputKnob);
+        FloatKnobOrSlider(ref phase, 0, 2 * Mathf.PI, phaseInputKnob);
         GUILayout.EndVertical();
 
         //Output pin
