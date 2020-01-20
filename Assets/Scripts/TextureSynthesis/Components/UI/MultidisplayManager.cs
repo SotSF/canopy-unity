@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Text;
 
@@ -14,11 +15,14 @@ public class MultidisplayManager : MonoBehaviour
             ListDisplays();
         }
     }
+    public Button displayButton;
 
     bool showButtons;
     string msg = "";
     float msgDuration = 0;
     float msgSent = 0;
+
+    bool displayActive = false;
 
     void ShowMessage(string message, float duration)
     {
@@ -53,6 +57,32 @@ public class MultidisplayManager : MonoBehaviour
                     showButtons = false;
                 }
             }
+        }
+    }
+
+    public void ToggleDisplay()
+    {
+        if (displayActive)
+            DeactivateSecondaryDisplay();
+        else
+            ActivateSecondaryDisplay();
+    }
+
+    public void ActivateSecondaryDisplay()
+    {
+        if (Application.isEditor)
+        {
+            Camera.main.targetDisplay = 1;
+            displayActive = true;
+        }
+    }
+
+    public void DeactivateSecondaryDisplay()
+    {
+        if (Application.isEditor)
+        {
+            Camera.main.targetDisplay = 0;
+            displayActive = false;
         }
     }
 
