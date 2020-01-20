@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/SignalToEvent")]
-public class SignalToEventNode : TextureSynthNode
+public class SignalToEventNode : TickingNode
 {
     public override string GetID => "SignalToEventNode";
     public override string Title { get { return "SignalToEvent"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 120); } }
+    public override Vector2 DefaultSize { get { return new Vector2(230, 150); } }
 
     [ValueConnectionKnob("inputSignal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob inputSignalKnob;
@@ -28,7 +28,8 @@ public class SignalToEventNode : TextureSynthNode
 
     public float threshold = 1;
 
-    float lastSignalValue;
+    bool wasOverThreshold;
+    float signalValue;
 
     public void Awake()
     {
@@ -61,45 +62,27 @@ public class SignalToEventNode : TextureSynthNode
 
     public override bool Calculate()
     {
-        float signalValue = inputSignalKnob.GetValue<float>();
-        if ( signalValue != lastSignalValue)
+        signalValue = inputSignalKnob.GetValue<float>();
+        switch (triggerMode.SelectedOption())
         {
-            if (triggerMode.IsSelected("leadingEdge"))
-            {
-                output = CheckLeadingEdge(signalValue);
-            } else if (triggerMode.IsSelected("trailingEdge"))
-            {
-                output = CheckTrailingEdge(signalValue);
-            } else if (triggerMode.IsSelected("high"))
-            {
-                output = CheckHigh(signalValue);
-            } else if (triggerMode.IsSelected("low"))
-            {
-                output = CheckLow(signalValue);
-            }
-            lastSignalValue = signalValue;
+            case "leadingEdge":
+                output = (signalValue > threshold) && !wasOverThreshold;
+                break;
+            case "trailingEdge":
+                output = (signalValue < threshold) && wasOverThreshold;
+                break;
+            case "high":
+                output = signalValue > threshold;
+                break;
+            case "low":
+                output = signalValue < threshold;
+                break;
+            default:
+                output = false;
+                break;
         }
+        wasOverThreshold = signalValue > threshold;
         outputEventKnob.SetValue(output);
         return true;
-    }
-
-    private bool CheckLow(float signalValue)
-    {
-        return signalValue < threshold;
-    }
-
-    private bool CheckHigh(float signalValue)
-    {
-        return signalValue > threshold;
-    }
-
-    private bool CheckTrailingEdge(float signalValue)
-    {
-        return (signalValue < threshold) && output == false;
-    }
-
-    private bool CheckLeadingEdge(float signalValue)
-    {
-        return (signalValue > threshold) && output == false;
     }
 }
