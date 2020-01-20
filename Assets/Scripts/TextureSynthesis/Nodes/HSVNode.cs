@@ -1,16 +1,17 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 
 [Node(false, "Filter/HSV")]
-public class HSVNode : Node
+public class HSVNode : TextureSynthNode
 {
     public const string ID = "hsvNode";
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "HSV"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(100, 100); } }
+    public override Vector2 DefaultSize { get { return new Vector2(150, 120); } }
 
     [ValueConnectionKnob("Texture", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
@@ -24,6 +25,8 @@ public class HSVNode : Node
     public ValueConnectionKnob satKnob;
     [ValueConnectionKnob("V", Direction.In, "Float")]
     public ValueConnectionKnob valKnob;
+
+    public float hue, saturation, value;
 
     private ComputeShader HSVShader;
     private int kernelId;
@@ -50,18 +53,13 @@ public class HSVNode : Node
 
     public override void NodeGUI()
     {
-        GUILayout.BeginHorizontal();
-
         GUILayout.BeginVertical();
         textureInputKnob.DisplayLayout();
-        hueKnob.DisplayLayout();
-        satKnob.DisplayLayout();
-        valKnob.DisplayLayout();
-        GUILayout.EndVertical();
-
+        FloatKnobOrSlider(ref hue, 0, 1, hueKnob);
+        FloatKnobOrSlider(ref saturation, 0, 1, satKnob);
+        FloatKnobOrSlider(ref value, 0, 1, valKnob);
         textureOutputKnob.DisplayLayout();
-
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
@@ -85,11 +83,19 @@ public class HSVNode : Node
             outputSize = inputSize;
             InitializeRenderTexture();
         }
-
-        HSV = new Vector4(hueKnob.GetValue<float>(), 
-                          satKnob.GetValue<float>(), 
-                          valKnob.GetValue<float>());
-
+        if (hueKnob.connected())
+        {
+            hue = hueKnob.GetValue<float>();
+        }
+        if (satKnob.connected())
+        {
+            saturation = satKnob.GetValue<float>();
+        }
+        if (valKnob.connected())
+        {
+            value = valKnob.GetValue<float>();
+        }
+        HSV = new Vector4(hue, saturation, value);
         //Execute HSV compute shader here
         HSVShader.SetVector("HSV", HSV);
         HSVShader.SetTexture(kernelId, "OutputTex", outputTex);
