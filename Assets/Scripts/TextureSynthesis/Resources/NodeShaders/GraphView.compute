@@ -1,0 +1,147 @@
+#pragma kernel gridPoints
+#pragma kernel horizontalAxis
+#pragma kernel verticalAxis
+#pragma kernel graph
+
+float2 windowMin;
+float2 windowMax;
+
+float4 lineColor;
+float4 labelColor;
+float4 backgroundColor;
+
+int numPoints;
+
+int minTickSpacing;
+
+int2 texSize;
+
+float xValues[256];
+float yValues[256];
+
+RWTexture2D<float4> outputTex;
+
+
+// Return exponent e that defines the tick scale, such that
+// there are at least minTickSpacing pixels between each primary
+// tick.
+float2 getScale(float2 pixelSize) {
+    return ceil(log10(pixelSize * minTickSpacing));
+}
+
+// Performs a fast integer pow(10, e) with simple loops for 
+// calculating tick spacing.
+float pow10(float e) {
+    float spacing = 1;
+    if (e >= 0) {
+        for (int i = 0; i < e; i++) {
+            spacing *= 10;
+        }
+    }
+    else {
+        for (int i = 0; i > e; i--) {
+            spacing /= 10;
+        }
+    }
+    return spacing;
+}
+
+void calculateGraphParameters(in int2 pos, out float2 pixelSize, out float2 position, out float2 scale) {
+
+    // Position in graph units of the pixel
+    position = lerp(windowMin, windowMax, pos.xy / (texSize - float2(1, 1)));
+
+    // Size in graph units of pixels in x/y direction
+    pixelSize = (windowMax - windowMin) / texSize;
+
+    // The scale regime in which the graph is drawn
+    scale = getScale(pixelSize);
+}
+
+/* Draw the graph of the signal based on the input data points*/
+[numthreads(256, 1, 1)]
+void graph(uint3 id : SV_DispatchThreadID)
+{
+    float x = xValues[id.x];
+    float y = yValues[id.x];
+    int xPos = floor(lerp(0, texSize.x - 1, (x - windowMin.x) / float(windowMax.x - windowMin.x)));
+    int yPos = floor(lerp(0, texSize.y - 1, (y - windowMin.y) / float(windowMax.y - windowMin.y)));
+    int2 index = int2(xPos, yPos);
+    outputTex[index] = lineColor;
+    // Run over width of image, apply color at lerp of closest values in datapoint array
+    // or
+    // Run over width of datapoint array, apply color at closest x value?
+}
+
+/* Draw the horizontal axis with ticks based on the window size*/
+[numthreads(256, 1, 1)]
+void horizontalAxis(uint3 id : SV_DispatchThreadID)
+{
+    if (windowMin.y < 0 && windowMax.y > 0) {
+        //the pixel y value of the graph zero
+        int yVal = lerp(0, texSize.y - 1, -windowMin.y / float(windowMax.y - windowMin.y));
+        uint2 index = uint2(id.x, yVal);
+
+        float2 pixelSize, position, scale;
+        calculateGraphParameters(index, pixelSize, position, scale);
+
+        float horizontalTickSpacing = pow10(scale.x);
+        outputTex[index] = labelColor;
+
+        float remainder = (abs(position.x) + horizontalTickSpacing / 2) % horizontalTickSpacing;
+        float dist = abs(remainder - (horizontalTickSpacing / 2));
+        float4 tickcolor = lerp(labelColor, backgroundColor, dist / pixelSize.x);
+        outputTex[index + uint2(0, 1)] = tickcolor;
+        outputTex[index - uint2(0, 1)] = tickcolor;
+        outputTex[index + uint2(0, 2)] = tickcolor;
+        outputTex[index - uint2(0, 2)] = tickcolor;
+    }
+}
+
+/* Draw the vertical axis with ticks based on the window size*/
+[numthreads(1, 256, 1)]
+void verticalAxis(uint3 id : SV_DispatchTHreadID)
+{
+    if (windowMin.x < 0 && windowMax.x > 0) {
+        int xVal = lerp(0, texSize.x - 1, -windowMin.x / float(windowMax.x - windowMin.x));
+        uint2 index = uint2(xVal, id.y);
+
+        float2 pixelSize, position, scale;
+        calculateGraphParameters(index, pixelSize, position, scale);
+
+        float verticalTickSpacing = pow10(scale.y);
+        outputTex[index] = labelColor;
+
+        float remainder = (abs(position.y) + verticalTickSpacing / 2) % verticalTickSpacing;
+        float dist = abs(remainder - (verticalTickSpacing / 2));
+        float4 tickcolor = lerp(labelColor, backgroundColor, dist / pixelSize.y);
+        outputTex[index + uint2(1, 0)] = tickcolor;
+        outputTex[index - uint2(1, 0)] = tickcolor;
+        outputTex[index + uint2(2, 0)] = tickcolor;
+        outputTex[index - uint2(2, 0)] = tickcolor;
+    }
+}
+
+/* Draw grid points for each "major" tick throughout the graph, and fill the background*/
+[numthreads(16, 16, 1)]
+void gridPoints(uint3 id : SV_DispatchThreadID)
+{
+    float2 pixelSize, position, scale;
+
+    calculateGraphParameters(id.xy, pixelSize, position, scale);
+    // Spacing in graph units of grid points.
+    // Place gridpoints at 5x the major tick spacing (eg at the 5 with ticks every 1 unit)
+    float2 gridpointSpacing = 5 * float2(pow10(scale.x), pow10(scale.y));
+
+    // The distance the pixel is between grid points
+    float2 gridpointRemainder = (abs(position) + (gridpointSpacing/2)) % gridpointSpacing;
+    float2 dist = abs(gridpointRemainder - (gridpointSpacing / 2));
+
+    if (dist.x <= pixelSize.x/2 && dist.y <= pixelSize.y/2) {
+        /*outputTex[id.xy] = lerp(labelColor, backgroundColor, length(dist / pixelSize));*/
+        outputTex[id.xy] = labelColor;
+    }
+    else {
+        outputTex[id.xy] = backgroundColor;
+    }
+}
