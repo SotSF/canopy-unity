@@ -1,0 +1,36 @@
+#include "Assets/Scripts/TextureSynthesis/Resources/NodeShaders/GraphicsUtils.compute"
+#include "Assets/Scripts/TextureSynthesis/Resources/NodeShaders/HSV.compute"
+
+#pragma kernel PatternKernel
+
+float timeScale;
+float h;
+float time;
+int octaves;
+
+int width;
+int height;
+
+RWTexture2D<float4> outputTex;
+
+float fbm(float2 pos) {
+    return fbm_grad(pos, h, octaves);
+}
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 p = (id.xy / float2(width,height));
+    float2 q = float2(fbm(p + time/timeScale),
+                      fbm(p - time/timeScale));
+
+    float2 r = float2(fbm(p + q-time/timeScale),
+                      fbm(p + q+time/timeScale));
+
+    float level = .5+fbm(p + r);
+    float x = lerp(q.x, r.y, sin(time / timeScale));
+    float y = lerp(q.y, r.x, cos(time / timeScale));
+    float3 hsv = float3(level, 2*length(q), 2*length(r));
+    float3 rgb = HSVtoRGB(hsv);
+    outputTex[id.xy] = float4(rgb.r, rgb.g, rgb.b, 1);
+}

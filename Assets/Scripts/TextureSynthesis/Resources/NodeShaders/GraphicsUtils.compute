@@ -1,0 +1,139 @@
+﻿// The MIT License
+// Copyright © 2017 Inigo Quilez
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// Value    Noise 2D, Derivatives: https://www.shadertoy.com/view/4dXBRH
+// Gradient Noise 2D, Derivatives: https://www.shadertoy.com/view/XdXBRH
+// Value    Noise 3D, Derivatives: https://www.shadertoy.com/view/XsXfRH
+// Gradient Noise 3D, Derivatives: https://www.shadertoy.com/view/4dffRH
+// Value    Noise 2D             : https://www.shadertoy.com/view/lsf3WH
+// Value    Noise 3D             : https://www.shadertoy.com/view/4sfGzS
+// Gradient Noise 2D             : https://www.shadertoy.com/view/XdXGW8
+// Gradient Noise 3D             : https://www.shadertoy.com/view/Xsl3Dl
+// Simplex  Noise 2D             : https://www.shadertoy.com/view/Msf3WH
+
+#define ONE_2D float2(1,1)
+#define ZERO_2D float2(0,0)
+#define LEFT_2D float2(-1,0)
+#define RIGHT_2D float2(1,0)
+#define UP_2D float2(0,1)
+#define DOWN_2D float2(0,-1)
+
+float hash(float2 p)
+{
+    p = 50.0 * frac(p * 0.3183099 + float2(0.71, 0.113));
+    return -1.0 + 2.0 * frac(p.x * p.y * (p.x + p.y));
+}
+
+float2 hash2d(float2 x)
+{
+    const float2 k = float2(0.3183099, 0.3678794);
+    x = x * k + k.yx;
+    return -1.0 + 2.0 * frac(16.0 * k * frac(x.x * x.y * (x.x + x.y)));
+}
+
+float value_noise(float2 p)
+{
+    float2 i = floor(p);
+    float2 f = frac(p);
+
+    float2 u = f * f * (3.0 - 2.0 * f);
+
+    return lerp( lerp(hash(i + ZERO_2D), hash(i + RIGHT_2D), u.x),
+                 lerp(hash(i + UP_2D), hash(i + ONE_2D), u.x),
+                 u.y);
+}
+
+// return value noise (in x) and its derivatives (in yz)
+float3 value_noised(float2 p)
+{
+    float2 i = floor(p);
+    float2 f = frac(p);
+
+    // quintic interpolation
+    float2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+    float2 du = 30.0 * f * f * (f * (f - 2.0) + 1.0);
+
+    float va = hash(i + ZERO_2D);
+    float vb = hash(i + RIGHT_2D);
+    float vc = hash(i + UP_2D);
+    float vd = hash(i + ONE_2D);
+
+    float k0 = va;
+    float k1 = vb - va;
+    float k2 = vc - va;
+    float k4 = va - vb - vc + vd;
+
+    return float3(va + (vb - va) * u.x + (vc - va) * u.y + (va - vb - vc + vd) * u.x * u.y, // value
+                  du * (u.yx * (va - vb - vc + vd) + float2(vb, vc) - va));     // derivative                
+}
+
+float gradient_noise(float2 p)
+{
+    float2 i = floor(p);
+    float2 f = frac(p);
+
+    float2 u = f * f * (3.0 - 2.0 * f);
+
+    return lerp( lerp( dot(hash(i + ZERO_2D), f - ZERO_2D), dot(hash(i + RIGHT_2D), f - RIGHT_2D), u.x),
+                 lerp( dot( hash(i + UP_2D), f - UP_2D), dot(hash(i + ONE_2D), f - ONE_2D), u.x),
+                 u.y);
+}
+
+// return gradient noise (in x) and its derivatives (in yz)
+float3 gradient_noised(float2 p)
+{
+    float2 i = floor(p);
+    float2 f = frac(p);
+
+    // quintic interpolation
+    float2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+    float2 du = 30.0 * f * f * (f * (f - 2.0) + 1.0);
+
+    float2 ga = hash2d(i + ZERO_2D);
+    float2 gb = hash2d(i + RIGHT_2D);
+    float2 gc = hash2d(i + UP_2D);
+    float2 gd = hash2d(i + ONE_2D);
+
+    float va = dot(ga, f - ZERO_2D);
+    float vb = dot(gb, f - RIGHT_2D);
+    float vc = dot(gc, f - UP_2D);
+    float vd = dot(gd, f - ONE_2D);
+
+    return float3(va + u.x * (vb - va) + u.y * (vc - va) + u.x * u.y * (va - vb - vc + vd),   // value
+        ga + u.x * (gb - ga) + u.y * (gc - ga) + u.x * u.y * (ga - gb - gc + gd) +  // derivatives
+        du * (u.yx * (va - vb - vc + vd) + float2(vb, vc) - va));
+}
+
+// Taken from iq's fractional Brownian Motion page
+// at https://iquilezles.org/www/articles/fbm/fbm.htm
+//
+float fbm_grad(float2 x, float H, int numOctaves)
+{
+    float G = exp2(-H);
+    float f = 1.0;
+    float a = 1.0;
+    float t = 0.0;
+    for (int i = 0; i < numOctaves; i++)
+    {
+        t += a * gradient_noise(f * x);
+        f *= 2.0;
+        a *= G;
+    }
+    return t;
+}
+
+float fbm_val(float2 x, float H, int numOctaves)
+{
+    float G = exp2(-H);
+    float f = 1.0;
+    float a = 1.0;
+    float t = 0.0;
+    for (int i = 0; i < numOctaves; i++)
+    {
+        t += a * value_noise(f * x);
+        f *= 2.0;
+        a *= G;
+    }
+    return t;
+}
