@@ -29,6 +29,7 @@ public class MathExprNode : Node
     private float output;
     private Interpreter interpreter;
     private Lambda exprFunc;
+    private string errorMsg = "";
 
     private void Awake()
     {
@@ -51,7 +52,10 @@ public class MathExprNode : Node
         aKnob.DisplayLayout();
         bKnob.DisplayLayout();
         GUILayout.EndVertical();
-        GUILayout.Label(string.Format("Result: {0:0.000}", output));
+        if (errorMsg != null && errorMsg != "")
+            GUILayout.Label(string.Format("Error: {0}", errorMsg));
+        else
+            GUILayout.Label(string.Format("Result: {0:0.000}", output));
         outputKnob.DisplayLayout();
         GUILayout.EndHorizontal();
 
@@ -72,8 +76,9 @@ public class MathExprNode : Node
                                          new Parameter("b", typeof(float))};
                 exprFunc = interpreter.Parse(stringexpr, parameters);
             }
-            catch
+            catch (Exception e)
             {
+                errorMsg = e.Message;
                 exprFunc = null;
             }
         }
@@ -118,9 +123,11 @@ public class MathExprNode : Node
             try
             {
                 output = float.Parse(exprFunc.Invoke(aKnob.GetValue<float>(), bKnob.GetValue<float>()).ToString());
+                if (errorMsg != "")
+                    errorMsg = "";
             } catch (Exception e)
             {
-                //Debug.Log(e);
+                errorMsg = e.Message;
             }
         }
         outputKnob.SetValue(output);
