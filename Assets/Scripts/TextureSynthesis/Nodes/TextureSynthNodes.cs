@@ -42,29 +42,58 @@ namespace SecretFire.TextureSynth
                 values[i] = (i == index);
             }
         }
+
+        public string SelectedOption()
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (values[i])
+                    return names[i];
+            }
+            return "";
+        }
     }
 
     public abstract class TextureSynthNode : Node
     {
         protected void FloatKnobOrSlider(ref float val, float min, float max, ValueConnectionKnob knob)
         {
+            GUILayout.BeginHorizontal();
             knob.DisplayLayout();
             if (!knob.connected())
             {
                 val = RTEditorGUI.Slider(val, min, max);
             }
+            GUILayout.EndHorizontal();
+        }
+
+        protected void IntKnobOrSlider(ref int val, int min, int max, ValueConnectionKnob knob)
+        {
+            GUILayout.BeginHorizontal();
+            knob.DisplayLayout();
+            if (!knob.connected())
+            {
+                val = RTEditorGUI.IntSlider(val, min, max);
+            }
+            GUILayout.EndHorizontal();
         }
 
         protected bool EventKnobOrButtonExclusive(GUIContent label, ValueConnectionKnob knob)
         {
+            GUILayout.BeginHorizontal();
             knob.DisplayLayout();
-            if (!knob.connected())
-            {
-                return GUILayout.Button(label);
-            } else
-            {
-                return knob.GetValue<bool>();
-            }
+            bool val = knob.connected() ? knob.GetValue<bool>() : GUILayout.Button(label);
+            GUILayout.EndHorizontal();
+            return val;
+        }
+
+        protected bool EventKnobOrButton(string label, ValueConnectionKnob knob)
+        {
+            GUILayout.BeginHorizontal();
+            knob.DisplayLayout();
+            bool val = knob.connected() ? GUILayout.Button(label) || knob.GetValue<bool>() : GUILayout.Button(label);
+            GUILayout.EndHorizontal();
+            return val;
         }
 
         protected void RadioButtons(RadioButtonSet buttons)
@@ -74,23 +103,11 @@ namespace SecretFire.TextureSynth
                 if (RTEditorGUI.Toggle(buttons.values[i], buttons.names[i]))
                 {
                     buttons.SelectOption(i);
-                } else
+                }
+                else
                 {
                     buttons.values[i] = false;
                 }
-            }
-        }
-
-        protected bool EventKnobOrButton(string label, ValueConnectionKnob knob)
-        {
-            knob.DisplayLayout();
-            if (!knob.connected())
-            {
-                return GUILayout.Button(label);
-            }
-            else
-            {
-                return GUILayout.Button(label) || knob.GetValue<bool>();
             }
         }
     }
