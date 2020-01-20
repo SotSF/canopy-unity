@@ -32,6 +32,7 @@ float gridNormalizingFactor;  // aka rdx, reciprocal of dx, grid scale
 float jacobiAlpha;
 float jacobiRBeta;
 
+float forceMultiplier;
 float dyeMultiplier;
 
 float forceRadius;
@@ -64,7 +65,7 @@ void applyForce(uint3 id : SV_DispatchThreadID)
     float2 coord = id.xy + ONE_2D;
     float maxForce = 160000;
     float3 hsv = RGBtoHSV(vField[coord].rgb);
-    float magnitude = isinf(hsv.z) ? maxForce : hsv.z *maxForce;
+    float magnitude = isinf(hsv.z) ? maxForce : hsv.z * maxForce * forceMultiplier;
     float angle = isnan(hsv.x) || isinf(hsv.x) ? 0 : hsv.x;
     float x = cos(2 * PI * angle) * magnitude;
     float y = sin(2 * PI * angle) * magnitude;

@@ -11,20 +11,33 @@ public class FluidSimNode : TickingNode
 {
     public override string GetID => "FluidSimNode";
     public override string Title { get { return "FluidSim"; } }
-    public override Vector2 DefaultSize => new Vector2(620, 300);
+    public override Vector2 DefaultSize => new Vector2(680, 240);
 
-    [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
+    [ValueConnectionKnob("velocityIn", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob velocityInputKnob;
 
-    [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 60)]
+    [ValueConnectionKnob("dyeIn", Direction.In, typeof(Texture), NodeSide.Top, 60)]
     public ValueConnectionKnob dyeInputKnob;
 
-    [ValueConnectionKnob("dyeLevel", Direction.In, "Float")]
-    public ValueConnectionKnob dyeInputLevel;
+    [ValueConnectionKnob("dyeLevel", Direction.In, typeof(float))]
+    public ValueConnectionKnob dyeInputLevelKnob;
+    public float dyeInputLevel = 1;
 
-    [ValueConnectionKnob("timeMultiplier", Direction.In, "Float")]
+    [ValueConnectionKnob("timeMultiplier", Direction.In, typeof(float))]
     public ValueConnectionKnob timeMultiplierKnob;
     public float timeMultiplier = 1;
+
+    [ValueConnectionKnob("Run", Direction.In, typeof(bool))]
+    public ValueConnectionKnob runKnob;
+
+    [ValueConnectionKnob("Reset", Direction.In, typeof(bool))]
+    public ValueConnectionKnob resetKnob;
+
+    [ValueConnectionKnob("ApplyForce", Direction.In, typeof(bool))]
+    public ValueConnectionKnob applyForceKnob;
+
+    [ValueConnectionKnob("ApplyDye", Direction.In, typeof(bool))]
+    public ValueConnectionKnob applyDyeKnob;
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
@@ -142,32 +155,38 @@ public class FluidSimNode : TickingNode
     //float viscosity = 1;
     public override void NodeGUI()
     {
-        GUILayout.BeginVertical();
+        GUILayout.BeginHorizontal();
         velocityInputKnob.SetPosition(140);
-        dyeInputKnob.SetPosition(40);
 
         // Top row simulation control buttons
-        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+        FloatKnobOrSlider(ref timeMultiplier, -1, 2, timeMultiplierKnob);
+        FloatKnobOrSlider(ref dyeInputLevel, 0, 1, dyeInputLevelKnob);
         string cmd = running ? "Stop" : "Run";
-        if (GUILayout.Button(cmd))
+        clicked = EventKnobOrButton(cmd, runKnob);
+        if (clicked)
         {
             running = !running;
-            clicked = true;
         }
-        if (GUILayout.Button("Apply dye"))
-        {
+        if (EventKnobOrButton("Apply dye", applyDyeKnob)) 
+        { 
             AddDye();
         }
-        if (GUILayout.Button("Apply velocity"))
+        if (EventKnobOrButton("Apply velocity", applyForceKnob))
         {
             ApplyVelocity();
         }
-        if (GUILayout.Button("Reset"))
+        if (EventKnobOrButton("Reset", resetKnob))
         {
             ClearRenderTextures();
             running = false;
         }
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+
+        GUILayout.BeginVertical();
+
+
+
 
         // parameters / buttons
         GUILayout.BeginHorizontal();
@@ -176,31 +195,24 @@ public class FluidSimNode : TickingNode
         continuousDye = RTEditorGUI.Toggle(continuousDye, new GUIContent("Continuous dye", "Add dye every frame"));
         //viscosity = RTEditorGUI.Slider(viscosity, 0.00001f, 100f);
         GUILayout.EndHorizontal();
-        // Time control
-        timeMultiplierKnob.DisplayLayout();
-        if (!timeMultiplierKnob.connected())
-        {
-            timeMultiplier = RTEditorGUI.Slider(timeMultiplier, -1, 1);
-        } else
-        {
-            timeMultiplier = timeMultiplierKnob.GetValue<float>();
-        }
         // Texture output
         GUILayout.BeginHorizontal();
 
-        GUILayout.Box(dyeField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
-        GUILayout.Box(velocityField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
-        GUILayout.Box(pressureField, GUILayout.MaxWidth(200), GUILayout.MaxHeight(200));
+        GUILayout.Box(dyeField, GUILayout.MaxWidth(128), GUILayout.MaxHeight(200));
+        GUILayout.Box(velocityField, GUILayout.MaxWidth(128), GUILayout.MaxHeight(200));
+        GUILayout.Box(pressureField, GUILayout.MaxWidth(128), GUILayout.MaxHeight(200));
         GUILayout.EndHorizontal();
         textureOutputKnob.SetPosition(DefaultSize.x - 40);
         GUILayout.EndVertical();
+
+        GUILayout.EndHorizontal();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
     private void AddDye()
     {
-        fluidSimShader.SetFloat("dyeMultiplier", dyeInputLevel.GetValue<float>());
+        fluidSimShader.SetFloat("dyeMultiplier", dyeInputLevel);
         Graphics.Blit(dyeInputKnob.GetValue<Texture>(), scaledBuffer);
         fluidSimShader.SetTexture(dyeKernel, "uField", dyeField);
         fluidSimShader.SetTexture(dyeKernel, "vField", scaledBuffer);
@@ -208,12 +220,13 @@ public class FluidSimNode : TickingNode
         Graphics.Blit(resultField, dyeField);
     }
 
-    private void ApplyVelocity()
+    private void ApplyVelocity(float multiplier = 1)
     {
         Texture input = velocityInputKnob.GetValue<Texture>();
         if (input != null && input.width > 0)
         {
             Graphics.Blit(input, scaledBuffer);
+            fluidSimShader.SetFloat("forceMultiplier", multiplier);
             fluidSimShader.SetTexture(forceKernel, "uField", velocityField);
             fluidSimShader.SetTexture(forceKernel, "vField", scaledBuffer);
             ExecuteInteriorShader(forceKernel);
@@ -268,7 +281,7 @@ public class FluidSimNode : TickingNode
 
         if (continuousVelocity)
         {
-            ApplyVelocity();
+            ApplyVelocity(Time.deltaTime);
         }
 
         // Compute diffusion
@@ -345,6 +358,14 @@ public class FluidSimNode : TickingNode
     float lastStep = 0;
     public override bool Calculate()
     {
+        if (timeMultiplierKnob.connected())
+        {
+            timeMultiplier = timeMultiplierKnob.GetValue<float>();
+        }
+        if (applyForceKnob.GetValue<bool>())
+        {
+            ApplyVelocity();
+        }
         if (running && Time.time - lastStep > 1/60f)
         {
             if (continuousDye)
