@@ -28,7 +28,6 @@ public class CropNode : TextureSynthNode
     public ValueConnectionKnob textureOutputKnob;
 
     private ComputeShader CropShader;
-    private Vector4 HSV;
     public RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
