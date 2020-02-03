@@ -87,7 +87,8 @@ public class DmxController : MonoBehaviour
 
     private void OnDestroy()
     {
-        artnet.Close();
+        if (artnet != null)
+            artnet.Close();
     }
 
     private void Update()
