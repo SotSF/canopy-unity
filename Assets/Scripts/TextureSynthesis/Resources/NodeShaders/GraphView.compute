@@ -16,8 +16,8 @@ int minTickSpacing;
 
 int2 texSize;
 
-float xValues[256];
-float yValues[256];
+float4 xValues[64];
+float4 yValues[64];
 
 RWTexture2D<float4> outputTex;
 
@@ -33,6 +33,9 @@ float2 getScale(float2 pixelSize) {
 // calculating tick spacing.
 float pow10(float e) {
     float spacing = 1;
+    if (isinf(e) || isnan(e)) {
+        return .1;
+    }
     if (e >= 0) {
         for (int i = 0; i < e; i++) {
             spacing *= 10;
@@ -62,15 +65,25 @@ void calculateGraphParameters(in int2 pos, out float2 pixelSize, out float2 posi
 [numthreads(256, 1, 1)]
 void graph(uint3 id : SV_DispatchThreadID)
 {
-    float x = xValues[id.x];
-    float y = yValues[id.x];
-    int xPos = floor(lerp(0, texSize.x - 1, (x - windowMin.x) / float(windowMax.x - windowMin.x)));
-    int yPos = floor(lerp(0, texSize.y - 1, (y - windowMin.y) / float(windowMax.y - windowMin.y)));
-    int2 index = int2(xPos, yPos);
-    outputTex[index] = lineColor;
-    // Run over width of image, apply color at lerp of closest values in datapoint array
-    // or
-    // Run over width of datapoint array, apply color at closest x value?
+	uint prevIndex = id.x > 0 ? id.x - 1 : 0;
+
+	float2 p0 = float2(xValues[prevIndex >> 2][prevIndex & 3], yValues[prevIndex >> 2][prevIndex & 3]);
+	float2 p1 = float2(xValues[id.x >> 2][id.x & 3], yValues[id.x >> 2][id.x & 3]);
+
+    int2 imagePoint0 = floor(lerp(0, texSize - int2(1, 1), (p0 - windowMin) / (windowMax - windowMin)));
+    int2 imagePoint1 = ceil(lerp(0, texSize - int2(1, 1), (p1 - windowMin) / (windowMax - windowMin)));
+    outputTex[imagePoint1] = lineColor;
+    
+	int yIncrement = imagePoint1.y > imagePoint0.y ? -1 : 1;
+	int xIncrement = imagePoint1.x > imagePoint0.x ? -1 : 1;
+    
+	for (int y = imagePoint1.y - yIncrement; abs(y - imagePoint0.y) > 0; y += yIncrement)
+	{
+		for (int x = imagePoint1.x; abs(x - imagePoint0.x) > 0; x += xIncrement)
+		{
+			outputTex[int2(x, y + yIncrement)] = lineColor;
+		}
+	}
 }
 
 /* Draw the horizontal axis with ticks based on the window size*/

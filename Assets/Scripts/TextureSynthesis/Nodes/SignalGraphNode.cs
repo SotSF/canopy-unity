@@ -4,9 +4,10 @@ using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
-[Node(false, "Pattern/SignalGraph")]
+[Node(false, "Signal/SignalGraph")]
 public class SignalGraphNode : TickingNode
 {
     public override string GetID => "SignalGraphNode";
@@ -42,7 +43,7 @@ public class SignalGraphNode : TickingNode
     private int horizontalAxisKernel;
     private int verticalAxisKernel;
     private int graphKernel;
-    public RenderTexture outputTex;
+    private RenderTexture graphTexture;
 
     private Vector2Int outputSize = new Vector2Int(256,256);
 
@@ -50,8 +51,8 @@ public class SignalGraphNode : TickingNode
     private List<float> signalValues;
 
     private void Awake(){
-        timeValues = new List<float>();
-        signalValues = new List<float>();
+        timeValues = new List<float>(257);
+        signalValues = new List<float>(257);
         patternShader = Resources.Load<ComputeShader>("NodeShaders/GraphView");
         gridPointsKernel = patternShader.FindKernel("gridPoints");
         horizontalAxisKernel = patternShader.FindKernel("horizontalAxis");
@@ -62,13 +63,18 @@ public class SignalGraphNode : TickingNode
 
     private void InitializeRenderTexture()
     {
-        if (outputTex != null)
+        if (graphTexture != null)
         {
-            outputTex.Release();
+            Debug.Log("Releasing non-null rendertexture");
+            graphTexture.Release();
         }
-        outputTex = new RenderTexture(outputSize.x, outputSize.y, 0);
-        outputTex.enableRandomWrite = true;
-        outputTex.Create();
+        graphTexture = new RenderTexture(outputSize.x, outputSize.y, 0);
+        graphTexture.enableRandomWrite = true;
+        graphTexture.Create();
+        Debug.Log("Clearing rendertexture");
+        RenderTexture.active = graphTexture;
+        GL.Clear(false, true, Color.black);
+        RenderTexture.active = null;
     }
     
     public override void NodeGUI()
@@ -82,7 +88,8 @@ public class SignalGraphNode : TickingNode
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        GUILayout.Box(outputTex, GUILayout.MaxWidth(256), GUILayout.MaxHeight(256));
+        this.TimedDebug("Drawing UI box");
+        GUILayout.Box(graphTexture, GUILayout.MaxWidth(256), GUILayout.MaxHeight(256));
         GUILayout.EndHorizontal();
         GUILayout.Space(4);
         GUILayout.EndVertical();
@@ -117,6 +124,7 @@ public class SignalGraphNode : TickingNode
         // Only calculate once per frame
         if (Time.time - lastCalc < Time.deltaTime)
         {
+            outputTexKnob.SetValue(graphTexture);
             return true;
         }
         lastCalc = Time.time;
@@ -124,8 +132,12 @@ public class SignalGraphNode : TickingNode
         // Store signal values
         if (signalKnob.connected())
         {
-            signalValues.Add(signalKnob.GetValue<float>());
-            timeValues.Add(Time.time);
+            float signal = signalKnob.GetValue<float>();
+            if (!(float.IsNaN(signal) || float.IsInfinity(signal)))
+            {
+                signalValues.Add(signalKnob.GetValue<float>());
+                timeValues.Add(Time.time);
+            }
         }
         if (signalValues.Count > 256)
         {
@@ -163,29 +175,38 @@ public class SignalGraphNode : TickingNode
         patternShader.SetVector("labelColor", Color.white);
 
         // Set render texture
-        patternShader.SetTexture(gridPointsKernel, "outputTex", outputTex);
-        patternShader.SetTexture(horizontalAxisKernel, "outputTex", outputTex);
-        patternShader.SetTexture(verticalAxisKernel, "outputTex", outputTex);
-        patternShader.SetTexture(graphKernel, "outputTex", outputTex);
+        patternShader.SetTexture(gridPointsKernel, "outputTex", graphTexture);
+        patternShader.SetTexture(horizontalAxisKernel, "outputTex", graphTexture);
+        patternShader.SetTexture(verticalAxisKernel, "outputTex", graphTexture);
+        patternShader.SetTexture(graphKernel, "outputTex", graphTexture);
 
         // Dispatch kernels
         uint tx, ty, tz;
         patternShader.GetKernelThreadGroupSizes(gridPointsKernel, out tx, out ty, out tz);
         var threadGroupX = Mathf.CeilToInt(((float)outputSize.x) / tx);
         var threadGroupY = Mathf.CeilToInt(((float)outputSize.y) / ty);
+        //this.TimedDebug("Drawing grid points");
         patternShader.Dispatch(gridPointsKernel, threadGroupX, threadGroupY, 1);
 
+        //this.TimedDebugFmt("minX: {0}, maxX: {1}, minY: {2}, maxY: {3}", 2, windowMinX, windowMaxX, windowMinY, windowMaxY);
         if (windowMinY < 0 && windowMaxY > 0)
-            patternShader.Dispatch(horizontalAxisKernel, Mathf.CeilToInt(outputSize.x/256f), 1, 1);
+        {
+            //this.TimedDebug("Drawing horizontal axis");
+            patternShader.Dispatch(horizontalAxisKernel, Mathf.CeilToInt(outputSize.x / 256f), 1, 1);
+        }
         if (windowMinX < 0 && windowMaxX > 0)
-            patternShader.Dispatch(verticalAxisKernel, 1, Mathf.CeilToInt(outputSize.y/256f), 1);
+        {
+            //this.TimedDebug("Drawing vertical axis");
+            patternShader.Dispatch(verticalAxisKernel, 1, Mathf.CeilToInt(outputSize.y / 256f), 1);
+        }
 
         if (signalValues.Count > 0)
         {
-            patternShader.Dispatch(graphKernel, Mathf.CeilToInt(signalValues.Count / 256f), 1, 1);
+            //this.TimedDebug("Drawing graph points");
+            patternShader.Dispatch(graphKernel, 1, 1, 1);
         }
 
-        outputTexKnob.SetValue(outputTex);
+        outputTexKnob.SetValue(graphTexture);
         return true;
     }
 }
