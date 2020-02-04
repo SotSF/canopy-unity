@@ -13,7 +13,7 @@ public class SignalGraphNode : TickingNode
     public override string GetID => "SignalGraphNode";
     public override string Title { get { return "SignalGraph"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(280,400); } }
+    public override Vector2 DefaultSize { get { return new Vector2(280,280); } }
 
     [ValueConnectionKnob("signal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob signalKnob;
@@ -38,7 +38,7 @@ public class SignalGraphNode : TickingNode
     public ValueConnectionKnob outputTexKnob;
 
 
-    private ComputeShader patternShader;
+    private ComputeShader graphShader;
     private int gridPointsKernel;
     private int horizontalAxisKernel;
     private int verticalAxisKernel;
@@ -53,11 +53,11 @@ public class SignalGraphNode : TickingNode
     private void Awake(){
         timeValues = new List<float>(257);
         signalValues = new List<float>(257);
-        patternShader = Resources.Load<ComputeShader>("NodeShaders/GraphView");
-        gridPointsKernel = patternShader.FindKernel("gridPoints");
-        horizontalAxisKernel = patternShader.FindKernel("horizontalAxis");
-        verticalAxisKernel = patternShader.FindKernel("verticalAxis");
-        graphKernel = patternShader.FindKernel("graph");
+        graphShader = Resources.Load<ComputeShader>("NodeShaders/GraphView");
+        gridPointsKernel = graphShader.FindKernel("gridPoints");
+        horizontalAxisKernel = graphShader.FindKernel("horizontalAxis");
+        verticalAxisKernel = graphShader.FindKernel("verticalAxis");
+        graphKernel = graphShader.FindKernel("graph");
         InitializeRenderTexture();
     }
 
@@ -153,11 +153,11 @@ public class SignalGraphNode : TickingNode
         //pollKnobs();
 
         // Set graph params
-        patternShader.SetInt("minTickSpacing", 5);
-        patternShader.SetInts("texSize", outputSize.x, outputSize.y);
-        patternShader.SetFloats("xValues", timeValues.ToArray());
-        patternShader.SetFloats("yValues", signalValues.ToArray());
-        patternShader.SetInt("numPoints", timeValues.Count);
+        graphShader.SetInt("minTickSpacing", 5);
+        graphShader.SetInts("texSize", outputSize.x, outputSize.y);
+        graphShader.SetFloats("xValues", timeValues.ToArray());
+        graphShader.SetFloats("yValues", signalValues.ToArray());
+        graphShader.SetInt("numPoints", timeValues.Count);
 
         if (timeValues.Count > 0 && signalValues.Count > 0)
         {
@@ -165,45 +165,45 @@ public class SignalGraphNode : TickingNode
             windowMaxX = timeValues.Max() + 1;
             windowMinY = signalValues.Min() - 1;
             windowMaxY = signalValues.Max() + 1;
-            patternShader.SetFloats("windowMin", windowMinX, windowMinY);
-            patternShader.SetFloats("windowMax", windowMaxX, windowMaxY);
+            graphShader.SetFloats("windowMin", windowMinX, windowMinY);
+            graphShader.SetFloats("windowMax", windowMaxX, windowMaxY);
         }
 
         // Set colors
-        patternShader.SetVector("lineColor", Color.cyan);
-        patternShader.SetVector("backgroundColor", new Color(0.1f, 0.1f, 0.1f, 1));
-        patternShader.SetVector("labelColor", Color.white);
+        graphShader.SetVector("lineColor", Color.cyan);
+        graphShader.SetVector("backgroundColor", new Color(0.1f, 0.1f, 0.1f, 1));
+        graphShader.SetVector("labelColor", Color.white);
 
         // Set render texture
-        patternShader.SetTexture(gridPointsKernel, "outputTex", graphTexture);
-        patternShader.SetTexture(horizontalAxisKernel, "outputTex", graphTexture);
-        patternShader.SetTexture(verticalAxisKernel, "outputTex", graphTexture);
-        patternShader.SetTexture(graphKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(gridPointsKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(horizontalAxisKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(verticalAxisKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(graphKernel, "outputTex", graphTexture);
 
         // Dispatch kernels
         uint tx, ty, tz;
-        patternShader.GetKernelThreadGroupSizes(gridPointsKernel, out tx, out ty, out tz);
+        graphShader.GetKernelThreadGroupSizes(gridPointsKernel, out tx, out ty, out tz);
         var threadGroupX = Mathf.CeilToInt(((float)outputSize.x) / tx);
         var threadGroupY = Mathf.CeilToInt(((float)outputSize.y) / ty);
         //this.TimedDebug("Drawing grid points");
-        patternShader.Dispatch(gridPointsKernel, threadGroupX, threadGroupY, 1);
+        graphShader.Dispatch(gridPointsKernel, threadGroupX, threadGroupY, 1);
 
         //this.TimedDebugFmt("minX: {0}, maxX: {1}, minY: {2}, maxY: {3}", 2, windowMinX, windowMaxX, windowMinY, windowMaxY);
         if (windowMinY < 0 && windowMaxY > 0)
         {
             //this.TimedDebug("Drawing horizontal axis");
-            patternShader.Dispatch(horizontalAxisKernel, Mathf.CeilToInt(outputSize.x / 256f), 1, 1);
+            graphShader.Dispatch(horizontalAxisKernel, Mathf.CeilToInt(outputSize.x / 256f), 1, 1);
         }
         if (windowMinX < 0 && windowMaxX > 0)
         {
             //this.TimedDebug("Drawing vertical axis");
-            patternShader.Dispatch(verticalAxisKernel, 1, Mathf.CeilToInt(outputSize.y / 256f), 1);
+            graphShader.Dispatch(verticalAxisKernel, 1, Mathf.CeilToInt(outputSize.y / 256f), 1);
         }
 
         if (signalValues.Count > 0)
         {
             //this.TimedDebug("Drawing graph points");
-            patternShader.Dispatch(graphKernel, 1, 1, 1);
+            graphShader.Dispatch(graphKernel, 1, 1, 1);
         }
 
         outputTexKnob.SetValue(graphTexture);

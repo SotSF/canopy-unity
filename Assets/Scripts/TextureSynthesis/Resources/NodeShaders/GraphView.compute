@@ -10,9 +10,9 @@ float4 lineColor;
 float4 labelColor;
 float4 backgroundColor;
 
-int numPoints;
+uint numPoints;
 
-int minTickSpacing;
+uint minTickSpacing;
 
 int2 texSize;
 
@@ -65,8 +65,13 @@ void calculateGraphParameters(in int2 pos, out float2 pixelSize, out float2 posi
 [numthreads(256, 1, 1)]
 void graph(uint3 id : SV_DispatchThreadID)
 {
+	if (id.x >= numPoints)
+		return;
+    
 	uint prevIndex = id.x > 0 ? id.x - 1 : 0;
 
+    // Datapoints are packed into float4s because of HLSL packing logic. 
+    // The (index >> 2) and (index & 3) bits pull the desired float back out.
 	float2 p0 = float2(xValues[prevIndex >> 2][prevIndex & 3], yValues[prevIndex >> 2][prevIndex & 3]);
 	float2 p1 = float2(xValues[id.x >> 2][id.x & 3], yValues[id.x >> 2][id.x & 3]);
 
