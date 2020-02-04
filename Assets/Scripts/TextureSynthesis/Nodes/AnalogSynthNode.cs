@@ -2,7 +2,6 @@
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
 using UnityEngine;
-using Oscillators;
 
 [Node(false, "Pattern/AnalogSynth")]
 public class AnalogSynthNode: Node

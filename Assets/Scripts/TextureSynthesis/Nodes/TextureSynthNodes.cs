@@ -23,6 +23,16 @@ namespace SecretFire.TextureSynth
             }
         }
 
+        public RadioButtonSet(int defaultActive, params string[] optionNames)
+        {
+            names = new List<string>(optionNames);
+            values = new List<bool>();
+            for (int i = 0; i < names.Count; i++)
+            {
+                values.Add(i == defaultActive);
+            }
+        }
+
         public bool IsSelected(string name)
         {
             for (int i = 0; i < names.Count; i++)
@@ -109,6 +119,40 @@ namespace SecretFire.TextureSynth
                     buttons.values[i] = false;
                 }
             }
+        }
+
+        protected void RadioButtonsHorizontal(RadioButtonSet buttons)
+        {
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < buttons.names.Count; i++)
+            {
+                if (RTEditorGUI.Toggle(buttons.values[i], buttons.names[i]))
+                {
+                    buttons.SelectOption(i);
+                }
+                else
+                {
+                    buttons.values[i] = false;
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        protected void RadioButtonsVertical(RadioButtonSet buttons)
+        {
+            GUILayout.BeginVertical();
+            for (int i = 0; i < buttons.names.Count; i++)
+            {
+                if (RTEditorGUI.Toggle(buttons.values[i], buttons.names[i]))
+                {
+                    buttons.SelectOption(i);
+                }
+                else
+                {
+                    buttons.values[i] = false;
+                }
+            }
+            GUILayout.EndVertical();
         }
     }
 
