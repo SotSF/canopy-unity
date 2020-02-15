@@ -13,6 +13,7 @@ public class Canopy: MonoBehaviour
     public Mesh pixelBase;
     public int renderTextureSize = 128;
     public Material canopyMaterial;
+    public Light canopyLightEmitter;
 
     public Transform start;
     public Transform end;
@@ -47,6 +48,7 @@ public class Canopy: MonoBehaviour
         var rotate = Animations.LocalQuatLerp(transform, originalRotation);
         var trans = Animations.LocalPositionLerp(transform, new Vector3(0, 4, 0));
         this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
+        canopyLightEmitter.gameObject.SetActive(true);
         simulatorMode = true;
     }
     public void EnterControllerMode()
@@ -57,6 +59,7 @@ public class Canopy: MonoBehaviour
         var rotate = Animations.LocalQuatLerp(transform, originalRotation);
         var trans = Animations.LocalPositionLerp(transform, controlViewCanopyPosition);
         this.CheckedRoutine(ref animRoutine, Animations.CubicTimedAnimator(1.2f, rotate, trans));
+        canopyLightEmitter.gameObject.SetActive(false);
         simulatorMode = false;
     }
     public void UpdateRotation(Quaternion rotation)
