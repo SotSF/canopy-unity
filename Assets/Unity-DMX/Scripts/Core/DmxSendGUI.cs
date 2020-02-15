@@ -10,9 +10,11 @@ public class DmxSendGUI : MonoBehaviour
     public short universe;
     public int fps;
 
-
+    #pragma warning disable 0649
     [SerializeField] DmxController controller;
     [SerializeField] Slider[] channelSliders;
+    #pragma warning restore 0649
+
     [SerializeField] byte[] dmxData;
     Thread dmxSender;
 

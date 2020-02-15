@@ -21,7 +21,9 @@ public class DmxController : MonoBehaviour
     ArtNetSocket artnet;
     [Header("send/recieved DMX data for debug")]
     [SerializeField] ArtNetDmxPacket latestReceivedDMX;
+    #pragma warning disable 0649
     [SerializeField] ArtNetDmxPacket dmxToSend;
+    #pragma warning restore 0649
     byte[] _dmxData;
 
     Dictionary<int, byte[]> dmxDataMap;
