@@ -28,7 +28,7 @@ public class CropNode : TextureSynthNode
     public ValueConnectionKnob textureOutputKnob;
 
     private ComputeShader CropShader;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
     private int tileKernel;
@@ -93,6 +93,8 @@ public class CropNode : TextureSynthNode
 
     public override bool Calculate()
     {
+        width = widthInputKnob.connected() ? widthInputKnob.GetValue<float>() : width;
+        height = heightInputKnob.connected() ? heightInputKnob.GetValue<float>() : height;
         Texture inputTex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || inputTex == null)
         { // Reset outputs if no texture is available

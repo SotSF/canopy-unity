@@ -19,7 +19,7 @@ public class ContinuousWaveNode : TickingNode
     public ValueConnectionKnob textureOutputKnob;
 
     private Vector2Int outputSize = new Vector2Int(75, 96);
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private ComputeShader continuousWaveShader;
     private int kernel; 

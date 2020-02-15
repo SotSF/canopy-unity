@@ -7,21 +7,6 @@ using UnityEngine;
 
 namespace SecretFire.TextureSynth.Signals
 {
-    [Serializable]
-    public struct Oscillator
-    {
-        public float period;
-        public float amplitude;
-        public float phase;
-
-        public Oscillator(float period, float amplitude, float phase)
-        {
-            this.period = period;
-            this.amplitude = amplitude;
-            this.phase = phase;
-        }
-    }
-
     [Node(false, "Signal/PeriodicSignal")]
     public class PeriodicSignalNode : TickingNode
     {
@@ -43,7 +28,6 @@ namespace SecretFire.TextureSynth.Signals
         [ValueConnectionKnob("Output", Direction.Out, typeof(float))]
         public ValueConnectionKnob outputKnob;
 
-        public Oscillator oscParams;
         public float period = 8;
         public float amplitude = 2;
         public float phase = 0;
@@ -92,88 +76,55 @@ namespace SecretFire.TextureSynth.Signals
 
         public float CalcSine(float t, float newPeriod, float newAmpl, float newPhase)
         {
-            float offset = 0;
-            if (paramStyle.SelectedOption() == "min max")
+            if (newPeriod != period ||
+                newAmpl   != amplitude ||
+                newPhase  != phase)
             {
-                newAmpl = (max - min) / 2;
-                offset = min + newAmpl;
-                // Calculate amplitude / offset
-            }
-            if (newPeriod != oscParams.period ||
-                newAmpl != oscParams.amplitude ||
-                newPhase != oscParams.phase)
-            {
-                if (newPeriod != oscParams.period)
+                if (newPeriod != period)
                 {
                     //Find a phase such that the oscillator won't instantaneously jump in amplitude
                     //If phase and freq change on the same Calculate()... we pick freq.
-                    newPhase = 2 * Mathf.PI * t - (newPeriod / oscParams.period) * (2 * Mathf.PI * t - oscParams.phase);
+                    var currentOldPhase = ((t + phase) % period) / period;
+                    var currentNewPhase = (t % newPeriod) / newPeriod;
+                    var phaseOffset = currentOldPhase - currentNewPhase;
+                    newPhase = 2 * Mathf.PI * ((currentNewPhase + phaseOffset) % 1);
                 }
                 period = newPeriod;
                 amplitude = newAmpl;
                 phase = newPhase;
-                if (Application.isPlaying)
-                {
-                    oscParams = new Oscillator(period, amplitude, phase);
-                }
             }
             return Mathf.Sin((2 * Mathf.PI * t - phase) / period) * amplitude + offset;
         }
 
         public float CalcSquare(float t, float newPeriod, float newAmpl, float newPhase)
         {
-            float offset = 0;
-            if (paramStyle.SelectedOption() == "min max")
-            {
-                amplitude = (max - min) / 2;
-                offset = min + amplitude;
-                // Calculate amplitude / offset
-            }
-            return (t % newPeriod < newPeriod / 2 ? amplitude : -amplitude) + offset;
+            return (t % newPeriod < newPeriod / 2 ? newAmpl : -newAmpl) + offset;
         }
 
         public float CalcSaw(float t, float newPeriod, float newAmpl, float newPhase)
         {
-            float offset = 0;
-            if (paramStyle.SelectedOption() == "min max")
-            {
-                amplitude = (max - min) / 2;
-                offset = min + amplitude;
-                // Calculate amplitude / offset
-            }
-            return 2*amplitude * ((t % newPeriod) / newPeriod - 0.5f) + offset;
+            return 2* newAmpl * ((t % newPeriod) / newPeriod - 0.5f) + offset;
         }
 
         public float CalcRevSaw(float t, float newPeriod, float newAmpl, float newPhase)
         {
-            float offset = 0;
-            if (paramStyle.SelectedOption() == "min max")
-            {
-                amplitude = (max - min) / 2;
-                offset = min + amplitude;
-                // Calculate amplitude / offset
-            }
-            return 2*amplitude * ((-(t % newPeriod) / newPeriod -0.5f) + 1) + offset ;
+            return 2* newAmpl * ((-(t % newPeriod) / newPeriod -0.5f) + 1) + offset ;
         }
 
         public float CalcTriangle(float t, float newPeriod, float newAmpl, float newPhase)
         {
-            float offset = 0;
-            if (paramStyle.SelectedOption() == "min max")
-            {
-                amplitude = (max - min) / 2;
-                offset = min + amplitude;
-                // Calculate amplitude / offset
-            }
+
             float halfPeriod = newPeriod / 2;
             float quarterPeriod = newPeriod / 4;
             // Offset time to match sin shape
             t -= quarterPeriod;
             return offset + (t % newPeriod < halfPeriod ?
-                                2*amplitude * ((   ((t) % halfPeriod) / halfPeriod) - 0.5f) :
-                                2*amplitude * ((  -((t) % halfPeriod) / halfPeriod) + 0.5f));
+                                2* newAmpl * ((   ((t) % halfPeriod) / halfPeriod) - 0.5f) :
+                                2* newAmpl * ((  -((t) % halfPeriod) / halfPeriod) + 0.5f));
         }
 
+
+        float offset;
         public override bool Calculate()
         {
             float value = 0;
@@ -182,6 +133,13 @@ namespace SecretFire.TextureSynth.Signals
             var newPeriod = periodInputKnob.connected() ? periodInputKnob.GetValue<float>() : period;
             var newAmpl   = amplInputKnob.connected()   ? amplInputKnob.GetValue<float>()   : amplitude;
             var newPhase  = phaseInputKnob.connected()  ? phaseInputKnob.GetValue<float>()  : phase;
+
+            offset = 0;
+            if (paramStyle.SelectedOption() == "min max")
+            {
+                newAmpl = (max - min) / 2;
+                offset = min + newAmpl;
+            }
 
             switch (signalType.SelectedOption())
             {

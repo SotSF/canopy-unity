@@ -35,7 +35,7 @@ public class PanNode : TickingNode {
     private int bilinearRepeatKernel;
     private int pointMirrorKernel;
     private int pointRepeatKernel;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private Vector2Int outputSize = Vector2Int.zero;
     private Vector2 offset = Vector2.zero;

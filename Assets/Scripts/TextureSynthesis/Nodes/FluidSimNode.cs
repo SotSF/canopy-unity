@@ -42,7 +42,7 @@ public class FluidSimNode : TickingNode
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
     public float timestep;
 
     public bool useBoundaries = true;
@@ -56,7 +56,6 @@ public class FluidSimNode : TickingNode
     private int divergenceKernel;
     private int gradientDiffKernel;
     private int clearPressureKernel;
-    //private int boundaryKernel;
     private int forceKernel;
     private int dyeKernel;
     private int horizontalBoundaryKernel;

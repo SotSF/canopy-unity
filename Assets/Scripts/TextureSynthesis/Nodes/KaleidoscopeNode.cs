@@ -23,7 +23,7 @@ public class KaleidoscopeNode : Node
     private ComputeShader KaleidoscopeShader;
     private int kernelId;
     private Vector4 HSV;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
     public int yReflections;
 

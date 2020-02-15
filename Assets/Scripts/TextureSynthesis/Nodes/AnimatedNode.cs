@@ -16,7 +16,7 @@ public class AnimatedNode : TickingNode
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
     private VideoPlayer player;
 

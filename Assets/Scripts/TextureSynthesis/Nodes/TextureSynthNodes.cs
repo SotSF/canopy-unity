@@ -1,18 +1,19 @@
 ﻿using UnityEngine;
-using System.Collections;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using System.Collections.Generic;
-using System;
 using System.Linq;
 
 namespace SecretFire.TextureSynth
 {
-    [Serializable]
+    [System.Serializable]
     public class RadioButtonSet
     {
         public List<bool> values;
         public List<string> names;
+
+        // Parameterless constructor to please the XML serialization gods
+        public RadioButtonSet(){}
 
         public RadioButtonSet(params string[] optionNames)
         {
@@ -175,6 +176,14 @@ namespace SecretFire.TextureSynth
         public RenderTexture graphTexture;
 
         private Vector2Int outputSize;
+        
+        public GraphProvider(){
+            InitializeValues(new Vector2Int(64, 64));
+        }
+
+        public GraphProvider(Vector2Int outputSize){
+            InitializeValues(outputSize);
+        }
 
         private void InitializeRenderTexture()
         {
@@ -198,15 +207,8 @@ namespace SecretFire.TextureSynth
             InitializeRenderTexture();
         }
 
-        public GraphProvider(){
-            InitializeValues(new Vector2Int(256, 256));
-        }
 
-        public GraphProvider(Vector2Int outputSize){
-            InitializeValues(outputSize);
-        }
-
-        public void Update(float x, float y){
+        public void AddDatapoint(float x, float y){
             timeValues.Add(x);
             signalValues.Add(y);
             if (timeValues.Count > 255){
@@ -215,8 +217,8 @@ namespace SecretFire.TextureSynth
             }
         }
 
-        public void Update(float value){
-            Update(Time.time, value);
+        public void AddDatapoint(float value){
+            AddDatapoint(Time.time, value);
         }
 
         public void DrawGraph()
@@ -231,10 +233,14 @@ namespace SecretFire.TextureSynth
 
             if (timeValues.Count > 0 && signalValues.Count > 0)
             {
-                windowMinX = timeValues.Min() - 1;
-                windowMaxX = timeValues.Max() + 1;
-                windowMinY = signalValues.Min() - 1;
-                windowMaxY = signalValues.Max() + 1;
+                var minX = timeValues.Min();
+                var maxX = timeValues.Max();
+                var minY = signalValues.Min();
+                var maxY = signalValues.Max();
+                windowMinX = minX - (maxX - minX) / 20;
+                windowMaxX = maxX + (maxX - minX) / 20;
+                windowMinY = minY - (maxY - minY) / 20;
+                windowMaxY = maxY + (maxY - minY) / 20;
                 graphShader.SetFloats("windowMin", windowMinX, windowMinY);
                 graphShader.SetFloats("windowMax", windowMaxX, windowMaxY);
             }

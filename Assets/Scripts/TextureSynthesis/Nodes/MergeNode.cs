@@ -29,7 +29,7 @@ public class MergeNode : Node
     private int patternKernel;
     private Vector2Int outputSize = Vector2Int.zero;
     private float crossfader = 0;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     
     private void Awake(){

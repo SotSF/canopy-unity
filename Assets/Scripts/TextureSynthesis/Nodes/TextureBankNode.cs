@@ -16,7 +16,7 @@ public class TextureBankNode : Node
     public override bool AutoLayout => true;
 
     public List<string> texNames;
-    public Dictionary<string, ValueConnectionKnob> texKnobs;
+    public SerialDict<string, ValueConnectionKnob> texKnobs;
     private List<Texture2D> textures;
 
 
@@ -29,7 +29,7 @@ public class TextureBankNode : Node
         texStyle.SetColor(Color.yellow);
         textures = new List<Texture2D>(Resources.LoadAll<Texture2D>("StaticTextures"));
         if (texKnobs == null)
-            texKnobs = new Dictionary<string, ValueConnectionKnob>();
+            texKnobs = new SerialDict<string, ValueConnectionKnob>();
         if (texNames == null)
             texNames = new List<string>();
         List<string> loadedValues = new List<string>(textures.Select(t => t.name));

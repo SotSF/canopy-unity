@@ -25,10 +25,10 @@ public class VortexGeneratorNode : Node
     [ValueConnectionKnob("Turbulence scale", Direction.In, "Float")]
     public ValueConnectionKnob turbScaleKnob;
 
-    public RenderTexture outputTex;
     public float normalAngleOffset = .25f;
     public float turbFactor = .25f;
     public float turbScale = 16;
+    private RenderTexture outputTex;
     private ComputeShader patternShader;
     private Vector2Int outputSize = new Vector2Int(128,128);
     private int patternKernel;
@@ -119,6 +119,7 @@ public class VortexGeneratorNode : Node
 
     public override bool Calculate()
     {
+        turbScale = turbScaleKnob.connected() ? turbScaleKnob.GetValue<float>() : turbScale;
         if (turbScale != oldScale)
         {
             oldScale = turbScale;

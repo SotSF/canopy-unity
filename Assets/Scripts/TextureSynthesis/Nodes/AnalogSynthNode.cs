@@ -23,7 +23,7 @@ public class AnalogSynthNode: Node
 
     public float period, amplitude, phase;
 
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private Vector2Int outputSize = new Vector2Int(256,256);
 

@@ -31,7 +31,7 @@ public class HSVNode : TextureSynthNode
     private ComputeShader HSVShader;
     private int kernelId;
     private Vector4 HSV;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
     private void Awake()

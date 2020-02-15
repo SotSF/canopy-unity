@@ -16,7 +16,7 @@ abstract public class PatternNode : TickingNode
     private ComputeShader patternShader;
     private int patternKernel;
 
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private Vector2Int outputSize = Vector2Int.zero;
 

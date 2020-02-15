@@ -30,7 +30,7 @@ public class DomainWarpNode : TickingNode
     private ComputeShader patternShader;
     private int patternKernel;
     private Vector2Int outputSize = new Vector2Int(256, 256);
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private void Awake(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/DomainWarpPattern");

@@ -25,7 +25,7 @@ public class ImplosionNode : TickingNode
     private Vector2Int outputSize = Vector2Int.zero;
     private float emissionRate = 200;
     private float speedFactor = 1;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private Transform particlePrefab;
     private Camera cam;

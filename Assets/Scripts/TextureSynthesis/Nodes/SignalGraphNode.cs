@@ -161,10 +161,14 @@ public class SignalGraphNode : TickingNode
 
         if (timeValues.Count > 0 && signalValues.Count > 0)
         {
-            windowMinX = timeValues.Min() - 1;
-            windowMaxX = timeValues.Max() + 1;
-            windowMinY = signalValues.Min() - 1;
-            windowMaxY = signalValues.Max() + 1;
+            var minX = timeValues.Min();
+            var maxX = timeValues.Max();
+            var minY = signalValues.Min();
+            var maxY = signalValues.Max();
+            windowMinX = minX - (maxX - minX)/20;
+            windowMaxX = maxX + (maxX - minX) / 20;
+            windowMinY = minY - (maxY - minY) / 20;
+            windowMaxY = maxY + (maxY - minY) / 20;
             graphShader.SetFloats("windowMin", windowMinX, windowMinY);
             graphShader.SetFloats("windowMax", windowMaxX, windowMaxY);
         }

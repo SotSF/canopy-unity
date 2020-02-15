@@ -26,9 +26,7 @@ public class KeySignalNode : TickingNode
     bool binding = false;
     bool bound = false;
 
-    [NonSerialized]
     float timeDown = 0;
-    [NonSerialized]
     float timeUp = 0;
 
     private void Awake()
