@@ -352,12 +352,15 @@ namespace NodeEditorFramework.IO
 				XmlSerializer serializer = new XmlSerializer(obj.GetType());
 				XPathNavigator navigator = parent.CreateNavigator();
 				using (XmlWriter writer = navigator.AppendChild())
+				{
+					writer.WriteWhitespace("");
 					serializer.Serialize(writer, obj);
+				}
 				return (XmlElement)parent.LastChild;
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				Debug.Log("Could not serialize " + obj.ToString());
+				Debug.Log("Could not serialize <" + obj.ToString()+">:"+e.ToString());
 				return null;
 			}
 		}
