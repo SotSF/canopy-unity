@@ -26,11 +26,9 @@ public class jptestNode : TickingNode
     private int tick = 0;
 
     private void Awake(){
-        int i = 0;
-        while (i < 100)
+        while (this.objects.Count < 100)
         {
             this.objects.Add(new PatternObject(outputSize));
-            i++;
         }
 
         patternShader = Resources.Load<ComputeShader>("NodeShaders/FirefliesPattern");

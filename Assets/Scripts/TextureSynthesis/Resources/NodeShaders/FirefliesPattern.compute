@@ -11,7 +11,7 @@ RWTexture2D<float4> outputTex;
 [numthreads(16, 16, 1)]
 void PatternKernel(uint3 id : SV_DispatchThreadID)
 {
-    uint dist = sqrt(pow(id.x - xy.x, 2) + pow(id.y - xy.y, 2));
+    uint dist = distance(id, xy);
     if (dist <= size) {
         outputTex[id.xy] = float4(0.9,0.8,0.2,(size - dist)/ size);
     }
