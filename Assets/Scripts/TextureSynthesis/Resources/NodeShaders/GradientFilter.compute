@@ -1,0 +1,29 @@
+#include "Assets/Scripts/TextureSynthesis/Resources/NodeShaders/HSV.compute"
+
+#pragma kernel PatternKernel
+
+Texture2D<float4> inputTex;
+float startHue;
+float endHue;
+float offset;
+int width;
+int height;
+
+RWTexture2D<float4> outputTex;
+
+
+float3 applyHSVTransforms(in float3 color, float3 hsv) {
+	color = RGBtoHSV(color);
+	return HSVtoRGB(float3((color.x + hsv.x) % 1, (color.y*hsv.y), color.z*hsv.z));
+}
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    float dist = distance(id.xy, float2(0,0));
+    float maxDist = sqrt(width * width + height * height);
+    dist = (dist + offset) % maxDist;
+    float3 hsv = lerp(float3(startHue, 1, 1), float3(endHue, 1, 1), dist / maxDist);
+
+    outputTex[id.xy] = float4(applyHSVTransforms(inputTex[id.xy].rgb, hsv.rgb), inputTex[id.xy].a);
+}
