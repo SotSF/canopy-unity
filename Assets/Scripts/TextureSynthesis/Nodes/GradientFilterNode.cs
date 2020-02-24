@@ -10,7 +10,7 @@ public class GradientFilterNode : Node
     public override string GetID => "GradientFilterNode";
     public override string Title { get { return "Gradient"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize { get { return new Vector2(256, 256); } }
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;
