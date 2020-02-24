@@ -4,6 +4,7 @@ using SecretFire.TextureSynth;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
+using NodeEditorFramework.Utilities;
 
 [Node(false, "Pattern/FirefliesPattern")]
 public class jptestNode : TickingNode
@@ -13,6 +14,10 @@ public class jptestNode : TickingNode
 
     public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
 
+    [ValueConnectionKnob("count", Direction.In, typeof(int), NodeSide.Left)]
+    public ValueConnectionKnob countKnob;
+    [ValueConnectionKnob("trail", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob trailKnob;
     [ValueConnectionKnob("outputTex", Direction.Out, typeof(Texture), NodeSide.Bottom)]
     public ValueConnectionKnob outputTexKnob;
 
@@ -22,15 +27,30 @@ public class jptestNode : TickingNode
     private Vector2Int outputSize = new Vector2Int(256,256);
     public RenderTexture outputTex;
 
+    private int _count;
+    private int Count {
+        get {
+            return _count;
+        }
+        set {
+            _count = value;
+            if (_count > objects.Count)
+            {
+                while (objects.Count < Count)
+                {
+                    objects.Add(new PatternObject(outputSize));
+                }
+            } else
+            {
+                objects.RemoveRange(_count, objects.Count - _count);
+            }
+        }
+    }
+    private float Trail = 0;
     private List<PatternObject> objects = new List<PatternObject>();
     private int tick = 0;
 
     private void Awake(){
-        while (this.objects.Count < 100)
-        {
-            this.objects.Add(new PatternObject(outputSize));
-        }
-
         patternShader = Resources.Load<ComputeShader>("NodeShaders/FirefliesPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
         fadeKernel = patternShader.FindKernel("FadeKernel");
@@ -50,6 +70,25 @@ public class jptestNode : TickingNode
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
+        countKnob.DisplayLayout();
+        if (!countKnob.connected())
+        {
+            Count = RTEditorGUI.IntSlider(Count, 1, 100);
+        }
+        else
+        {
+            Count = countKnob.GetValue<int>();
+        }
+        trailKnob.DisplayLayout();
+        if (!trailKnob.connected())
+        {
+            Trail = RTEditorGUI.Slider(Trail, 0, 0.1f);
+        }
+        else
+        {
+            Trail = trailKnob.GetValue<float>();
+        }
+
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -71,6 +110,7 @@ public class jptestNode : TickingNode
 
         uint tx,ty,tz;
 
+        patternShader.SetFloat("trail", Trail);
         patternShader.GetKernelThreadGroupSizes(fadeKernel, out tx, out ty, out tz);
         var threadGroupX = Mathf.CeilToInt(((float)outputSize.x) / tx);
         var threadGroupY = Mathf.CeilToInt(((float)outputSize.y) / ty);

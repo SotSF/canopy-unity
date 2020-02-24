@@ -5,10 +5,11 @@
 
 int2 xy; // center
 uint size; // radius
+float trail;
 
 RWTexture2D<float4> outputTex;
 
-[numthreads(16, 16, 1)]
+[numthreads(4, 4, 1)]
 void PatternKernel(uint3 id : SV_DispatchThreadID)
 {
     uint dist = distance(id, xy);
@@ -22,7 +23,7 @@ void FadeKernel(uint3 id: SV_DispatchThreadID) {
     float4 c = outputTex[id.xy];
     float3 rgb = float3(c.x, c.y, c.z);
     float3 hsv = RGBtoHSV(rgb);
-    float v = hsv.z - 0.02;
+    float v = hsv.z - trail;
     if (v < 0) { v = 0; }
     float3 res = HSVtoRGB(float3(hsv.x, hsv.y, v));
     outputTex[id.xy] = float4(res.x, res.y, res.z, 1);
