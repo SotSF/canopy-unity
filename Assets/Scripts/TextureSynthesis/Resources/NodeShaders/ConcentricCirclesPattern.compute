@@ -1,0 +1,33 @@
+#include "Assets/Scripts/TextureSynthesis/Resources/NodeShaders/HSV.compute"
+
+#pragma kernel PatternKernel
+#pragma kernel ClearKernel
+
+uint width;
+uint height;
+
+bool Fill;
+bool InvertDirection;
+float radius;
+float fade;
+
+RWTexture2D<float4> outputTex;
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    float d = distance(id.xy, int2(width / 2, height / 2));
+    bool color = Fill ? d <= radius : abs(radius - d) <= 1;
+    if (InvertDirection) {
+        color = Fill ? d <= width - radius : abs(width - radius - d) <= 1;
+    }
+    if (color) {
+        float3 c = HSVtoRGB(float3(0, 1, 1 - fade));
+        outputTex[id.xy] = float4(c.r, c.g, c.b, 1);
+    } 
+}
+
+[numthreads(16,16,1)]
+void ClearKernel(uint3 id : SV_DispatchThreadID) {
+    outputTex[id.xy] = float4(0,0,0,1);
+}
