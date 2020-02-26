@@ -29,6 +29,7 @@ public class GradientFilterNode : Node
     private float offset = 0;
     private float startHue = 0;
     private float endHue = 1;
+    private bool center = false;
     public RenderTexture outputTex;
 
     private void Awake(){
@@ -74,6 +75,8 @@ public class GradientFilterNode : Node
         {
             offset = offsetKnob.GetValue<float>();
         }
+        center = RTEditorGUI.Toggle(center, new GUIContent("Center", "Gradient from center"));
+
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -108,6 +111,7 @@ public class GradientFilterNode : Node
         patternShader.SetInt("height", outputSize.y);
         patternShader.SetFloat("startHue", startHue);
         patternShader.SetFloat("endHue", endHue);
+        patternShader.SetBool("center", center);
         patternShader.SetFloat("offset", offset * Mathf.Sqrt(Mathf.Pow(outputSize.x, 2) + Mathf.Pow(outputSize.y, 2)));
         patternShader.SetTexture(patternKernel, "inputTex", inputTex);
         patternShader.SetTexture(patternKernel, "outputTex", outputTex);

@@ -16,8 +16,8 @@ RWTexture2D<float4> outputTex;
 
 bool sf2d(float r, float u) 
 {
-    float raux = pow(pow(abs((1 / a) * cos(m1 * u / 4)), n2) + pow(abs((1 / b) * sin(m2 * u / 4)), n3), -1 / n1);
-    return r <= raux;
+    float r2 = pow(pow(abs((1 / a) * cos(m1 * u / 4)), n2) + pow(abs((1 / b) * sin(m2 * u / 4)), n3), -1 / n1);
+    return r <= r2;
 }
 
 
@@ -37,14 +37,3 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
         outputTex[id.xy] = float4(0,0,0,1);
     }
 }
-
-/*
-function sf2d(n, a)
-  u = [0:.001:2 * pi];
-  raux = abs(1 / a(1) .* abs(cos(n(1) * u / 4))) .^ n(3) + abs(1 / a(2) .* abs(sin(n(1) * u / 4))) .^ n(4);
-  r = abs(raux) .^ (- 1 / n(2));
-  x = r .* cos(u);
-  y = r .* sin(u);
-  plot(x, y);
-end
-*/

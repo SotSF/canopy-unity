@@ -14,6 +14,8 @@ public class jptestNode : TickingNode
 
     public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
 
+    [ValueConnectionKnob("jitter", Direction.In, typeof(bool), NodeSide.Left)]
+    public ValueConnectionKnob ManualJitterKnob;
     [ValueConnectionKnob("count", Direction.In, typeof(int), NodeSide.Left)]
     public ValueConnectionKnob countKnob;
     [ValueConnectionKnob("trail", Direction.In, typeof(float), NodeSide.Left)]
@@ -70,6 +72,11 @@ public class jptestNode : TickingNode
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
+        if (EventKnobOrButton("Manual jitter", ManualJitterKnob))
+        {
+            JitterFlies();
+        }
+
         countKnob.DisplayLayout();
         if (!countKnob.connected())
         {
@@ -133,6 +140,18 @@ public class jptestNode : TickingNode
         tick++;
 
         return true;
+    }
+
+    private void JitterFlies()
+    {
+        foreach (PatternObject o in objects)
+        {
+            o.pos.x += Random.Range(-1, 1) < 0 ? -50 : 50;
+            o.pos.y += Random.Range(-1, 1) < 0 ? -50 : 50;
+
+            o.pos.x = o.pos.x < 0 ? 0 : (o.pos.x >= outputSize.x ? outputSize.x - 1 : o.pos.x);
+            o.pos.y = o.pos.y < 0 ? 0 : (o.pos.x >= outputSize.y ? outputSize.y - 1 : o.pos.y);
+        }
     }
 
     private class PatternObject {

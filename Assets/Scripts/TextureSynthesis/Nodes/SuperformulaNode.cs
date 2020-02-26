@@ -71,19 +71,19 @@ public class SuperformulaNode : TickingNode
         if (!bKnob.connected()) { b = RTEditorGUI.Slider(b, 0.1f, 100); }
         else { b = bKnob.GetValue<float>(); }
         m1Knob.DisplayLayout();
-        if (!m1Knob.connected()) { m1 = RTEditorGUI.Slider(m1, 0.1f, 100); }
+        if (!m1Knob.connected()) { m1 = RTEditorGUI.Slider(m1, 0, 100); }
         else { m1 = m1Knob.GetValue<float>(); }
         m2Knob.DisplayLayout();
-        if (!m2Knob.connected()) { m2 = RTEditorGUI.Slider(m2, 0.1f, 100); }
+        if (!m2Knob.connected()) { m2 = RTEditorGUI.Slider(m2, 0, 100); }
         else { m2 = m2Knob.GetValue<float>(); }
         n1Knob.DisplayLayout();
-        if (!n1Knob.connected()) { n1 = RTEditorGUI.Slider(n1, 0.1f, 100); }
+        if (!n1Knob.connected()) { n1 = RTEditorGUI.Slider(n1, 0, 100); }
         else { n1 = n1Knob.GetValue<float>(); }
         n2Knob.DisplayLayout();
-        if (!n2Knob.connected()) { n2 = RTEditorGUI.Slider(n2, 0.1f, 100); }
+        if (!n2Knob.connected()) { n2 = RTEditorGUI.Slider(n2, 0, 100); }
         else { n2 = n2Knob.GetValue<float>(); }
         n3Knob.DisplayLayout();
-        if (!n3Knob.connected()) { n3 = RTEditorGUI.Slider(n3, 0.1f, 100); }
+        if (!n3Knob.connected()) { n3 = RTEditorGUI.Slider(n3, 0, 100); }
         else { n3 = n3Knob.GetValue<float>(); }
 
         GUILayout.FlexibleSpace();
