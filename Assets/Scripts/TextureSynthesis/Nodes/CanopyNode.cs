@@ -137,6 +137,9 @@ public class CanopyNode : Node
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (tex != null)
         {
+            // Process data one frame delayed
+            dataBuffer.GetData(colorData);
+            SetLightColor();
             int kernelId = seamless ? seamlessKernel : mainKernel;
             canopyMainShader.SetTexture(kernelId, "InputTex", tex);
             canopyMainShader.SetInt("height", tex.height);
@@ -146,10 +149,8 @@ public class CanopyNode : Node
             canopyMainShader.SetInt("width", tex.width);
 
             canopyMainShader.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
-            dataBuffer.GetData(colorData);
-            SetLightColor();
-            // Assign output channels
             textureOutputKnob.SetValue(outputTex);
+            // Assign output channels
         }
         return true;
     }

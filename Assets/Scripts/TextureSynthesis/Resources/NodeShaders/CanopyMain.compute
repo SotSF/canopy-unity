@@ -54,8 +54,10 @@ float2 scale(uint2 pixel, float2 dimensions) {
 [numthreads(25, 16, 1)]
 void CanopySeamless(uint3 id : SV_DispatchThreadID) 
 {
-    float2 maxDimensions = float2(width - 1, (height - 1)/2.0f);
-    float4 result = InputTex.SampleLevel(SmpLinearMirror, id.xy/maxDimensions, 0);
+	bool mirror = id.y > 96 / 2;
+	float2 maxDimensions = float2(width - 1, height - 1);
+	float2 smpPoint = !mirror ? id.xy : float2(id.x, 96 - id.y);
+	float4 result = InputTex.SampleLevel(SmpLinearMirror, smpPoint / maxDimensions, 0);
     OutputTex[id.xy] = result;
     dataBuffer[75 * id.y + id.x] = result.xyz;
 }
