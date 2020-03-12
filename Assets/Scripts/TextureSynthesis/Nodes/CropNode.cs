@@ -52,6 +52,10 @@ public class CropNode : TextureSynthNode
 
     private void InitializeRenderTexture()
     {
+        if (outputTex != null)
+        {
+            outputTex.Release();
+        }
         outputTex = new RenderTexture(outputSize.x, outputSize.y, 0);
         outputTex.enableRandomWrite = true;
         outputTex.Create();
