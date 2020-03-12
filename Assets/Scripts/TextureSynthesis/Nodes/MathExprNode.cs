@@ -35,6 +35,10 @@ public class MathExprNode : Node
     {
         interpreter = new Interpreter();
         MathWrapper.SetInterpreterEnv(interpreter);
+        if (stringexpr != null)
+        {
+            Parse();
+        }
     }
 
     public override void NodeGUI()
