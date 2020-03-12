@@ -1,0 +1,23 @@
+
+#pragma kernel PatternKernel
+#include "HSV.compute"
+
+Texture2D<float4> modTex;
+Texture2D<float4> inputTex;
+float controlSignal;
+
+RWTexture2D<float4> outputTex;
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    // Declare a color which is solid red, return it.
+    
+	float3 hsv = float3(
+                        lerp(.3, .5, (cos(id.y / 4 + modTex[id.xy].g / controlSignal + .0001) + 1) / 2),
+                        1, //tan((float(id.x) / (id.y + 1)) + modTex[id.xy].b / controlSignal),
+                        step(0, sin(id.x / 4 + modTex[id.xy].r / controlSignal + .0001)));
+	float3 rgb = HSVtoRGB(hsv);
+
+	outputTex[id.xy] = float4(rgb, 1);
+}
