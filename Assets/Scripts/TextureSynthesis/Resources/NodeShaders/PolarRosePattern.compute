@@ -1,0 +1,35 @@
+
+#pragma kernel PatternKernel
+
+float2 dims;
+float rmod;
+float k;
+RWTexture2D<float4> outputTex;
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+
+    // TODO(jwang): we're doing a bunch of polar-cartesian conversion,
+    //              but we do polarization later again in the canopy
+    //              node. Could probably just treat x and y as polar
+    //              coords
+    float2 st = id.xy / dims;
+
+    float2 pos = float2(0.5, 0.5) - st;
+
+    float r = length(pos) * rmod;
+    float a = atan2(pos.x, pos.y);
+
+    float f = cos(a*k);
+    // f = abs(cos(a*3.));
+    f = abs(cos(a*k))*.5+.3;
+    f = abs(cos(a*12.)*sin(a*k))*.8;
+
+    float color = 1.0 - smoothstep(f, f + 0.02, r);
+
+    // Declare a color which is solid red, return it.
+    // float4 result = float4(id.xy / dims.xy,0,1);
+    float4 result = float4(color, 0, color/10, 1);
+    outputTex[id.xy] = result;
+}
