@@ -1,0 +1,16 @@
+﻿sampler bilinearSampler;
+Texture2D heightmap;
+
+float3 filterNormal(float2 uv, float texelSize, float texelAspect)
+{
+	float4 h;
+	h[0] = heightmap.Sample(bilinearSampler, uv + texelSize * float2(0, -1)).r * texelAspect;
+	h[1] = heightmap.Sample(bilinearSampler, uv + texelSize * float2(-1, 0)).r * texelAspect;
+	h[2] = heightmap.Sample(bilinearSampler, uv + texelSize * float2(1, 0)).r * texelAspect;
+	h[3] = heightmap.Sample(bilinearSampler, uv + texelSize * float2(0, 1)).r * texelAspect;
+	float3 n;
+	n.z = h[0] - h[3];
+	n.x = h[1] - h[2];
+	n.y = 2;
+	return normalize(n);
+}
