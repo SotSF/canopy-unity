@@ -45,7 +45,7 @@ public class SignalGraphNode : TickingNode
     private int graphKernel;
     private RenderTexture graphTexture;
 
-    private Vector2Int outputSize = new Vector2Int(256,256);
+    private Vector2Int outputSize = new Vector2Int(128,128);
 
     private List<float> timeValues;
     private List<float> signalValues;
@@ -88,7 +88,6 @@ public class SignalGraphNode : TickingNode
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        this.TimedDebug("Drawing UI box");
         GUILayout.Box(graphTexture, GUILayout.MaxWidth(256), GUILayout.MaxHeight(256));
         GUILayout.EndHorizontal();
         GUILayout.Space(4);
