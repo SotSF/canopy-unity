@@ -11,7 +11,7 @@ namespace SecretFire.TextureSynth
     {
         public List<bool> values;
         public List<string> names;
-
+        public string Selected => SelectedOption();
         // Parameterless constructor to please the XML serialization gods
         public RadioButtonSet(){}
 

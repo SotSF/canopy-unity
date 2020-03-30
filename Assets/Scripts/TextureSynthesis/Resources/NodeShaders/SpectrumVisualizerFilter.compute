@@ -1,0 +1,28 @@
+#include "HSV.compute"
+#pragma kernel PatternKernel
+
+Texture2D<float4> inputTex;
+uint spectrumSize;
+float hueOffset;
+float4 spectrumData[8];
+float gradStart = 0.25f;
+float gradEnd = 0.6f;
+#define BLACK float4(0,0,0,1)
+#define TRANSPARENT float4(0,0,0,0);
+RWTexture2D<float4> outputTex;
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+	uint2 position = id.xy;
+	uint spectrumIndex = position.y / 3;
+	
+	// This indexing strategy is required due to the way shader architecture packs floats
+	float binValue = spectrumData[spectrumIndex >> 2][spectrumIndex & 3];
+	
+	float barHeight = lerp(0, 74, binValue);
+	float hue = (hueOffset + (float(spectrumIndex) / spectrumSize)) % 1;
+	float4 color = float4(HSVtoRGB(float3(hue, 1, 1)), 1);
+	float4 result = id.x < barHeight ? color : TRANSPARENT;
+    outputTex[id.xy] = result;
+}
