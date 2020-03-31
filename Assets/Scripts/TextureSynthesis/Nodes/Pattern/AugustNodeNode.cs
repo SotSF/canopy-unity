@@ -4,7 +4,7 @@ using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 using UnityEngine;
 
-[Node(false, "Filter/AugustNode")]
+[Node(false, "Pattern/AugustNode")]
 public class AugustNodeNode : TickingNode
 {
     public override string GetID => "AugustNodeNode";

@@ -4,7 +4,7 @@ using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 using UnityEngine;
 
-[Node(false, "Filter/SpectrumVisualizer")]
+[Node(false, "Pattern/SpectrumVisualizer")]
 public class SpectrumVisualizerNode : TickingNode
 {
     public override string GetID => "SpectrumVisualizerNode";

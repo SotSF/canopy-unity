@@ -27,13 +27,13 @@ public class SuperformulaNode : TickingNode
     [ValueConnectionKnob("n3", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob n3Knob;
 
-    private float a = 30;
-    private float b = 30;
-    private float m1 = 40;
-    private float m2 = 30;
-    private float n1 = 15;
-    private float n2 = 45;
-    private float n3 = 15;
+    public float a = 30;
+    public float b = 30;
+    public float m1 = 40;
+    public float m2 = 30;
+    public float n1 = 15;
+    public float n2 = 45;
+    public float n3 = 15;
 
     [ValueConnectionKnob("outputTex", Direction.Out, typeof(Texture), NodeSide.Bottom)]
     public ValueConnectionKnob outputTexKnob;
@@ -43,7 +43,7 @@ public class SuperformulaNode : TickingNode
     private Vector2Int outputSize = new Vector2Int(256, 256);
 
 
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private void Awake(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/SuperformulaPattern");
@@ -66,25 +66,18 @@ public class SuperformulaNode : TickingNode
         GUILayout.BeginVertical();
         aKnob.DisplayLayout();
         if (!aKnob.connected()) { a = RTEditorGUI.Slider(a, 0.1f, 100); }
-        else { a = aKnob.GetValue<float>(); }
         bKnob.DisplayLayout();
         if (!bKnob.connected()) { b = RTEditorGUI.Slider(b, 0.1f, 100); }
-        else { b = bKnob.GetValue<float>(); }
         m1Knob.DisplayLayout();
         if (!m1Knob.connected()) { m1 = RTEditorGUI.Slider(m1, 0, 100); }
-        else { m1 = m1Knob.GetValue<float>(); }
         m2Knob.DisplayLayout();
         if (!m2Knob.connected()) { m2 = RTEditorGUI.Slider(m2, 0, 100); }
-        else { m2 = m2Knob.GetValue<float>(); }
         n1Knob.DisplayLayout();
         if (!n1Knob.connected()) { n1 = RTEditorGUI.Slider(n1, 0, 100); }
-        else { n1 = n1Knob.GetValue<float>(); }
         n2Knob.DisplayLayout();
         if (!n2Knob.connected()) { n2 = RTEditorGUI.Slider(n2, 0, 100); }
-        else { n2 = n2Knob.GetValue<float>(); }
         n3Knob.DisplayLayout();
         if (!n3Knob.connected()) { n3 = RTEditorGUI.Slider(n3, 0, 100); }
-        else { n3 = n3Knob.GetValue<float>(); }
 
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();

@@ -4,8 +4,8 @@ using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 using UnityEngine;
 
-[Node(false, "Audio/BandSum")]
-public class BandSumNode : Node
+[Node(false, "Audio/BandAvg")]
+public class BandAvgNode : Node
 {
     public override string GetID => "BandSumNode";
     public override string Title { get { return "BandSum"; } }

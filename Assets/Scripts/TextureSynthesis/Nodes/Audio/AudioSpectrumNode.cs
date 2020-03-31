@@ -11,8 +11,8 @@ using TexSynth.Audio.Core;
 using TexSynth.Audio.WasapiAudio;
 using System.Collections.Generic;
 
-[Node(false, "Audio/SystemAudio")]
-public class SystemAudioNode : TickingNode
+[Node(false, "Audio/AudioSpectrum")]
+public class AudioSpectrumNode : TickingNode
 {
     public override string GetID => "SystemAudioSpectrumNode";
     public override string Title { get { return "SystemAudio"; } }
