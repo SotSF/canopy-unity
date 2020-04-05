@@ -54,6 +54,7 @@ public class NodeWizard : ScriptableWizard
         { ParamType.BOOL,  "bool"},
         { ParamType.FLOAT, "float"},
         { ParamType.INT,   "int"},
+        { ParamType.FLOAT4, "Vector4" },
         { ParamType.TEX,   "Texture"}
     };
 
@@ -383,6 +384,7 @@ public class {nodeName}Node : {parentClass}
         { ParamType.BOOL,  "bool {0};"},
         { ParamType.FLOAT, "float {0};"},
         { ParamType.INT,   "int {0};"},
+        { ParamType.FLOAT4, "float4 {0};" },
         { ParamType.TEX,   "{1}Texture2D<float4> {0};"}
     };
 
@@ -447,9 +449,13 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
         {
             System.IO.File.WriteAllText($"{shaderDir}/{nodeName}{suffix}.compute", GenerateShaderCode());
         }
-        System.IO.File.WriteAllText($"{nodeDir}/{nodeName}Node.cs", GenerateNodeFullCode());
+        var nodePath = $"{nodeDir}/{nodeName}Node.cs";
+        System.IO.File.WriteAllText(nodePath, GenerateNodeFullCode());
         AssetDatabase.Refresh();
         AssetDatabase.SaveAssets();
+        var nodeAsset = AssetDatabase.LoadAssetAtPath<Object>(nodePath);
+        Selection.activeObject = nodeAsset;
+        EditorGUIUtility.PingObject(nodeAsset);
     }
 
     private void OnWizardOtherButton()
