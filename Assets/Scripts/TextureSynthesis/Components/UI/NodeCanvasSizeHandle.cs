@@ -11,17 +11,19 @@ public class NodeCanvasSizeHandle : MonoBehaviour, IDragHandler
     // Start is called before the first frame update
     void Start()
     {
+        nodeCanvas.specifiedCanvasRect.width = Screen.width - 60;
+        nodeCanvas.specifiedCanvasRect.height = Screen.height - 60;
         originalCanvasRect = nodeCanvas.specifiedCanvasRect;
         originalRootRect = nodeCanvas.specifiedRootRect;
-        transform.position = new Vector3(originalCanvasRect.width, Screen.height - originalCanvasRect.height, 0);
+        transform.position = new Vector3(originalCanvasRect.width+10, (Screen.height - originalCanvasRect.height)+40, 0);
     }
 
     public void OnDrag(PointerEventData data)
     {
         transform.position = new Vector3(data.position.x, data.position.y, 0);
-        nodeCanvas.specifiedCanvasRect.width = data.position.x;
+        nodeCanvas.specifiedCanvasRect.width = data.position.x-10;
         nodeCanvas.specifiedCanvasRect.height = Screen.height - data.position.y;
-        nodeCanvas.specifiedRootRect.width = data.position.x;
+        nodeCanvas.specifiedRootRect.width = data.position.x-10;
         nodeCanvas.specifiedRootRect.height = Screen.height - data.position.y;
     }
 }
