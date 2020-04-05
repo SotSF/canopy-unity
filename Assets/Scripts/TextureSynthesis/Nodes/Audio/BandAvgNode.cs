@@ -7,8 +7,8 @@ using UnityEngine;
 [Node(false, "Audio/BandAvg")]
 public class BandAvgNode : Node
 {
-    public override string GetID => "BandSumNode";
-    public override string Title { get { return "BandSum"; } }
+    public override string GetID => "BandAvgNode";
+    public override string Title { get { return "BandAvg"; } }
 
     public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
 
@@ -18,8 +18,8 @@ public class BandAvgNode : Node
     [ValueConnectionKnob("outputSignal", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputSignalKnob;
 
-    public int filterLowEnd = 0;
-    public int filterHighEnd = 1;
+    public int filterLowEnd;
+    public int filterHighEnd;
 
     private int spectrumSize;
     private float outputSignal;

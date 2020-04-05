@@ -10,8 +10,8 @@ public class PanNode : TickingNode {
     public const string ID = "panNode";
     public override string GetID { get { return ID; } }
 
-    public override string Title { get { return "Pan"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(200, 175); } }
+    public override string Title { get { return "Pan/Offset"; } }
+    public override Vector2 DefaultSize { get { return new Vector2(200, 210); } }
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
@@ -21,14 +21,13 @@ public class PanNode : TickingNode {
 
 
     [ValueConnectionKnob("Speed", Direction.In, typeof(float))]
-    public ValueConnectionKnob speedInputKnob;
+    public ValueConnectionKnob in1Knob;
 
     [ValueConnectionKnob("Angle", Direction.In, typeof(float))]
-    public ValueConnectionKnob angleInputKnob;
+    public ValueConnectionKnob in2Knob;
 
     [ValueConnectionKnob("Reset", Direction.In, typeof(bool))]
     public ValueConnectionKnob resetKnob;
-
 
     private ComputeShader panShader;
     private int bilinearMirrorKernel;
@@ -40,9 +39,11 @@ public class PanNode : TickingNode {
     private Vector2Int outputSize = Vector2Int.zero;
     private Vector2 offset = Vector2.zero;
 
-    public bool smoothTransitions;
+    public bool smoothTransitions = true;
     public bool mirror;
-    public float speed, angle;
+    public float in1, in2;
+
+    public RadioButtonSet offsetMode;
 
     private void Awake()
     {
@@ -51,6 +52,10 @@ public class PanNode : TickingNode {
         bilinearRepeatKernel = panShader.FindKernel("BilinearRepeat");
         pointMirrorKernel = panShader.FindKernel("PointMirror");
         pointRepeatKernel = panShader.FindKernel("PointRepeat");
+        if (offsetMode == null || offsetMode.names.Count == 0)
+        {
+            offsetMode = new RadioButtonSet(0, "X/Y position", "X/Y speed", "Speed/angle");
+        }
     }
 
     private void InitializeRenderTexture()
@@ -64,28 +69,145 @@ public class PanNode : TickingNode {
         outputTex.Create();
     }
 
+    float in1min = 0, in1max = 0, in2min = 0, in2max = 0;
     public override void NodeGUI()
     {
-        //GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
-        FloatKnobOrSlider(ref speed, -50, 50, speedInputKnob);
-        FloatKnobOrSlider(ref angle, 0, 2 * Mathf.PI, angleInputKnob);
+
+        //Top row - pan options, offset mode
         GUILayout.BeginHorizontal();
+        GUILayout.Space(4);
+        // Options - smooth/mirror
+        GUILayout.BeginVertical();
+        GUILayout.Label("Pan options");
         smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
         mirror = RTEditorGUI.Toggle(mirror, new GUIContent("Mirror", "Use mirror wraping at texture edges"));
+        GUILayout.EndVertical();
+
+        GUILayout.FlexibleSpace();
+
+        // Offset mode
+        GUILayout.BeginVertical();
+        GUILayout.Label("Offset mode");
+        RadioButtons(offsetMode);
+        GUILayout.Space(4);
+        GUILayout.EndVertical();
+        GUILayout.Space(4);
         GUILayout.EndHorizontal();
+
+        // Middle row - Input knobs/sliders
+        FloatKnobOrSlider(ref in1, in1min, in1max, in1Knob, GUILayout.MaxWidth(DefaultSize.x-60));
+        FloatKnobOrSlider(ref in2, in2min, in2max, in2Knob, GUILayout.MaxWidth(DefaultSize.x-60));
+
+        // Bottom row - reset button, tex view
         GUILayout.BeginHorizontal();
-        GUILayout.Label(string.Format("Offset: ({0:0.00}, {1:0.00})", offset.x, offset.y));
+
+        GUILayout.BeginVertical();
+        GUILayout.FlexibleSpace();
+        GUILayout.Label(string.Format("Offset: ({0:0.0}, {1:0.0})", offset.x, offset.y));
         if (EventKnobOrButton("Reset", resetKnob))
         {
             offset = Vector2.zero;
+            in1 = 0;
+            in2 = 0;
         }
-        GUILayout.EndHorizontal();
         GUILayout.EndVertical();
-        //GUILayout.EndHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.Box(outputTex, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
+
+        GUILayout.EndHorizontal();
+        GUILayout.Space(4);
+        textureOutputKnob.SetPosition(DefaultSize.x - 20);
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
+    }
+
+    private void SetOffsetAndKnobParams()
+    {
+        // Set the offset & knob params based on mode
+        switch (offsetMode.Selected)
+        {
+            case "X/Y position":
+                in1Knob.name = "X offset";
+                in2Knob.name = "Y offset";
+                in1min = -outputSize.x;
+                in1max = outputSize.x;
+                in2min = -outputSize.y;
+                in2max = outputSize.y;
+                offset.x = in1;
+                offset.y = in2;
+                break;
+            case "X/Y speed":
+                in1Knob.name = "X speed";
+                in2Knob.name = "Y speed";
+                // Arbitrarily choose (image size) pixels/sec as max scroll speed
+                in1min = -outputSize.x;
+                in1max = outputSize.x;
+                in2min = -outputSize.y;
+                in2max = outputSize.y;
+                offset.x += Time.deltaTime*in1;
+                offset.y += Time.deltaTime*in2;
+                break;
+            case "Speed/angle":
+                // This is wasting a sqrt per frame, potential micro-optimization
+                var absSpeed = Mathf.Sqrt(outputSize.x * outputSize.x + outputSize.y * outputSize.y);
+                in1Knob.name = "Speed";
+                in2Knob.name = "Angle";
+                in1min = -absSpeed;
+                in1max = absSpeed;
+                in2min = 0;
+                in2max = 360;
+                var r = in1 * Time.deltaTime;
+                offset += new Vector2(r * Mathf.Cos(in2 * Mathf.Deg2Rad), r * Mathf.Sin(in2 * Mathf.Deg2Rad));
+                break;
+        }
+    }
+
+    private void BoundOffset()
+    {
+        // Keep offset bounded by (2x) dimensions so that floating point coverage doesn't decrease
+        // over long pans. use 2x so that mirrored textures don't jump on resetting the offset
+        Vector2 mirrorSafeBounds = 2 * new Vector2(outputSize.x - 1, outputSize.y - 1);
+        if (offset.x > mirrorSafeBounds.x)
+        {
+            offset.x -= mirrorSafeBounds.x;
+        }
+        else if (offset.x < -mirrorSafeBounds.x)
+        {
+            offset.x += mirrorSafeBounds.x;
+        }
+        if (offset.y > mirrorSafeBounds.y)
+        {
+            offset.y -= mirrorSafeBounds.y;
+        }
+        else if (offset.y < -mirrorSafeBounds.y)
+        {
+            offset.y += mirrorSafeBounds.y;
+        }
+    }
+
+    private int ChooseKernel()
+    {
+        // Choose appropriate kernel ID based on pan options
+        if (smoothTransitions && mirror)
+        {
+            return bilinearMirrorKernel;
+        }
+        else if (smoothTransitions && !mirror)
+        {
+            return bilinearRepeatKernel;
+        }
+        else if (!smoothTransitions && mirror)
+        {
+            return pointMirrorKernel;
+        }
+        else if (!smoothTransitions && !mirror)
+        {
+            return pointRepeatKernel;
+        }
+        return bilinearRepeatKernel;
     }
 
     float lastStep = 0;
@@ -117,47 +239,13 @@ public class PanNode : TickingNode {
             outputSize = inputSize;
             InitializeRenderTexture();
         }
-        speed = speedInputKnob.connected() ? speedInputKnob.GetValue<float>() : speed;
-        angle = angleInputKnob.connected() ? angleInputKnob.GetValue<float>() : angle;
+        in1 = in1Knob.connected() ? in1Knob.GetValue<float>() : in1;
+        in2 = in2Knob.connected() ? in2Knob.GetValue<float>() : in2;
 
+        SetOffsetAndKnobParams();
+        BoundOffset();
 
-        // Keep offset bounded by (2x) dimensions so that floating point coverage doesn't decrease
-        // over long pans. use 2x so that mirrored textures don't jump on resetting the offset
-        var r = speed * Time.deltaTime;
-        offset += new Vector2(r * Mathf.Cos(angle), r * Mathf.Sin(angle));
-        Vector2 mirrorSafeBounds = 2*new Vector2(tex.width-1, tex.height-1);
-        if (offset.x > mirrorSafeBounds.x)
-        {
-            offset.x -= mirrorSafeBounds.x;
-        }
-        else if (offset.x < -mirrorSafeBounds.x)
-        {
-            offset.x += mirrorSafeBounds.x;
-        }
-        if (offset.y > mirrorSafeBounds.y)
-        {
-            offset.y -= mirrorSafeBounds.y;
-        }
-        else if (offset.y < -mirrorSafeBounds.y)
-        {
-            offset.y += mirrorSafeBounds.y;
-        }
-
-        int panKernel = 0;
-        if (smoothTransitions && mirror)
-        {
-            panKernel = bilinearMirrorKernel;
-        } else if (smoothTransitions && !mirror)
-        {
-            panKernel = bilinearRepeatKernel;
-        } else if (!smoothTransitions && mirror)
-        {
-            panKernel = pointMirrorKernel;
-        } else if (!smoothTransitions && !mirror)
-        {
-            panKernel = pointRepeatKernel;
-        }
-
+        int panKernel = ChooseKernel();
         panShader.SetInt("width", tex.width);
         panShader.SetInt("height", tex.height);
         panShader.SetFloats("offset", offset.x, offset.y);

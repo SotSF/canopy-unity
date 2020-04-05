@@ -10,7 +10,7 @@ public class SpectrumVisualizerNode : TickingNode
     public override string GetID => "SpectrumVisualizerNode";
     public override string Title { get { return "SpectrumVisualizer"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize { get { return new Vector2(110, 110); } }
 
     [ValueConnectionKnob("spectrumData", Direction.In, typeof(float[]), NodeSide.Left)]
     public ValueConnectionKnob spectrumDataKnob;
@@ -43,14 +43,16 @@ public class SpectrumVisualizerNode : TickingNode
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
+        spectrumDataKnob.DisplayLayout();
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         GUILayout.Box(outputTex, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
+        GUILayout.Space(4);
         GUILayout.EndHorizontal();
         GUILayout.Space(4);
         GUILayout.EndVertical();
-        outputTexKnob.SetPosition(180);
+        outputTexKnob.SetPosition(DefaultSize.x-20);
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }

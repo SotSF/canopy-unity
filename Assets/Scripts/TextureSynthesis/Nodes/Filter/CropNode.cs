@@ -10,8 +10,8 @@ public class CropNode : TextureSynthNode
     public const string ID = "cropTileScale";
     public override string GetID { get { return ID; } }
 
-    public override string Title { get { return "Crop Tile Scale"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(200, 150); } }
+    public override string Title { get { return "Crop/Tile/Scale"; } }
+    public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
@@ -64,13 +64,13 @@ public class CropNode : TextureSynthNode
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
-        textureInputKnob.DisplayLayout();
+        textureInputKnob.SetPosition(20);
 
         GUILayout.BeginHorizontal();
         widthInputKnob.DisplayLayout();
         if (!widthInputKnob.connected())
         {
-            width = RTEditorGUI.Slider(width, 1f, 1000f);
+            width = RTEditorGUI.Slider(width, 1f, 1024f);
         }
         GUILayout.EndHorizontal();
 
@@ -78,17 +78,23 @@ public class CropNode : TextureSynthNode
         heightInputKnob.DisplayLayout();
         if (!heightInputKnob.connected())
         {
-            height = RTEditorGUI.Slider(height, 1f, 1000f);
+            height = RTEditorGUI.Slider(height, 1f, 1024f);
         }
         GUILayout.EndHorizontal();
 
+        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
         // Strategy for in size < out size: choose scale/tile/mirror, default is fill black/alpha
         // Strategy for out size < in size: default crop, allow scale
-        GUILayout.BeginHorizontal();
+        GUILayout.Label("Edge wrap mode");
         RadioButtons(edgeWrapMode);
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+        GUILayout.BeginVertical();
+        GUILayout.FlexibleSpace();
         GUILayout.Box(outputTex, GUILayout.MaxHeight(64), GUILayout.MaxWidth(64));
-        textureOutputKnob.DisplayLayout();
+        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
+        textureOutputKnob.SetPosition(DefaultSize.x - 20);
         GUILayout.EndVertical();
 
         if (GUI.changed)

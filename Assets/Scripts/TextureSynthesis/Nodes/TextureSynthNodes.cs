@@ -68,24 +68,24 @@ namespace SecretFire.TextureSynth
 
     public abstract class TextureSynthNode : Node
     {
-        protected void FloatKnobOrSlider(ref float val, float min, float max, ValueConnectionKnob knob)
+        protected void FloatKnobOrSlider(ref float val, float min, float max, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
             GUILayout.BeginHorizontal();
             knob.DisplayLayout();
             if (!knob.connected())
             {
-                val = RTEditorGUI.Slider(val, min, max);
+                val = RTEditorGUI.Slider(val, min, max, layoutOpts);
             }
             GUILayout.EndHorizontal();
         }
 
-        protected void IntKnobOrSlider(ref int val, int min, int max, ValueConnectionKnob knob)
+        protected void IntKnobOrSlider(ref int val, int min, int max, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
             GUILayout.BeginHorizontal();
             knob.DisplayLayout();
             if (!knob.connected())
             {
-                val = RTEditorGUI.IntSlider(val, min, max);
+                val = RTEditorGUI.IntSlider(val, min, max, layoutOpts);
             }
             GUILayout.EndHorizontal();
         }

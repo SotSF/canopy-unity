@@ -13,7 +13,7 @@ public class SignalGraphNode : TickingNode
     public override string GetID => "SignalGraphNode";
     public override string Title { get { return "SignalGraph"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(280,280); } }
+    public override Vector2 DefaultSize { get { return new Vector2(170,180); } }
 
     [ValueConnectionKnob("signal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob signalKnob;
@@ -50,6 +50,8 @@ public class SignalGraphNode : TickingNode
     private List<float> timeValues;
     private List<float> signalValues;
 
+    float windowMaxX = 1, windowMinX = -1, windowMaxY = 1, windowMinY = -1;
+
     private void Awake(){
         timeValues = new List<float>(257);
         signalValues = new List<float>(257);
@@ -80,42 +82,36 @@ public class SignalGraphNode : TickingNode
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
-        signalKnob.DisplayLayout();
-        //FloatKnobOrSlider(ref windowMinX, -100, 100, windowMinXKnob);
-        //FloatKnobOrSlider(ref windowMinY, -100, 100, windowMinYKnob);
-        //FloatKnobOrSlider(ref windowMaxX, -100, 100, windowMaxXKnob);
-        //FloatKnobOrSlider(ref windowMaxY, -100, 100, windowMaxYKnob);
-        GUILayout.FlexibleSpace();
+        
+        // Signal input knob and value label
         GUILayout.BeginHorizontal();
+        signalKnob.DisplayLayout();
+        GUILayout.Label(string.Format("value: {0:0.0000}", signalKnob.GetValue<float>()));
+        GUILayout.EndHorizontal();
+
         GUILayout.FlexibleSpace();
+
+        GUILayout.BeginHorizontal();
+
+        //Top/mid/bottom labels
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical();
+        GUILayout.Label(string.Format("{0:0.00}", windowMaxY));
+        GUILayout.FlexibleSpace();
+        GUILayout.Label(string.Format("{0:0.00}", (windowMaxY+windowMinY)/2));
+        GUILayout.FlexibleSpace();
+        GUILayout.Label(string.Format("{0:0.00}", windowMinY));
+        GUILayout.EndVertical();
+
         GUILayout.Box(graphTexture, GUILayout.MaxWidth(256), GUILayout.MaxHeight(256));
         GUILayout.EndHorizontal();
         GUILayout.Space(4);
         GUILayout.EndVertical();
-        outputTexKnob.SetPosition(180);
+        outputTexKnob.SetPosition(DefaultSize.x-20);
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public void pollKnobs()
-    {
-        //if (windowMinXKnob.connected())
-        //{
-        //    windowMinX = windowMinXKnob.GetValue<float>();
-        //}
-        //if (windowMinYKnob.connected())
-        //{
-        //    windowMinY = windowMinYKnob.GetValue<float>();
-        //}
-        //if (windowMaxXKnob.connected())
-        //{
-        //    windowMaxX = windowMaxXKnob.GetValue<float>();
-        //}
-        //if (windowMaxYKnob.connected())
-        //{
-        //    windowMaxY = windowMaxYKnob.GetValue<float>();
-        //}
-    }
 
     float lastCalc = 0;
     public override bool Calculate()
@@ -144,7 +140,6 @@ public class SignalGraphNode : TickingNode
             timeValues.RemoveAt(0);
         }
 
-        float windowMaxX = 1, windowMinX = -1, windowMaxY = 1, windowMinY = -1;
         //if (windowMaxX <= windowMinX || windowMaxY <= windowMinY)
         //{
         //    return true;

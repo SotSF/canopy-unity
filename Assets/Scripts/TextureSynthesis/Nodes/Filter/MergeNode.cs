@@ -1,10 +1,11 @@
 
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 [Node(false, "Filter/Merge")]
-public class MergeNode : Node
+public class MergeNode : TextureSynthNode
 {
     public override string GetID => "MergeNode";
     public override string Title { get { return "Merge"; } }
@@ -25,16 +26,21 @@ public class MergeNode : Node
     public ValueConnectionKnob outputTexKnob;
 
     
+    public float crossfader = 0;
+
     private ComputeShader patternShader;
     private int patternKernel;
     private Vector2Int outputSize = Vector2Int.zero;
-    private float crossfader = 0;
     private RenderTexture outputTex;
+    public RadioButtonSet mergeModeSelection;
 
-    
     private void Awake(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/MergeFilter");
         patternKernel = patternShader.FindKernel("PatternKernel");
+        if (mergeModeSelection == null || mergeModeSelection.names.Count == 0)
+        {
+            mergeModeSelection = new RadioButtonSet(0, "Simple", "Layers");
+        }
     }
 
     private void InitializeRenderTexture()

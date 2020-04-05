@@ -14,10 +14,10 @@ using System.Collections.Generic;
 [Node(false, "Audio/AudioSpectrum")]
 public class AudioSpectrumNode : TickingNode
 {
-    public override string GetID => "SystemAudioSpectrumNode";
-    public override string Title { get { return "SystemAudio"; } }
+    public override string GetID => "AudioSpectrumNode";
+    public override string Title { get { return "AudioSpectrum"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 175); } }
+    public override Vector2 DefaultSize { get { return new Vector2(200, 160); } }
 
     [ValueConnectionKnob("spectrumData", Direction.Out, typeof(float[]), NodeSide.Right)]
     public ValueConnectionKnob spectrumDataKnob;
@@ -92,39 +92,39 @@ public class AudioSpectrumNode : TickingNode
     {
         GUILayout.BeginVertical();
 
+        // 1st row
+        GUILayout.BeginHorizontal();
+        
         // Capture mode - system audio vs mic
-        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+        GUILayout.Label("Audio source");
         RadioButtons(captureModeSelection);
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+
         // Spectrum scaling mode - sqrt/decibel/linear
-        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+        GUILayout.Label("Scaling");
         RadioButtons(scalingModeSelection);
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
 
-        // Min/max frequency, smoothing iterations
-        GUILayout.BeginHorizontal();
-
+        //Min / max frequency
         GUILayout.BeginVertical();
         GUILayout.Label("Min freq");
         newMinFreq = RTEditorGUI.IntField(minFreq);
-        GUILayout.EndVertical();
-
-        GUILayout.FlexibleSpace();
-
-        GUILayout.BeginVertical();
         GUILayout.Label("Max freq");
         newMaxFreq = RTEditorGUI.IntField(maxFreq);
         GUILayout.EndVertical();
 
-        GUILayout.FlexibleSpace();
-
-        GUILayout.BeginVertical();
-        GUILayout.Label("Smoothing");
-        newSmoothing = RTEditorGUI.IntSlider(smoothingIterations, 1, 10);
-        GUILayout.EndVertical();
-
         GUILayout.EndHorizontal();
 
+        //Smoothing iterations
+        GUILayout.BeginHorizontal();
+
+        GUILayout.Label("Smoothing");
+        newSmoothing = RTEditorGUI.IntSlider(smoothingIterations, 1, 10, GUILayout.MaxWidth(DefaultSize.x-60));
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
         var label = capturing ? "Stop capture" : "Start capture";
         if (GUILayout.Button(label))
         {
@@ -140,6 +140,7 @@ public class AudioSpectrumNode : TickingNode
         }
 
         spectrumDataKnob.DisplayLayout();
+        GUILayout.EndHorizontal();
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
