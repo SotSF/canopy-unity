@@ -178,8 +178,7 @@ public class NodeWizard : ScriptableWizard
             outputTexKnobPlacements.AppendLine();
             foreach (var outTex in texOutputs)
             {
-                int xOffset = (int)defaultSize.x - (margin + j * 40);
-                string knobPlacement = $"        {outTex.name}Knob.SetPosition({xOffset});";
+                string knobPlacement = $"        {outTex.name}Knob.SetPosition(DefaultSize.x-20);";
                 outputTexKnobPlacements.AppendLine(knobPlacement);
                 j++;
             }
