@@ -13,6 +13,8 @@ public class NodeCanvasSizeHandle : MonoBehaviour, IDragHandler
     {
         nodeCanvas.specifiedCanvasRect.width = Screen.width - 60;
         nodeCanvas.specifiedCanvasRect.height = Screen.height - 60;
+        nodeCanvas.specifiedRootRect.width = Screen.width - 60;
+        nodeCanvas.specifiedRootRect.height = Screen.height - 60;
         originalCanvasRect = nodeCanvas.specifiedCanvasRect;
         originalRootRect = nodeCanvas.specifiedRootRect;
         transform.position = new Vector3(originalCanvasRect.width+10, (Screen.height - originalCanvasRect.height)+40, 0);
