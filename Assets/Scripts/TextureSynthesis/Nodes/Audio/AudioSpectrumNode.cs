@@ -98,7 +98,11 @@ public class AudioSpectrumNode : TickingNode
         // Capture mode - system audio vs mic
         GUILayout.BeginVertical();
         GUILayout.Label("Audio source");
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         RadioButtons(captureModeSelection);
+#else
+        GUILayout.Label("Mic");
+#endif
         GUILayout.EndVertical();
 
         // Spectrum scaling mode - sqrt/decibel/linear
