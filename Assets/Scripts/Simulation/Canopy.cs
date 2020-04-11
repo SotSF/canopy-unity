@@ -8,6 +8,11 @@ using Lightsale.Utility;
 
 public class Canopy: MonoBehaviour
 {
+    public enum CanopyProtocol
+    {
+        HTTP,
+        ARTNET
+    }
     public static Canopy instance;
 
     public Mesh pixelBase;
@@ -32,6 +37,8 @@ public class Canopy: MonoBehaviour
 
     const int maxVerts = 65000;
     public bool simulatorMode = false;
+    public bool sendToCanopy;
+    public CanopyProtocol proto = CanopyProtocol.HTTP;
 
     //private int numLEDs = numStrips * pixelsPerStrip;
 
