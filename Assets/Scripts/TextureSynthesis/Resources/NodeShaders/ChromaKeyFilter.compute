@@ -1,0 +1,16 @@
+
+#pragma kernel PatternKernel
+
+Texture2D<float4> inputTex;
+float4 keyColor;
+float sensitivity;
+
+RWTexture2D<float4> outputTex;
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+	float d = distance(inputTex[id.xy].rgb, keyColor.rgb);
+	float4 result = d < 1.73f * (sensitivity / 100) ? float4(inputTex[id.xy].rgb, 0) : inputTex[id.xy];
+    outputTex[id.xy] = result;
+}
