@@ -41,25 +41,6 @@ public class MultidisplayManager : MonoBehaviour
         ShowMessage(m.ToString(), 4);
     }
 
-    void OnGUI()
-    {
-        if (Time.time - msgSent < msgDuration)
-        {
-            GUI.Box(new Rect(Screen.width / 2, Screen.height / 2, Screen.width/4, Screen.height/4), msg);
-        }
-        if (showButtons)
-        {
-            for (int i = 1; i < Display.displays.Length; i++)
-            {
-                if (GUI.Button(new Rect(Screen.width - 120, Screen.height - 120, 120,120), string.Format("Activate Display {0}", i+1)))
-                {
-                    ActivateDisplay(i);
-                    showButtons = false;
-                }
-            }
-        }
-    }
-
     public void ToggleDisplay()
     {
         if (displayActive)
