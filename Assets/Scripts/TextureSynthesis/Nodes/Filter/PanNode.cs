@@ -2,6 +2,7 @@
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
+using System;
 using UnityEngine;
 
 
@@ -126,6 +127,14 @@ public class PanNode : TickingNode {
 
     private void SetOffsetAndKnobParams()
     {
+        // Stop NaN/inf propagation
+        Predicate<float> invalidFloat = (v) => { return float.IsNaN(v) || float.IsInfinity(v); };
+        if (invalidFloat(in1) || invalidFloat(in2))
+        {
+            in1 = 0;
+            in2 = 0;
+            return;
+        }
         // Set the offset & knob params based on mode
         switch (offsetMode.Selected)
         {
