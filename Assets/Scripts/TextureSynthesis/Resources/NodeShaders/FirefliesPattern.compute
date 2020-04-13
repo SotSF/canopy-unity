@@ -14,8 +14,9 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
 {
     uint dist = distance(id, xy);
     if (dist <= size) {
-        outputTex[id.xy] = float4(0.9,0.8,0.2,(size - dist)/ size);
+        outputTex[id.xy] = float4(0.9,0.8,0.2,1);
     }
+
 }
 
 [numthreads(32,32,1)]
@@ -26,5 +27,6 @@ void FadeKernel(uint3 id: SV_DispatchThreadID) {
     float v = hsv.z - trail;
     if (v < 0) { v = 0; }
     float3 res = HSVtoRGB(float3(hsv.x, hsv.y, v));
-    outputTex[id.xy] = float4(res.x, res.y, res.z, 1);
+	float alpha = c.a - trail;
+    outputTex[id.xy] = float4(res.x, res.y, res.z, alpha);
 }
