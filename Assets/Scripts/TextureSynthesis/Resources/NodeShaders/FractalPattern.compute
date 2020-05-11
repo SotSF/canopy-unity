@@ -1,0 +1,52 @@
+
+#pragma kernel JuliaKernel
+
+int order;
+int maxIterations;
+float bias;
+float zoom;
+float radius;
+float2 offset;
+
+float4 convergeColor;
+float4 divergeColor;
+
+int2 outputSize;
+
+RWTexture2D<float4> outputTex;
+
+float2 complexProduct(float2 a, float2 b)
+{
+	return float2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+}
+
+float2 complexPower(float2 a, int n)
+{
+	float2 b = a;
+	if (n == 0)
+	{
+		return float2(1, 0);
+	}
+	for (int i = 1; i < n; i++)
+	{
+		b = complexProduct(b, a);
+	}
+	return b;
+}
+
+[numthreads(16, 16, 1)]
+void JuliaKernel(uint3 id : SV_DispatchThreadID)
+{
+	//Offset
+	float2 position = (id.xy / float2(outputSize - float2(1, 1))) * zoom - offset;
+	int iter = 0;
+	while (length(position) < radius && iter < maxIterations)
+	{
+		position = complexPower(position, order) + bias;
+		iter++;
+	}
+	float4 result = iter == maxIterations ? 
+					  convergeColor       : 
+					  lerp(divergeColor, convergeColor, float(iter) / float(maxIterations));
+	outputTex[id.xy] = result;
+}
