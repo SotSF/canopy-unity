@@ -34,6 +34,6 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
         outputTex[id.xy] = result;
     }
     else {
-        outputTex[id.xy] = float4(0,0,0,1);
+        outputTex[id.xy] = float4(0,0,0,0);
     }
 }

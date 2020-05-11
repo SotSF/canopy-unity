@@ -29,5 +29,5 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
 
 [numthreads(16,16,1)]
 void ClearKernel(uint3 id : SV_DispatchThreadID) {
-    outputTex[id.xy] = float4(0,0,0,1);
+    outputTex[id.xy] = float4(0,0,0,0);
 }

@@ -26,7 +26,8 @@ void fade(uint3 id : SV_DispatchThreadID) {
     float v = hsv.z - 0.02;
     if (v < 0) { v = 0; }
     float3 res = HSVtoRGB(float3(hsv.x, hsv.y, v));
-    outputTex[id.xy] = float4(res.x, res.y, res.z, 1);
+	float alpha = c.a - 0.02;
+    outputTex[id.xy] = float4(res.x, res.y, res.z, alpha);
 }
 
 
