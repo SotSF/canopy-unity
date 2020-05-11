@@ -111,6 +111,19 @@ namespace SecretFire.TextureSynth.Signals
             return 2* newAmpl * ((-(t % newPeriod) / newPeriod -0.5f) + 1) + offset ;
         }
 
+        public float CalcExpSpike(float t, float newPeriod, float newAmpl, float newPhase)
+        {
+            // (x ^ (t%1) - 1) / (x-1)
+            // x = 2^q for q in [0, 32] to control spikiness
+            return 0;
+        }
+
+        public float CalcHemisphere(float t, float newPeriod, float newAmpl, float newPhase)
+        {
+            // - root(1- (t%1)^2)+1
+            return 0;
+        }
+
         public float CalcTriangle(float t, float newPeriod, float newAmpl, float newPhase)
         {
 

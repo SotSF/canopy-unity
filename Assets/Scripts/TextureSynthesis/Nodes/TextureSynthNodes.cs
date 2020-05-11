@@ -75,6 +75,9 @@ namespace SecretFire.TextureSynth
             if (!knob.connected())
             {
                 val = RTEditorGUI.Slider(val, min, max, layoutOpts);
+            } else
+            {
+                val = knob.GetValue<float>();
             }
             GUILayout.EndHorizontal();
         }
@@ -86,6 +89,9 @@ namespace SecretFire.TextureSynth
             if (!knob.connected())
             {
                 val = RTEditorGUI.IntSlider(val, min, max, layoutOpts);
+            } else
+            {
+                val = knob.GetValue<int>();
             }
             GUILayout.EndHorizontal();
         }
