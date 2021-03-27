@@ -20,7 +20,6 @@ public class PanNode : TickingNode {
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 100)]
     public ValueConnectionKnob textureOutputKnob;
 
-
     [ValueConnectionKnob("Speed", Direction.In, typeof(float))]
     public ValueConnectionKnob in1Knob;
 
@@ -33,8 +32,10 @@ public class PanNode : TickingNode {
     private ComputeShader panShader;
     private int bilinearMirrorKernel;
     private int bilinearRepeatKernel;
+    private int bilinearClampKernel;
     private int pointMirrorKernel;
     private int pointRepeatKernel;
+    private int pointClampKernel;
     private RenderTexture outputTex;
 
     private Vector2Int outputSize = Vector2Int.zero;
@@ -45,17 +46,24 @@ public class PanNode : TickingNode {
     public float in1, in2;
 
     public RadioButtonSet offsetMode;
+    public RadioButtonSet sampleMode;
 
     private void Awake()
     {
         panShader = Resources.Load<ComputeShader>("NodeShaders/PanFilter");
         bilinearMirrorKernel = panShader.FindKernel("BilinearMirror");
         bilinearRepeatKernel = panShader.FindKernel("BilinearRepeat");
+        bilinearClampKernel = panShader.FindKernel("BilinearClamp");
         pointMirrorKernel = panShader.FindKernel("PointMirror");
         pointRepeatKernel = panShader.FindKernel("PointRepeat");
-        if (offsetMode == null || offsetMode.names.Count == 0)
+        pointClampKernel = panShader.FindKernel("PointClamp");
+        if (offsetMode == null || offsetMode.names == null || offsetMode.names.Count == 0)
         {
             offsetMode = new RadioButtonSet(0, "X/Y position", "X/Y speed", "Speed/angle");
+        }
+        if (sampleMode == null || sampleMode.names == null || sampleMode.names.Count == 0)
+        {
+            sampleMode = new RadioButtonSet(0, "Mirror", "Repeat", "Clamp");
         }
     }
 
@@ -200,23 +208,30 @@ public class PanNode : TickingNode {
     private int ChooseKernel()
     {
         // Choose appropriate kernel ID based on pan options
-        if (smoothTransitions && mirror)
+        if (smoothTransitions)
         {
-            return bilinearMirrorKernel;
-        }
-        else if (smoothTransitions && !mirror)
+            switch (sampleMode.Selected)
+            {
+                case "Mirror":
+                    return bilinearMirrorKernel;
+                case "Repeat":
+                    return bilinearRepeatKernel;
+                case "Clamp":
+                    return bilinearClampKernel;
+            }
+        } else
         {
-            return bilinearRepeatKernel;
+            switch (sampleMode.Selected)
+            {
+                case "Mirror":
+                    return pointMirrorKernel;
+                case "Repeat":
+                    return pointRepeatKernel;
+                case "Clamp":
+                    return pointClampKernel;
+            }
         }
-        else if (!smoothTransitions && mirror)
-        {
-            return pointMirrorKernel;
-        }
-        else if (!smoothTransitions && !mirror)
-        {
-            return pointRepeatKernel;
-        }
-        return bilinearRepeatKernel;
+        return bilinearMirrorKernel;
     }
 
     float lastStep = 0;
@@ -231,6 +246,7 @@ public class PanNode : TickingNode {
                 outputTex.Release();
             return true;
         }
+
         // Guard against multiple Calculate()'s per frame
         if (Time.time - lastStep > Time.deltaTime)
         {

@@ -29,14 +29,16 @@ public class MergeNode : TextureSynthNode
     public float crossfader = 0;
 
     private ComputeShader patternShader;
-    private int patternKernel;
+    private int layerKernel;
+    private int fadeKernel;
     private Vector2Int outputSize = Vector2Int.zero;
     private RenderTexture outputTex;
     public RadioButtonSet mergeModeSelection;
 
     private void Awake(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/MergeFilter");
-        patternKernel = patternShader.FindKernel("PatternKernel");
+        layerKernel = patternShader.FindKernel("LayerKernel");
+        fadeKernel = patternShader.FindKernel("FadeKernel");
         if (mergeModeSelection == null || mergeModeSelection.names.Count == 0)
         {
             mergeModeSelection = new RadioButtonSet(0, "Simple", "Layers");
@@ -63,14 +65,22 @@ public class MergeNode : TextureSynthNode
         texRKnob.SetPosition(60);
 
         GUILayout.BeginVertical();
-        
-        crossfaderKnob.DisplayLayout();
-        if (!crossfaderKnob.connected())
+
+        GUILayout.BeginHorizontal();
+        RadioButtons(mergeModeSelection);
+        GUILayout.EndHorizontal();
+
+        if (mergeModeSelection.Selected == "Simple")
         {
-            crossfader = RTEditorGUI.Slider(crossfader, 0, 1);
-        } else
-        {
-            crossfader = crossfaderKnob.GetValue<float>();
+            crossfaderKnob.DisplayLayout();
+            if (!crossfaderKnob.connected())
+            {
+                crossfader = RTEditorGUI.Slider(crossfader, 0, 1);
+            }
+            else
+            {
+                crossfader = crossfaderKnob.GetValue<float>();
+            }
         }
 
         GUILayout.FlexibleSpace();
@@ -119,20 +129,32 @@ public class MergeNode : TextureSynthNode
             InitializeRenderTexture();
         }
 
-        crossfader = crossfaderKnob.connected() ? crossfaderKnob.GetValue<float>(): crossfader;
+        
 
         patternShader.SetInt("width", outputSize.x);
         patternShader.SetInt("height", outputSize.y);
-        patternShader.SetFloat("crossfader", crossfader);
-        patternShader.SetTexture(patternKernel, "texL", texL);
-        patternShader.SetTexture(patternKernel, "texR", texR);
-        patternShader.SetTexture(patternKernel, "outputTex", outputTex);
+        int kernel = 0;
+        switch (mergeModeSelection.Selected)
+        {
+            case "Simple":
+                crossfader = crossfaderKnob.connected() ? crossfaderKnob.GetValue<float>() : crossfader;
+                patternShader.SetFloat("crossfader", crossfader);
+                kernel = fadeKernel;
+                break;
+            case "Layers":
+                kernel = layerKernel;
+                break;
+        }
+
+        patternShader.SetTexture(kernel, "texL", texL);
+        patternShader.SetTexture(kernel, "texR", texR);
+        patternShader.SetTexture(kernel, "outputTex", outputTex);
 
         uint tx,ty,tz;
-        patternShader.GetKernelThreadGroupSizes(patternKernel, out tx, out ty, out tz);
+        patternShader.GetKernelThreadGroupSizes(kernel, out tx, out ty, out tz);
         var threadGroupX = Mathf.CeilToInt(((float)outputSize.x) / tx);
         var threadGroupY = Mathf.CeilToInt(((float)outputSize.y) / ty);
-        patternShader.Dispatch(patternKernel, threadGroupX, threadGroupY, 1);
+        patternShader.Dispatch(kernel, threadGroupX, threadGroupY, 1);
         outputTexKnob.SetValue(outputTex);
 
         return true;

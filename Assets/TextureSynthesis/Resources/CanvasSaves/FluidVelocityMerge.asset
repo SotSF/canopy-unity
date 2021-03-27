@@ -414,11 +414,21 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   velocityInputKnob: {fileID: -4924155863582816302}
   dyeInputKnob: {fileID: -727980580002119389}
-  dyeInputLevel: {fileID: -1976901581194173241}
+  dyeInputLevelKnob: {fileID: 0}
+  dyeInputLevel: 1
   timeMultiplierKnob: {fileID: 3319556756949489629}
   timeMultiplier: 1
+  runKnob: {fileID: 0}
+  resetKnob: {fileID: 0}
+  applyForceKnob: {fileID: 0}
+  applyDyeKnob: {fileID: 0}
   textureOutputKnob: {fileID: 7052236695590280109}
   outputTex: {fileID: 0}
+  timestep: 0
+  useBoundaries: 1
+  continuousVelocity: 0
+  continuousDye: 0
+  running: 0
 --- !u!114 &-5440467447364392005
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -477,6 +487,9 @@ MonoBehaviour:
   hueKnob: {fileID: 2082979106572518199}
   satKnob: {fileID: 6527788947746157406}
   valKnob: {fileID: -8769188830815965575}
+  hue: 0
+  saturation: 0
+  value: 0
   outputTex: {fileID: 0}
 --- !u!114 &-5128443558894055955
 MonoBehaviour:
@@ -528,7 +541,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: In
+  m_Name: velocityIn
   m_EditorClassIdentifier: 
   body: {fileID: -5442399194224041168}
   direction: 1
@@ -1067,7 +1080,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: In
+  m_Name: dyeIn
   m_EditorClassIdentifier: 
   body: {fileID: -5442399194224041168}
   direction: 1
@@ -1280,6 +1293,9 @@ MonoBehaviour:
   hueKnob: {fileID: 8987476754456805479}
   satKnob: {fileID: 6932977557138945208}
   valKnob: {fileID: -8953194922676509511}
+  hue: 0
+  saturation: 0
+  value: 0
   outputTex: {fileID: 0}
 --- !u!114 &910065900916287100
 MonoBehaviour:
@@ -1568,9 +1584,12 @@ MonoBehaviour:
   height: 512
   textureOutputKnob: {fileID: 4671961862899046339}
   outputTex: {fileID: 0}
-  scale: 0
-  tile: 1
-  mirror: 0
+  edgeWrapMode:
+    values: 000000
+    names:
+    - tile
+    - mirror
+    - scale
 --- !u!114 &3257445522697614892
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1633,7 +1652,7 @@ MonoBehaviour:
   body: {fileID: -5442399194224041168}
   direction: 1
   maxConnectionCount: 0
-  styleID: Float
+  styleID: System.Single
   _connections: []
   side: 4
   sidePosition: 74
@@ -2211,6 +2230,9 @@ MonoBehaviour:
   hueKnob: {fileID: 3257445522697614892}
   satKnob: {fileID: -5729069930085371134}
   valKnob: {fileID: 984343219617466843}
+  hue: 0
+  saturation: 0
+  value: 0
   outputTex: {fileID: 0}
 --- !u!114 &9033536199098599505
 MonoBehaviour:

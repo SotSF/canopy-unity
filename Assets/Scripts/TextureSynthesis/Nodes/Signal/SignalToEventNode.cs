@@ -12,7 +12,7 @@ public class SignalToEventNode : TickingNode
     public override string GetID => "SignalToEventNode";
     public override string Title { get { return "SignalToEvent"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(230, 150); } }
+    public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
 
     [ValueConnectionKnob("inputSignal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob inputSignalKnob;
@@ -26,7 +26,7 @@ public class SignalToEventNode : TickingNode
 
     public RadioButtonSet triggerMode;
 
-    public float threshold = 1;
+    public float threshold = .5f;
 
     bool wasOverThreshold;
     float signalValue;
@@ -35,15 +35,16 @@ public class SignalToEventNode : TickingNode
     {
         if (triggerMode == null)
         {
-            triggerMode = new RadioButtonSet("leadingEdge", "trailingEdge", "high", "low");
+            triggerMode = new RadioButtonSet(0, "leadingEdge", "trailingEdge", "high", "low");
         }
     }
 
     public override void NodeGUI()
     {
-        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
         RadioButtons(triggerMode);
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         inputSignalKnob.DisplayLayout();

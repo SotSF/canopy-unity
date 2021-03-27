@@ -716,7 +716,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f3469be317986434faaea3445fa2db15, type: 3}
   m_Name: Canopy
@@ -747,6 +747,7 @@ MonoBehaviour:
   textureOutputKnob: {fileID: -138839946472777607}
   speedInputKnob: {fileID: -1739232021973910376}
   angleInputKnob: {fileID: -2980560296500439499}
+  resetKnob: {fileID: 0}
   outputTex: {fileID: 0}
   smoothTransitions: 0
   mirror: 0
@@ -937,6 +938,9 @@ MonoBehaviour:
   hueKnob: {fileID: 4395579604111954685}
   satKnob: {fileID: 8930456932288398846}
   valKnob: {fileID: -8307507223496705005}
+  hue: 0
+  saturation: 0
+  value: 0
   outputTex: {fileID: 0}
 --- !u!114 &-2538591699471745867
 MonoBehaviour:
@@ -1499,7 +1503,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: In
+  m_Name: velocityIn
   m_EditorClassIdentifier: 
   body: {fileID: 4277690382374979522}
   direction: 1
@@ -1599,7 +1603,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: In
+  m_Name: dyeIn
   m_EditorClassIdentifier: 
   body: {fileID: 4277690382374979522}
   direction: 1
@@ -1712,6 +1716,9 @@ MonoBehaviour:
   hueKnob: {fileID: -5975144135719494369}
   satKnob: {fileID: -2952320074466356947}
   valKnob: {fileID: -4693617414366984697}
+  hue: 0
+  saturation: 0
+  value: 0
   outputTex: {fileID: 0}
 --- !u!114 &2957159347593817338
 MonoBehaviour:
@@ -1837,13 +1844,24 @@ MonoBehaviour:
   amplInputKnob: {fileID: -1671821722033728038}
   phaseInputKnob: {fileID: -1670953878630842067}
   outputKnob: {fileID: 3585282736568322536}
-  oscParams:
-    period: 8
-    amplitude: 0.5
-    phase: 0
   period: 8
   amplitude: 0.5
   phase: 0
+  max: 2
+  min: -2
+  signalType:
+    values: 0100000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
 --- !u!114 &4115938199937071178
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1880,13 +1898,24 @@ MonoBehaviour:
   amplInputKnob: {fileID: 7196697030849387543}
   phaseInputKnob: {fileID: -5315856396307605401}
   outputKnob: {fileID: 1769355347201209452}
-  oscParams:
-    period: 9
-    amplitude: 0.04
-    phase: 0
   period: 9
   amplitude: 0.04
   phase: 0
+  max: 2
+  min: -2
+  signalType:
+    values: 0100000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
 --- !u!114 &4217280257126725041
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1925,11 +1954,21 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   velocityInputKnob: {fileID: 867917885714750167}
   dyeInputKnob: {fileID: 2302336865620689350}
-  dyeInputLevel: {fileID: -7140848726656729371}
+  dyeInputLevelKnob: {fileID: 0}
+  dyeInputLevel: 0
   timeMultiplierKnob: {fileID: 0}
   timeMultiplier: 1
+  runKnob: {fileID: 0}
+  resetKnob: {fileID: 0}
+  applyForceKnob: {fileID: 0}
+  applyDyeKnob: {fileID: 0}
   textureOutputKnob: {fileID: -2180990858322499645}
   outputTex: {fileID: 0}
+  timestep: 0
+  useBoundaries: 1
+  continuousVelocity: 0
+  continuousDye: 0
+  running: 0
 --- !u!114 &4325663594392374429
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2141,7 +2180,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68039c3d1f2a24a84b1cbffa2e3de0e0, type: 3}
   m_Name: Crop Tile Scale
@@ -2156,9 +2195,12 @@ MonoBehaviour:
   height: 128
   textureOutputKnob: {fileID: -7451593715674763747}
   outputTex: {fileID: 0}
-  scale: 0
-  tile: 1
-  mirror: 0
+  edgeWrapMode:
+    values: 000000
+    names:
+    - tile
+    - mirror
+    - scale
 --- !u!114 &6256893074900216127
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2179,6 +2221,9 @@ MonoBehaviour:
   hueKnob: {fileID: 2905413302245750973}
   satKnob: {fileID: -1832349787389357849}
   valKnob: {fileID: -2756582787341887382}
+  hue: 0
+  saturation: 0
+  value: 0
   outputTex: {fileID: 0}
 --- !u!114 &6362896943843517795
 MonoBehaviour:
@@ -2279,7 +2324,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 68039c3d1f2a24a84b1cbffa2e3de0e0, type: 3}
   m_Name: Crop Tile Scale
@@ -2294,9 +2339,12 @@ MonoBehaviour:
   height: 512
   textureOutputKnob: {fileID: 8959371476934910463}
   outputTex: {fileID: 0}
-  scale: 0
-  tile: 1
-  mirror: 0
+  edgeWrapMode:
+    values: 000000
+    names:
+    - tile
+    - mirror
+    - scale
 --- !u!114 &7399847985887799360
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2316,13 +2364,24 @@ MonoBehaviour:
   amplInputKnob: {fileID: 8958767563278580092}
   phaseInputKnob: {fileID: -8187544582319293516}
   outputKnob: {fileID: -974868244396152459}
-  oscParams:
-    period: 5
-    amplitude: 0.1
-    phase: 6.2831855
   period: 5
   amplitude: 0.1
   phase: 6.2831855
+  max: 2
+  min: -2
+  signalType:
+    values: 0100000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
 --- !u!114 &7483230045123425599
 MonoBehaviour:
   m_ObjectHideFlags: 1

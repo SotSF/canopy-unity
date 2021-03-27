@@ -31,16 +31,7 @@ public class XboxStickInputNode : TickingNode
     public XboxStickId boundStick;
     public XboxController boundController;
 
-    private int player;
     private Vector2 axis2D;
-
-    public void Awake()
-    {
-        if (bound)
-        {
-            // Set listen?
-        }
-    }
 
     public override void NodeGUI()
     {
@@ -60,7 +51,6 @@ public class XboxStickInputNode : TickingNode
                 if (GUILayout.Button("Unbind"))
                 {
                     bound = false;
-                    player = -1;
                 }
 
                 GUILayout.BeginHorizontal();

@@ -1,7 +1,9 @@
 ﻿#pragma kernel BilinearMirror
 #pragma kernel BilinearRepeat
+#pragma kernel BilinearClamp
 #pragma kernel PointMirror
 #pragma kernel PointRepeat
+#pragma kernel PointClamp
 
 Texture2D<float4> InputTex;
 RWTexture2D<float4> OutputTex;
@@ -11,10 +13,12 @@ float2 offset;
 uint width;
 uint height;
 
-SamplerState SmpPointRepeat;
-SamplerState SmpPointMirror;
-SamplerState SmpLinearRepeat;
 SamplerState SmpLinearMirror;
+SamplerState SmpLinearRepeat;
+SamplerState SmpLinearClamp;
+SamplerState SmpPointMirror;
+SamplerState SmpPointRepeat;
+SamplerState SmpPointClamp;
 
 [numthreads(16, 16, 1)]
 void BilinearMirror(uint3 id : SV_DispatchThreadID)
@@ -33,6 +37,14 @@ void BilinearRepeat(uint3 id : SV_DispatchThreadID)
 }
 
 [numthreads(16, 16, 1)]
+void BilinearClamp(uint3 id : SV_DispatchThreadID)
+{
+	float2 newOffset = id.xy + offset;
+	uint2 maxDimensions = uint2(width - 1, height - 1);
+	OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearClamp, newOffset / maxDimensions, 0);
+}
+
+[numthreads(16, 16, 1)]
 void PointMirror(uint3 id : SV_DispatchThreadID)
 {
     float2 newOffset = floor(id.xy + offset);
@@ -46,4 +58,12 @@ void PointRepeat(uint3 id : SV_DispatchThreadID)
     float2 newOffset = floor(id.xy + offset);
     uint2 maxDimensions = uint2(width - 1, height - 1);
     OutputTex[id.xy] = InputTex.SampleLevel(SmpPointRepeat, newOffset / maxDimensions, 0);
+}
+
+[numthreads(16, 16, 1)]
+void PointClamp(uint3 id : SV_DispatchThreadID)
+{
+	float2 newOffset = floor(id.xy + offset);
+	uint2 maxDimensions = uint2(width - 1, height - 1);
+	OutputTex[id.xy] = InputTex.SampleLevel(SmpPointClamp, newOffset / maxDimensions, 0);
 }

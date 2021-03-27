@@ -1,5 +1,6 @@
 
-#pragma kernel PatternKernel
+#pragma kernel FadeKernel
+#pragma kernel LayerKernel
 
 Texture2D<float4> texL;
 Texture2D<float4> texR;
@@ -8,12 +9,18 @@ RWTexture2D<float4> outputTex;
 
 
 [numthreads(16, 16, 1)]
-void PatternKernel(uint3 id : SV_DispatchThreadID)
+void LayerKernel(uint3 id : SV_DispatchThreadID)
 {
 	float4 src = texL[id.xy];
 	float4 dst = texR[id.xy];
 	float outA = src.a + dst.a * (1 - src.a);
-	float3 outRGB = (src.rgb * src.a + dst.rgb * dst.a * (1 - src.a))/outA;
+	float3 outRGB = (src.rgb * src.a + dst.rgb * dst.a * (1 - src.a)) / outA;
 	float4 result = float4(outRGB, outA);
-    outputTex[id.xy] = result;
+	outputTex[id.xy] = result;
+}
+
+[numthreads(16, 16, 1)]
+void FadeKernel(uint3 id : SV_DispatchThreadID)
+{
+	outputTex[id.xy] = lerp(texL[id.xy], texR[id.xy], crossfader);
 }

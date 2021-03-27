@@ -8,6 +8,7 @@ float4 spectrumData[8];
 float gradStart = 0.25f;
 float gradEnd = 0.6f;
 #define BLACK float4(0,0,0,1)
+//#define TRANSPARENT float4(.5,.55,1,1);
 #define TRANSPARENT float4(0,0,0,0);
 RWTexture2D<float4> outputTex;
 
@@ -22,7 +23,7 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
 	
 	float barHeight = lerp(0, 74, binValue);
 	float hue = (hueOffset + (float(spectrumIndex) / spectrumSize)) % 1;
-	float4 color = float4(HSVtoRGB(float3(hue, 1, 1)), 1);
+	float4 color = float4(HSVtoRGB(float3(.5, 1, 1)), 1);
 	float4 result = id.x < barHeight ? color : TRANSPARENT;
     outputTex[id.xy] = result;
 }

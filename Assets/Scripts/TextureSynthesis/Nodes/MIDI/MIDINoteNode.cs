@@ -20,6 +20,18 @@ public class MIDINoteNode : TickingNode
     [ValueConnectionKnob("value", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob valueKnob;
 
+    [ValueConnectionKnob("pressed", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob pressedKnob;
+    bool pressed;
+
+    [ValueConnectionKnob("held", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob heldKnob;
+    bool held;
+
+    [ValueConnectionKnob("released", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob releasedKnob;
+    bool released;
+
     public float value;
     public int note;
     public MidiChannel channel;
@@ -46,13 +58,20 @@ public class MIDINoteNode : TickingNode
     private void ReceiveNoteUp(MidiChannel channel, int note)
     {
         if (channel == this.channel && note == this.note)
+        {
             value = 0;
+            held = false;
+        }
     }
 
     private void ReceiveNoteDown(MidiChannel channel, int note, float velocity)
     {
         if (channel == this.channel && note == this.note)
+        {
             value = velocity;
+            pressed = true;
+            held = true;
+        }
     }
 
     public override void NodeGUI()
@@ -96,6 +115,11 @@ public class MIDINoteNode : TickingNode
 
     public override bool Calculate()
     {
+        pressedKnob.SetValue(pressed);
+        if (pressed)
+            pressed = false;
+        heldKnob.SetValue(held);
+        releasedKnob.SetValue(released);
         valueKnob.SetValue(value);
         return true;
     }

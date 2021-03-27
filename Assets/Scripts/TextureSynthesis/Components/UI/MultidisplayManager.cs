@@ -2,33 +2,33 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Text;
+using UnityEditor;
+using System.Collections.Generic;
 
 public class MultidisplayManager : MonoBehaviour
 {
-    // Use this for initialization
+    private void Awake()
+    {
+        instance = this;
+    }
+
     void Start()
     {
         var displayCount = Display.displays.Length;
         if (displayCount > 1)
         {
-            showButtons = true;
             ListDisplays();
         }
     }
     public Button displayButton;
+    public static MultidisplayManager instance;   
+    public Camera MainCamera;
+    public Camera BlankCamera;
+    public Text textTag;
 
-    bool showButtons;
-    string msg = "";
-    float msgDuration = 0;
-    float msgSent = 0;
 
     bool displayActive = false;
 
-    void ShowMessage(string message, float duration)
-    {
-        msg = message;
-        msgDuration = duration;
-    }
 
     void ListDisplays()
     {
@@ -38,7 +38,38 @@ public class MultidisplayManager : MonoBehaviour
         {
             m.AppendLine("Display " + i.ToString() + ": " + Display.displays[i].ToString());
         }
-        ShowMessage(m.ToString(), 4);
+
+    }
+
+    internal Vector2 GetEditorGameWindowSize(int index)
+    {
+        System.Reflection.Assembly assembly = typeof(EditorWindow).Assembly;
+        System.Type GameView = assembly.GetType("UnityEditor.GameView");
+        var gameWindow = EditorWindow.GetWindow(GameView);
+        var GetSizeMethod = GameView.GetMethod("GetPlayModeViewSize", System.Reflection.BindingFlags.NonPublic);
+        var ViewArrayInfo = GameView.GetField("s_PlayModeViews", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        //var ViewArray = ViewArrayInfo.GetValue(null) as List<object>;
+        //var window = ViewArray[index];
+        //System.Object Res = GetSizeMethod.Invoke(null, null);
+        return new Vector2(gameWindow.position.width,gameWindow.position.height);
+    }
+
+    internal Vector2 GetDisplaySize(int displayIndex)
+    {
+        if (Application.isEditor)
+        {
+            return GetEditorGameWindowSize(displayIndex);
+        }
+        if (displayIndex >= Display.displays.Length)
+        {
+            Debug.LogError("Invalid display index");
+            return Vector2.zero;
+        }
+        Display d = Display.displays[displayIndex];
+
+        int width = d.systemWidth;
+        int height = d.systemHeight;
+        return new Vector2(width, height);
     }
 
     public void ToggleDisplay()
@@ -53,8 +84,13 @@ public class MultidisplayManager : MonoBehaviour
     {
         if (Application.isEditor)
         {
-            Camera.main.targetDisplay = 1;
+            BlankCamera.targetDisplay = 0;
+            MainCamera.targetDisplay = 1;
             displayActive = true;
+            textTag.text = "Deactivate 2nd display";
+        } else
+        {
+            ActivateDisplay(1);
         }
     }
 
@@ -62,8 +98,10 @@ public class MultidisplayManager : MonoBehaviour
     {
         if (Application.isEditor)
         {
-            Camera.main.targetDisplay = 0;
+            MainCamera.targetDisplay = 0;
+            BlankCamera.targetDisplay = 1;
             displayActive = false;
+            textTag.text = "Activate 2nd display";
         }
     }
 
@@ -77,15 +115,19 @@ public class MultidisplayManager : MonoBehaviour
         Camera.main.fieldOfView = fov;
     }
     
-    void ActivateDisplay(int displayIndex)
+    public void ActivateDisplay(int displayIndex)
     {
-        Camera c = Camera.main;
-        Display d = Display.displays[displayIndex];
+        if (Application.isEditor)
+            return;
         if (displayIndex >= Display.displays.Length)
+        {
             Debug.LogError("Invalid display index");
+            return;
+        }
+        Display d = Display.displays[displayIndex];
 
-        int width = Display.displays[displayIndex].systemWidth;
-        int height = Display.displays[displayIndex].systemHeight;
+        int width = d.systemWidth;
+        int height = d.systemHeight;
         float aspectRatio = ((float)width) / height;
         //if (aspectRatio > 1)
         //{
@@ -95,10 +137,11 @@ public class MultidisplayManager : MonoBehaviour
         //{
         //    Camera.main.fieldOfView = Mathf.Rad2Deg * 2.0f * Mathf.Atan(Mathf.Tan(100 * 0.5f) / aspectRatio);
         //}
-        d.Activate(width, height, 60);
-        d.SetParams(width, height, 0, 0);
-        c.aspect = aspectRatio;
-        c.targetDisplay = displayIndex;
+        d.Activate();
+        //d.Activate(width, height, 60);
+        //d.SetParams(width, height, 0, 0);
+        //c.aspect = aspectRatio;
+        //c.targetDisplay = displayIndex;
     }
 }
 

@@ -134,11 +134,11 @@ public class FluidSimNode : TickingNode
         forceKernel = fluidSimShader.FindKernel("applyForce");
         jacobiKernel = fluidSimShader.FindKernel("jacobi"); ;
         advectionKernel = fluidSimShader.FindKernel("advect");
-        divergenceKernel = fluidSimShader.FindKernel("divergence"); ;
-        gradientDiffKernel = fluidSimShader.FindKernel("gradientDiff"); ;
+        divergenceKernel = fluidSimShader.FindKernel("divergence");
+        gradientDiffKernel = fluidSimShader.FindKernel("gradientDiff");
         clearPressureKernel = fluidSimShader.FindKernel("clearPressure");
-        verticalBoundaryKernel = fluidSimShader.FindKernel("verticalBoundary"); ;
-        horizontalBoundaryKernel = fluidSimShader.FindKernel("horizontalBoundary"); ;
+        verticalBoundaryKernel = fluidSimShader.FindKernel("verticalBoundary");
+        horizontalBoundaryKernel = fluidSimShader.FindKernel("horizontalBoundary");
 
 
         dataBuffer = new ComputeBuffer(512, Constants.FLOAT_BYTES * Constants.VEC4_LENGTH);

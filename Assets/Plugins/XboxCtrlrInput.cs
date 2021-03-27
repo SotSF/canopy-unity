@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -1687,18 +1688,32 @@ namespace XboxCtrlrInput
         private static bool xiNumOfCtrlrsQueried = false;
         private static XciXInputInitializer xinputInitalizer = new XCI.XciXInputInitializer();
 
-        
 
         // This can be set to something different if you want
         private const GamePadDeadZone WindowsDeadzoneMethod = GamePadDeadZone.Circular;
 
+		//public static event AxisInputConsumer axisEvents;
+  //      public static event ButtonInputConsumer buttonEvents;
+		//public delegate void AxisInputConsumer(PlayerIndex i, XboxAxis axis, XboxAxis a, XboxAxis b);
+		//public delegate void ButtonInputConsumer(PlayerIndex i, XboxButton btn, ButtonState a, ButtonState b);
 
+		// ------------ Methods --------------- //
 
-        // ------------ Methods --------------- //
+		//>> For updating states <<
 
-        //>> For updating states <<
+		//private static void CompareState(int i, GamePadState a, GamePadState b)
+		//{
+		//	if (a.Buttons.Start != b.Buttons.Start)
+		//	{
+		//		a.Buttons.Start == ButtonState.Pressed;
+		//	}
+		//	if (a.Triggers.Left != b.Triggers.Left)
+		//	{
+		//		a.Triggers.Left
+		//	}
+		//}
 
-        private static void XInputUpdateAllStates()
+		private static void XInputUpdateAllStates()
 		{
 			if(xiUpdateAlreadyCalled) return;
 			
@@ -1707,12 +1722,26 @@ namespace XboxCtrlrInput
 				PlayerIndex plyNum = (PlayerIndex) i;
 				xInputCtrlrsPrev[i] = xInputCtrlrs[i];
 				xInputCtrlrs[i] = GamePad.GetState(plyNum, XCI.WindowsDeadzoneMethod);
+
+				//CompareState(i, xInputCtrlrsPrev[i], xInputCtrlrs[i]);
+				// Propagate events here
+				var b = xInputCtrlrs[i].Buttons;
+				{
+					
+				}
+				var d = xInputCtrlrs[i].DPad;
+				var a = xInputCtrlrs[i].ThumbSticks;
+				var t = xInputCtrlrs[i].Triggers;
 			}
-			
 			xiUpdateAlreadyCalled = true;
 		}
-		
-		
+
+		private static void CompareState(int i, GamePadState gamePadState1, GamePadState gamePadState2)
+		{
+			throw new NotImplementedException();
+		}
+
+
 		//>> For getting states <<
 		private static GamePadState XInputGetSingleState()
 		{
