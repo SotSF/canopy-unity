@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
@@ -25,6 +27,9 @@ namespace SecretFire.TextureSynth.Signals
         [ValueConnectionKnob("Phase", Direction.In, typeof(float))]
         public ValueConnectionKnob phaseInputKnob;
 
+        [ValueConnectionKnob("q", Direction.In, typeof(float))]
+        public ValueConnectionKnob qInputKnob;
+
         [ValueConnectionKnob("Output", Direction.Out, typeof(float))]
         public ValueConnectionKnob outputKnob;
 
@@ -33,8 +38,27 @@ namespace SecretFire.TextureSynth.Signals
         public float phase = 0;
         public float max = 2;
         public float min = -2;
-        public RadioButtonSet signalType = new RadioButtonSet(0, "sine", "square", "saw", "reverse-saw", "triangle");
+        public RadioButtonSet signalType = new RadioButtonSet(0, "sine", "square", "saw", "reverse-saw", "triangle", "expspike", "hemi");
         public RadioButtonSet paramStyle = new RadioButtonSet(0, "amplitude", "min max");
+
+        private float lastPeriod = 8;
+        private float lastPhase = 0;
+        private float lastAmplitude = 2;
+
+        public delegate float SignalFunc(float x, float p, float a, float t, float q);
+        private static Dictionary<string, SignalFunc> signalGenerators = new Dictionary<string, SignalFunc>();
+
+        public void Awake()
+        {
+            signalGenerators["sine"] = CalcSine;
+            signalGenerators["square"] = CalcSquare;
+            signalGenerators["saw"] = CalcSaw;
+            signalGenerators["reverse-saw"] = CalcRevSaw;
+            signalGenerators["triangle"] = CalcTriangle;
+            signalGenerators["expspike"] = CalcExpSpike;
+            signalGenerators["hemi"] = CalcHemisphere;
+            //signalGenerators.
+        }
 
         public override void NodeGUI()
         {
@@ -66,7 +90,7 @@ namespace SecretFire.TextureSynth.Signals
                 max = RTEditorGUI.FloatField("Max", max);
             }
             FloatKnobOrSlider(ref period, 0.01f, 50, periodInputKnob);
-            FloatKnobOrSlider(ref phase, 0, 2 * Mathf.PI, phaseInputKnob);
+            FloatKnobOrSlider(ref phase, -period, period, phaseInputKnob);
             GUILayout.Space(4);
             GUILayout.EndVertical();
 
@@ -74,67 +98,59 @@ namespace SecretFire.TextureSynth.Signals
                 NodeEditor.curNodeCanvas.OnNodeChange(this);
         }
 
-        public float CalcSine(float t, float newPeriod, float newAmpl, float newPhase)
+        /* Parameters:
+         * x: Time
+         * p: Period
+         * a: Amplitude
+         * t: theta (phase)
+         * */
+        public static float CalcSine(float x, float p, float a, float t, float q = 0)
         {
-            if (newPeriod != period ||
-                newAmpl   != amplitude ||
-                newPhase  != phase)
-            {
-                if (newPeriod != period)
-                {
-                    //Find a phase such that the oscillator won't instantaneously jump in amplitude
-                    //If phase and freq change on the same Calculate()... we pick freq.
-                    var currentOldPhase = ((t + phase) % period) / period;
-                    var currentNewPhase = (t % newPeriod) / newPeriod;
-                    var phaseOffset = currentOldPhase - currentNewPhase;
-                    newPhase = 2 * Mathf.PI * ((currentNewPhase + phaseOffset) % 1);
-                }
-                period = newPeriod;
-                amplitude = newAmpl;
-                phase = newPhase;
-            }
-            return Mathf.Sin((2 * Mathf.PI * t - phase) / period) * amplitude + offset;
+            return Mathf.Sin((2 * Mathf.PI * (x - t)) / p) * a ;
         }
 
-        public float CalcSquare(float t, float newPeriod, float newAmpl, float newPhase)
+        public static float CalcSquare(float x, float p, float a, float t, float q = 0)
         {
-            return (t % newPeriod < newPeriod / 2 ? newAmpl : -newAmpl) + offset;
+            return ((x-t) % p < p / 2 ? a : -a);
         }
 
-        public float CalcSaw(float t, float newPeriod, float newAmpl, float newPhase)
+        public static float CalcSaw(float x, float p, float a, float t, float q = 0)
         {
-            return 2* newAmpl * ((t % newPeriod) / newPeriod - 0.5f) + offset;
+            return 2* a * (((x-t) % p) / p - 0.5f);
         }
 
-        public float CalcRevSaw(float t, float newPeriod, float newAmpl, float newPhase)
+        public static float CalcRevSaw(float x, float p, float a, float t, float q = 0)
         {
-            return 2* newAmpl * ((-(t % newPeriod) / newPeriod -0.5f) + 1) + offset ;
+            return 2* a * ((-((x-t) % p) / p -0.5f) + 1) ;
         }
 
-        public float CalcExpSpike(float t, float newPeriod, float newAmpl, float newPhase)
+        public static float CalcExpSpike(float x, float p, float a, float t, float q = 2)
         {
             // (x ^ (t%1) - 1) / (x-1)
             // x = 2^q for q in [0, 32] to control spikiness
-            return 0;
+            var b = Mathf.Pow(2, q);
+            return (Mathf.Pow(b, x % 1) - 1) / (b - 1);
         }
 
-        public float CalcHemisphere(float t, float newPeriod, float newAmpl, float newPhase)
+        public static float CalcHemisphere(float x, float p, float a, float t, float q = 0)
         {
             // - root(1- (t%1)^2)+1
             return 0;
         }
 
-        public float CalcTriangle(float t, float newPeriod, float newAmpl, float newPhase)
+        public static float CalcTriangle(float x, float p, float a, float t, float q = 0)
         {
 
-            float halfPeriod = newPeriod / 2;
-            float quarterPeriod = newPeriod / 4;
+            float halfPeriod = p / 2;
+            float quarterPeriod = p / 4;
             // Offset time to match sin shape
-            t -= quarterPeriod;
-            return offset + (t % newPeriod < halfPeriod ?
-                                2* newAmpl * ((   ((t) % halfPeriod) / halfPeriod) - 0.5f) :
-                                2* newAmpl * ((  -((t) % halfPeriod) / halfPeriod) + 0.5f));
+            x -= quarterPeriod;
+            return ((x-t) % p < halfPeriod ?
+                                2* a * ((   ((x-t) % halfPeriod) / halfPeriod) - 0.5f) :
+                                2* a * ((  -((x-t) % halfPeriod) / halfPeriod) + 0.5f));
         }
+
+
 
 
         float offset;
@@ -143,36 +159,33 @@ namespace SecretFire.TextureSynth.Signals
             float value = 0;
             float t = Time.time;
 
-            var newPeriod = periodInputKnob.connected() ? periodInputKnob.GetValue<float>() : period;
-            var newAmpl   = amplInputKnob.connected()   ? amplInputKnob.GetValue<float>()   : amplitude;
-            var newPhase  = phaseInputKnob.connected()  ? phaseInputKnob.GetValue<float>()  : phase;
+            amplitude = amplInputKnob.connected()  ? amplInputKnob.GetValue<float>()   : amplitude;
+            period = periodInputKnob.connected()   ? periodInputKnob.GetValue<float>() : period;
+            phase  = phaseInputKnob.connected()    ? phaseInputKnob.GetValue<float>()  : phase;
 
             offset = 0;
             if (paramStyle.SelectedOption() == "min max")
             {
-                newAmpl = (max - min) / 2;
-                offset = min + newAmpl;
+                amplitude = (max - min) / 2;
+                offset = min + amplitude;
             }
 
-            switch (signalType.SelectedOption())
+            var newParams = (period, amplitude, phase);
+            var oldParams = (lastPeriod, lastAmplitude, lastPhase);
+            if (newParams != oldParams)
             {
-                case "sine":
-                    value = CalcSine(t, newPeriod, newAmpl, newPhase);
-                    break;
-                case "square":
-                    value = CalcSquare(t, newPeriod, newAmpl, newPhase);
-                    break;
-                case "saw":
-                    value = CalcSaw(t, newPeriod, newAmpl, newPhase);
-                    break;
-                case "reverse-saw":
-                    value = CalcRevSaw(t, newPeriod, newAmpl, newPhase);
-                    break;
-                case "triangle":
-                    value = CalcTriangle(t, newPeriod, newAmpl, newPhase);
-                    break;
+                if (period != lastPeriod)
+                {
+                    phase = (t - period / lastPeriod * (t - lastPhase)) % period;
+                    Debug.Log("New phase: " + phase);
+                }
             }
-            outputKnob.SetValue(value);
+
+            value = signalGenerators[signalType.SelectedOption()](t, period, amplitude, phase, 0);
+            outputKnob.SetValue(value + offset);
+            lastPeriod = period;
+            lastPhase = phase;
+            lastAmplitude = amplitude;
             return true;
         }
     }

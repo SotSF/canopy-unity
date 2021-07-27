@@ -23,6 +23,10 @@ public class FluidSimNode : TickingNode
     public ValueConnectionKnob dyeInputLevelKnob;
     public float dyeInputLevel = 1;
 
+    [ValueConnectionKnob("dyeDecay", Direction.In, typeof(float))]
+    public ValueConnectionKnob dyeDecayKnob;
+    public float dyeDecay = 0;
+
     [ValueConnectionKnob("timeMultiplier", Direction.In, typeof(float))]
     public ValueConnectionKnob timeMultiplierKnob;
     public float timeMultiplier = 1;
@@ -58,6 +62,7 @@ public class FluidSimNode : TickingNode
     private int clearPressureKernel;
     private int forceKernel;
     private int dyeKernel;
+    private int decayKernel;
     private int horizontalBoundaryKernel;
     private int verticalBoundaryKernel;
 
@@ -131,6 +136,7 @@ public class FluidSimNode : TickingNode
     {
         fluidSimShader = Resources.Load<ComputeShader>("NodeShaders/EulerFluidSimPattern");
         dyeKernel = fluidSimShader.FindKernel("applyDye");
+        decayKernel = fluidSimShader.FindKernel("decayDye");
         forceKernel = fluidSimShader.FindKernel("applyForce");
         jacobiKernel = fluidSimShader.FindKernel("jacobi"); ;
         advectionKernel = fluidSimShader.FindKernel("advect");
@@ -161,6 +167,7 @@ public class FluidSimNode : TickingNode
         GUILayout.BeginVertical();
         FloatKnobOrSlider(ref timeMultiplier, -1, 2, timeMultiplierKnob);
         FloatKnobOrSlider(ref dyeInputLevel, 0, 1, dyeInputLevelKnob);
+        FloatKnobOrSlider(ref dyeDecay, 0, 1, dyeDecayKnob);
         string cmd = running ? "Stop" : "Run";
         clicked = EventKnobOrButton(cmd, runKnob);
         if (clicked)
@@ -265,7 +272,7 @@ public class FluidSimNode : TickingNode
         float dx2 = outputSize.x * outputSize.x;
         fluidSimShader.SetInt("width", outputSize.x);
         fluidSimShader.SetInt("height", outputSize.y);
-        //fluidSimShader.SetFloat("dissipation", 0.0f);
+        fluidSimShader.SetFloat("dyeDecay", dyeDecay);
         fluidSimShader.SetFloat("timestep", timeMultiplier * timestep);
 
         //Apply velocity boundary
@@ -346,6 +353,12 @@ public class FluidSimNode : TickingNode
         fluidSimShader.SetTexture(advectionKernel, "vField", dyeField);
         ExecuteFullTexShader(advectionKernel);
         Graphics.Blit(resultField, dyeField);
+
+        // Decay dye
+        fluidSimShader.SetTexture(decayKernel, "uField", dyeField);
+        ExecuteFullTexShader(decayKernel);
+        Graphics.Blit(resultField, dyeField);
+
 
         //Texture2D dbg = velocityField.ToTexture2D();
         //var colors = dbg.GetPixels();

@@ -7,6 +7,7 @@
 #pragma kernel gradientDiff
 #pragma kernel applyForce
 #pragma kernel applyDye
+#pragma kernel decayDye
 #pragma kernel horizontalBoundary
 #pragma kernel verticalBoundary
 
@@ -35,6 +36,8 @@ float jacobiRBeta;
 float forceMultiplier;
 float dyeMultiplier;
 
+float dyeDecay;
+
 float forceRadius;
 float forceMag;
 uint forceX;
@@ -56,6 +59,21 @@ void advect(uint3 id : SV_DispatchThreadID)
     Result[coord] = result;
 }
 
+/* Decay the dye levels */
+[numthreads(16,16,1)]
+void decayDye(uint3 id: SV_DispatchThreadID)
+{
+    float4 color = uField[id.xy] * (1 - (dyeDecay / 60.0f));
+    Result[id.xy] = color;
+}
+
+/* Apply a new dye layer*/
+[numthreads(16, 16, 1)]
+void applyDye(uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = saturate(uField[id.xy] + dyeMultiplier * vField[id.xy]);
+}
+
 /* Apply a texture force*/
 [numthreads(127, 2, 1)]
 void applyForce(uint3 id : SV_DispatchThreadID)
@@ -73,12 +91,6 @@ void applyForce(uint3 id : SV_DispatchThreadID)
     Result[coord] = uField[coord] + result;
 }
 
-/* Apply a new dye layer*/
-[numthreads(16, 16, 1)]
-void applyDye(uint3 id : SV_DispatchThreadID)
-{
-    Result[id.xy] = saturate(uField[id.xy] + dyeMultiplier*vField[id.xy]);
-}
 
 //threadgroup shared buffer for reducing tex sampling cost
 //groupshared float4 texSamples[127 * 2];

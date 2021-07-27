@@ -1,0 +1,25 @@
+
+#pragma kernel FadeKernel
+#pragma kernel LayerKernel
+
+Texture2D<float4> texL;
+Texture2D<float4> texR;
+
+float width;
+float height;
+
+float crossfader;
+RWTexture2D<float4> outputTex;
+
+SamplerState SmpLinearRepeat;
+
+[numthreads(16, 16, 1)]
+void FadeKernel(uint3 id : SV_DispatchThreadID)
+{
+	float2 dimensions = float2(width, height);
+	float2 position = id.xy / dimensions;
+
+	float4 l = texL.SampleLevel(SmpLinearRepeat, position, 0);
+	float4 r = texR.SampleLevel(SmpLinearRepeat, position, 0);
+	outputTex[id.xy] = lerp(texL[id.xy], texR[id.xy], crossfader);
+}

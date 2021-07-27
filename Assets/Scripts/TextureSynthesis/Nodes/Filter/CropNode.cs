@@ -35,7 +35,6 @@ public class CropNode : TextureSynthNode
     private int mirrorKernel;
     private int cropScaleKernel;
 
-    [SerializeField]
     public RadioButtonSet edgeWrapMode;
 
     private void Awake()

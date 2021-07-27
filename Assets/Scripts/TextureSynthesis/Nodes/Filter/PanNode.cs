@@ -90,7 +90,9 @@ public class PanNode : TickingNode {
         GUILayout.BeginVertical();
         GUILayout.Label("Pan options");
         smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
-        mirror = RTEditorGUI.Toggle(mirror, new GUIContent("Mirror", "Use mirror wraping at texture edges"));
+        //mirror = RTEditorGUI.Toggle(mirror, new GUIContent("Mirror", "Use mirror wraping at texture edges"));
+        GUILayout.Label("Sample mode");
+        RadioButtons(sampleMode);
         GUILayout.EndVertical();
 
         GUILayout.FlexibleSpace();

@@ -19,7 +19,17 @@ public class SpoutOutputNode : TextureSynthNode
     private RenderTexture outputTex;
 
     private Vector2Int outputSize = new Vector2Int(1920, 1080);
-    private SpoutController spoutController;
+    private SpoutController _spoutController;
+    private SpoutController spoutController {
+        get
+        {
+            if (_spoutController == null)
+            {
+                _spoutController = Instantiate(prefab).GetComponent<SpoutController>();
+            }
+            return _spoutController;
+        }
+    }
 
     public string name = "spoutSender";
     public bool sendAlpha = false;
@@ -60,13 +70,8 @@ public class SpoutOutputNode : TextureSynthNode
 
     private void InitializeRenderTexture()
     {
-        if (spoutController == null)
-        {
-            spoutController = Instantiate(prefab).GetComponent<SpoutController>();
-        } else
-        {
-            spoutController.RefreshSender();
-        }
+
+        spoutController.RefreshSender();
         spoutController.SetName(name);
         if (outputTex != null)
         {

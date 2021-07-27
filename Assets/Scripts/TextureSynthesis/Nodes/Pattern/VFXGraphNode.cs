@@ -21,7 +21,7 @@ public class VFXGraphNode: TickingNode
 
     private Vector2Int outputSize = Vector2Int.zero;
     private float emissionRate = 200;
-    private float speedFactor = 1;
+    //private float speedFactor = 1;
     private RenderTexture outputTex;
 
     private Transform vfxPrefab;
