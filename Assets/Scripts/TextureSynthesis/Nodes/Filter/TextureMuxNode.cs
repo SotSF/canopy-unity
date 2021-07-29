@@ -22,7 +22,6 @@ public class TextureMuxNode : TickingNode
     [ValueConnectionKnob("control", Direction.In, typeof(bool), NodeSide.Left)]
     public ValueConnectionKnob controlKnob;
 
-    private ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(Texture), NodeSide.Top);
 
     [ValueConnectionKnob("autoplay", Direction.In, typeof(bool), NodeSide.Left)]
     public ValueConnectionKnob autoplayKnob;
@@ -79,6 +78,7 @@ public class TextureMuxNode : TickingNode
         }
         else if (dynamicConnectionPorts.Count < targetPortCount)
         {
+            ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(Texture), NodeSide.Top);
             while (dynamicConnectionPorts.Count < targetPortCount)
                 CreateValueConnectionKnob(outKnobAttribs);
         }

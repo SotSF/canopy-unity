@@ -21,7 +21,6 @@ public class SignalMuxNode : Node
     [ValueConnectionKnob("outputSignal", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputSignalKnob;
 
-    private ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(float));
     private float outputSignal;
     public int activeSignalIndex = 0;
     private int targetPortCount => activePortCount +1;
@@ -48,6 +47,7 @@ public class SignalMuxNode : Node
             }   
         } else if (dynamicConnectionPorts.Count < targetPortCount)
         {
+            ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(float));
             while (dynamicConnectionPorts.Count < targetPortCount)
                 CreateValueConnectionKnob(outKnobAttribs);
         }
