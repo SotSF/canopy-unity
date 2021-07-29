@@ -43,6 +43,7 @@ public class MultidisplayManager : MonoBehaviour
 
     internal Vector2 GetEditorGameWindowSize(int index)
     {
+#if  UNITY_EDITOR
         System.Reflection.Assembly assembly = typeof(EditorWindow).Assembly;
         System.Type GameView = assembly.GetType("UnityEditor.GameView");
         var gameWindow = EditorWindow.GetWindow(GameView);
@@ -52,6 +53,8 @@ public class MultidisplayManager : MonoBehaviour
         //var window = ViewArray[index];
         //System.Object Res = GetSizeMethod.Invoke(null, null);
         return new Vector2(gameWindow.position.width,gameWindow.position.height);
+#endif
+        return Vector2.zero;
     }
 
     internal Vector2 GetDisplaySize(int displayIndex)
