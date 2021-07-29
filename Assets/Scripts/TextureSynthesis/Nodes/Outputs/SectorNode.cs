@@ -8,11 +8,11 @@ using System.Linq;
 
 using UnityEngine;
 
-[Node(false, "Output/ArtNet")]
-public class ArtNetNode : TickingNode
+[Node(false, "Output/Sector")]
+public class SectorNode : TickingNode
 {
-    public override string GetID => "ArtNetNode";
-    public override string Title { get { return "ArtNet"; } }
+    public override string GetID => "SectorNode";
+    public override string Title { get { return "Sector"; } }
 
     public override Vector2 DefaultSize { get { return new Vector2(220, 180); } }
 

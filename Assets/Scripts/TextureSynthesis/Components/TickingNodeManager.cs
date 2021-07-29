@@ -25,17 +25,20 @@ public class TickingNodeManager : MonoBehaviour
     void TickNodes()
     {
         List<TickingNode> nodesToTick = new List<TickingNode>();
-        foreach (var node in nodeEditor.workingCanvas.nodes)
+        if (nodeEditor?.workingCanvas != null)
         {
-            if (node is TickingNode)
+            foreach (var node in nodeEditor.workingCanvas.nodes)
             {
-                nodesToTick.Add((TickingNode)node);
-                node.ClearCalculation();
+                if (node is TickingNode)
+                {
+                    nodesToTick.Add((TickingNode)node);
+                    node.ClearCalculation();
+                }
             }
-        }
-        foreach (var node in nodesToTick)
-        {
-            canvasCalculator.ContinueCalculation(node);
+            foreach (var node in nodesToTick)
+            {
+                canvasCalculator.ContinueCalculation(node);
+            }
         }
     }
 

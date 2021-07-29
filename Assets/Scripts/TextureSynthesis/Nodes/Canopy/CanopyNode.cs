@@ -29,7 +29,6 @@ public class CanopyNode : Node
     private ComputeBuffer dataBuffer;
     private Vector3[] colorData;
     private int mainKernel;
-    private int seamlessKernel;
     public bool polarize;
     public bool seamless;
     private Light lightCaster;
@@ -41,14 +40,11 @@ public class CanopyNode : Node
         {
             canopyMainShader = Resources.Load<ComputeShader>("NodeShaders/CanopyMain");
             mainKernel = canopyMainShader.FindKernel("CanopyMain");
-            seamlessKernel = canopyMainShader.FindKernel("CanopySeamless");
             dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
             colorData = new Vector3[Constants.NUM_LEDS];
             InitializeTextures();
             canopyMainShader.SetBuffer(mainKernel, "dataBuffer", dataBuffer);
             canopyMainShader.SetTexture(mainKernel, "OutputTex", outputTex);
-            canopyMainShader.SetBuffer(seamlessKernel, "dataBuffer", dataBuffer);
-            canopyMainShader.SetTexture(seamlessKernel, "OutputTex", outputTex);
             lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
             RenderToCanopySimulation(outputTex);
         }
@@ -140,7 +136,7 @@ public class CanopyNode : Node
             // Process data one frame delayed
             dataBuffer.GetData(colorData);
             SetLightColor();
-            int kernelId = seamless ? seamlessKernel : mainKernel;
+            int kernelId = mainKernel;
             canopyMainShader.SetTexture(kernelId, "InputTex", tex);
             canopyMainShader.SetInt("height", tex.height);
 
