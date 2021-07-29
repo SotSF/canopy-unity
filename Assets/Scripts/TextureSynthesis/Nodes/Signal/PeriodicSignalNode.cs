@@ -177,7 +177,6 @@ namespace SecretFire.TextureSynth.Signals
                 if (period != lastPeriod)
                 {
                     phase = (t - period / lastPeriod * (t - lastPhase)) % period;
-                    Debug.Log("New phase: " + phase);
                 }
             }
 

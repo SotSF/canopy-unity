@@ -73,7 +73,6 @@ public class SignalGraphNode : TickingNode
         graphTexture = new RenderTexture(outputSize.x, outputSize.y, 0);
         graphTexture.enableRandomWrite = true;
         graphTexture.Create();
-        Debug.Log("Clearing rendertexture");
         RenderTexture.active = graphTexture;
         GL.Clear(false, true, Color.black);
         RenderTexture.active = null;
