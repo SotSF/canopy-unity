@@ -21,18 +21,12 @@ public class CanopyArtnetNode : TickingNode
 
     private RenderTexture buffer;
 
-    private int universe;
     private string ip;
     private List<byte[]> universes;
-    private const int numPixels = 7200;
-    private int numUniverses = 48;
+    private int numUniverses = 49;
 
-    private ComputeShader canopyMainShader;
-    private ComputeBuffer dataBuffer;
-    private Vector3[] colorData;
-    private int mainKernel;
 
-    public bool polarize;
+    public int mirrorOffset = 0;
     int frameindex = 0;
 
     DmxController controller;
@@ -50,7 +44,7 @@ public class CanopyArtnetNode : TickingNode
 
     private void InitializeRenderTexture()
     {
-        buffer = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
+        buffer = new RenderTexture(76, Constants.NUM_STRIPS, 24);
         buffer.enableRandomWrite = true;
         buffer.Create();
     }
@@ -68,7 +62,7 @@ public class CanopyArtnetNode : TickingNode
         }
         GUILayout.EndHorizontal();
 
-        universe = RTEditorGUI.IntSlider(universe, 0, 6);
+        mirrorOffset = RTEditorGUI.IntSlider(mirrorOffset, 0, 95);
 
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
@@ -115,24 +109,47 @@ public class CanopyArtnetNode : TickingNode
 
     public void setPixel(int r, int c, Color32 color)
     {
-        var port = stripToPort(r);
-        var pixelIndex = pixelIndexInPort(r, c);
-        var portUniverseIndex = pixelIndexToUniverseIndex(pixelIndex);
-        var universeIndex = (3 * port) + portUniverseIndex;
-        var universe = universes[universeIndex];
+        // Special case behavior for infinity mirror at the innermost ring
+        if (c == 0)
+        {
+            var universeIndex = 47;
+            var pixelIndex = (r + mirrorOffset) % 96;
+            var startOffset = 0;
+            if (pixelIndex < 60)
+            {
+                //There are 110 LEDs in the last universe of the final strip
+                startOffset = (pixelIndex + 110) * 3;
+            }
+            else
+            {
+                universeIndex = 48;
+                startOffset = (pixelIndex - 60) * 3;
+            }
+            var universe = universes[universeIndex];
+            universe[startOffset + 0] = color.r;
+            universe[startOffset + 1] = color.g;
+            universe[startOffset + 2] = color.b;
+        } else
+        {
+            var port = stripToPort(r);
+            var pixelIndex = pixelIndexInPort(r, c);
+            var portUniverseIndex = pixelIndexToUniverseIndex(pixelIndex);
+            var universeIndex = (3 * port) + portUniverseIndex;
+            var universe = universes[universeIndex];
 
-        var startOffset = (pixelIndex - (170 * portUniverseIndex)) * 3;
+            var startOffset = (pixelIndex - (170 * portUniverseIndex)) * 3;
 
-        universe[startOffset + 0] = color.r;
-        universe[startOffset + 1] = color.g;
-        universe[startOffset + 2] = color.b;
+            universe[startOffset + 0] = color.r;
+            universe[startOffset + 1] = color.g;
+            universe[startOffset + 2] = color.b;
+        }
     }
 
     public void FillFromTexture(Texture2D tex)
     {
         for (int r = 0; r < Constants.NUM_STRIPS; r++)
         {
-            for (int c = 0; c < Constants.PIXELS_PER_STRIP; c++)
+            for (int c = 0; c < 76; c++)
             {
                 var col = c;
                 Color32 color = tex.GetPixel(col, r);
