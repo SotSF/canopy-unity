@@ -16,7 +16,7 @@ namespace SecretFire.TextureSynth.Signals
         public override string GetID { get { return ID; } }
 
         public override string Title { get { return "PeriodicSignal"; } }
-        public override Vector2 DefaultSize { get { return new Vector2(230, 200); } }
+        public override Vector2 DefaultSize { get { return new Vector2(230, 300); } }
 
         [ValueConnectionKnob("Period", Direction.In, typeof(float))]
         public ValueConnectionKnob periodInputKnob;

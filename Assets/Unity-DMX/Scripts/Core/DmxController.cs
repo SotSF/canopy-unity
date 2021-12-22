@@ -47,6 +47,18 @@ public class DmxController : MonoBehaviour
             artnet.Send(dmxToSend, remote);
     }
 
+    public void Send(short universe, byte sequence, byte[] dmxData)
+    {
+        dmxToSend.Universe = universe;
+        dmxToSend.Sequence = sequence;
+        System.Buffer.BlockCopy(dmxData, 0, dmxToSend.DmxData, 0, dmxData.Length);
+
+        if (useBroadcast && isServer)
+            artnet.Send(dmxToSend);
+        else
+            artnet.Send(dmxToSend, remote);
+    }
+
     private void OnValidate()
     {
         foreach (var u in universes)

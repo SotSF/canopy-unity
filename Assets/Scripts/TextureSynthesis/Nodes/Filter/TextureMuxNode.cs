@@ -202,11 +202,14 @@ public class TextureMuxNode : TickingNode
 
             var activePort = (ValueConnectionKnob)dynamicConnectionPorts[activeTextureIndex];
             Texture activeTex = activePort.GetValue<Texture>();
-            var inputSize = new Vector2Int(activeTex.width, activeTex.height);
-            if (inputSize != outputSize)
+            if (activeTex != null)
             {
-                outputSize = inputSize;
-                InitializeRenderTexture();
+                var inputSize = new Vector2Int(activeTex.width, activeTex.height);
+                if (inputSize != outputSize)
+                {
+                    outputSize = inputSize;
+                    InitializeRenderTexture();
+                }
             }
             if (fading)
             {

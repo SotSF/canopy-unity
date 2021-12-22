@@ -22,11 +22,10 @@ public class SectorNode : TickingNode
     private Vector2Int outputSize = Vector2Int.zero;
     private RenderTexture buffer;
 
-    private int universe;
     private string ip;
-    private byte[] universe0 = new byte[512];
-    private byte[] universe1 = new byte[512];
-    private byte[] universe2 = new byte[512];
+    private byte[] universe0 = new byte[510];
+    private byte[] universe1 = new byte[510];
+    private byte[] universe2 = new byte[324];
     private List<byte[]> universes;
     private const int numPixels = 448;
 
@@ -61,9 +60,7 @@ public class SectorNode : TickingNode
             controller.remoteIP = ip;
         }
         GUILayout.EndHorizontal();
-
-        universe = RTEditorGUI.IntSlider(universe, 0, 6);
-
+        targetFPS = RTEditorGUI.Slider(targetFPS, 0.5f, 60);
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -218,34 +215,49 @@ public class SectorNode : TickingNode
         }
     }
 
+    byte seq = 1;
     public void SendDMX()
     {
         controller.Send(0, universe0);
+        //controller.Send(1, seq, universe1);
         controller.Send(1, universe1);
+        //seq++;
+        //if (seq == 0)
+        //{
+        //    seq = 1;
+        //}
+        //Debug.Log("Values: <" + string.Join(", ", universe1) + ">");
+        //this.TimedDebug("Values: <"+ string.Join(", ", universe1)+">", .5f);
         controller.Send(2, universe2);
     }
 
+    float lastCalced = 0;
+    public float targetFPS = 60;
     public override bool Calculate()
     {
-        Texture tex = inputTexKnob.GetValue<Texture>();
-        if (!inputTexKnob.connected() || tex == null)
-        { // Reset outputs if no texture is available
-            if (buffer != null)
-                buffer.Release();
-            outputSize = Vector2Int.zero;
-            return true;
-        }
-        var inputSize = new Vector2Int(tex.width, tex.height);
-        if (inputSize != outputSize)
+        if (Time.time - lastCalced > (1 / targetFPS))
         {
-            outputSize = inputSize;
-            InitializeRenderTexture();
+            Texture tex = inputTexKnob.GetValue<Texture>();
+            if (!inputTexKnob.connected() || tex == null)
+            { // Reset outputs if no texture is available
+                if (buffer != null)
+                    buffer.Release();
+                outputSize = Vector2Int.zero;
+                return true;
+            }
+            var inputSize = new Vector2Int(tex.width, tex.height);
+            if (inputSize != outputSize)
+            {
+                outputSize = inputSize;
+                InitializeRenderTexture();
+            }
+            Graphics.Blit(tex, buffer);
+            Texture2D tex2d = buffer.ToTexture2D();
+            FillFromTexture(tex2d);
+            SendDMX();
+            Destroy(tex2d);
+            lastCalced = Time.time;
         }
-        Graphics.Blit(tex, buffer);
-        Texture2D tex2d = buffer.ToTexture2D();
-        FillFromTexture(tex2d);
-        SendDMX();
-        Destroy(tex2d);
         return true;
     }
 }

@@ -46,6 +46,10 @@ public class VortexGeneratorNode : Node
 
     private void GenerateNoiseTex()
     {
+        if (noiseTex != null)
+        {
+            Destroy(noiseTex);
+        }
         noiseTex = new Texture2D(outputSize.x, outputSize.y);
         // For each pixel in the texture...
         float y = 0.0F;

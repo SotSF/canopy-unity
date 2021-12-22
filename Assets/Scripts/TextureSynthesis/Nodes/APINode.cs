@@ -42,7 +42,8 @@ public class ApiNode : TickingNode
 
     private Dictionary<string, float> values;
     private Dictionary<string, ValueConnectionKnob> outKnobs;
-    private static UnityWebRequest request;
+
+    private List<UnityWebRequest> requests;
 
     [System.Serializable]
     struct ApiResponse
@@ -61,6 +62,7 @@ public class ApiNode : TickingNode
     {
         outKnobs = new Dictionary<string, ValueConnectionKnob>();
         values = new Dictionary<string, float>();
+        requests = new List<UnityWebRequest>();
     }
 
     private void ProcessResponse(string apiResponse)
@@ -141,10 +143,11 @@ public class ApiNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    static void Request(string endpoint)
+    void Request(string endpoint)
     {
-        request = UnityWebRequest.Get(endpoint);
+        var request = UnityWebRequest.Get(endpoint);
         request.Send();
+        requests.Add(request);
     }
 
     public override bool Calculate()
@@ -155,16 +158,20 @@ public class ApiNode : TickingNode
             return true;
         }
 
-        if (request != null && request.isDone)
-        {
-            ProcessResponse(request.downloadHandler.text);
-            request = null;
-        }
-
         if (check && Time.time - lastCheck > (1 / pollhz))
         {
             Request(endpoint);
             lastCheck = Time.time;
+        }
+
+        for (int i = 0; i < requests.Count; i++)
+        {
+            if (requests[i].isDone)
+            {
+                ProcessResponse(requests[i].downloadHandler.text);
+                requests.RemoveAt(i);
+                break;
+            }
         }
 
         foreach (var pair in outKnobs)

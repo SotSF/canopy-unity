@@ -18,6 +18,8 @@ public class MathExprNode : Node
     public ValueConnectionKnob aKnob;
     [ValueConnectionKnob("b", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob bKnob;
+    [ValueConnectionKnob("c", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob cKnob;
 
     [ValueConnectionKnob("output", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputKnob;
@@ -77,7 +79,8 @@ public class MathExprNode : Node
             try
             {
                 var parameters = new[] { new Parameter("a", typeof(float)),
-                                         new Parameter("b", typeof(float))};
+                                         new Parameter("b", typeof(float)),
+                                         new Parameter("c", typeof(float))};
                 exprFunc = interpreter.Parse(stringexpr, parameters);
             }
             catch (Exception e)
@@ -126,7 +129,7 @@ public class MathExprNode : Node
         {
             try
             {
-                output = float.Parse(exprFunc.Invoke(aKnob.GetValue<float>(), bKnob.GetValue<float>()).ToString());
+                output = float.Parse(exprFunc.Invoke(aKnob.GetValue<float>(), bKnob.GetValue<float>(), cKnob.GetValue<float>()).ToString());
                 if (errorMsg != "")
                     errorMsg = "";
             } catch (Exception e)
