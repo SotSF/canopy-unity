@@ -16,7 +16,7 @@ namespace SecretFire.TextureSynth.Signals
         public override string GetID { get { return ID; } }
 
         public override string Title { get { return "PeriodicSignal"; } }
-        public override Vector2 DefaultSize { get { return new Vector2(230, 300); } }
+        public override Vector2 DefaultSize { get { return new Vector2(230, 250); } }
 
         [ValueConnectionKnob("Period", Direction.In, typeof(float))]
         public ValueConnectionKnob periodInputKnob;
@@ -26,9 +26,6 @@ namespace SecretFire.TextureSynth.Signals
 
         [ValueConnectionKnob("Phase", Direction.In, typeof(float))]
         public ValueConnectionKnob phaseInputKnob;
-
-        [ValueConnectionKnob("q", Direction.In, typeof(float))]
-        public ValueConnectionKnob qInputKnob;
 
         [ValueConnectionKnob("Output", Direction.Out, typeof(float))]
         public ValueConnectionKnob outputKnob;
@@ -45,8 +42,10 @@ namespace SecretFire.TextureSynth.Signals
         private float lastPhase = 0;
         private float lastAmplitude = 2;
 
-        public delegate float SignalFunc(float x, float p, float a, float t, float q);
+        public delegate float SignalFunc(float x, float p, float a, float t);
         private static Dictionary<string, SignalFunc> signalGenerators = new Dictionary<string, SignalFunc>();
+
+        public float expSpikeLevel = 22;
 
         public void Awake()
         {
@@ -57,7 +56,6 @@ namespace SecretFire.TextureSynth.Signals
             signalGenerators["triangle"] = CalcTriangle;
             signalGenerators["expspike"] = CalcExpSpike;
             signalGenerators["hemi"] = CalcHemisphere;
-            //signalGenerators.
         }
 
         public override void NodeGUI()
@@ -104,41 +102,41 @@ namespace SecretFire.TextureSynth.Signals
          * a: Amplitude
          * t: theta (phase)
          * */
-        public static float CalcSine(float x, float p, float a, float t, float q = 0)
+        public static float CalcSine(float x, float p, float a, float t)
         {
             return Mathf.Sin((2 * Mathf.PI * (x - t)) / p) * a ;
         }
 
-        public static float CalcSquare(float x, float p, float a, float t, float q = 0)
+        public static float CalcSquare(float x, float p, float a, float t)
         {
             return ((x-t) % p < p / 2 ? a : -a);
         }
 
-        public static float CalcSaw(float x, float p, float a, float t, float q = 0)
+        public static float CalcSaw(float x, float p, float a, float t)
         {
             return 2* a * (((x-t) % p) / p - 0.5f);
         }
 
-        public static float CalcRevSaw(float x, float p, float a, float t, float q = 0)
+        public static float CalcRevSaw(float x, float p, float a, float t)
         {
             return 2* a * ((-((x-t) % p) / p -0.5f) + 1) ;
         }
 
-        public static float CalcExpSpike(float x, float p, float a, float t, float q = 2)
+        public float CalcExpSpike(float x, float p, float a, float t)
         {
             // (x ^ (t%1) - 1) / (x-1)
-            // x = 2^q for q in [0, 32] to control spikiness
-            var b = Mathf.Pow(2, q);
-            return (Mathf.Pow(b, x % 1) - 1) / (b - 1);
+            // x = 2^q for q in (0, 32] to control spikiness
+            var b = Mathf.Pow(2, expSpikeLevel);
+            return a*(Mathf.Pow(b, (x/p) % 1) - 1) / (b - 1);
         }
 
-        public static float CalcHemisphere(float x, float p, float a, float t, float q = 0)
+        public static float CalcHemisphere(float x, float p, float a, float t)
         {
             // - root(1- (t%1)^2)+1
-            return 0;
+            return a * Mathf.Sqrt(1 - Mathf.Pow((x + t) / (p/2) % 2 - 1, 2));
         }
 
-        public static float CalcTriangle(float x, float p, float a, float t, float q = 0)
+        public static float CalcTriangle(float x, float p, float a, float t)
         {
 
             float halfPeriod = p / 2;
@@ -149,9 +147,6 @@ namespace SecretFire.TextureSynth.Signals
                                 2* a * ((   ((x-t) % halfPeriod) / halfPeriod) - 0.5f) :
                                 2* a * ((  -((x-t) % halfPeriod) / halfPeriod) + 0.5f));
         }
-
-
-
 
         float offset;
         public override bool Calculate()
@@ -180,7 +175,7 @@ namespace SecretFire.TextureSynth.Signals
                 }
             }
 
-            value = signalGenerators[signalType.SelectedOption()](t, period, amplitude, phase, 0);
+            value = signalGenerators[signalType.SelectedOption()](t, period, amplitude, phase);
             outputKnob.SetValue(value + offset);
             lastPeriod = period;
             lastPhase = phase;
