@@ -13,7 +13,7 @@ public class TextureMuxNode : TickingNode
     public override string GetID => "TextureMux";
     public override string Title { get { return "TextureMux"; } }
 
-    public override Vector2 DefaultSize => new Vector2((1 + targetPortCount) * 120, 200);
+    public override Vector2 DefaultSize => new Vector2((2 + targetPortCount) * 90, 200);
     public override bool AutoLayout => true;
 
     [ValueConnectionKnob("outputTex", Direction.Out, typeof(Texture), NodeSide.Bottom)]
@@ -104,31 +104,39 @@ public class TextureMuxNode : TickingNode
         // Top-to-bottom
         GUILayout.BeginVertical();
 
-        // Input image ports left to right
         GUILayout.BeginHorizontal();
-        controlKnob.DisplayLayout();
-        autoplayKnob.DisplayLayout();
+        //Control inputs
+        GUILayout.BeginVertical();
+        GUILayout.Label("Control", GUILayout.ExpandWidth(false), GUILayout.Width(50));
+        controlKnob.SetPosition();
+        //controlKnob.DisplayLayout();
+        GUILayout.Label("Autoplay", GUILayout.ExpandWidth(false), GUILayout.Width(50));
+        autoplayKnob.SetPosition();
+        GUILayout.EndVertical();
+        // Input image ports left to right
         for (int i = 0; i < targetPortCount - 1; i++)
         {
             GUILayout.BeginVertical();
             var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
             GUILayout.Space(4);
-            port.SetPosition();
-            GUILayout.Label(string.Format("Tex {0}", i));
+            GUILayout.Box(port.GetValue<Texture>(), GUILayout.MaxWidth(50), GUILayout.MaxHeight(50));
+            //GUILayout.Label(string.Format("Tex {0}", i));
             if (i == activeTextureIndex)
             {
-                GUILayout.Label("Active");
+                GUILayout.Label("Active", GUILayout.Width(50), GUILayout.MaxWidth(50));
             }
             else
             {
-                if (GUILayout.Button("Activate", GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Activate", GUILayout.Width(50), GUILayout.ExpandWidth(false)))
                 {
                     activeTextureIndex = i;
                 }
             }
+            port.SetPosition();
             GUILayout.EndVertical();
         }
-        ((ValueConnectionKnob)dynamicConnectionPorts[openPortIndex]).DisplayLayout();
+        GUILayout.Label("Add input", GUILayout.ExpandWidth(false), GUILayout.Width(50));
+        ((ValueConnectionKnob)dynamicConnectionPorts[openPortIndex]).SetPosition();
         GUILayout.EndHorizontal();
 
 
@@ -136,7 +144,7 @@ public class TextureMuxNode : TickingNode
 
         //Autoplay button
         string label = autoplay ? "Stop autoplay" : "Start autoplay";
-        if (GUILayout.Button(label))
+        if (GUILayout.Button(label, GUILayout.Width(100)))
         {
             ToggleAutoplay();
         }
@@ -176,7 +184,6 @@ public class TextureMuxNode : TickingNode
         if (autoplay)
         {
             lastCycleTime = Time.time;
-            Debug.LogFormat("Autoplay: {0}, time: {1}", autoplay, lastCycleTime);
         }
     }
     
@@ -186,14 +193,7 @@ public class TextureMuxNode : TickingNode
         {
             if ((autoplay && ((Time.time - lastCycleTime) > cycleTime)) || controlKnob.GetValue<bool>())
             {
-                Debug.Log("Cycling");
                 NextImage();
-            } else
-            {
-                if (Random.Range(0,1) > .95f)
-                {
-                    Debug.LogFormat("Elapsed: {0}, cycleTime: {1}", Time.time - lastCycleTime, cycleTime);
-                }
             }
             if (autoplayKnob.GetValue<bool>())
             {
