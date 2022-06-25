@@ -14,6 +14,7 @@ public class SignalMuxNode : Node
     public override string Title { get { return "SignalMux"; } }
 
     public override Vector2 DefaultSize => new Vector2(180, (1+targetPortCount) * 100);
+    public override Vector2 MinSize => new Vector2(180, 0);
     public override bool AutoLayout => true;
 
     [ValueConnectionKnob("control", Direction.In, typeof(bool), NodeSide.Left)]
@@ -85,13 +86,15 @@ public class SignalMuxNode : Node
         ((ValueConnectionKnob)dynamicConnectionPorts[openPortIndex]).DisplayLayout();
         GUILayout.EndVertical();
 
+        GUILayout.BeginVertical();
         if (activePortCount > 0)
         {
             var port = (ValueConnectionKnob)dynamicConnectionPorts[activeSignalIndex];
-            GUILayout.Label(string.Format("Output: {0:0.00}", port.GetValue<float>()));
+            GUILayout.Label(string.Format("Output: {0:0.00}", port.GetValue<float>()), GUILayout.Width(60));
             GUILayout.Space(4);
         }
         outputSignalKnob.SetPosition();
+        GUILayout.EndVertical();
         GUILayout.EndHorizontal();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
