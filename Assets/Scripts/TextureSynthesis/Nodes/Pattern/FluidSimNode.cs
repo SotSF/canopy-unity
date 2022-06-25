@@ -27,6 +27,10 @@ public class FluidSimNode : TickingNode
     public ValueConnectionKnob dyeDecayKnob;
     public float dyeDecay = 0;
 
+    [ValueConnectionKnob("forceMultiplier", Direction.In, typeof(float))]
+    public ValueConnectionKnob forceMultiplierKnob;
+    public float forceMultiplier = 1;
+
     [ValueConnectionKnob("timeMultiplier", Direction.In, typeof(float))]
     public ValueConnectionKnob timeMultiplierKnob;
     public float timeMultiplier = 1;
@@ -168,6 +172,7 @@ public class FluidSimNode : TickingNode
         FloatKnobOrSlider(ref timeMultiplier, -1, 2, timeMultiplierKnob);
         FloatKnobOrSlider(ref dyeInputLevel, 0, 1, dyeInputLevelKnob);
         FloatKnobOrSlider(ref dyeDecay, 0, 1, dyeDecayKnob);
+        FloatKnobOrSlider(ref forceMultiplier, 0, 4, forceMultiplierKnob);
         string cmd = running ? "Stop" : "Run";
         clicked = EventKnobOrButton(cmd, runKnob);
         if (clicked)
@@ -287,7 +292,7 @@ public class FluidSimNode : TickingNode
 
         if (continuousVelocity)
         {
-            ApplyVelocity(Time.deltaTime);
+            ApplyVelocity(Time.deltaTime * forceMultiplier);
         }
 
         // Compute diffusion
@@ -376,7 +381,7 @@ public class FluidSimNode : TickingNode
         }
         if (applyForceKnob.GetValue<bool>())
         {
-            ApplyVelocity();
+            ApplyVelocity(forceMultiplier);
         }
         if (running && Time.time - lastStep > 1/60f)
         {
