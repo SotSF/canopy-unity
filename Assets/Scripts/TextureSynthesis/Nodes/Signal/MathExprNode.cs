@@ -6,7 +6,7 @@ using SecretFire.TextureSynth;
 using System;
 using UnityEngine;
 
-[Node(false, "Signal/MathExpr")]
+[Node(false, "Signal/ZZObsoleteMathExpr")]
 public class MathExprNode : Node
 {
     public override string GetID => "MathExprNode";
