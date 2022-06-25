@@ -12,7 +12,7 @@ public class MIDIControlNode : TickingNode
     public override string GetID => "MIDIControlNode";
     public override string Title { get { return "MIDIControl"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    public override Vector2 DefaultSize { get { return new Vector2(150, rescale ? 125 : 85); } }
 
     bool binding = false;
     public bool bound = false;
@@ -20,8 +20,10 @@ public class MIDIControlNode : TickingNode
     [ValueConnectionKnob("value", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob valueKnob;
 
-    public float value;
-    public bool normalize = true;
+    public float rawMIDIValue;
+    public float rescaleMin = 0;
+    public float rescaleMax = 1;
+    public bool rescale = false;
     public int controlID;
     public MidiChannel channel;
 
@@ -29,7 +31,23 @@ public class MIDIControlNode : TickingNode
     {
         if (bound)
         {
-            BindMIDIControl(channel, controlID, value);
+            BindMIDIControl(channel, controlID, rawMIDIValue);
+        }
+    }
+
+    void SetRescalePorts()
+    {
+        if (rescale)
+        {
+            ValueConnectionKnobAttribute minKnobAttrib = new ValueConnectionKnobAttribute("rescaleMin", Direction.In, typeof(float), NodeSide.Left);
+            ValueConnectionKnobAttribute maxKnobAttrib = new ValueConnectionKnobAttribute("rescaleMax", Direction.In, typeof(float), NodeSide.Left);
+            CreateValueConnectionKnob(minKnobAttrib);
+            CreateValueConnectionKnob(maxKnobAttrib);
+        } 
+        else
+        {
+            DeleteConnectionPort(dynamicConnectionPorts[1]);
+            DeleteConnectionPort(dynamicConnectionPorts[0]);
         }
     }
 
@@ -47,7 +65,7 @@ public class MIDIControlNode : TickingNode
     {
         if (chan == channel && id == controlID)
         { 
-            value = val;
+            rawMIDIValue = val;
         }
     }
 
@@ -67,7 +85,7 @@ public class MIDIControlNode : TickingNode
         {
             if (bound)
             {
-                string label = string.Format("{0} ctrl {1}: {2:0.00}", channel.ToString(), controlID, value);
+                string label = string.Format("{0} ctrl {1}: {2:0.00}", channel.ToString(), controlID, rawMIDIValue);
                 GUILayout.Label(label);
                 if (GUILayout.Button("Unbind"))
                 {
@@ -81,6 +99,20 @@ public class MIDIControlNode : TickingNode
                 GUILayout.Label("Use control to bind");
             }
         }
+
+        // Rescale float inputs
+        bool lastRescale = rescale;
+        rescale = RTEditorGUI.Toggle(rescale, "Rescale value");
+        if (lastRescale != rescale)
+        {
+            SetRescalePorts();
+        }
+        if (rescale && dynamicConnectionPorts.Count >= 2)
+        {
+            FloatKnobOrField("", ref rescaleMin, (ValueConnectionKnob)dynamicConnectionPorts[0]);
+            FloatKnobOrField("", ref rescaleMax, (ValueConnectionKnob)dynamicConnectionPorts[1]);
+        }
+
         GUILayout.EndVertical();
         valueKnob.DisplayLayout();
         GUILayout.EndHorizontal();
@@ -91,7 +123,12 @@ public class MIDIControlNode : TickingNode
     
     public override bool Calculate()
     {
-        valueKnob.SetValue(value);
+        float val = rawMIDIValue;
+        if (rescale)
+        {
+            val = Mathf.Lerp(rescaleMin, rescaleMax, rawMIDIValue);
+        }
+        valueKnob.SetValue(val);
         return true;
     }
 }

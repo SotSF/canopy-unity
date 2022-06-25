@@ -12,7 +12,7 @@ public class MIDINoteNode : TickingNode
     public override string GetID => "MIDINoteNode";
     public override string Title { get { return "MIDINote"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    public override Vector2 DefaultSize { get { return new Vector2(150, 110); } }
 
     bool binding = false;
     public bool bound = false;
@@ -53,6 +53,7 @@ public class MIDINoteNode : TickingNode
         MidiMaster.noteOffDelegate += ReceiveNoteUp;
         binding = false;
         bound = true;
+        
     }
 
     private void ReceiveNoteUp(MidiChannel channel, int note)
@@ -61,6 +62,7 @@ public class MIDINoteNode : TickingNode
         {
             value = 0;
             held = false;
+            released = true;
         }
     }
 
@@ -106,7 +108,12 @@ public class MIDINoteNode : TickingNode
             }
         }
         GUILayout.EndVertical();
+        GUILayout.BeginVertical();
         valueKnob.DisplayLayout();
+        pressedKnob.DisplayLayout();
+        heldKnob.DisplayLayout();
+        releasedKnob.DisplayLayout();
+        GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
         if (GUI.changed)
@@ -120,6 +127,8 @@ public class MIDINoteNode : TickingNode
             pressed = false;
         heldKnob.SetValue(held);
         releasedKnob.SetValue(released);
+        if (released)
+            released = false;
         valueKnob.SetValue(value);
         return true;
     }
