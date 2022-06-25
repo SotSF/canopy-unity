@@ -17,6 +17,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -1663823598271249011}
   bKnob: {fileID: 4401914145817101065}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: 4013453259273072634}
   stringexpr: lerp(.1f,20,a)
 --- !u!114 &-8991287113609272533
@@ -274,6 +275,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -2375656979268536334}
   bKnob: {fileID: 6035504597201268784}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: 3954047624464241671}
   stringexpr: lerp(0,4,a)+b
 --- !u!114 &-8405025042180724209
@@ -478,7 +480,6 @@ MonoBehaviour:
   periodInputKnob: {fileID: 3575712470661591171}
   amplInputKnob: {fileID: -5023658340663772941}
   phaseInputKnob: {fileID: 7631922578103327604}
-  qInputKnob: {fileID: 0}
   outputKnob: {fileID: 967244208773243414}
   period: 20
   amplitude: 0.4
@@ -498,6 +499,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &-8042784137131810448
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1121,6 +1123,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -6180724436009451659}
   bKnob: {fileID: 8735232041755517184}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: 6515737090222924811}
   stringexpr: -lerp(1920,0,a)/2
 --- !u!114 &-5888409257681999725
@@ -2755,6 +2758,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -2253456068299358029}
   bKnob: {fileID: 8671376734628132579}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: 3473080560169353902}
   stringexpr: lerp(0,0.2f,a)
 --- !u!114 &-1553312425928106536
@@ -3500,7 +3504,6 @@ MonoBehaviour:
   periodInputKnob: {fileID: -3429628316567809464}
   amplInputKnob: {fileID: -4030067862744029988}
   phaseInputKnob: {fileID: 6050465703372922209}
-  qInputKnob: {fileID: 0}
   outputKnob: {fileID: 5507679798299156712}
   period: 12
   amplitude: 2
@@ -3520,6 +3523,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &466612786332347192
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4033,6 +4037,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -8576055069832157206}
   bKnob: {fileID: -3882739778192956341}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: -2164499984553256993}
   stringexpr: lerp(-1,2,a) + 0
 --- !u!114 &2171623077209777027
@@ -4185,6 +4190,8 @@ MonoBehaviour:
   dyeInputLevel: 0.04409449
   dyeDecayKnob: {fileID: -6278633034376055442}
   dyeDecay: 0.8976378
+  forceMultiplierKnob: {fileID: 0}
+  forceMultiplier: 0
   timeMultiplierKnob: {fileID: -946942172042037682}
   timeMultiplier: -0.6929134
   runKnob: {fileID: 7763590723603457191}
@@ -4443,6 +4450,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -8042784137131810448}
   bKnob: {fileID: 8304056476707439792}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: -4373086036406674577}
   stringexpr: 2*invlerp(0.1f, 0.4f, a)
 --- !u!114 &2889975939885848185
@@ -4482,6 +4490,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -30907264117297872}
   bKnob: {fileID: 70933787482253540}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: -6920799773137670064}
   stringexpr: lerp(128,1024,a)
 --- !u!114 &3060244775194731091
@@ -4555,6 +4564,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: -3801769904377253849}
   bKnob: {fileID: -197147918210360515}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: 1786696365626860676}
   stringexpr: a+b
 --- !u!114 &3339112598926863292
@@ -4852,7 +4862,6 @@ MonoBehaviour:
   periodInputKnob: {fileID: -6396222084984147275}
   amplInputKnob: {fileID: -4004852033550082285}
   phaseInputKnob: {fileID: -3578853059007448455}
-  qInputKnob: {fileID: 0}
   outputKnob: {fileID: -5888409257681999725}
   period: 5
   amplitude: 2
@@ -4872,6 +4881,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &4639520039061363833
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4978,6 +4988,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: 2507240902087112016}
   bKnob: {fileID: -1694845893572077642}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: 8748911450519769316}
   stringexpr: (a/30)+b
 --- !u!114 &5139081473241732072
@@ -5521,6 +5532,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: 6196372460455675861}
   bKnob: {fileID: 224305844459300911}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: -5154780513253379660}
   stringexpr: lerp(1,24,a)
 --- !u!114 &6767095016514626885
@@ -5645,7 +5657,6 @@ MonoBehaviour:
   periodInputKnob: {fileID: -2603177876001293929}
   amplInputKnob: {fileID: 8795477120028604407}
   phaseInputKnob: {fileID: 1849664984564523681}
-  qInputKnob: {fileID: 0}
   outputKnob: {fileID: 2762302177544858336}
   period: 2.137008
   amplitude: 2
@@ -5665,6 +5676,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &7407867612671960720
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -5885,6 +5897,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: 270659376884598393}
   bKnob: {fileID: -129121299012573052}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: -6394888270518090055}
   stringexpr: -lerp(1080,0,a)/2
 --- !u!114 &7942458681331219796
@@ -5924,6 +5937,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   aKnob: {fileID: 9221979849373376608}
   bKnob: {fileID: 6767095016514626885}
+  cKnob: {fileID: 0}
   outputKnob: {fileID: -1703984651567387254}
   stringexpr: 512
 --- !u!114 &8153940591997571915
