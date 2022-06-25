@@ -1,5 +1,4 @@
 
-using Boo.Lang;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;

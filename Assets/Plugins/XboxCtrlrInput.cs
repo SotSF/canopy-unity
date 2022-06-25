@@ -847,9 +847,15 @@ namespace XboxCtrlrInput
 			else
 			{
 				string axisCode = DetermineAxisCode(axis, controllerNumber);
-				
-				r = Input.GetAxis(axisCode);
-				r = AdjustAxisValues(r, axis, controllerNumber);
+				try
+				{
+					r = Input.GetAxis(axisCode);
+					r = AdjustAxisValues(r, axis, controllerNumber);
+				} 
+				catch (ArgumentException e) 
+				{
+					
+				}
 			}
 			
 			return r;
@@ -1066,7 +1072,7 @@ namespace XboxCtrlrInput
                    
                     // TODO: Remove condition for XboxController.All when the time comes
                     // Users of XCI: Feel free to remove XboxController.All if you like having no warnings
-                    if(controllerNumber == XboxController.Any)
+                    if(controllerNumber == XboxController.Any || controllerNumber == XboxController.All)
                     {
                         // Examine all controllers it see if any are connected
                         for(int i = 1; i <= 4; i++)
@@ -1688,32 +1694,18 @@ namespace XboxCtrlrInput
         private static bool xiNumOfCtrlrsQueried = false;
         private static XciXInputInitializer xinputInitalizer = new XCI.XciXInputInitializer();
 
+        
 
         // This can be set to something different if you want
         private const GamePadDeadZone WindowsDeadzoneMethod = GamePadDeadZone.Circular;
 
-		//public static event AxisInputConsumer axisEvents;
-  //      public static event ButtonInputConsumer buttonEvents;
-		//public delegate void AxisInputConsumer(PlayerIndex i, XboxAxis axis, XboxAxis a, XboxAxis b);
-		//public delegate void ButtonInputConsumer(PlayerIndex i, XboxButton btn, ButtonState a, ButtonState b);
 
-		// ------------ Methods --------------- //
 
-		//>> For updating states <<
+        // ------------ Methods --------------- //
 
-		//private static void CompareState(int i, GamePadState a, GamePadState b)
-		//{
-		//	if (a.Buttons.Start != b.Buttons.Start)
-		//	{
-		//		a.Buttons.Start == ButtonState.Pressed;
-		//	}
-		//	if (a.Triggers.Left != b.Triggers.Left)
-		//	{
-		//		a.Triggers.Left
-		//	}
-		//}
+        //>> For updating states <<
 
-		private static void XInputUpdateAllStates()
+        private static void XInputUpdateAllStates()
 		{
 			if(xiUpdateAlreadyCalled) return;
 			
@@ -1722,26 +1714,12 @@ namespace XboxCtrlrInput
 				PlayerIndex plyNum = (PlayerIndex) i;
 				xInputCtrlrsPrev[i] = xInputCtrlrs[i];
 				xInputCtrlrs[i] = GamePad.GetState(plyNum, XCI.WindowsDeadzoneMethod);
-
-				//CompareState(i, xInputCtrlrsPrev[i], xInputCtrlrs[i]);
-				// Propagate events here
-				var b = xInputCtrlrs[i].Buttons;
-				{
-					
-				}
-				var d = xInputCtrlrs[i].DPad;
-				var a = xInputCtrlrs[i].ThumbSticks;
-				var t = xInputCtrlrs[i].Triggers;
 			}
+			
 			xiUpdateAlreadyCalled = true;
 		}
-
-		private static void CompareState(int i, GamePadState gamePadState1, GamePadState gamePadState2)
-		{
-			throw new NotImplementedException();
-		}
-
-
+		
+		
 		//>> For getting states <<
 		private static GamePadState XInputGetSingleState()
 		{

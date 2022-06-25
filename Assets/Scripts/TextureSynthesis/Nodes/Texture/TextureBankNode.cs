@@ -19,6 +19,18 @@ public class TextureBankNode : Node
     public SerialDict<string, ValueConnectionKnob> texKnobs;
     private List<Texture2D> textures;
 
+    public void Awake() {
+        if (textures == null || texKnobs == null)
+        {
+            try
+            {
+                LoadTextures();
+            } catch (UnityException e)
+            {
+                Debug.Log(e+":\n\n"+e.Message);
+            }
+        }
+    }
 
     public void LoadTextures()
     {

@@ -7,7 +7,7 @@ public class MovePlayer : MonoBehaviour
 	
 	public float jumpImpulse;
 	public float maxMoveSpeed;
-	public XboxCtrlrInput.XboxController controller;
+	public XboxController controller;
 	
 	public Material matRed;
 	public Material matGreen;
@@ -40,10 +40,10 @@ public class MovePlayer : MonoBehaviour
 	{
 		switch(controller)
 		{
-			case XboxCtrlrInput.XboxController.First: GetComponent<Renderer>().material = matRed; break;
-			case XboxCtrlrInput.XboxController.Second: GetComponent<Renderer>().material = matGreen; break;
-			case XboxCtrlrInput.XboxController.Third: GetComponent<Renderer>().material = matBlue; break;
-			case XboxCtrlrInput.XboxController.Fourth: GetComponent<Renderer>().material = matYellow; break;
+			case XboxController.First: GetComponent<Renderer>().material = matRed; break;
+			case XboxController.Second: GetComponent<Renderer>().material = matGreen; break;
+			case XboxController.Third: GetComponent<Renderer>().material = matBlue; break;
+			case XboxController.Fourth: GetComponent<Renderer>().material = matYellow; break;
 		}
 
 
@@ -75,12 +75,12 @@ public class MovePlayer : MonoBehaviour
             // This code only works on Windows
             if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
             {
-                Debug.Log("Windows Only:: Any Controller Plugged in: " + XCI.IsPluggedIn(XboxCtrlrInput.XboxController.Any).ToString());
+                Debug.Log("Windows Only:: Any Controller Plugged in: " + XCI.IsPluggedIn(XboxController.Any).ToString());
 
-                Debug.Log("Windows Only:: Controller 1 Plugged in: " + XCI.IsPluggedIn(XboxCtrlrInput.XboxController.First).ToString());
-                Debug.Log("Windows Only:: Controller 2 Plugged in: " + XCI.IsPluggedIn(XboxCtrlrInput.XboxController.Second).ToString());
-                Debug.Log("Windows Only:: Controller 3 Plugged in: " + XCI.IsPluggedIn(XboxCtrlrInput.XboxController.Third).ToString());
-                Debug.Log("Windows Only:: Controller 4 Plugged in: " + XCI.IsPluggedIn(XboxCtrlrInput.XboxController.Fourth).ToString());
+                Debug.Log("Windows Only:: Controller 1 Plugged in: " + XCI.IsPluggedIn(XboxController.First).ToString());
+                Debug.Log("Windows Only:: Controller 2 Plugged in: " + XCI.IsPluggedIn(XboxController.Second).ToString());
+                Debug.Log("Windows Only:: Controller 3 Plugged in: " + XCI.IsPluggedIn(XboxController.Third).ToString());
+                Debug.Log("Windows Only:: Controller 4 Plugged in: " + XCI.IsPluggedIn(XboxController.Fourth).ToString());
             }
         }
 
@@ -276,10 +276,10 @@ public class MovePlayer : MonoBehaviour
 	{
 		switch (controller)
 		{
-			case XboxCtrlrInput.XboxController.First:  Gizmos.color = Color.red; break;
-			case XboxCtrlrInput.XboxController.Second: Gizmos.color = Color.green; break;
-			case XboxCtrlrInput.XboxController.Third:  Gizmos.color = Color.blue; break;
-			case XboxCtrlrInput.XboxController.Fourth: Gizmos.color = Color.yellow; break;
+			case XboxController.First:  Gizmos.color = Color.red; break;
+			case XboxController.Second: Gizmos.color = Color.green; break;
+			case XboxController.Third:  Gizmos.color = Color.blue; break;
+			case XboxController.Fourth: Gizmos.color = Color.yellow; break;
 			default:                    Gizmos.color = Color.white; break;
 		}
 		

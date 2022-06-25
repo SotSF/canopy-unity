@@ -206,7 +206,8 @@ namespace MidiJack
             while (true)
             {
                 // Pop from the queue.
-                var data = DequeueIncomingData();
+                //var data = DequeueIncomingData();
+                ulong data = 0;
                 if (data == 0) break;
 
                 // Parse the message.
