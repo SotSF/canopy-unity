@@ -32,8 +32,11 @@ public class SectorNode : TickingNode
     DmxController controller;
     public void Awake()
     {
-        controller = GameObject.Find("DMXController").GetComponent<DmxController>();
-        ip = controller.remoteIP;
+        var controllerObj = GameObject.Find("DMXController");
+        if (controllerObj != null) {
+            controller = controllerObj.GetComponent<DmxController>();
+            ip = controller.remoteIP;
+        }
         universes = new List<byte[]>() { universe0, universe1, universe2 };
     }
 
