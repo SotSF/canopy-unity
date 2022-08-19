@@ -21,6 +21,7 @@ namespace Chess
         King
     }
 
+#pragma warning disable CS0660, CS0661
     public struct Coord
     {
         public int r;
@@ -63,6 +64,7 @@ namespace Chess
         }
     }
 
+#pragma warning restore CS0660, CS0661
     public struct BoardSpace
     {
         public int r;

@@ -218,19 +218,10 @@ public class SectorNode : TickingNode
         }
     }
 
-    byte seq = 1;
     public void SendDMX()
     {
         controller.Send(0, universe0);
-        //controller.Send(1, seq, universe1);
         controller.Send(1, universe1);
-        //seq++;
-        //if (seq == 0)
-        //{
-        //    seq = 1;
-        //}
-        //Debug.Log("Values: <" + string.Join(", ", universe1) + ">");
-        //this.TimedDebug("Values: <"+ string.Join(", ", universe1)+">", .5f);
         controller.Send(2, universe2);
     }
 

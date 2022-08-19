@@ -31,7 +31,7 @@ public class SpoutOutputNode : TextureSynthNode
         }
     }
 
-    public string name = "spoutSender";
+    public string senderName = "spoutSender";
     public bool sendAlpha = false;
 
     private void Awake()
@@ -43,11 +43,11 @@ public class SpoutOutputNode : TextureSynthNode
     {
         inputTexKnob.SetPosition(20);
         GUILayout.BeginVertical();
-        var newName = GUILayout.TextField(name);
-        if (newName != name)
+        var newName = GUILayout.TextField(senderName);
+        if (newName != senderName)
         {
-            name = newName;
-            spoutController.SetName(name);
+            senderName = newName;
+            spoutController.SetName(senderName);
             spoutController.RefreshSender();
         }
         // Bottom row: output image
@@ -72,7 +72,7 @@ public class SpoutOutputNode : TextureSynthNode
     {
 
         spoutController.RefreshSender();
-        spoutController.SetName(name);
+        spoutController.SetName(senderName);
         if (outputTex != null)
         {
             outputTex.Release();

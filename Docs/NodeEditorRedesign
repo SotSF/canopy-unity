@@ -1,0 +1,24 @@
+Node editor redesign:
+
+- Runtime only? Separate presentations for Editor vs Runtime?
+- Use standard gameobject based UI
+Object hierarchy:
+
+- Editor    (Stores list of serialized graphs, available node types, presents top level UI eg file.load,
+			 file.save, etc)
+- Graph     (Stores nodes, positions, connections)
+- Subgraph? (Represent a collapsible block of nodes, reduce to "black box" w/ inputs/outputs)
+- Node      (Internal state, connection state)
+- Inputs    (Linkages)
+- Outputs   (Linkages)
+
+- Separate data model and representation?
+  - Two types of presentation by default, Editor and RT
+- base "Node" class has paired "Representation" class?
+- Nodes have:
+  - Location (x,y)
+  - Internal state
+  - Connection state
+
+- Graph has set of nodes with location?
+- Graph responsible for drawing of nodes?

@@ -1,0 +1,216 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7625014469213203284
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: outputTex
+  m_EditorClassIdentifier: 
+  body: {fileID: 8992301428801999740}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 7174781084646756674}
+  side: 1
+  sidePosition: 180
+  sideOffset: 0
+--- !u!114 &-6127122237126057175
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrumData
+  m_EditorClassIdentifier: 
+  body: {fileID: 8992301428801999740}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single[]
+  _connections:
+  - {fileID: 7534925316150293171}
+  side: 4
+  sidePosition: 0
+  sideOffset: 0
+--- !u!114 &-6006711759757728132
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: 
+  body: {fileID: 6365017937999831983}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 1
+  sidePosition: 40
+  sideOffset: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26a89c36c30b2e940804d7efcccaf0bd, type: 3}
+  m_Name: AudioTest
+  m_EditorClassIdentifier: 
+  editorStates:
+  - {fileID: 1176739084347653228}
+  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\AudioTest
+  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\AudioTest.asset
+  livesInScene: 0
+  nodes:
+  - {fileID: 22734028034920056}
+  - {fileID: 8992301428801999740}
+  - {fileID: 6365017937999831983}
+  groups: []
+--- !u!114 &22734028034920056
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9ebc784c5f69f54cb3fa84c47e12f79, type: 3}
+  m_Name: SystemAudio
+  m_EditorClassIdentifier: 
+  position: {x: -206.2, y: -101.3}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumDataKnob: {fileID: 7534925316150293171}
+  capturing: 0
+  scalingModeSelection:
+    values: 000100
+    names:
+    - Sqrt
+    - Decibel
+    - Linear
+  captureModeSelection:
+    values: 0100
+    names:
+    - System
+    - Mic
+  captureMode: 0
+  scalingMode: 0
+  spectrumSize: 32
+  minFreq: 32
+  maxFreq: 16384
+  smoothingIterations: 5
+--- !u!114 &1176739084347653228
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
+  m_Name: MainEditorState
+  m_EditorClassIdentifier: 
+  canvas: {fileID: 11400000}
+  parentEditor: {fileID: 0}
+  selectedNode: {fileID: 6365017937999831983}
+  panOffset: {x: -52.2, y: -85.8}
+  zoom: 1
+--- !u!114 &6365017937999831983
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3469be317986434faaea3445fa2db15, type: 3}
+  m_Name: Canopy
+  m_EditorClassIdentifier: 
+  position: {x: 153.2, y: 190.3}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureInputKnob: {fileID: 7174781084646756674}
+  textureOutputKnob: {fileID: -6006711759757728132}
+  polarize: 0
+  seamless: 0
+--- !u!114 &7174781084646756674
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: In
+  m_EditorClassIdentifier: 
+  body: {fileID: 6365017937999831983}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: -7625014469213203284}
+  side: 3
+  sidePosition: 20
+  sideOffset: 0
+--- !u!114 &7534925316150293171
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrumData
+  m_EditorClassIdentifier: 
+  body: {fileID: 22734028034920056}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single[]
+  _connections:
+  - {fileID: -6127122237126057175}
+  side: 2
+  sidePosition: 0
+  sideOffset: 0
+--- !u!114 &8992301428801999740
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 731d2a6a365a68542bf618d78c6ce2fa, type: 3}
+  m_Name: SpectrumVisualizer
+  m_EditorClassIdentifier: 
+  position: {x: -21.800001, y: -55.9}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumDataKnob: {fileID: -6127122237126057175}
+  outputTexKnob: {fileID: -7625014469213203284}
+  outputTex: {fileID: 0}

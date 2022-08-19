@@ -1,0 +1,36 @@
+﻿#include "HSV.compute"
+
+#pragma kernel PatternKernel
+
+#define PI 3.14159265f
+
+struct Player {
+    float2 position;
+    float2 velocity;
+    float4 color;
+};
+
+RWTexture2D<float4> OutputTex;
+RWStructuredBuffer<Player> PlayerBuffer;
+
+uint width;
+uint height;
+
+uint numPlayers;
+float playerSize;
+
+SamplerState SmpPointClamp;
+
+[numthreads(25, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    // Compute distance from current pixel operating on (aka id)
+    // and player centers, if < player size, fill with player color
+    for (uint i = 0; i < numPlayers; i++) {
+        Player p = PlayerBuffer[i];
+        float distFromPlayer = distance(id.xy, p.position);
+        if (distFromPlayer < playerSize) {
+            OutputTex[id.xy] = p.color;
+        }
+    }
+}

@@ -54,8 +54,10 @@ public class MultidisplayManager : MonoBehaviour
         //System.Object Res = GetSizeMethod.Invoke(null, null);
         return new Vector2(gameWindow.position.width,gameWindow.position.height);
 #endif
+#pragma warning disable CS0162
         return Vector2.zero;
     }
+#pragma warning restore CS0162
 
     internal Vector2 GetDisplaySize(int displayIndex)
     {

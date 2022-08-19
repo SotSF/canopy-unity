@@ -12,6 +12,7 @@ using System.Net;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Threading;
+using System;
 
 [Node(false, "Signal/API")]
 public class ApiNode : TickingNode
@@ -31,7 +32,6 @@ public class ApiNode : TickingNode
     [ValueConnectionKnob("Endpoint", Direction.In, typeof(string))]
     public ValueConnectionKnob endpointInputKnob;
 
-    private int targetPortCount = 0;
     private float lastCheck = 0;
 
     public int activeSignalIndex = 0;
@@ -43,7 +43,6 @@ public class ApiNode : TickingNode
     private Dictionary<string, float> values;
     private Dictionary<string, ValueConnectionKnob> outKnobs;
 
-    private List<UnityWebRequest> requests;
 
     [System.Serializable]
     struct ApiResponse
@@ -62,14 +61,19 @@ public class ApiNode : TickingNode
     {
         outKnobs = new Dictionary<string, ValueConnectionKnob>();
         values = new Dictionary<string, float>();
-        requests = new List<UnityWebRequest>();
     }
 
     private void ProcessResponse(string apiResponse)
     {
-        var responseObj = JsonUtility.FromJson<ApiResponse>(apiResponse);
+        ApiResponse responseObj;
+        try
+        {
+            responseObj = JsonUtility.FromJson<ApiResponse>(apiResponse);
+        } catch (Exception e) {
+            Debug.LogError(e);
+            return;
+        }
         bool changed = false;
-        Debug.LogFormat("Parsed response: {0}", responseObj.values);
         if (responseObj.values.Count == dynamicConnectionPorts.Count)
         {
             for (int i = 0; i < responseObj.values.Count; i++)
@@ -146,8 +150,15 @@ public class ApiNode : TickingNode
     void Request(string endpoint)
     {
         var request = UnityWebRequest.Get(endpoint);
-        request.Send();
-        requests.Add(request);
+        var operation = request.SendWebRequest();
+        operation.completed += OnRequestCompleted;
+        //requests.Add(request);
+    }
+
+    private void OnRequestCompleted(AsyncOperation obj)
+    {
+        var req = (UnityWebRequestAsyncOperation)obj;
+        ProcessResponse(req.webRequest.downloadHandler.text);
     }
 
     public override bool Calculate()
@@ -162,16 +173,6 @@ public class ApiNode : TickingNode
         {
             Request(endpoint);
             lastCheck = Time.time;
-        }
-
-        for (int i = 0; i < requests.Count; i++)
-        {
-            if (requests[i].isDone)
-            {
-                ProcessResponse(requests[i].downloadHandler.text);
-                requests.RemoveAt(i);
-                break;
-            }
         }
 
         foreach (var pair in outKnobs)

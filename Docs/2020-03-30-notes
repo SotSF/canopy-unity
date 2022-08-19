@@ -1,0 +1,21 @@
+2020-03-30
+==========
+
+Canopy organization work
+
+- Create subfolders for node types
+  - Pattern
+  - Filter
+  - FloatSignal
+  - AudioSignal
+  - MIDI
+  - Texture
+- Update node menu entries ("Filter/foo") to match new hierarchy
+- Update certain nodes to be dynamic in ports:
+  - MathExpr, have unlimited inputs
+  - MergeNode, multiple layers
+    - Also make MergeNode support alpha compositing
+- Update NodeWizard to respect these things
+  - Also add support for more input/output types (float[] for audio)
+- Test whether WasapiMic works on OSX, otherwise consider alternative support?
+  - Haha no, it crashes the editor
