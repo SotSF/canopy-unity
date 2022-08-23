@@ -126,6 +126,7 @@ public class CanopyNode : Node
     {
         var canopyMaterial = NodeUIController.instance.canopyMaterial;
         canopyMaterial.SetTexture("_Frame", texture);
+        canopyMaterial.SetTexture("Frame", texture);
     }
 
     public override bool Calculate()

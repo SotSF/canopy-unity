@@ -108,7 +108,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 665
+  sidePosition: 595
   sideOffset: 0
 --- !u!114 &-8867903541328341473
 MonoBehaviour:
@@ -426,8 +426,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: 6207768119623889316}
-  value: 0
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 16
   channel: 0
 --- !u!114 &-7770823961220148796
@@ -448,7 +450,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1225
+  sidePosition: 1085
   sideOffset: 0
 --- !u!114 &-7674568576127388633
 MonoBehaviour:
@@ -468,7 +470,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1155
+  sidePosition: 1015
   sideOffset: 0
 --- !u!114 &-7659946794586024875
 MonoBehaviour:
@@ -613,7 +615,7 @@ MonoBehaviour:
   _connections:
   - {fileID: 598314511469086999}
   side: 1
-  sidePosition: 525
+  sidePosition: 455
   sideOffset: 0
 --- !u!114 &-7029970339205035284
 MonoBehaviour:
@@ -840,7 +842,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 875
+  sidePosition: 735
   sideOffset: 0
 --- !u!114 &-6539390100667894507
 MonoBehaviour:
@@ -1070,7 +1072,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1365
+  sidePosition: 1155
   sideOffset: 0
 --- !u!114 &-5519719599565292574
 MonoBehaviour:
@@ -1151,7 +1153,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1995
+  sidePosition: 1785
   sideOffset: 0
 --- !u!114 &-5440600909829464040
 MonoBehaviour:
@@ -1400,8 +1402,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: -4386138268342592840}
-  value: 0.5748032
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 74
   channel: 0
 --- !u!114 &-4718146069470260981
@@ -1506,8 +1510,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: -861612351573329629}
-  value: 0.1023622
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 20
   channel: 15
 --- !u!114 &-4511497943761010300
@@ -1633,8 +1639,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: -5241024027441781773}
-  value: 0
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 57
   channel: 0
 --- !u!114 &-4346672936533566029
@@ -1733,7 +1741,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1925
+  sidePosition: 1715
   sideOffset: 0
 --- !u!114 &-3989500830285665807
 MonoBehaviour:
@@ -1795,7 +1803,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1645
+  sidePosition: 1435
   sideOffset: 0
 --- !u!114 &-3733292465478531310
 MonoBehaviour:
@@ -1816,7 +1824,7 @@ MonoBehaviour:
   _connections:
   - {fileID: 5885906340815470166}
   side: 1
-  sidePosition: 2065
+  sidePosition: 1855
   sideOffset: 0
 --- !u!114 &-3701238422342076752
 MonoBehaviour:
@@ -1857,7 +1865,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 945
+  sidePosition: 805
   sideOffset: 0
 --- !u!114 &-3432455149777060735
 MonoBehaviour:
@@ -2001,7 +2009,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1715
+  sidePosition: 1505
   sideOffset: 0
 --- !u!114 &-2986579838013994342
 MonoBehaviour:
@@ -2183,8 +2191,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: 7220570198078956509}
-  value: 0.062992126
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 73
   channel: 0
 --- !u!114 &-2301625015124549494
@@ -2215,8 +2225,6 @@ MonoBehaviour:
     names:
     - System
     - Mic
-  captureMode: 0
-  scalingMode: 0
   spectrumSize: 32
   minFreq: 32
   maxFreq: 16384
@@ -2300,7 +2308,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1505
+  sidePosition: 1295
   sideOffset: 0
 --- !u!114 &-2014851471658489982
 MonoBehaviour:
@@ -2658,7 +2666,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1015
+  sidePosition: 875
   sideOffset: 0
 --- !u!114 &-1036774101557444777
 MonoBehaviour:
@@ -2738,7 +2746,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 595
+  sidePosition: 525
   sideOffset: 0
 --- !u!114 &-861612351573329629
 MonoBehaviour:
@@ -2820,8 +2828,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: -8427853945516215178}
-  value: 0
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 17
   channel: 0
 --- !u!114 &-584542638025937196
@@ -2998,8 +3008,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   editorStates:
   - {fileID: 1762516859546394359}
-  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\ArtnetTest
-  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\ArtnetTest.asset
+  saveName: ArtnetTest
+  savePath: Assets/TextureSynthesis/Resources/CanvasSaves/ArtnetTest.asset
   livesInScene: 0
   nodes:
   - {fileID: -4552225507552591957}
@@ -3244,7 +3254,7 @@ MonoBehaviour:
   _connections:
   - {fileID: 5559042293758863640}
   side: 1
-  sidePosition: 1435
+  sidePosition: 1225
   sideOffset: 0
 --- !u!114 &435178585788949391
 MonoBehaviour:
@@ -3450,7 +3460,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1785
+  sidePosition: 1575
   sideOffset: 0
 --- !u!114 &959916471148979491
 MonoBehaviour:
@@ -3523,7 +3533,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ebfa5bcc1e99bcd48b532b39ed262049, type: 3}
   m_Name: Textures
@@ -4149,7 +4159,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1855
+  sidePosition: 1645
   sideOffset: 0
 --- !u!114 &2899669488350469536
 MonoBehaviour:
@@ -4210,8 +4220,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: 4363833419226535519}
-  value: 0.27559054
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 7
   channel: 0
 --- !u!114 &3057331285167077730
@@ -4253,7 +4265,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1085
+  sidePosition: 945
   sideOffset: 0
 --- !u!114 &3115858010561668711
 MonoBehaviour:
@@ -4441,8 +4453,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: 7721552206166988983}
-  value: 0.62992126
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 91
   channel: 0
 --- !u!114 &3854905224693944745
@@ -4606,7 +4620,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 735
+  sidePosition: 665
   sideOffset: 0
 --- !u!114 &4214940522405799767
 MonoBehaviour:
@@ -4807,7 +4821,7 @@ MonoBehaviour:
   _connections:
   - {fileID: -5765589867207178374}
   side: 1
-  sidePosition: 1575
+  sidePosition: 1365
   sideOffset: 0
 --- !u!114 &4641299829027108903
 MonoBehaviour:
@@ -5195,8 +5209,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: -9083259628308561150}
-  value: 1
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 61
   channel: 0
 --- !u!114 &6196502344036372181
@@ -5404,8 +5420,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: 467663576110426132}
-  value: 1
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 62
   channel: 0
 --- !u!114 &6802648748743029976
@@ -5654,7 +5672,7 @@ MonoBehaviour:
   _connections:
   - {fileID: -6865870818022365981}
   side: 1
-  sidePosition: 2205
+  sidePosition: 1925
   sideOffset: 0
 --- !u!114 &7721552206166988983
 MonoBehaviour:
@@ -5941,8 +5959,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: -1319051025064766341}
-  value: 0.53543305
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 71
   channel: 0
 --- !u!114 &8329576955188402876
@@ -6043,8 +6063,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: -3864916399119952773}
-  value: 1
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 19
   channel: 15
 --- !u!114 &8632703954677504323
@@ -6084,8 +6106,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
   valueKnob: {fileID: 6946846472526689310}
-  value: 1
-  normalize: 1
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
   controlID: 18
   channel: 0
 --- !u!114 &8826023456704315558

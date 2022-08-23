@@ -18,7 +18,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 525
+  sidePosition: 595
   sideOffset: 0
 --- !u!114 &-9073771446132480425
 MonoBehaviour:
@@ -38,7 +38,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1505
+  sidePosition: 1715
   sideOffset: 0
 --- !u!114 &-9054328698076893800
 MonoBehaviour:
@@ -99,7 +99,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1715
+  sidePosition: 1925
   sideOffset: 0
 --- !u!114 &-8721144079694792582
 MonoBehaviour:
@@ -120,7 +120,7 @@ MonoBehaviour:
   _connections:
   - {fileID: 2957159347593817338}
   side: 1
-  sidePosition: 1645
+  sidePosition: 1855
   sideOffset: 0
 --- !u!114 &-8673460874152147166
 MonoBehaviour:
@@ -138,7 +138,6 @@ MonoBehaviour:
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureOutputKnob: {fileID: 8767194306477413268}
-  outputTex: {fileID: 0}
 --- !u!114 &-8617132066865824323
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -277,7 +276,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1085
+  sidePosition: 1295
   sideOffset: 0
 --- !u!114 &-8211789523411220284
 MonoBehaviour:
@@ -318,6 +317,9 @@ MonoBehaviour:
   - {fileID: -711692813012605395}
   - {fileID: -9073771446132480425}
   - {fileID: -2305474612395133852}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   texNames:
   - brc_red
@@ -345,6 +347,9 @@ MonoBehaviour:
   - straight-rings
   - TextureTest
   - test_velocity_input
+  - AMLogo
+  - impression_figure_margaret_watts_hughes_2
+  - OrangeSlice
 --- !u!114 &-8187544582319293516
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -403,7 +408,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 245
+  sidePosition: 315
   sideOffset: 0
 --- !u!114 &-7850954556883054527
 MonoBehaviour:
@@ -423,7 +428,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 455
+  sidePosition: 525
   sideOffset: 0
 --- !u!114 &-7451593715674763747
 MonoBehaviour:
@@ -464,7 +469,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1575
+  sidePosition: 1785
   sideOffset: 0
 --- !u!114 &-7140848726656729371
 MonoBehaviour:
@@ -582,7 +587,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 385
+  sidePosition: 455
   sideOffset: 0
 --- !u!114 &-5315856396307605401
 MonoBehaviour:
@@ -745,14 +750,25 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: -3572026044099987656}
   textureOutputKnob: {fileID: -138839946472777607}
-  speedInputKnob: {fileID: -1739232021973910376}
-  angleInputKnob: {fileID: -2980560296500439499}
+  in1Knob: {fileID: 0}
+  in2Knob: {fileID: 0}
   resetKnob: {fileID: 0}
-  outputTex: {fileID: 0}
   smoothTransitions: 0
   mirror: 0
-  speed: 64
-  angle: 0
+  in1: 0
+  in2: 0
+  offsetMode:
+    values: 010000
+    names:
+    - X/Y position
+    - X/Y speed
+    - Speed/angle
+  sampleMode:
+    values: 010000
+    names:
+    - Mirror
+    - Repeat
+    - Clamp
 --- !u!114 &-3572026044099987656
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -793,7 +809,7 @@ MonoBehaviour:
   _connections:
   - {fileID: 6362896943843517795}
   side: 1
-  sidePosition: 315
+  sidePosition: 385
   sideOffset: 0
 --- !u!114 &-3406527577754388666
 MonoBehaviour:
@@ -854,7 +870,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 665
+  sidePosition: 805
   sideOffset: 0
 --- !u!114 &-2952320074466356947
 MonoBehaviour:
@@ -916,7 +932,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 105
+  sidePosition: 175
   sideOffset: 0
 --- !u!114 &-2567356502367080333
 MonoBehaviour:
@@ -941,7 +957,6 @@ MonoBehaviour:
   hue: 0
   saturation: 0
   value: 0
-  outputTex: {fileID: 0}
 --- !u!114 &-2538591699471745867
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -980,7 +995,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1295
+  sidePosition: 1505
   sideOffset: 0
 --- !u!114 &-2305474612395133852
 MonoBehaviour:
@@ -1000,7 +1015,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1435
+  sidePosition: 1645
   sideOffset: 0
 --- !u!114 &-2244458464529171867
 MonoBehaviour:
@@ -1287,7 +1302,6 @@ MonoBehaviour:
   offsetKnob: {fileID: 8600789238669411841}
   turbIntensityKnob: {fileID: 5864256606512745101}
   turbScaleKnob: {fileID: -9020357103315116994}
-  outputTex: {fileID: 0}
   normalAngleOffset: 0.46181035
   turbFactor: 0.9141523
   turbScale: 16
@@ -1309,7 +1323,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1225
+  sidePosition: 1435
   sideOffset: 0
 --- !u!114 &-618918872108699948
 MonoBehaviour:
@@ -1346,7 +1360,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 175
+  sidePosition: 245
   sideOffset: 0
 --- !u!114 &-410616008516614452
 MonoBehaviour:
@@ -1471,7 +1485,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 35
+  sidePosition: 105
   sideOffset: 0
 --- !u!114 &844086015596384005
 MonoBehaviour:
@@ -1491,7 +1505,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 595
+  sidePosition: 665
   sideOffset: 0
 --- !u!114 &867917885714750167
 MonoBehaviour:
@@ -1632,7 +1646,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 875
+  sidePosition: 1015
   sideOffset: 0
 --- !u!114 &2580275331972794966
 MonoBehaviour:
@@ -1673,7 +1687,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1365
+  sidePosition: 1575
   sideOffset: 0
 --- !u!114 &2905413302245750973
 MonoBehaviour:
@@ -1719,7 +1733,6 @@ MonoBehaviour:
   hue: 0
   saturation: 0
   value: 0
-  outputTex: {fileID: 0}
 --- !u!114 &2957159347593817338
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1862,6 +1875,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &4115938199937071178
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1916,6 +1930,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &4217280257126725041
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1956,6 +1971,10 @@ MonoBehaviour:
   dyeInputKnob: {fileID: 2302336865620689350}
   dyeInputLevelKnob: {fileID: 0}
   dyeInputLevel: 0
+  dyeDecayKnob: {fileID: 0}
+  dyeDecay: 0
+  forceMultiplierKnob: {fileID: 0}
+  forceMultiplier: 1
   timeMultiplierKnob: {fileID: 0}
   timeMultiplier: 1
   runKnob: {fileID: 0}
@@ -1963,7 +1982,6 @@ MonoBehaviour:
   applyForceKnob: {fileID: 0}
   applyDyeKnob: {fileID: 0}
   textureOutputKnob: {fileID: -2180990858322499645}
-  outputTex: {fileID: 0}
   timestep: 0
   useBoundaries: 1
   continuousVelocity: 0
@@ -2029,7 +2047,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 945
+  sidePosition: 1155
   sideOffset: 0
 --- !u!114 &5043032803349188199
 MonoBehaviour:
@@ -2049,7 +2067,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1015
+  sidePosition: 1225
   sideOffset: 0
 --- !u!114 &5126438970829111393
 MonoBehaviour:
@@ -2090,7 +2108,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 805
+  sidePosition: 945
   sideOffset: 0
 --- !u!114 &5517625016609961204
 MonoBehaviour:
@@ -2130,7 +2148,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 1155
+  sidePosition: 1365
   sideOffset: 0
 --- !u!114 &5864256606512745101
 MonoBehaviour:
@@ -2194,7 +2212,6 @@ MonoBehaviour:
   heightInputKnob: {fileID: -8617132066865824323}
   height: 128
   textureOutputKnob: {fileID: -7451593715674763747}
-  outputTex: {fileID: 0}
   edgeWrapMode:
     values: 000000
     names:
@@ -2224,7 +2241,6 @@ MonoBehaviour:
   hue: 0
   saturation: 0
   value: 0
-  outputTex: {fileID: 0}
 --- !u!114 &6362896943843517795
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2338,7 +2354,6 @@ MonoBehaviour:
   heightInputKnob: {fileID: -410616008516614452}
   height: 512
   textureOutputKnob: {fileID: 8959371476934910463}
-  outputTex: {fileID: 0}
   edgeWrapMode:
     values: 000000
     names:
@@ -2382,6 +2397,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &7483230045123425599
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2400,7 +2416,7 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections: []
   side: 1
-  sidePosition: 735
+  sidePosition: 875
   sideOffset: 0
 --- !u!114 &7897337039717831671
 MonoBehaviour:
