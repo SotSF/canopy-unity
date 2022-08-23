@@ -9,17 +9,24 @@ using WebSocketServer;
 
 public class SpaceshipGameController : MonoBehaviour
 {
-    private static Vector2Int gameBoardSize = new Vector2Int(750, 960);
+    private static Vector2Int gameBoardSize = new Vector2Int(512, 512);
+    private static Vector2 gameBoardCenter = new Vector2(255, 255);
+    public float innerRingDist = 256 / 8;
+    public float outerRingDist = 256;
+    public float velocityScaling = 0.25f;
+    public float maxSpeed = 10;
     public static SpaceshipGameController instance;
 
     // No more than 32 players
     private Dictionary<string, SpaceshipGamePlayer> players;
 
     public RenderTexture gameBoardTex;
+    public RenderTexture fluidVelocityTex;
 
     private ComputeBuffer playerBuffer;
     private ComputeShader spaceshipRenderShader;
-    int shaderKernel;
+    int gameBoardKernel;
+    int fluidVelocityKernel;
 
 
     public void Awake()
@@ -41,14 +48,26 @@ public class SpaceshipGameController : MonoBehaviour
         gameBoardTex.wrapModeV = TextureWrapMode.Clamp;
         gameBoardTex.Create();
 
+        fluidVelocityTex = new RenderTexture(gameBoardSize.x, gameBoardSize.y, 0);
+        fluidVelocityTex.useMipMap = false;
+        fluidVelocityTex.autoGenerateMips = false;
+        fluidVelocityTex.enableRandomWrite = true;
+        fluidVelocityTex.filterMode = FilterMode.Point;
+        fluidVelocityTex.wrapModeU = TextureWrapMode.Repeat;
+        fluidVelocityTex.wrapModeV = TextureWrapMode.Clamp;
+        fluidVelocityTex.Create();
+
         // 32 instances, 32 bytes for 2x Vector2 + Vector4 color
         playerBuffer = new ComputeBuffer(32, 32);
 
         // Initialize shader
         spaceshipRenderShader = Resources.Load<ComputeShader>("NodeShaders/SpaceshipGamePattern");
-        shaderKernel = spaceshipRenderShader.FindKernel("PatternKernel");
-        spaceshipRenderShader.SetTexture(shaderKernel, "OutputTex", gameBoardTex);
-        spaceshipRenderShader.SetBuffer(shaderKernel, "PlayerBuffer", playerBuffer);
+        gameBoardKernel = spaceshipRenderShader.FindKernel("GameBoardKernel");
+        fluidVelocityKernel = spaceshipRenderShader.FindKernel("FluidVelocityKernel");
+        spaceshipRenderShader.SetTexture(gameBoardKernel, "GameboardTex", gameBoardTex);
+        spaceshipRenderShader.SetBuffer(gameBoardKernel, "PlayerBuffer", playerBuffer);
+        spaceshipRenderShader.SetTexture(fluidVelocityKernel, "FluidVelocityTex", fluidVelocityTex);
+        spaceshipRenderShader.SetBuffer(fluidVelocityKernel, "PlayerBuffer", playerBuffer);
     }
 
     void Start()
@@ -56,13 +75,15 @@ public class SpaceshipGameController : MonoBehaviour
         
     }
 
-    public static float dragFactor = 0.01f;
-    public float playerSize = 32;
+    public static float dragFactor = 0.005f;
+    public float playerSize = 2;
 
     void Update()
     {
         // Clear gameboard
         RenderTexture.active = gameBoardTex;
+        GL.Clear(true, true, Color.black);
+        RenderTexture.active = fluidVelocityTex;
         GL.Clear(true, true, Color.black);
         RenderTexture.active = null;
 
@@ -78,11 +99,21 @@ public class SpaceshipGameController : MonoBehaviour
         spaceshipRenderShader.SetInt("height", gameBoardSize.y);
         spaceshipRenderShader.SetInt("numPlayers", players.Count);
         spaceshipRenderShader.SetFloat("playerSize", playerSize);
+        spaceshipRenderShader.SetFloat("maxSpeed", maxSpeed);
+        spaceshipRenderShader.SetFloat("innerRingDist", innerRingDist);
+        spaceshipRenderShader.SetFloat("outerRingDist", outerRingDist);
+
         uint tx, ty, tz;
-        spaceshipRenderShader.GetKernelThreadGroupSizes(shaderKernel, out tx, out ty, out tz);
+
+        spaceshipRenderShader.GetKernelThreadGroupSizes(gameBoardKernel, out tx, out ty, out tz);
         var threadGroupX = Mathf.CeilToInt(((float)gameBoardSize.x) / tx);
         var threadGroupY = Mathf.CeilToInt(((float)gameBoardSize.y) / ty);
-        spaceshipRenderShader.Dispatch(shaderKernel, threadGroupX, threadGroupY, 1);
+        spaceshipRenderShader.Dispatch(gameBoardKernel, threadGroupX, threadGroupY, 1);
+
+        spaceshipRenderShader.GetKernelThreadGroupSizes(fluidVelocityKernel, out tx, out ty, out tz);
+        threadGroupX = Mathf.CeilToInt(((float)fluidVelocityTex.width) / tx);
+        threadGroupY = Mathf.CeilToInt(((float)fluidVelocityTex.height) / ty);
+        spaceshipRenderShader.Dispatch(fluidVelocityKernel, threadGroupX, threadGroupY, 1);
     }
 
     struct SpaceshipGamePlayer
@@ -100,7 +131,7 @@ public class SpaceshipGameController : MonoBehaviour
 
         public void OnStickInput(Vector2 stick1, Vector2 stick2)
         {
-            velocity += stick1;
+            velocity += stick1/instance.velocityScaling;
         }
 
         public void OnButtonPress(byte buttonId)
@@ -118,23 +149,18 @@ public class SpaceshipGameController : MonoBehaviour
             position += velocity;
 
             // Continuous loop around gameboard in y (Canopy ring)
-            if (position.y < 0)
+            float r = Vector2.Distance(gameBoardCenter, position);
+            float theta = Mathf.Atan2(gameBoardCenter.y - position.y, gameBoardCenter.x - position.x);
+
+            // Reflect off apex
+            if (r < instance.innerRingDist)
             {
-                position.y += gameBoardSize.y;
-            } else if (position.y > gameBoardSize.y)
-            {
-                position.y -= gameBoardSize.y;
+                velocity = Vector2.Reflect(velocity, (gameBoardCenter-position).normalized);
             }
-            
-            // Bounce off at x boundaries?
-            if (position.x < 0)
+            // Reflect off outer edge
+            else if (r >= instance.outerRingDist)
             {
-                position.x = Mathf.Abs(position.x);
-                velocity.x = Mathf.Abs(velocity.x);
-            } else if (position.x > gameBoardSize.x)
-            {
-                position.x = gameBoardSize.x - (position.x - gameBoardSize.x);
-                velocity.x *= -1;
+                velocity = Vector2.Reflect(velocity, (position-gameBoardCenter).normalized);
             }
             velocity *= (1 - dragFactor);
         }

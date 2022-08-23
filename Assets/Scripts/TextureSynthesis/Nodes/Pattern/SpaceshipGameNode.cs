@@ -21,6 +21,13 @@ public class SpaceshipGameNode : TickingNode
 
     public override string Title { get { return "SpaceshipGame"; } }
 
+
+    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
+    public ValueConnectionKnob gameOutputKnob;
+
+    [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 80)]
+    public ValueConnectionKnob fluidVelocityOutputKnob;
+
     public override Vector2 DefaultSize => new Vector2(180, 180);
 
     public bool check;
@@ -48,7 +55,8 @@ public class SpaceshipGameNode : TickingNode
 
     public override bool Calculate()
     {
-
+        gameOutputKnob.SetValue<Texture>(gameController.gameBoardTex);
+        fluidVelocityOutputKnob.SetValue<Texture>(gameController.fluidVelocityTex);
         return true;
     }
 }
