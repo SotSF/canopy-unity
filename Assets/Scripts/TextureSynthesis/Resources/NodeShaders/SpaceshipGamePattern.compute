@@ -1,6 +1,7 @@
 ﻿#include "HSV.compute"
 
-#pragma kernel PatternKernel
+#pragma kernel GameBoardKernel
+#pragma kernel FluidVelocityKernel
 
 #define PI 3.14159265f
 
@@ -10,7 +11,8 @@ struct Player {
     float4 color;
 };
 
-RWTexture2D<float4> OutputTex;
+RWTexture2D<float4> GameboardTex;
+RWTexture2D<float4> FluidVelocityTex;
 RWStructuredBuffer<Player> PlayerBuffer;
 
 uint width;
@@ -19,10 +21,35 @@ uint height;
 uint numPlayers;
 float playerSize;
 
+float maxSpeed;
+float innerRingDistance;
+float outerRingDistance;
+
 SamplerState SmpPointClamp;
 
 [numthreads(25, 16, 1)]
-void PatternKernel(uint3 id : SV_DispatchThreadID)
+void GameBoardKernel(uint3 id : SV_DispatchThreadID)
+{
+    // Compute distance from current pixel operating on (aka id)
+    // and player centers, if < player size, fill with player color
+    for (uint i = 0; i < numPlayers; i++) {
+        Player p = PlayerBuffer[i];
+        float distFromPlayer = distance(id.xy, p.position);
+        //GameboardTex[id.xy] = float4(0, 0, 0, 1);
+        //if (distance(id.xy, float2(width, height) / 2) < innerRingDistance) {
+        //    GameboardTex[id.xy] = float4(0.2, 0.2, 0.2, 1);
+        //}
+        //if (distance(id.xy, float2(width, height) / 2) > outerRingDistance) {
+        //    GameboardTex[id.yx] = float4(0.2, 0.2, 0.2, 1);
+        //}
+        if (distFromPlayer < playerSize) {
+            GameboardTex[id.xy] = p.color;
+        }
+    }
+}
+
+[numthreads(25, 16, 1)]
+void FluidVelocityKernel(uint3 id : SV_DispatchThreadID)
 {
     // Compute distance from current pixel operating on (aka id)
     // and player centers, if < player size, fill with player color
@@ -30,7 +57,10 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
         Player p = PlayerBuffer[i];
         float distFromPlayer = distance(id.xy, p.position);
         if (distFromPlayer < playerSize) {
-            OutputTex[id.xy] = p.color;
+            float angle = (atan2(p.velocity.y, p.velocity.x) + 3.14159) / (2 * 3.14159);
+            float speed = length(p.velocity);
+            float3 color = HSVtoRGB(float3(angle, 1, (speed / maxSpeed)));
+            FluidVelocityTex[id.xy] = float4(color.r, color.g, color.b, 1);
         }
     }
 }
