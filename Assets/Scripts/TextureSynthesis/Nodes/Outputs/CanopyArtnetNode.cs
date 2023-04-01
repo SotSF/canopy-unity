@@ -25,7 +25,7 @@ public class CanopyArtnetNode : TickingNode
     private List<byte[]> universes;
     private int numUniverses = 49;
 
-
+    public bool flipMirrorDirection;
     public int mirrorOffset = 0;
     int frameindex = 0;
 
@@ -61,9 +61,9 @@ public class CanopyArtnetNode : TickingNode
             controller.remoteIP = ip;
         }
         GUILayout.EndHorizontal();
-
-        mirrorOffset = RTEditorGUI.IntSlider(mirrorOffset, 0, 95);
-
+        
+        mirrorOffset = RTEditorGUI.IntSlider("Mirror offset", mirrorOffset, 0, 95);
+        flipMirrorDirection = RTEditorGUI.Toggle(flipMirrorDirection, "Flip mirror direction");
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -114,6 +114,10 @@ public class CanopyArtnetNode : TickingNode
         {
             var universeIndex = 47;
             var pixelIndex = (r + mirrorOffset) % 96;
+            if (flipMirrorDirection)
+            {
+                pixelIndex = ((95 - r) + mirrorOffset) % 96;
+            }
             var startOffset = 0;
             if (pixelIndex < 60)
             {
