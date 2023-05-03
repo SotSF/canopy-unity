@@ -1,0 +1,76 @@
+
+#pragma kernel PatternKernel
+#include "HSV.compute"
+#define tau 6.2831853
+
+RWTexture2D<float4> outputTex;
+
+float globalTimeFactor;
+float time;
+float spikeMotionTimeScalingFactor;
+float repetitionsPerSpiralTurn;
+float primaryOscPeriod;
+float distCutoff;
+float colorRangeStart;
+float colorRangeWidth;
+float waveOffset;
+float baseAmplitude;
+float spiralGrowthFactor;
+float spiralTightness;
+float width;
+float height;
+
+int colorIterations;
+int spiralCount;
+
+float4 colorLine(float dist, float radius, float theta, int spiralIdx) {
+    float primaryOsc = (sin((tau * (time * globalTimeFactor)) / primaryOscPeriod));
+    float scalingFactorPulse = 1.6 + 0.15 * primaryOsc;
+    //float radialScalingFactor = exp(theta/scalingFactorPulse);
+    float radialScalingFactor = pow(radius / 1.3, scalingFactorPulse);
+
+    float transitionWidth = 1.0;
+
+    float timeOffset = time * (-globalTimeFactor + spikeMotionTimeScalingFactor);
+    float period = tau / repetitionsPerSpiralTurn;
+
+    float2 colorRange = float2(colorRangeStart, ((colorRangeStart + colorRangeWidth) % 1.0));
+
+    float4 color = float4(0.0, 0.0, 0.0, 1.0);
+    for (int i = 0; i < colorIterations; i++) {
+        float iteratedAmplitude = baseAmplitude * i;
+        float iteratedOffset = timeOffset + (sin((tau * (i + time * globalTimeFactor)) / 15.0) / 10.0);
+        float triangleWave = abs(((theta + timeOffset) % period) - period / 2.0);
+        float intensity = 1.0 - smoothstep(distCutoff, distCutoff + transitionWidth, dist - waveOffset * radialScalingFactor + iteratedAmplitude * triangleWave * radialScalingFactor);
+        intensity /= float(colorIterations) / 4;
+        float hue = lerp(colorRange.x, colorRange.y, float(spiralIdx) / spiralCount);
+        float3 clr = HSVtoRGB(float3(hue, 1.0 - (i / float(colorIterations)), intensity));
+        color += float4(clr, 1.0);
+    }
+
+    return color;
+}
+
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = id.xy / float2(width - 1, height - 1) * 2.0 - 1.0;
+
+    // Convert the coordinates to polar coordinates
+    float radius = length(uv) * 300.0;
+    float angle = (atan2(uv.y, uv.x) + time * globalTimeFactor) % tau;
+
+    // logarithmic spiral
+    float4 fragColor = float4(0.0, 0.0, 0.0, 1.0);
+    for (int spiralIdx = 0; spiralIdx < spiralCount; spiralIdx++) {
+        float spiralOffset = (angle + (float(spiralIdx) * tau / float(spiralCount))) % tau;
+        // Iterate 5 turns of the spiral
+        for (int i = 0; i < 5; i++) {
+            float theta = spiralOffset + (float(i) * tau);
+            float spiralRadius = spiralGrowthFactor * exp(spiralTightness * theta);
+            fragColor += colorLine(abs(radius - spiralRadius), radius, theta, spiralIdx);
+        }
+    }
+    outputTex[id.xy] = fragColor;
+}
