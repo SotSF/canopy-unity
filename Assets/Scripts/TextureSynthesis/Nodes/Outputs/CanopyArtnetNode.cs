@@ -19,15 +19,28 @@ public class CanopyArtnetNode : TickingNode
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;
 
+    public bool useDoubleDensity = false;
+
     private RenderTexture buffer;
 
     private string ip;
     private List<byte[]> universes;
-    private int numUniverses = 49;
+    private int numUniverses = 96;
 
-    public bool flipMirrorDirection;
-    public int mirrorOffset = 0;
+    public bool flipMirrorDirection = true;
+    public int mirrorOffset = 70;
     int frameindex = 0;
+
+    const int singleDensitypixelsPerStrip = 76;
+    const int doubleDensityPixelsPerStrip = 151;
+
+    private int pixelsPerStrip
+    {
+        get 
+        {
+            return useDoubleDensity ? doubleDensityPixelsPerStrip : singleDensitypixelsPerStrip;
+        }
+    }
 
     DmxController controller;
     public void Awake()
@@ -44,7 +57,7 @@ public class CanopyArtnetNode : TickingNode
 
     private void InitializeRenderTexture()
     {
-        buffer = new RenderTexture(76, Constants.NUM_STRIPS, 24);
+        buffer = new RenderTexture(pixelsPerStrip, Constants.NUM_STRIPS, 24);
         buffer.enableRandomWrite = true;
         buffer.Create();
     }
@@ -64,6 +77,7 @@ public class CanopyArtnetNode : TickingNode
         
         mirrorOffset = RTEditorGUI.IntSlider("Mirror offset", mirrorOffset, 0, 95);
         flipMirrorDirection = RTEditorGUI.Toggle(flipMirrorDirection, "Flip mirror direction");
+        useDoubleDensity = RTEditorGUI.Toggle(useDoubleDensity, "Use double density");
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -89,22 +103,23 @@ public class CanopyArtnetNode : TickingNode
     private int pixelIndexInPort(int r, int c)
     {
         var stripIndex = stripIndexInPort(r);
-        var passedPixels = Constants.PIXELS_PER_STRIP * stripIndex;
+        var passedPixels = pixelsPerStrip * stripIndex;
         if (r % 2 == 1)
         {
             // Zig-zag odd numbered strips
-            return passedPixels + ((Constants.PIXELS_PER_STRIP-1) - c);
+            return passedPixels + (pixelsPerStrip - c);
         }
         return passedPixels + c;
     }
 
     private int pixelIndexToUniverseIndex(int pixIndex)
     {
-        if (pixIndex < 170)
-            return 0;
-        if (pixIndex < 340)
-            return 1;
-        return 2;
+        //if (pixIndex < 170)
+        //    return 0;
+        //if (pixIndex < 340)
+        //    return 1;
+        //return 2;
+        return pixIndex / 170;
     }
 
     public void setPixel(int r, int c, Color32 color)
@@ -112,7 +127,7 @@ public class CanopyArtnetNode : TickingNode
         // Special case behavior for infinity mirror at the innermost ring
         if (c == 0)
         {
-            var universeIndex = 47;
+            var universeIndex = 95;
             var pixelIndex = (r + mirrorOffset) % 96;
             if (flipMirrorDirection)
             {
@@ -153,7 +168,7 @@ public class CanopyArtnetNode : TickingNode
     {
         for (int r = 0; r < Constants.NUM_STRIPS; r++)
         {
-            for (int c = 0; c < 76; c++)
+            for (int c = 0; c < pixelsPerStrip; c++)
             {
                 var col = c;
                 Color32 color = tex.GetPixel(col, r);
