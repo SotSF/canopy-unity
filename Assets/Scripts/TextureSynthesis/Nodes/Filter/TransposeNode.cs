@@ -6,13 +6,13 @@ using SecretFire.TextureSynth;
 using UnityEngine;
 
 
-[Node(false, "Filter/HSV")]
-public class HSVNode : TextureSynthNode
+[Node(false, "Filter/TransposeNode")]
+public class TransposeNode : TextureSynthNode
 {
-    public const string ID = "hsvNode";
+    public const string ID = "transposeNode";
     public override string GetID { get { return ID; } }
 
-    public override string Title { get { return "HSV"; } }
+    public override string Title { get { return "Transpose"; } }
     public override Vector2 DefaultSize { get { return new Vector2(150, 120); } }
 
     [ValueConnectionKnob("Texture", Direction.In, typeof(Texture), NodeSide.Top, 20)]
@@ -21,25 +21,16 @@ public class HSVNode : TextureSynthNode
     [ValueConnectionKnob("Texture", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
-    [ValueConnectionKnob("H", Direction.In, "Float")]
-    public ValueConnectionKnob hueKnob;
-    [ValueConnectionKnob("S", Direction.In, "Float")]
-    public ValueConnectionKnob satKnob;
-    [ValueConnectionKnob("V", Direction.In, "Float")]
-    public ValueConnectionKnob valKnob;
 
-    public float hue, saturation, value;
-
-    private ComputeShader HSVShader;
+    private ComputeShader TransposeShader;
     private int kernelId;
-    private Vector4 HSV;
     private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
     private void Awake()
     {
-        HSVShader = Resources.Load<ComputeShader>("NodeShaders/HSVFilter");
-        kernelId = HSVShader.FindKernel("CSMain");
+        TransposeShader = Resources.Load<ComputeShader>("NodeShaders/TransposeFilter");
+        kernelId = TransposeShader.FindKernel("CSMain");
     }
 
     private void InitializeRenderTexture()
@@ -57,9 +48,6 @@ public class HSVNode : TextureSynthNode
     {
         GUILayout.BeginVertical();
         textureInputKnob.DisplayLayout();
-        FloatKnobOrSlider(ref hue, 0, 1, hueKnob);
-        FloatKnobOrSlider(ref saturation, 0, 1, satKnob);
-        FloatKnobOrSlider(ref value, 0, 1, valKnob);
         textureOutputKnob.DisplayLayout();
         GUILayout.EndVertical();
 
@@ -79,32 +67,18 @@ public class HSVNode : TextureSynthNode
             return true;
         }
 
-        var inputSize = new Vector2Int(tex.width, tex.height);
+        var inputSize = new Vector2Int(tex.height, tex.width);
         if (inputSize != outputSize)
         {
-            outputSize = inputSize;
+            outputSize = new Vector2Int(inputSize.x, inputSize.y);
             InitializeRenderTexture();
         }
-        if (hueKnob.connected())
-        {
-            hue = hueKnob.GetValue<float>();
-        }
-        if (satKnob.connected())
-        {
-            saturation = satKnob.GetValue<float>();
-        }
-        if (valKnob.connected())
-        {
-            value = valKnob.GetValue<float>();
-        }
-        HSV = new Vector4(hue, saturation, value);
         //Execute HSV compute shader here
-        HSVShader.SetVector("HSV", HSV);
-        HSVShader.SetTexture(kernelId, "OutputTex", outputTex);
-        HSVShader.SetTexture(kernelId, "InputTex", tex);
-        var threadGroupX = Mathf.CeilToInt(tex.width / 16.0f);
-        var threadGroupY = Mathf.CeilToInt(tex.height / 16.0f);
-        HSVShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
+        TransposeShader.SetTexture(kernelId, "OutputTex", outputTex);
+        TransposeShader.SetTexture(kernelId, "InputTex", tex);
+        var threadGroupX = Mathf.CeilToInt(outputSize.x / 16.0f);
+        var threadGroupY = Mathf.CeilToInt(outputSize.y/ 16.0f);
+        TransposeShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
 
         // Assign output channels
         textureOutputKnob.SetValue(outputTex);
