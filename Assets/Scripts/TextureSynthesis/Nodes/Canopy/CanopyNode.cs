@@ -4,7 +4,7 @@ using NodeEditorFramework.Utilities;
 using UnityEngine;
 using System;
 
-[Node(false, "Canopy/Main")]
+[Node(false, "Canopy/CanopyProjection")]
 public class CanopyNode : Node
 {
     public const string ID = "canopyMain";
@@ -20,7 +20,7 @@ public class CanopyNode : Node
     public ValueConnectionKnob textureOutputKnob;
 
 
-    private Camera canopyCam;
+
     //private RenderTexture camTex;
     private RenderTexture kaleidoscopeElementTexture;
     private Vector2Int outputSize = Vector2Int.zero;
@@ -48,7 +48,6 @@ public class CanopyNode : Node
             lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
             RenderToCanopySimulation(outputTex);
         }
-
     }
 
     private void OnDestroy()
