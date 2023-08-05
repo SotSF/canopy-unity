@@ -33,10 +33,12 @@ public class CanopyNode : Node
     public bool seamless;
     private Light lightCaster;
 
+    private bool hasAwoken = false;
+
     private void Awake()
     {
         Debug.Log("CanopyMain awoke");
-        if (Application.isPlaying)
+        if (Application.isPlaying && !hasAwoken)
         {
             canopyMainShader = Resources.Load<ComputeShader>("NodeShaders/CanopyMain");
             mainKernel = canopyMainShader.FindKernel("CanopyMain");
@@ -47,6 +49,7 @@ public class CanopyNode : Node
             canopyMainShader.SetTexture(mainKernel, "OutputTex", outputTex);
             lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
             RenderToCanopySimulation(outputTex);
+            hasAwoken = true;
         }
     }
 

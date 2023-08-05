@@ -112,6 +112,7 @@ public class TextureMuxNode : TickingNode
         //controlKnob.DisplayLayout();
         GUILayout.Label("Autoplay", GUILayout.ExpandWidth(false), GUILayout.Width(50));
         autoplayKnob.SetPosition();
+        fade = RTEditorGUI.Toggle(fade, "Fade?");
         GUILayout.EndVertical();
         // Input image ports left to right
         for (int i = 0; i < targetPortCount - 1; i++)
@@ -129,6 +130,13 @@ public class TextureMuxNode : TickingNode
             {
                 if (GUILayout.Button("Activate", GUILayout.Width(50), GUILayout.ExpandWidth(false)))
                 {
+                    lastTextureIndex = activeTextureIndex;
+                    if (fade)
+                    {
+                        fadeBeginTime = Time.time;
+                        fading = true;
+                        lastCycleTime = Time.time;
+                    }
                     activeTextureIndex = i;
                 }
             }
@@ -211,7 +219,7 @@ public class TextureMuxNode : TickingNode
                     InitializeRenderTexture();
                 }
             }
-            if (fading)
+            if (fading && outputTex != null && patternShader != null)
             {
                 var lastPort = (ValueConnectionKnob)dynamicConnectionPorts[lastTextureIndex];
                 Texture lastTex = lastPort.GetValue<Texture>();

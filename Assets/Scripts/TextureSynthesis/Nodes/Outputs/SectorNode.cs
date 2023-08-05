@@ -141,34 +141,35 @@ public class SectorNode : TickingNode
         0,   // 5
         0,   // 6
         0,   // 7
-        -1,   // 8 
-        0,  // 9
+        -1,  // 8 
+        0,   // 9
         -1,  // 10
-        0,  // 11
-        0,  // 12
-        0,  // 13
-        -1,  // 14
-        0,  // 15
+        1,   // 11
+        0,   // 12
+        0,   // 13
+        0,  // 14
+        0,   // 15
         -1,  // 16
-        0,  // 17
+        0,   // 17
         -1,  // 18
-        0,  // 19
-        -1,  // 20
-        0,  // 21
-        -2,  // 22
-        0,  // 23
-        0,  // 24
-        0,  // 25
-        -1,  // 26
-        2,  // 27
-        0,  // 28
-        1,  // 29
-        0,  // 30
-        0}; // 31?
+        -2,   // 19
+        2,  // 20
+        -1,   // 21
+        2,  // 22
+        -1,   // 23
+        2,   // 24
+        -1,   // 25
+        2,  // 26
+        0,   // 27
+        3,   // 28
+        0,   // 29
+        3,   // 30
+        -6};  // 31?
     public void FillFromTexture(Texture2D tex)
     {
         for (int r = 0; r < rows.Length; r++)
         {
+            int startcol = tex.width/2-rows[r]/2;
             for (int c = 0; c < rows[r]; c++)
             {
                 int index = rows.Where((value, i) => i < r).Sum() + c;
@@ -178,7 +179,7 @@ public class SectorNode : TickingNode
                     col = rows[r] - c;
                 }
                 col = col + offsets[r];
-                Color32 color = tex.GetPixel(col, r);
+                Color32 color = tex.GetPixel(startcol+col, r);
                 setPixel(index, color);
             }
         }
@@ -219,19 +220,30 @@ public class SectorNode : TickingNode
     }
 
     byte seq = 1;
+    bool dmxAlive = true;
     public void SendDMX()
     {
-        controller.Send(0, universe0);
-        //controller.Send(1, seq, universe1);
-        controller.Send(1, universe1);
-        //seq++;
-        //if (seq == 0)
-        //{
-        //    seq = 1;
-        //}
-        //Debug.Log("Values: <" + string.Join(", ", universe1) + ">");
-        //this.TimedDebug("Values: <"+ string.Join(", ", universe1)+">", .5f);
-        controller.Send(2, universe2);
+        if (dmxAlive){
+            try
+            {
+                controller.Send(0, universe0);
+                //controller.Send(1, seq, universe1);
+                controller.Send(1, universe1);
+                //seq++;
+                //if (seq == 0)
+                //{
+                //    seq = 1;
+                //}
+                //Debug.Log("Values: <" + string.Join(", ", universe1) + ">");
+                //this.TimedDebug("Values: <"+ string.Join(", ", universe1)+">", .5f);
+                controller.Send(2, universe2);
+            }
+            catch (System.Exception err)
+            {
+                // DMX is down, ignore
+                dmxAlive = false;
+            }
+        }
     }
 
     float lastCalced = 0;

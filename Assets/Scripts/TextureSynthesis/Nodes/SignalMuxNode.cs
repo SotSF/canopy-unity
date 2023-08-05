@@ -92,7 +92,7 @@ public class SignalMuxNode : Node
             GUILayout.Label(string.Format("Output: {0:0.00}", port.GetValue<float>()), GUILayout.Width(60));
             GUILayout.Space(4);
         }
-        outputSignalKnob.SetPosition();
+        outputSignalKnob.DisplayLayout();
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
         if (GUI.changed)

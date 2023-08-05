@@ -17,6 +17,11 @@ public class SignalLatchNode : TickingNode
 
     public override Vector2 DefaultSize { get { return new Vector2(220, 150); } }
 
+
+    [ValueConnectionKnob("latchControl", Direction.In, typeof(bool), NodeSide.Left)]
+    public ValueConnectionKnob latchControlKnob;
+    bool latched;
+
     [ValueConnectionKnob("controlSignal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob controlSignalKnob;
     [ValueConnectionKnob("sensitivity", Direction.In, typeof(float), NodeSide.Left)]
@@ -25,6 +30,7 @@ public class SignalLatchNode : TickingNode
     [ValueConnectionKnob("outputSignal", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputSignalKnob;
 
+    public bool additive = true;
     public float latchedValue;
     public bool useRange;
     public float max = 1;
@@ -43,8 +49,10 @@ public class SignalLatchNode : TickingNode
         GUILayout.BeginHorizontal();
         
         GUILayout.BeginVertical();
+        latchControlKnob.DisplayLayout();
         controlSignalKnob.DisplayLayout();
         useRange = RTEditorGUI.Toggle(useRange, "Use range");
+        additive = RTEditorGUI.Toggle(additive, "Additive");
         if (useRange)
         {
 
@@ -76,7 +84,20 @@ public class SignalLatchNode : TickingNode
         }
         var inputValue = controlSignalKnob.GetValue<float>();
         var sensitivity = sensitivityKnob.connected() ? sensitivityKnob.GetValue<float>() : 1;
-        latchedValue += inputValue * sensitivity;
+        if (additive)
+        {
+            latchedValue += inputValue * sensitivity;
+        } else
+        {
+            if (latchControlKnob.connected()){
+                if (latchControlKnob.GetValue<bool>()){
+                    latched = !latched;
+                }
+            }
+            if (!latched){
+                latchedValue = inputValue;
+            }
+        }
         if (useRange)
         {
             latchedValue = Mathf.Clamp(latchedValue, min, max);

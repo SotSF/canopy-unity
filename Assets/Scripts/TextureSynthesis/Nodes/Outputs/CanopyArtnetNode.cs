@@ -78,6 +78,7 @@ public class CanopyArtnetNode : TickingNode
         mirrorOffset = RTEditorGUI.IntSlider("Mirror offset", mirrorOffset, 0, 95);
         flipMirrorDirection = RTEditorGUI.Toggle(flipMirrorDirection, "Flip mirror direction");
         useDoubleDensity = RTEditorGUI.Toggle(useDoubleDensity, "Use double density");
+        GUILayout.Label($"FPS: {fps}");
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -125,25 +126,23 @@ public class CanopyArtnetNode : TickingNode
     public void setPixel(int r, int c, Color32 color)
     {
         // Special case behavior for infinity mirror at the innermost ring
+        // Mirror is tailed off #12
+        // It can thus use the end of universe 72
         if (c == 0)
         {
-            var universeIndex = 95;
+            var universeIndex = 71;
             var pixelIndex = (r + mirrorOffset) % 96;
             if (flipMirrorDirection)
             {
                 pixelIndex = ((95 - r) + mirrorOffset) % 96;
             }
             var startOffset = 0;
-            if (pixelIndex < 60)
+            if (true)
             {
-                //There are 110 LEDs in the last universe of the final strip
-                startOffset = (pixelIndex + 110) * 3;
+                //There are 50 LEDs in the last universe of the final strip
+                startOffset = (pixelIndex + 50) * 3;
             }
-            else
-            {
-                universeIndex = 48;
-                startOffset = (pixelIndex - 60) * 3;
-            }
+
             var universe = universes[universeIndex];
             universe[startOffset + 0] = color.r;
             universe[startOffset + 1] = color.g;
@@ -153,7 +152,7 @@ public class CanopyArtnetNode : TickingNode
             var port = stripToPort(r);
             var pixelIndex = pixelIndexInPort(r, c);
             var portUniverseIndex = pixelIndexToUniverseIndex(pixelIndex);
-            var universeIndex = (3 * port) + portUniverseIndex;
+            var universeIndex = (6 * port) + portUniverseIndex;
             var universe = universes[universeIndex];
 
             var startOffset = (pixelIndex - (170 * portUniverseIndex)) * 3;
@@ -178,13 +177,33 @@ public class CanopyArtnetNode : TickingNode
     }
 
 
+    bool dmxAlive = true;
     public void SendDMX()
     {
-        for (short i = 0; i < numUniverses; i++)
+        if (dmxAlive)
         {
-            controller.Send(i, universes[i]);
+            try
+            {
+                if (lastSendTime != 0)
+                {
+                    var deltaFrame = Time.time - lastSendTime;
+                    fps = 1/deltaFrame;
+                }
+                for (short i = 0; i < numUniverses; i++)
+                {
+                    controller.Send(i, universes[i]);
+                }
+                lastSendTime = Time.time;
+            }
+            catch (System.Exception err)
+            {
+                dmxAlive = false;
+            }
         }
     }
+
+    float lastSendTime;
+    float fps = 24;
 
     public override bool Calculate()
     {
@@ -196,6 +215,7 @@ public class CanopyArtnetNode : TickingNode
         Graphics.Blit(inputTex, buffer);
         Texture2D tex2d = buffer.ToTexture2D();
         FillFromTexture(tex2d);
+
         SendDMX();
         Destroy(tex2d);
         frameindex++;

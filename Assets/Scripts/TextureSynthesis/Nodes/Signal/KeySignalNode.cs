@@ -18,21 +18,38 @@ public class KeySignalNode : TickingNode
     [ValueConnectionKnob("Out", Direction.Out, typeof(float))]
     public ValueConnectionKnob signalOutputKnob;
 
-    HashSet<KeyCode> bindingKeys;
-    HashSet<KeyCode> boundKeys;
+    [ValueConnectionKnob("pressed", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob pressedKnob;
+    bool pressed;
+
+    [ValueConnectionKnob("held", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob heldKnob;
+    bool held;
+
+    [ValueConnectionKnob("released", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob releasedKnob;
+    bool released;
+
+    public HashSet<KeyCode> bindingKeys;
+    public HashSet<KeyCode> boundKeys;
     bool inputActive = false;
 
     bool useEasing = false;
     bool binding = false;
-    bool bound = false;
+    public bool bound = false;
 
     float timeDown = 0;
     float timeUp = 0;
 
     private void Awake()
     {
-        bindingKeys = new HashSet<KeyCode>();
-        boundKeys = new HashSet<KeyCode>();
+        if (bindingKeys == null){
+            bindingKeys = new HashSet<KeyCode>();
+        }
+        if (boundKeys == null)
+        {
+            boundKeys = new HashSet<KeyCode>();
+        }
     }
 
     public override bool Calculate()
@@ -55,7 +72,14 @@ public class KeySignalNode : TickingNode
         else
         {
             signalOutputKnob.SetValue<float>(inputActive ? 1 : 0);
+
         }
+        pressedKnob.SetValue<bool>(pressed);
+        if (pressed){
+            pressed = false;
+        }
+        heldKnob.SetValue<bool>(held);
+        releasedKnob.SetValue<bool>(released);
         return true;
     }
          
@@ -82,6 +106,8 @@ public class KeySignalNode : TickingNode
                     if (bindingKeys.SetEquals(boundKeys))
                     {
                         inputActive = true;
+                        pressed = true;
+                        held = true;
                         timeDown = Time.time;
                     }
                 }
@@ -103,6 +129,7 @@ public class KeySignalNode : TickingNode
                     {
                         timeUp = Time.time;
                         inputActive = false;
+                        held = false;
                     }
                 }
                 break;
@@ -144,7 +171,12 @@ public class KeySignalNode : TickingNode
         }
         useEasing = RTEditorGUI.Toggle(useEasing, new GUIContent("Use easing", "Apply an easing curve to key input transitions"));
         GUILayout.EndVertical();
+        GUILayout.BeginVertical();
         signalOutputKnob.DisplayLayout();
+        pressedKnob.DisplayLayout();
+        heldKnob.DisplayLayout();
+        releasedKnob.DisplayLayout();
+        GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
         if (GUI.changed)

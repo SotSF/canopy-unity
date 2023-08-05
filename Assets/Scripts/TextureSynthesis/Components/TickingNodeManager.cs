@@ -42,9 +42,10 @@ public class TickingNodeManager : MonoBehaviour
         }
     }
 
+    public float targetFPS = 144;
     void Update()
     {
-        if (Time.time - lastTick > 1.0f / 60)
+        if (Time.time - lastTick > 1.0f / targetFPS)
         {
             lastTick = Time.time;
             TickNodes();
