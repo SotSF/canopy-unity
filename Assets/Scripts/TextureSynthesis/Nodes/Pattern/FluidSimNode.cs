@@ -162,6 +162,9 @@ public class FluidSimNode : TickingNode
     
     bool clicked = false;
     //float viscosity = 1;
+    GUIContent boundaryLabel = new GUIContent("Bounded", "Bound at the borders");
+    GUIContent continuousVelocityLabel = new GUIContent("Continuous Velocity", "Add velocity texture every frame");
+    GUIContent continuousDyeLabel = new GUIContent("Continuous dye", "Add dye every frame");
     public override void NodeGUI()
     {
         GUILayout.BeginHorizontal();
@@ -196,14 +199,12 @@ public class FluidSimNode : TickingNode
 
         GUILayout.BeginVertical();
 
-
-
-
         // parameters / buttons
         GUILayout.BeginHorizontal();
-        useBoundaries = RTEditorGUI.Toggle(useBoundaries, new GUIContent("Bounded", "Bound at the borders"));
-        continuousVelocity = RTEditorGUI.Toggle(continuousVelocity, new GUIContent("Continuous Velocity", "Add velocity texture every frame"));
-        continuousDye = RTEditorGUI.Toggle(continuousDye, new GUIContent("Continuous dye", "Add dye every frame"));
+
+        useBoundaries = RTEditorGUI.Toggle(useBoundaries, boundaryLabel);
+        continuousVelocity = RTEditorGUI.Toggle(continuousVelocity, continuousVelocityLabel);
+        continuousDye = RTEditorGUI.Toggle(continuousDye, continuousDyeLabel);
         //viscosity = RTEditorGUI.Slider(viscosity, 0.00001f, 100f);
         GUILayout.EndHorizontal();
         // Texture output

@@ -1,6 +1,8 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
+
 using SecretFire.TextureSynth;
+
 using UnityEngine;
 
 
@@ -33,11 +35,13 @@ public class HSVNode : TextureSynthNode
     private Vector4 HSV;
     private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
-
+    private Vector2Int inputSize;
     private void Awake()
     {
         HSVShader = Resources.Load<ComputeShader>("NodeShaders/HSVFilter");
         kernelId = HSVShader.FindKernel("CSMain");
+        inputSize = new Vector2Int(0, 0);
+        HSV = new Vector4(hue, saturation, value);
     }
 
     private void InitializeRenderTexture()
@@ -77,7 +81,8 @@ public class HSVNode : TextureSynthNode
             return true;
         }
 
-        var inputSize = new Vector2Int(tex.width, tex.height);
+        inputSize.x = tex.width;
+        inputSize.y = tex.height;
         if (inputSize != outputSize)
         {
             outputSize = inputSize;
@@ -95,7 +100,9 @@ public class HSVNode : TextureSynthNode
         {
             value = valKnob.GetValue<float>();
         }
-        HSV = new Vector4(hue, saturation, value);
+        HSV.x = hue;
+        HSV.y = saturation;
+        HSV.z = value;
         //Execute HSV compute shader here
         HSVShader.SetVector("HSV", HSV);
         HSVShader.SetTexture(kernelId, "OutputTex", outputTex);

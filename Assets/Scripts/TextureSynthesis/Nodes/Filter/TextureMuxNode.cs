@@ -96,7 +96,11 @@ public class TextureMuxNode : TickingNode
         outputTex.Create();
 
     }
-    
+
+    GUILayoutOption expandFalse = GUILayout.ExpandWidth(false);
+    GUILayoutOption width50 = GUILayout.Width(50);
+    GUILayoutOption width100 = GUILayout.Width(100);
+    GUILayoutOption height50 = GUILayout.Height(50);
     public override void NodeGUI()
     {
         SetPortCount();
@@ -107,10 +111,10 @@ public class TextureMuxNode : TickingNode
         GUILayout.BeginHorizontal();
         //Control inputs
         GUILayout.BeginVertical();
-        GUILayout.Label("Control", GUILayout.ExpandWidth(false), GUILayout.Width(50));
+        GUILayout.Label("Control", expandFalse, width50);
         controlKnob.SetPosition();
         //controlKnob.DisplayLayout();
-        GUILayout.Label("Autoplay", GUILayout.ExpandWidth(false), GUILayout.Width(50));
+        GUILayout.Label("Autoplay", expandFalse, width50);
         autoplayKnob.SetPosition();
         fade = RTEditorGUI.Toggle(fade, "Fade?");
         GUILayout.EndVertical();
@@ -120,15 +124,15 @@ public class TextureMuxNode : TickingNode
             GUILayout.BeginVertical();
             var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
             GUILayout.Space(4);
-            GUILayout.Box(port.GetValue<Texture>(), GUILayout.MaxWidth(50), GUILayout.MaxHeight(50));
+            GUILayout.Box(port.GetValue<Texture>(), width50, height50);
             //GUILayout.Label(string.Format("Tex {0}", i));
             if (i == activeTextureIndex)
             {
-                GUILayout.Label("Active", GUILayout.Width(50), GUILayout.MaxWidth(50));
+                GUILayout.Label("Active", width50);
             }
             else
             {
-                if (GUILayout.Button("Activate", GUILayout.Width(50), GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Activate", width50, expandFalse))
                 {
                     lastTextureIndex = activeTextureIndex;
                     if (fade)
@@ -143,7 +147,7 @@ public class TextureMuxNode : TickingNode
             port.SetPosition();
             GUILayout.EndVertical();
         }
-        GUILayout.Label("Add input", GUILayout.ExpandWidth(false), GUILayout.Width(50));
+        GUILayout.Label("Add input", expandFalse, width50);
         ((ValueConnectionKnob)dynamicConnectionPorts[openPortIndex]).SetPosition();
         GUILayout.EndHorizontal();
 
@@ -152,7 +156,7 @@ public class TextureMuxNode : TickingNode
 
         //Autoplay button
         string label = autoplay ? "Stop autoplay" : "Start autoplay";
-        if (GUILayout.Button(label, GUILayout.Width(100)))
+        if (GUILayout.Button(label, width100))
         {
             ToggleAutoplay();
         }
@@ -162,7 +166,7 @@ public class TextureMuxNode : TickingNode
         if (activePortCount > 0)
         {
             var port = (ValueConnectionKnob)dynamicConnectionPorts[activeTextureIndex];
-            GUILayout.Box(outputTex, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
+            GUILayout.Box(outputTex, width50, height50);
             //GUILayout.Space(4);
         }
         outputTexKnob.SetPosition();
@@ -194,7 +198,8 @@ public class TextureMuxNode : TickingNode
             lastCycleTime = Time.time;
         }
     }
-    
+
+    Vector2Int inputSize = new Vector2Int(0, 0);
     public override bool Calculate()
     {
         if (targetPortCount > 1)
@@ -212,7 +217,8 @@ public class TextureMuxNode : TickingNode
             Texture activeTex = activePort.GetValue<Texture>();
             if (activeTex != null)
             {
-                var inputSize = new Vector2Int(activeTex.width, activeTex.height);
+                inputSize.x = activeTex.width;
+                inputSize.y = activeTex.height;
                 if (inputSize != outputSize)
                 {
                     outputSize = inputSize;

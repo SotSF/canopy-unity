@@ -79,6 +79,9 @@ public class PanNode : TickingNode {
     }
 
     float in1min = 0, in1max = 0, in2min = 0, in2max = 0;
+    GUIContent smoothLabel = new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions");
+    GUILayoutOption imgWidth = GUILayout.MaxWidth(64);
+    GUILayoutOption imgHeight = GUILayout.MaxHeight(64);
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
@@ -89,7 +92,7 @@ public class PanNode : TickingNode {
         // Options - smooth/mirror
         GUILayout.BeginVertical();
         GUILayout.Label("Pan options");
-        smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, new GUIContent("Smooth", "Whether the image panning should use bilinear filtering to produce smooth transitions"));
+        smoothTransitions = RTEditorGUI.Toggle(smoothTransitions, smoothLabel);
         //mirror = RTEditorGUI.Toggle(mirror, new GUIContent("Mirror", "Use mirror wraping at texture edges"));
         GUILayout.Label("Sample mode");
         RadioButtons(sampleMode);
@@ -107,8 +110,8 @@ public class PanNode : TickingNode {
         GUILayout.EndHorizontal();
 
         // Middle row - Input knobs/sliders
-        FloatKnobOrSlider(ref in1, in1min, in1max, in1Knob, GUILayout.MaxWidth(DefaultSize.x-60));
-        FloatKnobOrSlider(ref in2, in2min, in2max, in2Knob, GUILayout.MaxWidth(DefaultSize.x-60));
+        FloatKnobOrSlider(ref in1, in1min, in1max, in1Knob);
+        FloatKnobOrSlider(ref in2, in2min, in2max, in2Knob);
 
         // Bottom row - reset button, tex view
         GUILayout.BeginHorizontal();
@@ -124,7 +127,7 @@ public class PanNode : TickingNode {
         }
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
-        GUILayout.Box(outputTex, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
+        GUILayout.Box(outputTex, imgWidth, imgHeight);
 
         GUILayout.EndHorizontal();
         GUILayout.Space(4);
@@ -184,11 +187,13 @@ public class PanNode : TickingNode {
         }
     }
 
+    Vector2 mirrorSafeBounds = new Vector2(0,0);
     private void BoundOffset()
     {
         // Keep offset bounded by (2x) dimensions so that floating point coverage doesn't decrease
         // over long pans. use 2x so that mirrored textures don't jump on resetting the offset
-        Vector2 mirrorSafeBounds = 2 * new Vector2(outputSize.x - 1, outputSize.y - 1);
+        mirrorSafeBounds.x = 2 * (outputSize.x - 1);
+        mirrorSafeBounds.y = 2 * (outputSize.y - 1);
         if (offset.x > mirrorSafeBounds.x)
         {
             offset.x -= mirrorSafeBounds.x;
@@ -237,6 +242,7 @@ public class PanNode : TickingNode {
     }
 
     float lastStep = 0;
+    Vector2Int inputSize = new Vector2Int(0, 0);
     public override bool Calculate()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
@@ -260,7 +266,8 @@ public class PanNode : TickingNode {
             return true;
         }
 
-        var inputSize = new Vector2Int(tex.width, tex.height);
+        inputSize.x = tex.width;
+        inputSize.y = tex.height;
         if (inputSize != outputSize)
         {
             outputSize = inputSize;
