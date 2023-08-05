@@ -46,6 +46,10 @@ public class NodeUIController : MonoBehaviour
     {
         originalCanvasRect = nodeCanvas.specifiedCanvasRect;
         originalRootRect = nodeCanvas.specifiedRootRect;
+        nodeCanvas.specifiedCanvasRect.width = Screen.width;
+        nodeCanvas.specifiedCanvasRect.height = Screen.height;
+        nodeCanvas.specifiedRootRect.width = Screen.width;
+        nodeCanvas.specifiedRootRect.height = Screen.height;
     }
 
     IEnumerator MinimizeRoutine()
@@ -107,7 +111,7 @@ public class NodeUIController : MonoBehaviour
         {
             obj.gameObject.SetActive(false);
         }
-        viewModeButton.GetComponentInChildren<Text>().text = "Enter simulator view";
+        //viewModeButton.GetComponentInChildren<Text>().text = "Enter simulator view";
         Canopy.instance.EnterControllerMode();
         var trans = Animations.LocalPositionLerp(Camera.main.transform, controllerCameraPosition);
         var rotate = Animations.LocalQuatLerp(Camera.main.transform, Quaternion.identity);
