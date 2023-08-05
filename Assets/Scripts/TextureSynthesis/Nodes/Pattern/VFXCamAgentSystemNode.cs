@@ -5,6 +5,8 @@ using SecretFire.TextureSynth;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.VFX;
+using UnityEngine.VFX.Utility;
 
 [Node(false, "Pattern/VFXCamAgentSystem")]
 public class VFXCamAgentSystemNode : TickingNode
@@ -20,25 +22,37 @@ public class VFXCamAgentSystemNode : TickingNode
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;
+    ExposedProperty inputTexProp;
 
     [ValueConnectionKnob("emissionRate", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob emissionRateKnob;
+    public float emissionRate = 3;
+    ExposedProperty emissionRateProp;
+
     [ValueConnectionKnob("sizeMultiplier", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob sizeKnob;
+    public float particleSize = 9;
+    ExposedProperty sizeProp;
+
     [ValueConnectionKnob("vortexSpeed", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob vortexSpeedKnob;
-    [ValueConnectionKnob("V", Direction.In, typeof(float), NodeSide.Left)]
-    public ValueConnectionKnob valKnob;
+    public float vortexSpeed = 40;
+    ExposedProperty vortexSpeedProp;
 
-    public float vortexSpeed, particleSize=9, value, emissionRate=3;
+    [ValueConnectionKnob("rotationSpeed", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob rotationSpeedKnob;
+    public float rotationSpeed = 0.5f;
+    ExposedProperty rotationSpeedProp;
+
+
 
     private Vector2Int outputSize = Vector2Int.zero;
     //private float speedFactor = 1;
     private RenderTexture outputTex;
 
-    private Transform vfxPrefab;
     private Camera cam;
     private GameObject sceneObj;
+    private VisualEffect effect;
 
     public void Awake()
     {
@@ -46,22 +60,24 @@ public class VFXCamAgentSystemNode : TickingNode
         sceneObj = GameObject.Find("VFXCam");
         cam = sceneObj.GetComponentsInChildren<Camera>().First();
         outputTex = cam.targetTexture;
+        effect = sceneObj.GetComponentsInChildren<VisualEffect>().First();
+        inputTexProp = "InputTex";
+        emissionRateProp = "EmissionRate";
+        sizeProp = "SizeMultiplier";
+        vortexSpeedProp = "VortexSpeed";
+        rotationSpeedProp = "RotationSpeed";
     }
 
 
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
+        inputTexKnob.DisplayLayout();
 
-        emissionRateKnob.DisplayLayout();
-        if (!emissionRateKnob.connected())
-        {
-            emissionRate = RTEditorGUI.Slider(emissionRate, 0, 1000);
-        }
-        else
-        {
-            emissionRate = emissionRateKnob.GetValue<float>();
-        }
+        FloatKnobOrSlider(ref emissionRate, 0, 100, emissionRateKnob);
+        FloatKnobOrSlider(ref particleSize, 0, 10, sizeKnob);
+        FloatKnobOrSlider(ref vortexSpeed, -100, 100, vortexSpeedKnob);
+        FloatKnobOrSlider(ref rotationSpeed, 0, 1, rotationSpeedKnob);
 
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
@@ -81,7 +97,18 @@ public class VFXCamAgentSystemNode : TickingNode
     public override bool Calculate()
     {
         emissionRate = emissionRateKnob.connected() ? emissionRateKnob.GetValue<float>() : emissionRate;
-
+        particleSize = sizeKnob.connected() ? sizeKnob.GetValue<float>() : particleSize;
+        vortexSpeed = vortexSpeedKnob.connected() ? vortexSpeedKnob.GetValue<float>() : vortexSpeed;
+        rotationSpeed = rotationSpeedKnob.connected() ? rotationSpeedKnob.GetValue<float>() : rotationSpeed;
+        Texture tex = inputTexKnob.GetValue<Texture>();
+        if (inputTexKnob.connected() && tex != null)
+        {
+            effect.SetTexture(inputTexProp, tex);
+        }
+        effect.SetFloat(emissionRateProp, emissionRate);
+        effect.SetFloat(sizeProp, particleSize);
+        effect.SetFloat(vortexSpeedProp, vortexSpeed);
+        effect.SetFloat(rotationSpeedProp, rotationSpeed);
         outputTexKnob.SetValue(outputTex);
         return true;
     }
