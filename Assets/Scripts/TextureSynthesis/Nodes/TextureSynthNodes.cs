@@ -68,10 +68,25 @@ namespace SecretFire.TextureSynth
 
     public abstract class TextureSynthNode : Node
     {
+        GUIStyle _sliderStyle;
+        GUIStyle sliderStyle {
+            get {
+                if (_sliderStyle == null)
+                {
+                    _sliderStyle = new GUIStyle();
+                    _sliderStyle.fixedWidth = 100;
+                    _sliderStyle.normal.textColor = Color.white;
+                }
+                return _sliderStyle;
+            }
+        }
+
         protected void FloatKnobOrSlider(ref float val, float min, float max, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
             GUILayout.BeginHorizontal();
-            knob.DisplayLayout();
+            GUILayout.Space(5);
+
+            knob.DisplayLayout(sliderStyle);
             if (!knob.connected())
             {
                 val = RTEditorGUI.Slider(val, min, max, layoutOpts);
