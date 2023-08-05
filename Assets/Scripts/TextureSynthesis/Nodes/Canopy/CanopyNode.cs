@@ -26,7 +26,7 @@ public class CanopyNode : Node
     private Vector2Int outputSize = Vector2Int.zero;
     private RenderTexture outputTex;
     private ComputeShader canopyMainShader;
-    private ComputeBuffer dataBuffer;
+    //private ComputeBuffer dataBuffer;
     private Vector3[] colorData;
     private int mainKernel;
     public bool polarize;
@@ -42,10 +42,10 @@ public class CanopyNode : Node
         {
             canopyMainShader = Resources.Load<ComputeShader>("NodeShaders/CanopyMain");
             mainKernel = canopyMainShader.FindKernel("CanopyMain");
-            dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
+            //dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
             colorData = new Vector3[Constants.NUM_LEDS];
             InitializeTextures();
-            canopyMainShader.SetBuffer(mainKernel, "dataBuffer", dataBuffer);
+            //canopyMainShader.SetBuffer(mainKernel, "dataBuffer", dataBuffer);
             canopyMainShader.SetTexture(mainKernel, "OutputTex", outputTex);
             lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
             RenderToCanopySimulation(outputTex);
@@ -61,8 +61,8 @@ public class CanopyNode : Node
             if (t != null)
                 t.Release();
         }
-        if (dataBuffer != null)
-            dataBuffer.Release();
+        //if (dataBuffer != null)
+        //    dataBuffer.Release();
     }
 
     private void OnDisable()
@@ -137,7 +137,7 @@ public class CanopyNode : Node
         if (tex != null)
         {
             // Process data one frame delayed
-            dataBuffer.GetData(colorData);
+            //dataBuffer.GetData(colorData);
             SetLightColor();
             int kernelId = mainKernel;
             canopyMainShader.SetTexture(kernelId, "InputTex", tex);
