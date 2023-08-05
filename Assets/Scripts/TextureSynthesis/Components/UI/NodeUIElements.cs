@@ -17,15 +17,17 @@ public static class NodeUIElements
         }
     }
 
-    public static void TexInfo(Texture tex, float width=0, float height=0, bool showAttribs=true)
+    private static Dictionary<float, GUILayoutOption> widths = new();
+    private static Dictionary<float, GUILayoutOption> heights = new();
+
+    public static void TexInfo(Texture tex, float width, float height)
     {
         GUILayout.BeginVertical();
-        var layoutParams = new List<GUILayoutOption>();
-        if (width > 0)
-            layoutParams.Add(GUILayout.MaxWidth(width));
-        if (height > 0)
-            layoutParams.Add(GUILayout.MaxHeight(height));
-        GUILayout.Box(tex, layoutParams.ToArray());
+        if (!widths.ContainsKey(width))
+            widths[width] = GUILayout.MaxWidth(width);
+        if (!heights.ContainsKey(height))
+            heights[height] = GUILayout.MaxHeight(height);
+        GUILayout.Box(tex, widths[width], heights[height]);
         GUILayout.Label("'" + TrimName(tex.name) + "'");
         GUILayout.Label(tex.width + "x" + tex.height);
         GUILayout.EndVertical();

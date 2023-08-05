@@ -19,6 +19,19 @@ public class TextureBankNode : Node
     public SerialDict<string, ValueConnectionKnob> texKnobs;
     private List<Texture2D> textures;
 
+    public void Awake() {
+        if (textures == null || texKnobs == null)
+        {
+            try
+            {
+                LoadTextures();
+            } catch (UnityException e)
+            {
+                Debug.Log(e+":\n\n"+e.Message);
+            }
+        }
+        Calculate();
+    }
 
     public void LoadTextures()
     {
@@ -28,8 +41,11 @@ public class TextureBankNode : Node
         this.TimedDebug("texStyleID: " + outKnobAttribs.StyleID,2);
         texStyle.SetColor(Color.yellow);
         textures = new List<Texture2D>(Resources.LoadAll<Texture2D>("StaticTextures"));
-        if (texKnobs == null)
+        //Debug.Log("Num tex: "+textures.Count);
+        if (texKnobs == null){
             texKnobs = new SerialDict<string, ValueConnectionKnob>();
+            //Debug.Log("Empty tex knobs");
+        }
         if (texNames == null)
             texNames = new List<string>();
         List<string> loadedValues = new List<string>(textures.Select(t => t.name));
@@ -40,6 +56,7 @@ public class TextureBankNode : Node
         //Rewire connection ports from loaded strings
         foreach (string texName in texNames)
         {
+            //Debug.Log("name: "+texName+" texture");
             texKnobs[texName] = (ValueConnectionKnob)dynamicConnectionPorts[texNames.IndexOf(texName)];
         }
         //Remove any ports for textures that were removed
@@ -85,8 +102,13 @@ public class TextureBankNode : Node
         }
         foreach (var tex in textures)
         {
-            if (texKnobs.ContainsKey(tex.name))
+            if (texKnobs.ContainsKey(tex.name)){
                 texKnobs[tex.name].SetValue(tex);
+                //Debug.Log("Set tex "+tex.name+" for knob");
+            }
+            else{
+                Debug.Log("Couldn't find knob for "+tex.name);
+            }
         }
         return true;
     }
