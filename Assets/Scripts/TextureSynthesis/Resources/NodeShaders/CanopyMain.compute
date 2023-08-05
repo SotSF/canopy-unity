@@ -1,7 +1,7 @@
 ﻿#pragma kernel CanopyMain
 
 Texture2D<float4> InputTex;
-RWStructuredBuffer<float3> dataBuffer;
+//RWStructuredBuffer<float3> dataBuffer;
 RWTexture2D<float4> OutputTex;
 
 bool polarize;
@@ -58,7 +58,7 @@ void CanopySeamless(uint3 id : SV_DispatchThreadID)
 	float2 smpPoint = !mirror ? id.xy : float2(id.x, 96 - id.y);
 	float4 result = InputTex.SampleLevel(SmpLinearMirror, smpPoint / maxDimensions, 0);
     OutputTex[id.xy] = result;
-    dataBuffer[75 * id.y + id.x] = result.xyz;
+    /*dataBuffer[75 * id.y + id.x] = result.xyz;*/
 }
 
 [numthreads(25, 16, 1)]
@@ -71,5 +71,5 @@ void CanopyMain(uint3 id : SV_DispatchThreadID)
     }
     float4 result = InputTex.SampleLevel(SmpPointRepeat, coord/maxDimensions, 0);
     OutputTex[id.xy] = result;
-    dataBuffer[75 * id.y  + id.x] = result.xyz;
+    /*dataBuffer[75 * id.y  + id.x] = result.xyz;*/
 }
