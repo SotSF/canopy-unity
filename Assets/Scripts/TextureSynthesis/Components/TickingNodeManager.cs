@@ -11,6 +11,7 @@ public class TickingNodeManager : MonoBehaviour
     public static TickingNodeManager instance;
     private RTCanvasCalculator canvasCalculator;
     private RTNodeEditor nodeEditor;
+    private List<TickingNode> nodesToTick;
     float lastTick = 0;
 
     void Awake()
@@ -18,13 +19,13 @@ public class TickingNodeManager : MonoBehaviour
         instance = this;
         canvasCalculator = GetComponent<RTCanvasCalculator>();
         nodeEditor = GetComponent<RTNodeEditor>();
+        nodesToTick = new List<TickingNode>();
     }
 
     /* Sets calculated = false (ClearCalculation()) for all subgraphs dependent on 
      * a ticking node, then recalculates them in one go. */
     void TickNodes()
     {
-        List<TickingNode> nodesToTick = new List<TickingNode>();
         if (nodeEditor?.workingCanvas != null)
         {
             foreach (var node in nodeEditor.workingCanvas.nodes)
@@ -39,6 +40,7 @@ public class TickingNodeManager : MonoBehaviour
             {
                 canvasCalculator.ContinueCalculation(node);
             }
+            nodesToTick.Clear();
         }
     }
 
