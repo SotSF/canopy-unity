@@ -25,8 +25,8 @@ float2 rotate(float2 xy, float2 center, float theta)
     return float2(newX, newY);
 }
 
-/* Transforms a pixel coordinate in 75x96 canopy space, where 
- * x in [0,74] specifies distance from the center along a strip, and
+/* Transforms a pixel coordinate in 151x96 canopy space, where 
+ * x in [0,150] specifies distance from the center along a strip, and
  * y in [0,95] specifies the strip's position around the circle, to
  * the texture coordinate such that the physical pixel matches
  * its position in a standard 2D layout, using the Canopy's physical
@@ -38,7 +38,7 @@ float2 canopyDepolarize(uint2 pixel, float2 dimensions) {
     float stripLength = 2.5f;     // Length of the strips in meters
     float normalizedStripAngle = pixel.y / 96.0f;  // Strip angle around center in [0-1) 
                                                    // 0 and 2pi are the same angle so we don't fully cover [0-1]
-    float normalizedPixelStripPosition = pixel.x / 74.0f; // position along strip in [0-1]
+    float normalizedPixelStripPosition = pixel.x / 151.0f; // position along strip in [0-1]
     float normalizedX = ((stripLength*normalizedPixelStripPosition) + apexRadius) / (stripLength + apexRadius);
     float2 rotatedPixel = rotate(float2(normalizedX, 0), center, 2 * pi * normalizedStripAngle);
     float normalizedDimension = min(dimensions.x, dimensions.y);

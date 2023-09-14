@@ -19,10 +19,6 @@ public class CanopyNode : Node
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
-
-
-    //private RenderTexture camTex;
-    private RenderTexture kaleidoscopeElementTexture;
     private Vector2Int outputSize = Vector2Int.zero;
     private RenderTexture outputTex;
     private ComputeShader canopyMainShader;
@@ -34,49 +30,49 @@ public class CanopyNode : Node
     private Light lightCaster;
 
     private bool hasAwoken = false;
+    private bool isInitialized = false;
 
     private void Awake()
     {
-        Debug.Log("CanopyMain awoke");
-        if (Application.isPlaying && !hasAwoken)
+        isInitialized = false;
+    }
+
+    private void ReleaseTextures()
+    {
+        if (outputTex != null)
         {
-            canopyMainShader = Resources.Load<ComputeShader>("NodeShaders/CanopyMain");
-            mainKernel = canopyMainShader.FindKernel("CanopyMain");
-            //dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
-            colorData = new Vector3[Constants.NUM_LEDS];
-            InitializeTextures();
-            //canopyMainShader.SetBuffer(mainKernel, "dataBuffer", dataBuffer);
-            canopyMainShader.SetTexture(mainKernel, "OutputTex", outputTex);
-            lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
-            RenderToCanopySimulation(outputTex);
-            hasAwoken = true;
+            outputTex.Release();
         }
     }
 
     private void OnDestroy()
     {
-        RenderTexture[] textures = { outputTex, kaleidoscopeElementTexture };/*, camTex };*/
-        foreach (var t in textures)
-        {
-            if (t != null)
-                t.Release();
-        }
-        //if (dataBuffer != null)
-        //    dataBuffer.Release();
+        ReleaseTextures();
     }
 
     private void OnDisable()
     {
-        OnDestroy();
+        ReleaseTextures();
+    }
+
+    private void Initialize()
+    {
+        canopyMainShader = Resources.Load<ComputeShader>("NodeShaders/CanopyMain");
+        mainKernel = canopyMainShader.FindKernel("CanopyMain");
+        //dataBuffer = new ComputeBuffer(Constants.NUM_LEDS, Constants.FLOAT_BYTES * Constants.VEC3_LENGTH);
+        colorData = new Vector3[Constants.NUM_LEDS];
+        InitializeTextures();
+        //canopyMainShader.SetBuffer(mainKernel, "dataBuffer", dataBuffer);
+        canopyMainShader.SetTexture(mainKernel, "OutputTex", outputTex);
+        lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
+        RenderToCanopySimulation(outputTex);
+        Debug.Log("Canopy called Initialize");
+        isInitialized = true;
     }
 
     private void InitializeTextures()
-    {
-        // Create a texture that is half of the canopy size
-        kaleidoscopeElementTexture = new RenderTexture(75, 48, 24);
-        kaleidoscopeElementTexture.enableRandomWrite = true;
-        kaleidoscopeElementTexture.Create();
-
+{
+        ReleaseTextures();
         //outputTex = new RenderTexture(outputSize.x, outputSize.y, 24);
         outputTex = new RenderTexture(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS, 24);
         outputTex.enableRandomWrite = true;
@@ -94,8 +90,10 @@ public class CanopyNode : Node
 
         GUILayout.BeginHorizontal();
         polarize = RTEditorGUI.Toggle(polarize, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
-        seamless = RTEditorGUI.Toggle(seamless, new GUIContent("Seamless", "Apply a kaleidoscope effect such that the output is seamless"));
-
+        if (GUILayout.Button("Reinitialize"))
+        {
+            isInitialized = false;
+        }
         GUILayout.EndHorizontal();
         var lastBox = GUILayoutUtility.GetLastRect();
         Rect inOutTextureBox = new Rect(lastBox.x + 15, lastBox.yMax + 4, 220, 80);
@@ -118,8 +116,6 @@ public class CanopyNode : Node
         textureOutputKnob.SetPosition(rightSideOffset);
         GUILayout.EndVertical();
 
-
-
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
@@ -133,6 +129,10 @@ public class CanopyNode : Node
 
     public override bool Calculate()
     {
+        if (!isInitialized)
+        {
+            Initialize();
+        }
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (tex != null)
         {

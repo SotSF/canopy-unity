@@ -12,9 +12,7 @@ SamplerState smpRepeatPoint;
 
 int gameOfLifeSample(int2 id, int2 offset)
 {
-    float2 dimensions = float2(width - 1, height - 1);
-    float4 val = gameState.SampleLevel(smpRepeatPoint, (id + offset) / dimensions, 0);
-	return length(val) > ALIVE_THRESHOLD ? 1 : 0;
+    return gameState[id+offset].x;
 }
 
 
@@ -41,8 +39,7 @@ void GameOfLife(uint3 id : SV_DispatchThreadID)
     neighbors += gameOfLifeSample(id.xy, int2(0, 1));
     neighbors += gameOfLifeSample(id.xy, int2(1, 1));
 
-	uint self = length(gameState[id.xy]) > ALIVE_THRESHOLD ? 1 : 0;
-    bool alive = self == 1;
+    bool alive = gameState[id.xy].x >= 0.9;
     bool stable = neighbors >= 2 && neighbors <= 3;
     bool repro = neighbors == 3;
     float val = alive ? (stable ? 1 : 0) : (repro ? 1 : 0);

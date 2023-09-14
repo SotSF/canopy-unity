@@ -18,7 +18,7 @@ public class CropNode : TextureSynthNode
 
     [ValueConnectionKnob("Width", Direction.In, typeof(float))]
     public ValueConnectionKnob widthInputKnob;
-    public float width = 75;
+    public float width = 151;
 
     [ValueConnectionKnob("Height", Direction.In, typeof(float))]
     public ValueConnectionKnob heightInputKnob;
