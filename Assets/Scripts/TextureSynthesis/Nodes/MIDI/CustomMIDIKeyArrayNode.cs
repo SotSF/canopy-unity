@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[Node(false, "MIDI/CustomMIDIKeyArray")]
-public class CustomMIDIKeyArrayNode : Node
+//[Node(false, "MIDI/CustomMIDIKeyArray")]
+public class CustomMIDIKeyArrayNode //: Node
 {
     public struct MIDINote
     {
@@ -21,10 +21,10 @@ public class CustomMIDIKeyArrayNode : Node
         public MidiChannel channel;
     }
 
-    public override string GetID => "CustomMIDIKeyArrayNode";
-    public override string Title { get { return "CustomMIDIKeyArray"; } }
-    public override bool AutoLayout => true;
-    public override Vector2 MinSize => noteToValue != null ? new Vector2(120, noteToValue.Count * 30 + 40) : new Vector2(120, 70);
+    // public override string GetID => "CustomMIDIKeyArrayNode";
+    // public override string Title { get { return "CustomMIDIKeyArray"; } }
+    // public override bool AutoLayout => true;
+    // public override Vector2 MinSize => noteToValue != null ? new Vector2(120, noteToValue.Count * 30 + 40) : new Vector2(120, 70);
 
     bool binding = false;
     public bool bound = false;
@@ -90,48 +90,48 @@ public class CustomMIDIKeyArrayNode : Node
         }
     }
 
-    public override void NodeGUI()
-    {
-        GUILayout.BeginVertical();
-        if (!bound && !binding)
-        {
-            if (GUILayout.Button("Bind input MIDI keys"))
-            {
-                BeginBinding();
-            }
-        }
-        else
-        {
-            if (bound)
-            {
-                if (GUILayout.Button("Unbind"))
-                {
-                    Unbind();
-                }
-            }
-            else
-            {
-                GUILayout.Label("Press MIDI keys to bind them");
-                if (GUILayout.Button("Finish binding"))
-                {
-                    FinishBinding();
-                }
-            }
-            // Loop over dynamic ports and show them
-            foreach(var note in noteToValue.Keys)
-            {
-                string label = string.Format("{0} note {1}: {2:0.00}", note.channel.ToString(), note.note, noteToValue[note]);
-                GUILayout.Label(label);
-            }
-        }
-        GUILayout.EndVertical();
+    // public override void NodeGUI()
+    // {
+    //     GUILayout.BeginVertical();
+    //     if (!bound && !binding)
+    //     {
+    //         if (GUILayout.Button("Bind input MIDI keys"))
+    //         {
+    //             BeginBinding();
+    //         }
+    //     }
+    //     else
+    //     {
+    //         if (bound)
+    //         {
+    //             if (GUILayout.Button("Unbind"))
+    //             {
+    //                 Unbind();
+    //             }
+    //         }
+    //         else
+    //         {
+    //             GUILayout.Label("Press MIDI keys to bind them");
+    //             if (GUILayout.Button("Finish binding"))
+    //             {
+    //                 FinishBinding();
+    //             }
+    //         }
+    //         // Loop over dynamic ports and show them
+    //         foreach(var note in noteToValue.Keys)
+    //         {
+    //             string label = string.Format("{0} note {1}: {2:0.00}", note.channel.ToString(), note.note, noteToValue[note]);
+    //             GUILayout.Label(label);
+    //         }
+    //     }
+    //     GUILayout.EndVertical();
 
-        if (GUI.changed)
-            NodeEditor.curNodeCanvas.OnNodeChange(this);
-    }
+    //     if (GUI.changed)
+    //         NodeEditor.curNodeCanvas.OnNodeChange(this);
+    // }
 
-    public override bool Calculate()
-    {
-        return true;
-    }
+    // public override bool Calculate()
+    // {
+    //     return true;
+    // }
 }

@@ -34,9 +34,19 @@ public class GameOfLifeNode : TickingNode
     {
         outputState = new RenderTexture(outputSize.x, outputSize.y, 0);
         outputState.enableRandomWrite = true;
+        outputState.useMipMap = false;
+        outputState.autoGenerateMips = false;
+        outputState.enableRandomWrite = true;
+        outputState.filterMode = FilterMode.Point;
+        outputState.wrapMode = TextureWrapMode.Clamp;
         outputState.Create();
         inputState = new RenderTexture(outputSize.x, outputSize.y, 0);
         inputState.enableRandomWrite = true;
+        inputState.useMipMap = false;
+        inputState.autoGenerateMips = false;
+        inputState.enableRandomWrite = true;
+        inputState.filterMode = FilterMode.Point;
+        inputState.wrapMode = TextureWrapMode.Clamp;
         inputState.Create();
     }
 
@@ -50,6 +60,7 @@ public class GameOfLifeNode : TickingNode
             if (GUILayout.Button("Apply state"))
             {
                 Graphics.Blit(gameStateKnob.GetValue<Texture>(), inputState);
+                Debug.Log("State applied");
             }
         }
         string label = running ? "Stop" : "Run";
@@ -60,6 +71,7 @@ public class GameOfLifeNode : TickingNode
 
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
+        GUILayout.Box(inputState, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
         GUILayout.Box(outputState, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
         GUILayout.EndHorizontal();
 

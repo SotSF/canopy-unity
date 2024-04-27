@@ -1,0 +1,32 @@
+﻿#include "HSV.compute"
+
+#pragma kernel CSMain
+
+int strip;
+float width;
+float barRepetitionPeriod;
+float rotationPeriod;
+float time;
+float TAU = 6.283185307179586;
+bool pulse;
+RWTexture2D<float4> OutputTex;
+
+[numthreads(16, 16, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y == strip)
+	{
+		if (pulse)
+		{
+			OutputTex[id.xy] = float4(cos(time),0.3,sin(time),1);
+		}
+		else
+		{
+			OutputTex[id.xy] = float4(1,1,1,1);
+		}
+	}
+	else
+	{
+		OutputTex[id.xy] = float4(0,0,0,1);
+	}
+}

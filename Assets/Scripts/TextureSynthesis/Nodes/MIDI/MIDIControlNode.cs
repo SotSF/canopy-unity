@@ -6,13 +6,13 @@ using SecretFire.TextureSynth;
 using System;
 using UnityEngine;
 
-[Node(false, "MIDI/MIDIControl")]
-public class MIDIControlNode : TickingNode
+//[Node(false, "MIDI/MIDIControl")]
+public class MIDIControlNode //: TickingNode
 {
-    public override string GetID => "MIDIControlNode";
-    public override string Title { get { return "MIDIControl"; } }
+    // public override string GetID => "MIDIControlNode";
+    // public override string Title { get { return "MIDIControl"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, rescale ? 125 : 85); } }
+    // public override Vector2 DefaultSize { get { return new Vector2(150, rescale ? 125 : 85); } }
 
     bool binding = false;
     public bool bound = false;
@@ -35,21 +35,21 @@ public class MIDIControlNode : TickingNode
         }
     }
 
-    void SetRescalePorts()
-    {
-        if (rescale)
-        {
-            ValueConnectionKnobAttribute minKnobAttrib = new ValueConnectionKnobAttribute("rescaleMin", Direction.In, typeof(float), NodeSide.Left);
-            ValueConnectionKnobAttribute maxKnobAttrib = new ValueConnectionKnobAttribute("rescaleMax", Direction.In, typeof(float), NodeSide.Left);
-            CreateValueConnectionKnob(minKnobAttrib);
-            CreateValueConnectionKnob(maxKnobAttrib);
-        } 
-        else
-        {
-            DeleteConnectionPort(dynamicConnectionPorts[1]);
-            DeleteConnectionPort(dynamicConnectionPorts[0]);
-        }
-    }
+    // void SetRescalePorts()
+    // {
+    //     if (rescale)
+    //     {
+    //         ValueConnectionKnobAttribute minKnobAttrib = new ValueConnectionKnobAttribute("rescaleMin", Direction.In, typeof(float), NodeSide.Left);
+    //         ValueConnectionKnobAttribute maxKnobAttrib = new ValueConnectionKnobAttribute("rescaleMax", Direction.In, typeof(float), NodeSide.Left);
+    //         CreateValueConnectionKnob(minKnobAttrib);
+    //         CreateValueConnectionKnob(maxKnobAttrib);
+    //     } 
+    //     else
+    //     {
+    //         DeleteConnectionPort(dynamicConnectionPorts[1]);
+    //         DeleteConnectionPort(dynamicConnectionPorts[0]);
+    //     }
+    // }
 
     void BindMIDIControl(MidiJack.MidiChannel chan, int id, float val)
     {
@@ -69,66 +69,66 @@ public class MIDIControlNode : TickingNode
         }
     }
 
-    public override void NodeGUI()
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.BeginVertical();
-        if (!bound && !binding)
-        {
-            if (GUILayout.Button("Bind input knob"))
-            {
-                MidiMaster.knobDelegate += BindMIDIControl;
-                binding = true;
-            }
-        }
-        else
-        {
-            if (bound)
-            {
-                string label = string.Format("{0} ctrl {1}: {2:0.00}", channel.ToString(), controlID, rawMIDIValue);
-                GUILayout.Label(label);
-                if (GUILayout.Button("Unbind"))
-                {
-                    MidiMaster.knobDelegate -= ReceiveMIDIMessage;
-                    controlID = 0;
-                    bound = false;
-                }
-            }
-            else
-            {
-                GUILayout.Label("Use control to bind");
-            }
-        }
+    // public override void NodeGUI()
+    // {
+    //     GUILayout.BeginHorizontal();
+    //     GUILayout.BeginVertical();
+    //     if (!bound && !binding)
+    //     {
+    //         if (GUILayout.Button("Bind input knob"))
+    //         {
+    //             MidiMaster.knobDelegate += BindMIDIControl;
+    //             binding = true;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         if (bound)
+    //         {
+    //             string label = string.Format("{0} ctrl {1}: {2:0.00}", channel.ToString(), controlID, rawMIDIValue);
+    //             GUILayout.Label(label);
+    //             if (GUILayout.Button("Unbind"))
+    //             {
+    //                 MidiMaster.knobDelegate -= ReceiveMIDIMessage;
+    //                 controlID = 0;
+    //                 bound = false;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             GUILayout.Label("Use control to bind");
+    //         }
+    //     }
 
-        // Rescale float inputs
-        bool lastRescale = rescale;
-        rescale = RTEditorGUI.Toggle(rescale, "Rescale value");
-        if (lastRescale != rescale)
-        {
-            SetRescalePorts();
-        }
-        if (rescale && dynamicConnectionPorts.Count >= 2)
-        {
-            FloatKnobOrField("", ref rescaleMin, (ValueConnectionKnob)dynamicConnectionPorts[0]);
-            FloatKnobOrField("", ref rescaleMax, (ValueConnectionKnob)dynamicConnectionPorts[1]);
-        }
+    //     // Rescale float inputs
+    //     bool lastRescale = rescale;
+    //     rescale = RTEditorGUI.Toggle(rescale, "Rescale value");
+    //     // if (lastRescale != rescale)
+    //     // {
+    //     //     SetRescalePorts();
+    //     // }
+    //     // if (rescale && dynamicConnectionPorts.Count >= 2)
+    //     // {
+    //     //     FloatKnobOrField("", ref rescaleMin, (ValueConnectionKnob)dynamicConnectionPorts[0]);
+    //     //     FloatKnobOrField("", ref rescaleMax, (ValueConnectionKnob)dynamicConnectionPorts[1]);
+    //     // }
 
-        GUILayout.EndVertical();
-        valueKnob.DisplayLayout();
-        GUILayout.EndHorizontal();
+    //     GUILayout.EndVertical();
+    //     valueKnob.DisplayLayout();
+    //     GUILayout.EndHorizontal();
 
-        if (GUI.changed)
-            NodeEditor.curNodeCanvas.OnNodeChange(this);
-    }
+    //     // if (GUI.changed)
+    //     //     NodeEditor.curNodeCanvas.OnNodeChange(this);
+    // }
     
-    public override bool Calculate()
-    {
-        float val = rawMIDIValue;
-        if (rescale)
-        {
-            val = Mathf.Lerp(rescaleMin, rescaleMax, rawMIDIValue);
-        }
-        valueKnob.SetValue(val);
-        return true;
-    }
+    // public override bool Calculate()
+    // {
+    //     float val = rawMIDIValue;
+    //     if (rescale)
+    //     {
+    //         val = Mathf.Lerp(rescaleMin, rescaleMax, rawMIDIValue);
+    //     }
+    //     valueKnob.SetValue(val);
+    //     return true;
+    // }
 }

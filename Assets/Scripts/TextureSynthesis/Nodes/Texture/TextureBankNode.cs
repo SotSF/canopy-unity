@@ -20,17 +20,16 @@ public class TextureBankNode : Node
     private List<Texture2D> textures;
 
     public void Awake() {
-        if (textures == null || texKnobs == null)
-        {
-            try
-            {
-                LoadTextures();
-            } catch (UnityException e)
-            {
-                Debug.Log(e+":\n\n"+e.Message);
-            }
-        }
+        Debug.Log("TexBank Awake() called");
+        LoadTextures();
         Calculate();
+    }
+
+
+    protected override void OnAddConnection(ConnectionPort port, ConnectionPort connection)
+    {
+        base.OnAddConnection(port, connection);
+        Debug.Log("TexBank OnAddConnection called");
     }
 
     public void LoadTextures()
@@ -74,7 +73,11 @@ public class TextureBankNode : Node
 
     public override void NodeGUI()
     {
-
+        GUILayout.BeginVertical();
+        if (GUILayout.Button("Reinitialize")){
+            LoadTextures();
+            Calculate();
+        }
         GUILayout.BeginHorizontal();
         int i = 0;
         foreach (var tex in textures)
@@ -86,6 +89,7 @@ public class TextureBankNode : Node
             i++;
         }
         GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
     }
 
     public override bool Calculate()

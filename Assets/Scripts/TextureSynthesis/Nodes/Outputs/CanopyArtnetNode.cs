@@ -19,7 +19,7 @@ public class CanopyArtnetNode : TickingNode
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;
 
-    public bool useDoubleDensity = false;
+    public bool useDoubleDensity = true;
 
     private RenderTexture buffer;
 
@@ -28,7 +28,7 @@ public class CanopyArtnetNode : TickingNode
     private int numUniverses = 96;
 
     public bool flipMirrorDirection = true;
-    public int mirrorOffset = 70;
+    public int mirrorOffset = 27;
     int frameindex = 0;
 
     const int singleDensitypixelsPerStrip = 76;
@@ -104,11 +104,11 @@ public class CanopyArtnetNode : TickingNode
     private int pixelIndexInPort(int r, int c)
     {
         var stripIndex = stripIndexInPort(r);
-        var passedPixels = pixelsPerStrip * stripIndex;
+        var passedPixels = (pixelsPerStrip-1) * stripIndex;
         if (r % 2 == 1)
         {
             // Zig-zag odd numbered strips
-            return passedPixels + (pixelsPerStrip - c);
+            return passedPixels + ((pixelsPerStrip-1) - c);
         }
         return passedPixels + c;
     }

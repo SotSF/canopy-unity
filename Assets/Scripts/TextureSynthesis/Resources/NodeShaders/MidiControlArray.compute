@@ -1,0 +1,19 @@
+﻿#include "HSV.compute"
+
+#pragma kernel CSMain
+
+float width;
+float barRepetitionPeriod;
+float rotationPeriod;
+float time;
+float TAU = 6.283185307179586;
+RWTexture2D<float4> OutputTex;
+
+[numthreads(16, 16, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+	int2 coords = int2(id.y, id.x);
+	float osc = sin( TAU * time / rotationPeriod);
+	float color = osc + width / 
+	OutputTex[id.xy] = float4(InputTex[coords].x, InputTex[coords].y, InputTex[coords].z, 1.0f);
+}

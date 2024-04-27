@@ -6,13 +6,13 @@ using SecretFire.TextureSynth;
 using System;
 using UnityEngine;
 
-[Node(false, "MIDI/MIDINote")]
-public class MIDINoteNode : TickingNode
+//[Node(false, "MIDI/MIDINote")]
+public class MIDINoteNode //: TickingNode
 {
-    public override string GetID => "MIDINoteNode";
-    public override string Title { get { return "MIDINote"; } }
+    // public override string GetID => "MIDINoteNode";
+    // public override string Title { get { return "MIDINote"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 110); } }
+    // public override Vector2 DefaultSize { get { return new Vector2(150, 110); } }
 
     bool binding = false;
     public bool bound = false;
@@ -76,60 +76,60 @@ public class MIDINoteNode : TickingNode
         }
     }
 
-    public override void NodeGUI()
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.BeginVertical();
-        if (!bound && !binding)
-        {
-            if (GUILayout.Button("Bind input note"))
-            {
-                MidiMaster.noteOnDelegate += BindMIDINote;
-                binding = true;
-            }
-        }
-        else
-        {
-            if (bound)
-            {
-                string label = string.Format("{0} note {1}: {2:0.00}", channel.ToString(), note, value);
-                GUILayout.Label(label);
-                if (GUILayout.Button("Unbind"))
-                {
-                    MidiMaster.noteOnDelegate -= ReceiveNoteDown;
-                    MidiMaster.noteOffDelegate -= ReceiveNoteUp;
-                    note = 0;
-                    bound = false;
-                }
-            }
-            else
-            {
-                GUILayout.Label("Play note to bind");
-            }
-        }
-        GUILayout.EndVertical();
-        GUILayout.BeginVertical();
-        valueKnob.DisplayLayout();
-        pressedKnob.DisplayLayout();
-        heldKnob.DisplayLayout();
-        releasedKnob.DisplayLayout();
-        GUILayout.EndVertical();
-        GUILayout.EndHorizontal();
+    // public override void NodeGUI()
+    // {
+    //     GUILayout.BeginHorizontal();
+    //     GUILayout.BeginVertical();
+    //     if (!bound && !binding)
+    //     {
+    //         if (GUILayout.Button("Bind input note"))
+    //         {
+    //             MidiMaster.noteOnDelegate += BindMIDINote;
+    //             binding = true;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         if (bound)
+    //         {
+    //             string label = string.Format("{0} note {1}: {2:0.00}", channel.ToString(), note, value);
+    //             GUILayout.Label(label);
+    //             if (GUILayout.Button("Unbind"))
+    //             {
+    //                 MidiMaster.noteOnDelegate -= ReceiveNoteDown;
+    //                 MidiMaster.noteOffDelegate -= ReceiveNoteUp;
+    //                 note = 0;
+    //                 bound = false;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             GUILayout.Label("Play note to bind");
+    //         }
+    //     }
+    //     GUILayout.EndVertical();
+    //     GUILayout.BeginVertical();
+    //     valueKnob.DisplayLayout();
+    //     pressedKnob.DisplayLayout();
+    //     heldKnob.DisplayLayout();
+    //     releasedKnob.DisplayLayout();
+    //     GUILayout.EndVertical();
+    //     GUILayout.EndHorizontal();
 
-        if (GUI.changed)
-            NodeEditor.curNodeCanvas.OnNodeChange(this);
-    }
+    //     if (GUI.changed)
+    //         NodeEditor.curNodeCanvas.OnNodeChange(this);
+    // }
 
-    public override bool Calculate()
-    {
-        pressedKnob.SetValue(pressed);
-        if (pressed)
-            pressed = false;
-        heldKnob.SetValue(held);
-        releasedKnob.SetValue(released);
-        if (released)
-            released = false;
-        valueKnob.SetValue(value);
-        return true;
-    }
+    // public override bool Calculate()
+    // {
+    //     pressedKnob.SetValue(pressed);
+    //     if (pressed)
+    //         pressed = false;
+    //     heldKnob.SetValue(held);
+    //     releasedKnob.SetValue(released);
+    //     if (released)
+    //         released = false;
+    //     valueKnob.SetValue(value);
+    //     return true;
+    // }
 }
