@@ -11,8 +11,9 @@ public class jptestNode : TickingNode
 {
     public override string GetID => "FirefliesPattern";
     public override string Title { get { return "Fireflies"; } }
+    private Vector2 _DefaultSize = new Vector2(200, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("jitter", Direction.In, typeof(bool), NodeSide.Left)]
     public ValueConnectionKnob ManualJitterKnob;

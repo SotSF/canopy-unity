@@ -9,8 +9,9 @@ public class ChromaKeyNode : TextureSynthNode
 {
     public override string GetID => "ChromaKeyNode";
     public override string Title { get { return "ChromaKey"; } }
+    private Vector2 _DefaultSize =new Vector2(200, 150);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 150); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;

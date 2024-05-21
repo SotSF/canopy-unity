@@ -12,7 +12,9 @@ public class XboxFullControllerNode : TickingNode
     public override string GetID => "XboxFullControllerNode";
     public override string Title { get { return "XboxFullController"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 400); } }
+    private Vector2 _DefaultSize = new Vector2(150, 400);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     // Defines which controller we take data from (?)
     [ValueConnectionKnob("Controller", Direction.In, typeof(int), NodeSide.Left)]

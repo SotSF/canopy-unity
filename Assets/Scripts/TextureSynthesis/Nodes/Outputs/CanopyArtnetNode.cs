@@ -13,8 +13,9 @@ public class CanopyArtnetNode : TickingNode
 {
     public override string GetID => "CanopyArtnetNode";
     public override string Title { get { return "CanopyArtNet"; } }
+    private Vector2 _DefaultSize = new Vector2(220, 180);
 
-    public override Vector2 DefaultSize { get { return new Vector2(220, 180); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;
@@ -62,13 +63,14 @@ public class CanopyArtnetNode : TickingNode
         buffer.Create();
     }
 
+    private GUIContent IPLabel = new GUIContent("IP");
     public override void NodeGUI()
     {
         inputTexKnob.SetPosition(20);
         GUILayout.BeginVertical();
 
         GUILayout.BeginHorizontal();
-        ip = RTEditorGUI.TextField(new GUIContent("IP"), ip);
+        ip = RTEditorGUI.TextField(IPLabel, ip);
         if (GUILayout.Button("Set IP"))
         {
             controller.remoteIP = ip;
@@ -198,6 +200,7 @@ public class CanopyArtnetNode : TickingNode
             catch (System.Exception err)
             {
                 dmxAlive = false;
+                Debug.LogException(err);
             }
         }
     }

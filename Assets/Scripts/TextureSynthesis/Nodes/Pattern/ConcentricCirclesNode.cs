@@ -10,8 +10,9 @@ public class ConcentricCirclesNode : TickingNode
 {
     public override string GetID => "ConcentricCirclesNode";
     public override string Title { get { return "ConcentricCircles"; } }
+    private Vector2 _DefaultSize = new Vector2(250, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(250, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("ManualTrigger", Direction.In, typeof(bool), NodeSide.Left)]
     public ValueConnectionKnob ManualTriggerKnob;

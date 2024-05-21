@@ -12,8 +12,9 @@ public class SignalToEventNode : TickingNode
     public override string GetID => "SignalToEventNode";
     public override string Title { get { return "SignalToEvent"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
+    private Vector2 _DefaultSize = new Vector2(150, 150);
 
+    public override Vector2 DefaultSize => _DefaultSize;
     [ValueConnectionKnob("inputSignal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob inputSignalKnob;
 

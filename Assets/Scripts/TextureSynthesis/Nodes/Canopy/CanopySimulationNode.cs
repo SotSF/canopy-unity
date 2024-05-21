@@ -13,8 +13,9 @@ public class CanopySimulationNode : TickingNode
 {
     public override string GetID => "CanopySimulationView";
     public override string Title { get { return "CanopySimulationView"; } }
+    private Vector2 _DefaultSize = new Vector2(1024, 1024);
 
-    public override Vector2 DefaultSize { get { return new Vector2(1024, 1024); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
 
     //private float speedFactor = 1;

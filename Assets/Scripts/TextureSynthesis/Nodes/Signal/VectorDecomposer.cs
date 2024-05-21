@@ -15,7 +15,9 @@ public class VectorDecomposerNode : Node
 
     public override bool AutoLayout => true;
 
-    public override Vector2 DefaultSize { get { return new Vector2(180, 150); } }
+    private Vector2 _DefaultSize = new Vector2(180, 150); 
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("Input vector", Direction.In, typeof(Vector2), NodeSide.Left)]
     public ValueConnectionKnob inputVectorKnob;

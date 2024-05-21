@@ -30,7 +30,7 @@ namespace NodeEditorFramework
 		internal bool calculated = true;
 
 		// Internal
-		internal Vector2 contentOffset = Vector2.zero;
+		internal Vector2 contentOffset = new Vector2(0, 20);
 		internal Vector2 nodeGUIHeight;
 		internal bool ignoreGUIKnobPlacement;
 		internal bool isClipped;
@@ -57,10 +57,11 @@ namespace NodeEditorFramework
 			#endif
 			} }
 
+		private Vector2 __DefaultSize = new Vector2(200, 100);
 		/// <summary>
 		/// Specifies the default size of the node when automatic resizing is turned off.
 		/// </summary>
-		public virtual Vector2 DefaultSize { get { return new Vector2(200, 100); } }
+		public virtual Vector2 DefaultSize => __DefaultSize;
 
 		/// <summary>
 		/// Specifies whether the size of this node should be automatically calculated.
@@ -68,10 +69,11 @@ namespace NodeEditorFramework
 		/// </summary>
 		public virtual bool AutoLayout { get { return false; } }
 
+		private Vector2 _MinSize = new Vector2(100, 50);
 		/// <summary>
 		/// Specifies the minimum size the node can have if no content is present.
 		/// </summary>
-		public virtual Vector2 MinSize { get { return new Vector2(100, 50); } }
+		public virtual Vector2 MinSize { get { return _MinSize; } }
 
 		/// <summary>
 		/// Specifies if this node handles recursive node loops on the canvas.
@@ -272,7 +274,7 @@ namespace NodeEditorFramework
 			Rect nodeRect = rect;
 			Vector2 pos = NodeEditor.curEditorState.zoomPanAdjust + NodeEditor.curEditorState.panOffset;
 			nodeRect.position = new Vector2((int)(nodeRect.x+pos.x), (int)(nodeRect.y+pos.y));
-			contentOffset = new Vector2 (0, 20);
+			//contentOffset = new Vector2 (0, 20);
 
 			GUI.color = backgroundColor;
 

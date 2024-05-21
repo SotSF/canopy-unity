@@ -10,7 +10,9 @@ public class AnalogSynthNode: Node
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "AnalogSynth"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(220, 150); } }
+    private Vector2 _DefaultSize = new Vector2(220, 150);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("Period", Direction.In, typeof(float))]
     public ValueConnectionKnob periodInputKnob;

@@ -11,7 +11,10 @@ public class CanopyNode : Node
     public override string GetID { get { return ID; } }
 
     public override string Title { get { return "Canopy"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(250, 160); } }
+    private Vector2 _DefaultSize = new Vector2(250, 160);
+
+    public override Vector2 DefaultSize => _DefaultSize;
+
 
     [ValueConnectionKnob("In", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;

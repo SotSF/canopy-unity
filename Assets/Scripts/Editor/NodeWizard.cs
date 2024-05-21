@@ -362,8 +362,8 @@ public class {nodeName}Node : {parentClass}
 {{
     public override string GetID => ""{nodeName}Node"";
     public override string Title {{ get {{ return ""{nodeName}""; }} }}
-
-    public override Vector2 DefaultSize {{ get {{ return new Vector2({defaultSize.x}, {defaultSize.y}); }} }}
+    private Vector2 _DefaultSize = new Vector2({defaultSize.x}, {defaultSize.y});
+    public override Vector2 DefaultSize => _DefaultSize;
 
     {GenerateNodePorts()}
     {GenerateNodeVars()}

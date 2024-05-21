@@ -21,7 +21,8 @@ public class ApiNode : TickingNode
 
     public override string Title { get { return "API"; } }
 
-    public override Vector2 DefaultSize => new Vector2(180, (1 + dynamicConnectionPorts.Count) * 100);
+    private Vector2 _DefaultSize = new Vector2(180, 100);
+    public override Vector2 DefaultSize => _DefaultSize;
 
     public override bool AutoLayout => true;
 
@@ -97,6 +98,7 @@ public class ApiNode : TickingNode
                 var knob = CreateValueConnectionKnob(outKnobAttribs);
                 outKnobs[pair.name] = knob;
             }
+            _DefaultSize = new Vector2(180, (1 + dynamicConnectionPorts.Count) * 100);
         } 
         {
             foreach (var pair in responseObj.values)

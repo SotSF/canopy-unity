@@ -9,8 +9,9 @@ public class FractalNode : TickingNode
 {
     public override string GetID => "FractalNode";
     public override string Title { get { return "Fractal"; } }
+    private Vector2 _DefaultSize = new Vector2(200, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("maxIterations", Direction.In, typeof(int), NodeSide.Left)]
     public ValueConnectionKnob maxIterationsKnob;

@@ -10,7 +10,9 @@ public class TimeSecondsNode : TickingNode
     public override string GetID => "TimeSecondsNode";
     public override string Title { get { return "TimeSeconds"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(120, 80); } }
+    private Vector2 _DefaultSize =new Vector2(120, 80);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("outputSignal", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputSignalKnob;

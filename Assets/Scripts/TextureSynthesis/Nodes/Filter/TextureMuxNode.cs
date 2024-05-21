@@ -13,7 +13,8 @@ public class TextureMuxNode : TickingNode
     public override string GetID => "TextureMux";
     public override string Title { get { return "TextureMux"; } }
 
-    public override Vector2 DefaultSize => new Vector2((2 + targetPortCount) * 90, 200);
+    private Vector2 _DefaultSize = new Vector2(3 * 90, 200);
+    public override Vector2 DefaultSize => _DefaultSize;
     public override bool AutoLayout => true;
 
     [ValueConnectionKnob("outputTex", Direction.Out, typeof(Texture), NodeSide.Bottom)]
@@ -59,6 +60,7 @@ public class TextureMuxNode : TickingNode
 
     private void SetPortCount()
     {
+        bool changed = false;
         // Keep one open slot at the bottom of the input list
         // Adjust the active signal index if necessary
         if (dynamicConnectionPorts.Count > targetPortCount)
@@ -75,12 +77,19 @@ public class TextureMuxNode : TickingNode
                         activeTextureIndex = 0;
                 }
             }
+            changed = true;
+            _DefaultSize = new Vector2((2 + targetPortCount) * 90, 200);
         }
         else if (dynamicConnectionPorts.Count < targetPortCount)
         {
             ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(Texture), NodeSide.Top);
             while (dynamicConnectionPorts.Count < targetPortCount)
                 CreateValueConnectionKnob(outKnobAttribs);
+            changed = true;
+        }
+        if (changed)
+        {
+            _DefaultSize = new Vector2((2 + targetPortCount) * 90, 200);
         }
     }
 

@@ -9,8 +9,9 @@ public class AugustNodeNode : TickingNode
 {
     public override string GetID => "AugustNodeNode";
     public override string Title { get { return "AugustNode"; } }
+    private Vector2 _DefaultSize = new Vector2(200, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;

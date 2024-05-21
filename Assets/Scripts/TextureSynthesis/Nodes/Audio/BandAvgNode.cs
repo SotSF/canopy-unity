@@ -10,7 +10,9 @@ public class BandAvgNode : Node
     public override string GetID => "BandAvgNode";
     public override string Title { get { return "BandAvg"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    private Vector2 _DefaultSize = new Vector2(150, 100);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("spectrumData", Direction.In, typeof(float[]), NodeSide.Left)]
     public ValueConnectionKnob spectrumDataKnob;

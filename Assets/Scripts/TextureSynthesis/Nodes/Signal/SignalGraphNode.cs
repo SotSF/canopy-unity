@@ -13,7 +13,9 @@ public class SignalGraphNode : TickingNode
     public override string GetID => "SignalGraphNode";
     public override string Title { get { return "SignalGraph"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(170,180); } }
+    private Vector2 _DefaultSize = new Vector2(170,180);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("signal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob signalKnob;

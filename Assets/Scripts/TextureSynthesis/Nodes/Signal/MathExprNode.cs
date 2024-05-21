@@ -12,7 +12,9 @@ public class MathExprNode : Node
     public override string GetID => "MathExprNode";
     public override string Title { get { return "MathExpr"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    private Vector2 _DefaultSize = new Vector2(150, 100);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("a", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob aKnob;

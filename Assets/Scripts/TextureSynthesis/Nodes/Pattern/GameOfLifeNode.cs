@@ -9,9 +9,9 @@ public class GameOfLifeNode : TickingNode
 {
     public override string GetID => "GameOfLifeNode";
     public override string Title { get { return "GameOfLife"; } }
+    private Vector2 _DefaultSize = new Vector2(150, 150);
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 150); } }
-
+    public override Vector2 DefaultSize => _DefaultSize;
     [ValueConnectionKnob("gameState", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob gameStateKnob;
 

@@ -13,8 +13,9 @@ public class VFXCamAgentSystemNode : TickingNode
 {
     public override string GetID => "VFXCamAgentSystem";
     public override string Title { get { return "VFXCamAgentSystem"; } }
+    private Vector2 _DefaultSize = new Vector2(200, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
 
     [ValueConnectionKnob("outputTex", Direction.Out, typeof(Texture), NodeSide.Bottom)]

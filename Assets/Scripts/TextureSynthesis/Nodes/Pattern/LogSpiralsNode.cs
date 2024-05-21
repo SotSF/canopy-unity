@@ -9,8 +9,9 @@ public class LogSpiralsNode : TickingNode
 {
     public override string GetID => "LogSpiralsNode";
     public override string Title { get { return "LogSpirals"; } }
+    private Vector2 _DefaultSize = new Vector2(250, 500);
 
-    public override Vector2 DefaultSize { get { return new Vector2(250, 500); } }
+    public override Vector2 DefaultSize => _DefaultSize;
     [ValueConnectionKnob("globalTimeFactor", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob globalTimeFactorKnob;
     private float globalTimeFactor = 1.1f;

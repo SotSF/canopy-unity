@@ -15,7 +15,10 @@ public class DynamicMathExprNode : Node
     public override string GetID => "DynMathExprNode";
     public override string Title { get { return "DynMathExpr"; } }
     public override bool AutoLayout => true;
-    public override Vector2 DefaultSize => new Vector2(160, (1 + targetPortCount) * 120);
+
+    private Vector2 _DefaultSize = new Vector2(160, (1 + 1) * 120);
+
+    public override Vector2 DefaultSize => _DefaultSize;
     public override Vector2 MinSize => new Vector2(160, 120);
 
     [ValueConnectionKnob("output", Direction.Out, typeof(float), NodeSide.Right)]
@@ -37,6 +40,10 @@ public class DynamicMathExprNode : Node
     private string alpha = "abcdefghijklmnopqrstuvwxyz";
 
     public List<Parameter> exprParams;
+    private void SetSize()
+    {
+        _DefaultSize = new Vector2(160, (1 + targetPortCount) * 120);
+    }
 
     private void Awake()
     {
@@ -83,6 +90,7 @@ public class DynamicMathExprNode : Node
 
     private void SetPortCount()
     {
+        bool resized = false;
         // Keep one open slot at the bottom of the input list
         // Adjust the active signal index if necessary
         if (dynamicConnectionPorts.Count > targetPortCount)
@@ -96,6 +104,7 @@ public class DynamicMathExprNode : Node
                     Parse();
                 }
             }
+            resized = true;
         }
         else if (dynamicConnectionPorts.Count < targetPortCount && targetPortCount < 27)
         {
@@ -105,6 +114,11 @@ public class DynamicMathExprNode : Node
                 CreateValueConnectionKnob(outKnobAttribs);
                 Parse();
             }
+            resized = true;
+        }
+        if (resized)
+        {
+            SetSize();
         }
     }
 

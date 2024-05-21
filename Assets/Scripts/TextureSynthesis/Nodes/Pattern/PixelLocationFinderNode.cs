@@ -13,8 +13,9 @@ public class PixelLocationFinderNode : TickingNode
 {
     public override string GetID => "PixelLocationFinder";
     public override string Title { get { return "PixelLocationFinder"; } }
+    private Vector2 _DefaultSize = new Vector2(220, 180); 
 
-    public override Vector2 DefaultSize { get { return new Vector2(220, 180); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     private string ip;
     private byte[] universe0 = new byte[512];

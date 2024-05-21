@@ -7,7 +7,9 @@ using UnityEngine;
 
 abstract public class PatternNode : TickingNode
 {
-    public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    private Vector2 _DefaultSize = new Vector2(150, 100);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
      [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 100)]
     public ValueConnectionKnob textureOutputKnob;

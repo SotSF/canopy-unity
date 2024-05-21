@@ -14,7 +14,9 @@ public class ChristmasTreeNode : TickingNode
     public const string ID = "christmasTreeNode";
     public override string GetID { get { return ID; } }
     public override string Title { get { return "Christmas Tree"; } }
-    public override Vector2 DefaultSize { get { return new Vector2(250, 250); } }
+    private Vector2 _DefaultSize = new Vector2(250, 250);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;

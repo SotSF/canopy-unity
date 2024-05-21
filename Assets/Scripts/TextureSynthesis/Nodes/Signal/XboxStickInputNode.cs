@@ -17,7 +17,9 @@ public class XboxStickInputNode : TickingNode
     public override string GetID => "XboxStickInputNode";
     public override string Title { get { return "XboxStickInput"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, 120); } }
+    private Vector2 _DefaultSize = new Vector2(150, 120);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("axis2D", Direction.Out, typeof(Vector2), NodeSide.Right)]
     public ValueConnectionKnob axis2DKnob;

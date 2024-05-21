@@ -17,7 +17,8 @@ public class AudioSpectrumNode : TickingNode
     public override string GetID => "AudioSpectrumNode";
     public override string Title { get { return "AudioSpectrum"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 160); } }
+    private Vector2 _DefaultSize = new Vector2(200, 160);
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("spectrumData", Direction.Out, typeof(float[]), NodeSide.Right)]
     public ValueConnectionKnob spectrumDataKnob;

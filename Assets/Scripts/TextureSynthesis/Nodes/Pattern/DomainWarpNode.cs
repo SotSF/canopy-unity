@@ -9,8 +9,9 @@ public class DomainWarpNode : TickingNode
 {
     public override string GetID => "DomainWarpNode";
     public override string Title { get { return "DomainWarp"; } }
+    private Vector2 _DefaultSize = new Vector2(300, 300); 
 
-    public override Vector2 DefaultSize { get { return new Vector2(300, 300); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("timeMultiplier", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob timeMultiplierKnob;

@@ -13,8 +13,9 @@ public class ChessNode : TickingNode
 {
     public override string GetID => "Chess";
     public override string Title { get { return "Chess"; } }
+    private Vector2 _DefaultSize = new Vector2(200, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("xInput", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob xInputKnob;

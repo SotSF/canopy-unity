@@ -15,7 +15,9 @@ public class SignalLatchNode : TickingNode
 
     public override bool AutoLayout => true;
 
-    public override Vector2 DefaultSize { get { return new Vector2(220, 150); } }
+    private Vector2 _DefaultSize = new Vector2(220, 150);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
 
     [ValueConnectionKnob("latchControl", Direction.In, typeof(bool), NodeSide.Left)]

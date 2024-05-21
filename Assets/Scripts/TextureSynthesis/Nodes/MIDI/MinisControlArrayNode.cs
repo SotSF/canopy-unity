@@ -20,11 +20,11 @@ public class MinisControlArrayNode : TickingNode
     private const int rescaleControlsHeight = 45;
     private const int nodeBaseHeight = 20;
     private const int controlBaseHeight = 60;
-    public override Vector2 DefaultSize => new Vector2(160, 
+
+    private Vector2 _DefaultSize = new Vector2(160,
         nodeBaseHeight
-        + numControls * controlBaseHeight
-        + controls.Where(cc => cc.rescale).Sum(i => rescaleControlsHeight)
-    );
+        + 1 * controlBaseHeight);
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [Serializable]
     public class BoundMidiControl {
@@ -160,6 +160,7 @@ public class MinisControlArrayNode : TickingNode
         controls[bindingIndex].bound = true;
         controls[bindingIndex].AddOutputPort();
         controls.Add(new BoundMidiControl(this));
+        SetSize();
     }
 
     void ReceiveMIDIMessage(Minis.MidiValueControl cc, float value)
@@ -173,8 +174,18 @@ public class MinisControlArrayNode : TickingNode
         }
     }
 
+    private void SetSize()
+    {
+        _DefaultSize = new Vector2(160,
+             nodeBaseHeight
+            + numControls * controlBaseHeight
+            + controls.Where(cc => cc.rescale).Sum(i => rescaleControlsHeight)
+        );
+    }
+
     public override void NodeGUI()
     {
+        bool resized = false;
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         foreach (var control in controls)
@@ -204,6 +215,7 @@ public class MinisControlArrayNode : TickingNode
                         control.bound = false;
                         control.deleted = true;
                         control.OnDelete();
+                        resized = true;
                     }
                     GUILayout.EndHorizontal();
                     // Rescale float inputs
@@ -212,11 +224,12 @@ public class MinisControlArrayNode : TickingNode
                     if (lastRescale != control.rescale)
                     {
                         control.SetRescalePorts();
+                        resized = true;
                     }
                     if (control.rescale && dynamicConnectionPorts.Count >= 2)
                     {
-                        FloatKnobOrField("", ref control.rescaleMin, (ValueConnectionKnob)control.minKnob);
-                        FloatKnobOrField("", ref control.rescaleMax, (ValueConnectionKnob)control.maxKnob);
+                        FloatKnobOrField(GUIContent.none, ref control.rescaleMin, (ValueConnectionKnob)control.minKnob);
+                        FloatKnobOrField(GUIContent.none, ref control.rescaleMax, (ValueConnectionKnob)control.maxKnob);
                     }
                 }
                 else
@@ -240,6 +253,10 @@ public class MinisControlArrayNode : TickingNode
         GUILayout.FlexibleSpace();
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
+        if (resized)
+        {
+            SetSize();
+        }
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

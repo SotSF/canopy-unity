@@ -27,8 +27,9 @@ public class SpaceshipGameNode : TickingNode
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 80)]
     public ValueConnectionKnob fluidVelocityOutputKnob;
+    private Vector2 _DefaultSize = new Vector2(180, 180);
 
-    public override Vector2 DefaultSize => new Vector2(180, 180);
+    public override Vector2 DefaultSize => _DefaultSize;
 
     public bool check;
 

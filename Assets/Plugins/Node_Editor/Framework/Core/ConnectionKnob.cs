@@ -20,6 +20,8 @@ namespace NodeEditorFramework
 		protected override Type styleBaseClass { get { return typeof(ConnectionKnobStyle); } }
 		new protected ConnectionKnobStyle ConnectionStyle { get { CheckConnectionStyle (); return (ConnectionKnobStyle)_connectionStyle; } }
 
+		protected GUIContent _NameContent = null;
+		protected GUIContent NameContent { get { if (_NameContent == null) _NameContent = new GUIContent(name); return _NameContent; } }
 		// Knob GUI
 		protected Texture2D knobTexture;
 		private float knobAspect { get { return knobTexture != null? knobTexture.width/knobTexture.height : 1; } }
@@ -74,6 +76,7 @@ namespace NodeEditorFramework
 				UpdateKnobTexture ();
 		}
 
+		protected string[] rotationMods = null;
 		/// <summary>
 		/// Requests to reload the knobTexture and adapts it to the position and orientation
 		/// </summary>
@@ -85,21 +88,24 @@ namespace NodeEditorFramework
 			if (side != defaultSide) 
 			{ // Rotate Knob texture according to the side it's used on
 				int rotationSteps = getRotationStepsAntiCW (defaultSide, side);
-				string[] mods = new string[] { "Rotation:" + rotationSteps };
+				if (rotationMods == null)
+                {
+					rotationMods = new string[] { "Rotation:" + rotationSteps };
+				}
 				Texture2D modKnobTex = null;
 
 				// Try to get standard texture in memory
 				ResourceManager.MemoryTexture memoryTex = ResourceManager.FindInMemory (knobTexture);
 				if (memoryTex != null)
 				{ // Texture does exist in memory, so built a mod including rotation and try to find it again
-					mods = ResourceManager.AppendMod (memoryTex.modifications, "Rotation:" + rotationSteps);
-					ResourceManager.TryGetTexture (memoryTex.path, ref modKnobTex, mods);
+					rotationMods = ResourceManager.AppendMod (memoryTex.modifications, "Rotation:" + rotationSteps);
+					ResourceManager.TryGetTexture (memoryTex.path, ref modKnobTex, rotationMods);
 				}
 
 				if (modKnobTex == null)
 				{ // Rotated version does not exist yet, so create and record it
 					modKnobTex = RTEditorGUI.RotateTextureCCW (knobTexture, rotationSteps);
-					ResourceManager.AddTextureToMemory (memoryTex.path, modKnobTex, mods);
+					ResourceManager.AddTextureToMemory (memoryTex.path, modKnobTex, rotationMods);
 				}
 
 				knobTexture = modKnobTex;
@@ -220,7 +226,8 @@ namespace NodeEditorFramework
 		/// </summary>
 		public void DisplayLayout () 
 		{
-			DisplayLayout (new GUIContent (name), labelStyle);
+			DisplayLayout (NameContent, labelStyle);
+			//DisplayLayout(new GUIContent(name), labelStyle);
 		}
 
 		/// <summary>
@@ -228,7 +235,8 @@ namespace NodeEditorFramework
 		/// </summary>
 		public void DisplayLayout (GUIStyle style)
 		{
-			DisplayLayout (new GUIContent (name), style);
+			DisplayLayout(NameContent, labelStyle);
+			//DisplayLayout (new GUIContent(name), style);
 		}
 
 		/// <summary>

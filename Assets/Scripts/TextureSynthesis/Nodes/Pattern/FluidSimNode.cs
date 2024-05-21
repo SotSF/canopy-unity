@@ -11,7 +11,9 @@ public class FluidSimNode : TickingNode
 {
     public override string GetID => "FluidSimNode";
     public override string Title { get { return "FluidSim"; } }
-    public override Vector2 DefaultSize => new Vector2(680, 240);
+    private Vector2 _DefaultSize = new Vector2(680, 240);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("velocityIn", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob velocityInputKnob;
@@ -249,16 +251,18 @@ public class FluidSimNode : TickingNode
 
     private void ExecuteInteriorShader(int kernel)
     {
-        Vector2Int groupSize = new Vector2Int(Mathf.CeilToInt((outputSize.x-2) / 127.0f), Mathf.CeilToInt((outputSize.y-2) / 2.0f));
+        var groupSizeX = Mathf.CeilToInt((outputSize.x - 2) / 127.0f);
+        var groupSizeY = Mathf.CeilToInt((outputSize.y - 2) / 2.0f);
         fluidSimShader.SetTexture(kernel, "Result", resultField);
-        fluidSimShader.Dispatch(kernel, groupSize.x, groupSize.y, 1);
+        fluidSimShader.Dispatch(kernel, groupSizeX, groupSizeY, 1);
     }
 
     private void ExecuteFullTexShader(int kernel)
     {
-        Vector2Int groupSize = new Vector2Int(Mathf.CeilToInt((outputSize.x) / 16f), Mathf.CeilToInt((outputSize.y) / 16f));
+        var groupSizeX = Mathf.CeilToInt((outputSize.x) / 16f);
+        var groupSizeY = Mathf.CeilToInt((outputSize.y) / 16f);
         fluidSimShader.SetTexture(kernel, "Result", resultField);
-        fluidSimShader.Dispatch(kernel, groupSize.x, groupSize.y, 1);
+        fluidSimShader.Dispatch(kernel, groupSizeX, groupSizeY, 1);
     }
 
     private void ExecuteBoundaryShader(RenderTexture field, float scale)

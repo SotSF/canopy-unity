@@ -13,8 +13,9 @@ public class SectorNode : TickingNode
 {
     public override string GetID => "SectorNode";
     public override string Title { get { return "Sector"; } }
+    private Vector2 _DefaultSize = new Vector2(220, 180);
 
-    public override Vector2 DefaultSize { get { return new Vector2(220, 180); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;

@@ -9,8 +9,9 @@ public class SuperformulaNode : TickingNode
 {
     public override string GetID => "SuperformulaNode";
     public override string Title { get { return "Superformula"; } }
+    private Vector2 _DefaultSize = new Vector2(256, 400);
 
-    public override Vector2 DefaultSize { get { return new Vector2(256, 400); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("a", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob aKnob;

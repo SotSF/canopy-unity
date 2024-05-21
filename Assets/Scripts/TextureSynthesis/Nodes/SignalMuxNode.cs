@@ -12,7 +12,10 @@ public class SignalMuxNode : Node
     public override string GetID => "SignalMuxNode";
     public override string Title { get { return "SignalMux"; } }
 
-    public override Vector2 DefaultSize => new Vector2(180, (1+targetPortCount) * 100);
+    private Vector2 _DefaultSize = new Vector2(180, (1 + 1) * 100);
+
+    public override Vector2 DefaultSize => _DefaultSize;
+
     public override Vector2 MinSize => new Vector2(180, 0);
     public override bool AutoLayout => true;
 
@@ -26,9 +29,13 @@ public class SignalMuxNode : Node
     private int targetPortCount => activePortCount +1;
     private int activePortCount => dynamicConnectionPorts.Where(port => port.connected()).Count();
     private int openPortIndex => activePortCount;
-
+    private void SetSize()
+    {
+        _DefaultSize = new Vector2(180, (1 + targetPortCount) * 100);
+    }
     private void SetPortCount()
     {
+        bool resized = false;
         // Keep one open slot at the bottom of the input list
         // Adjust the active signal index if necessary
         if (dynamicConnectionPorts.Count > targetPortCount)
@@ -44,12 +51,18 @@ public class SignalMuxNode : Node
                     else if (activeSignalIndex == i)
                         activeSignalIndex = 0;
                 }
-            }   
+            }
+            resized = true;
         } else if (dynamicConnectionPorts.Count < targetPortCount)
         {
             ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(float));
             while (dynamicConnectionPorts.Count < targetPortCount)
                 CreateValueConnectionKnob(outKnobAttribs);
+            resized = true;
+        }
+        if (resized)
+        {
+            SetSize();
         }
     }
 

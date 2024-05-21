@@ -1,11 +1,39 @@
 ﻿using ArtNet.Enums;
 using System.IO;
 using ArtNet.IO;
+using System.Collections.Generic;
 
 namespace ArtNet.Packets
 {
     public class ArtNetPacket
     {
+        private static Dictionary<int, byte[]> _BufferPool;
+        public static Dictionary<int, byte[]> BufferPool
+        {
+            get
+            {
+                if (_BufferPool == null)
+                {
+                    _BufferPool = new Dictionary<int, byte[]>();
+                }
+                return _BufferPool;
+            }
+        }
+
+        public static byte[] Buffer(int size)
+        {
+            if (!BufferPool.ContainsKey(size))
+            {
+                BufferPool[size] = new byte[size];
+            }
+            return BufferPool[size];
+        }
+
+        public virtual bool KnownSize()
+        {
+            return false;
+        }
+
         public ArtNetPacket(ArtNetOpCodes opCode)
         {
             OpCode = opCode;
@@ -19,9 +47,18 @@ namespace ArtNet.Packets
 
         public byte[] ToArray()
         {
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = KnownSize() ? new MemoryStream(Buffer(Size())) : new MemoryStream();
+            //MemoryStream stream = new MemoryStream();
             WriteData(new ArtNetBinaryWriter(stream));
-            return stream.ToArray();
+            if (KnownSize())
+            {
+                return Buffer(Size());
+                //return stream.ToArray();
+            }
+            else
+            {
+                return stream.ToArray();
+            }
         }
 
         #region Packet Properties
@@ -68,6 +105,13 @@ namespace ArtNet.Packets
             if (OpCode != ArtNetOpCodes.PollReply)
                 Version = data.ReadNetwork16();
 
+        }
+
+        public virtual int Size()
+        {
+            return 8 // Protocol string
+                 + 2 // OpCode short
+                 + (OpCode != ArtNetOpCodes.PollReply ? 2 : 0); // Version short (except for polls)
         }
 
         public virtual void WriteData(ArtNetBinaryWriter data)

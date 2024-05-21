@@ -13,8 +13,9 @@ public class BasicParticleNode : TickingNode
 {
     public override string GetID => "BasicParticle";
     public override string Title { get { return "BasicParticle"; } }
+    private Vector2 _DefaultSize = new Vector2(200, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
 
     [ValueConnectionKnob("emissionRate", Direction.In, typeof(float), NodeSide.Left)]

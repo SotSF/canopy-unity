@@ -17,7 +17,9 @@ public class MinisControlNode : TickingNode
     public override string GetID => "MinisControlNode";
     public override string Title { get { return "MinisControl"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(150, rescale ? 125 : 85); } }
+
+    private Vector2 _DefaultSize = new Vector2(150, 85);
+    public override Vector2 DefaultSize => _DefaultSize;
 
     bool binding = false;
     public bool bound = false;
@@ -34,6 +36,10 @@ public class MinisControlNode : TickingNode
     public int channel;
     private List<Minis.MidiDevice> midiDevices;
     private Minis.MidiDevice boundDevice;
+    private void SetSize()
+    {
+        _DefaultSize = new Vector2(150, rescale ? 125 : 85);
+    }
 
     private void Awake()
     {
@@ -87,6 +93,7 @@ public class MinisControlNode : TickingNode
             DeleteConnectionPort(dynamicConnectionPorts[1]);
             DeleteConnectionPort(dynamicConnectionPorts[0]);
         }
+        SetSize();
     }
 
     void BeginBindingMinis()
@@ -160,8 +167,8 @@ public class MinisControlNode : TickingNode
         }
         if (rescale && dynamicConnectionPorts.Count >= 2)
         {
-            FloatKnobOrField("", ref rescaleMin, (ValueConnectionKnob)dynamicConnectionPorts[0]);
-            FloatKnobOrField("", ref rescaleMax, (ValueConnectionKnob)dynamicConnectionPorts[1]);
+            FloatKnobOrField(GUIContent.none, ref rescaleMin, (ValueConnectionKnob)dynamicConnectionPorts[0]);
+            FloatKnobOrField(GUIContent.none, ref rescaleMax, (ValueConnectionKnob)dynamicConnectionPorts[1]);
         }
 
         GUILayout.EndVertical();

@@ -13,7 +13,9 @@ public class KeySignalNode : TickingNode
 {
     public override string GetID => "KeySignal";
     public override string Title { get { return "KeySignal"; } }
-    public override Vector2 DefaultSize => new Vector2(150, 100);
+    private Vector2 _DefaultSize = new Vector2(150, 100);
+
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(float))]
     public ValueConnectionKnob signalOutputKnob;

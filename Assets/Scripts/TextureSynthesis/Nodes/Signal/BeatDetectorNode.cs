@@ -12,8 +12,9 @@ namespace TexSynth.Audio.BeatDetection
     {
         public override string GetID => "BeatDetectorNode";
         public override string Title { get { return "BeatDetector"; } }
+        private Vector2 _DefaultSize = new Vector2(150, 100);
 
-        public override Vector2 DefaultSize { get { return new Vector2(150, 100); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
         [ValueConnectionKnob("spectrum", Direction.In, typeof(float), NodeSide.Left)]
         public ValueConnectionKnob spectrumKnob;

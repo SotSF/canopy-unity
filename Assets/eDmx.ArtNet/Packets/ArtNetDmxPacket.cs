@@ -88,5 +88,22 @@ namespace ArtNet.Packets
             data.Write(DmxData);
         }
 
+        public override int Size()
+        {
+            var baseSize = base.Size();
+            return baseSize
+                + 1 // Sequence
+                + 1 // Physical
+                + 2 // Universe
+                + 2 // Length field
+                + DmxData.Length; // Data length 
+
+        }
+
+        public override bool KnownSize()
+        {
+            return true;
+        }
+
     }
 }

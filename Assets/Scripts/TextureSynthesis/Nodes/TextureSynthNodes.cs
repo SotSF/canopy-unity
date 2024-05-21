@@ -98,8 +98,7 @@ namespace SecretFire.TextureSynth
             GUI.skin.label.fixedWidth = defaultWidth;
             GUILayout.EndHorizontal();
         }
-
-        protected void FloatKnobOrField(string label, ref float val, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
+        protected void FloatKnobOrField(GUIContent label, ref float val, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
             GUILayout.BeginHorizontal();
             knob.DisplayLayout();
@@ -112,6 +111,11 @@ namespace SecretFire.TextureSynth
                 val = knob.GetValue<float>();
             }
             GUILayout.EndHorizontal();
+        }
+
+        protected void FloatKnobOrField(string label, ref float val, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
+        {
+            FloatKnobOrField(new GUIContent(label), ref val, knob, layoutOpts);
         }
 
         protected void IntKnobOrSlider(ref int val, int min, int max, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)

@@ -9,8 +9,9 @@ public class ImplosionNode : TickingNode
 {
     public override string GetID => "ImplosionNode";
     public override string Title { get { return "Implosion"; } }
+    private Vector2 _DefaultSize = new Vector2(200, 200);
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 200); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     
     [ValueConnectionKnob("emissionRate", Direction.In, typeof(float), NodeSide.Left)]

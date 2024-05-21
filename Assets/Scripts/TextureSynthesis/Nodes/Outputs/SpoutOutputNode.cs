@@ -10,7 +10,8 @@ public class SpoutOutputNode : TextureSynthNode
     public override string GetID => "SpoutOutput";
     public override string Title { get { return "SpoutOutput"; } }
 
-    public override Vector2 DefaultSize { get { return new Vector2(200, 150); } }
+    private Vector2 _DefaultSize = new Vector2(200, 150);
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;

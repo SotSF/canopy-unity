@@ -10,8 +10,9 @@ public class DropsNode : TickingNode
 {
     public override string GetID => "DropsNode";
     public override string Title { get { return "Drops"; } }
+    private Vector2 _DefaultSize = new Vector2(256, 256); 
 
-    public override Vector2 DefaultSize { get { return new Vector2(256, 256); } }
+    public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("Interval", Direction.In, typeof(int), NodeSide.Left)]
     public ValueConnectionKnob IntervalKnob;
