@@ -264,6 +264,7 @@ public class MinisControlArrayNode : TickingNode
     
     public override bool Calculate()
     {
+        int i = 0;
         foreach (var control in controls)
         {
             if (control.bound)
@@ -273,8 +274,14 @@ public class MinisControlArrayNode : TickingNode
                 {
                     val = Mathf.Lerp(control.rescaleMin, control.rescaleMax, control.rawMIDIValue);
                 }
+                if (control.outputKnob == null)
+                {
+                    control.outputKnob = (ValueConnectionKnob)dynamicConnectionPorts[i];
+                    SetSize();
+                }
                 control.outputKnob.SetValue(val);
             }
+            i++;
         }
         return true;
     }
