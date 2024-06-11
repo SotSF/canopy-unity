@@ -59,6 +59,11 @@ public class DmxController : MonoBehaviour
             artnet.Send(dmxToSend, remote);
     }
 
+    public void ConnectIp()
+    {
+        remote = new IPEndPoint(FindFromHostName(remoteIP), ArtNetSocket.Port);
+    }
+
     private void OnValidate()
     {
         foreach (var u in universes)
