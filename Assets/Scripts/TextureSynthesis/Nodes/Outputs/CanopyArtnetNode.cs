@@ -68,12 +68,19 @@ public class CanopyArtnetNode : TickingNode
     {
         inputTexKnob.SetPosition(20);
         GUILayout.BeginVertical();
-
         GUILayout.BeginHorizontal();
-        ip = RTEditorGUI.TextField(IPLabel, ip);
+        GUILayout.Space(4);
+        ip = RTEditorGUI.TextField(IPLabel, ip, null, GUILayout.ExpandWidth(true) );
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
         if (GUILayout.Button("Set IP"))
         {
             controller.remoteIP = ip;
+            controller.ConnectIp();
+        }
+        if (GUILayout.Button("Reconnect"))
+        {
+            dmxAlive = true;
         }
         GUILayout.EndHorizontal();
         
