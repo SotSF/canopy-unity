@@ -1,43 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8944200495844367969
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: outputTex
-  m_EditorClassIdentifier: 
-  body: {fileID: -3724705095315567842}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections: []
-  side: 1
-  sidePosition: 150
-  sideOffset: 0
---- !u!114 &-3724705095315567842
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46d572fe47b45a742b164d57f600bc39, type: 3}
-  m_Name: SignalGraph
-  m_EditorClassIdentifier: 
-  position: {x: -270.5, y: -286}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  signalKnob: {fileID: 8317728507448058477}
-  outputTexKnob: {fileID: -8944200495844367969}
---- !u!114 &-1520482157689498152
+--- !u!114 &-8937829665889670785
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,16 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: Value
   m_EditorClassIdentifier: 
-  body: {fileID: -277546103619966140}
+  body: {fileID: -7548594151124037610}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
-  _connections:
-  - {fileID: 8317728507448058477}
+  _connections: []
   side: 2
-  sidePosition: 29
+  sidePosition: 160.145
   sideOffset: 0
---- !u!114 &-277546103619966140
+--- !u!114 &-7548594151124037610
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -70,36 +32,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d053d3bf8d6047a0b2c2f1d370db788, type: 3}
   m_Name: MinisControlArray
   m_EditorClassIdentifier: 
-  position: {x: -561.5, y: -281}
+  position: {x: -385.5, y: -161.5}
   dynamicConnectionPorts:
-  - {fileID: -1520482157689498152}
-  - {fileID: 1907088980343326624}
+  - {fileID: -3470595038538748389}
+  - {fileID: -233374081553333888}
+  - {fileID: -8937829665889670785}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   channel: 0
   controls:
-  - rawMIDIValue: 0.4566929
+  - rawMIDIValue: 0.56692916
     rescaleMin: 0
     rescaleMax: 1
     rescale: 0
-    controlID: 19
+    controlID: 57
     binding: 0
     bound: 1
     deleted: 0
     controlIndex: 0
-    parent: {fileID: -277546103619966140}
+    parent: {fileID: -7548594151124037610}
     minKnob: {fileID: 0}
     maxKnob: {fileID: 0}
     outputKnob: {fileID: 0}
-  - rawMIDIValue: 0.4015748
+  - rawMIDIValue: 0.5590551
     rescaleMin: 0
     rescaleMax: 1
     rescale: 0
-    controlID: 23
+    controlID: 61
     binding: 0
     bound: 1
     deleted: 0
     controlIndex: 0
-    parent: {fileID: -277546103619966140}
+    parent: {fileID: -7548594151124037610}
+    minKnob: {fileID: 0}
+    maxKnob: {fileID: 0}
+    outputKnob: {fileID: 0}
+  - rawMIDIValue: 0.6062992
+    rescaleMin: 0
+    rescaleMax: 1
+    rescale: 0
+    controlID: 62
+    binding: 0
+    bound: 1
+    deleted: 0
+    controlIndex: 0
+    parent: {fileID: -7548594151124037610}
     minKnob: {fileID: 0}
     maxKnob: {fileID: 0}
     outputKnob: {fileID: 0}
@@ -112,10 +88,50 @@ MonoBehaviour:
     bound: 0
     deleted: 0
     controlIndex: 0
-    parent: {fileID: -277546103619966140}
+    parent: {fileID: -7548594151124037610}
     minKnob: {fileID: 0}
     maxKnob: {fileID: 0}
     outputKnob: {fileID: 0}
+--- !u!114 &-3470595038538748389
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Value
+  m_EditorClassIdentifier: 
+  body: {fileID: -7548594151124037610}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections: []
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-233374081553333888
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Value
+  m_EditorClassIdentifier: 
+  body: {fileID: -7548594151124037610}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections: []
+  side: 2
+  sidePosition: 94.145004
+  sideOffset: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,35 +145,14 @@ MonoBehaviour:
   m_Name: New Calculation Canvas
   m_EditorClassIdentifier: 
   editorStates:
-  - {fileID: 2142185749322672613}
-  saveName: MiniArrayTest
-  savePath: Assets/TextureSynthesis/Resources/CanvasSaves/MiniArrayTest.asset
+  - {fileID: 5718969073174025916}
+  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\MiniArrayTest
+  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\MiniArrayTest.asset
   livesInScene: 0
   nodes:
-  - {fileID: -277546103619966140}
-  - {fileID: -3724705095315567842}
+  - {fileID: -7548594151124037610}
   groups: []
---- !u!114 &1907088980343326624
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Value
-  m_EditorClassIdentifier: 
-  body: {fileID: -277546103619966140}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections: []
-  side: 2
-  sidePosition: 92
-  sideOffset: 0
---- !u!114 &2142185749322672613
+--- !u!114 &5718969073174025916
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -171,27 +166,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvas: {fileID: 0}
   parentEditor: {fileID: 0}
-  selectedNode: {fileID: -3724705095315567842}
+  selectedNode: {fileID: -7548594151124037610}
   panOffset: {x: 0, y: 0}
   zoom: 1
---- !u!114 &8317728507448058477
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: signal
-  m_EditorClassIdentifier: 
-  body: {fileID: -3724705095315567842}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: -1520482157689498152}
-  side: 4
-  sidePosition: 29
-  sideOffset: 0
