@@ -1,0 +1,41 @@
+#include "GraphicsUtils.compute"
+#include "HSV.compute"
+
+#pragma kernel PatternKernel
+
+int width;
+int height;
+int numPoints;
+
+float2 points[64];
+
+RWTexture2D<float4> OutputTex;
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 normalizedPosition = id.xy / (float2(width,height)-float2(1,1));
+    float min_dist = 100;
+    float second_dist = 100;
+    float2 closest_point = float2(100,100);
+    float2 second_closest = float2(100,100);
+    for (int i = 0; i < numPoints; i++)
+    {
+        if (points[i].x < 0 || points[i].x > 1 || points[i].y < 0 || points[i].y > 1)
+        {
+            continue;
+        }
+        float d = distance(points[i], normalizedPosition);
+        if (d < min_dist)
+        {
+            second_dist = min_dist;
+            min_dist = d;
+            second_closest = closest_point;
+            closest_point = points[i];
+        }
+    }
+    float border = 1 - smoothstep(0.0, 0.05, second_dist - min_dist);
+    float voronoi_point = 1 - smoothstep(0.0, 0.01, min_dist);
+    float color = border + voronoi_point;
+    OutputTex[id.xy] = float4(color, color, color, 1);
+}
