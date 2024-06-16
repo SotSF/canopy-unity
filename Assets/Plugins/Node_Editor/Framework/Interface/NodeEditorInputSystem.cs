@@ -27,7 +27,7 @@ namespace NodeEditorFramework
 
 		// NOTE: Using Lists of KeyValuePair as we 1. need it ordered in the first two cases and 2. we do not need extras from Dictionary anyway
 		private static List<KeyValuePair<EventHandlerAttribute, Delegate>> eventHandlers;
-		private static List<KeyValuePair<HotkeyAttribute, Delegate>> hotkeyHandlers;
+		public static List<KeyValuePair<HotkeyAttribute, Delegate>> hotkeyHandlers;
 		private static List<KeyValuePair<ContextEntryAttribute, MenuFunctionData>> contextEntries;
 		private static List<KeyValuePair<ContextFillerAttribute, Delegate>> contextFillers;
 
@@ -136,6 +136,13 @@ namespace NodeEditorFramework
 			object[] parameter = new object[] { inputInfo };
 			foreach (KeyValuePair<HotkeyAttribute, Delegate> hotKey in hotkeyHandlers)
 			{
+				if (hotKey.Key == null)
+                {
+					hotKey.Value.DynamicInvoke(parameter);
+					if (inputInfo.inputEvent.type == EventType.Used)
+						return;
+					continue;
+                }
 				if (hotKey.Key.handledHotKey == keyCode && 
 					(hotKey.Key.modifiers == null || hotKey.Key.modifiers == mods) && 
 					(hotKey.Key.limitingEventType == null || hotKey.Key.limitingEventType == inputInfo.inputEvent.type))

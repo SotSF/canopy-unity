@@ -32,8 +32,8 @@ public class KeySignalNode : TickingNode
     public ValueConnectionKnob releasedKnob;
     bool released;
 
-    public HashSet<KeyCode> bindingKeys;
-    public HashSet<KeyCode> boundKeys;
+    public List<KeyCode> bindingKeys;
+    public List<KeyCode> boundKeys;
     bool inputActive = false;
 
     bool useEasing = false;
@@ -46,14 +46,17 @@ public class KeySignalNode : TickingNode
     private void Awake()
     {
         if (bindingKeys == null){
-            bindingKeys = new HashSet<KeyCode>();
+            bindingKeys = new List<KeyCode>();
         }
         if (boundKeys == null)
         {
-            boundKeys = new HashSet<KeyCode>();
+            boundKeys = new List<KeyCode>();
         }
+        InputHandler inputHandler = HandleInput;
+        NodeEditorInputSystem.hotkeyHandlers.Add(new KeyValuePair<HotkeyAttribute, Delegate>(null, inputHandler));
     }
-
+    public delegate void InputHandler(NodeEditorInputInfo e);
+    
     public override bool Calculate()
     {
         if (useEasing)
@@ -91,9 +94,10 @@ public class KeySignalNode : TickingNode
          - Set(0) != Set(0), use SetEquals
          - Only trigger timeUp if the removed key was actually part of the bound key chord
          */
-    void HandleInput()
+    
+    void HandleInput(NodeEditorInputInfo q)
     {
-        var e = Event.current;
+        Event e = q.inputEvent;
         if (e.keyCode == KeyCode.None)
             return;
         switch (e.type)
@@ -105,7 +109,7 @@ public class KeySignalNode : TickingNode
                 } else if (bound && boundKeys.Contains(e.keyCode) && !inputActive)
                 {
                     bindingKeys.Add(e.keyCode);
-                    if (bindingKeys.SetEquals(boundKeys))
+                    if (bindingKeys.SequenceEqual(boundKeys))
                     {
                         inputActive = true;
                         pressed = true;
@@ -140,7 +144,6 @@ public class KeySignalNode : TickingNode
 
     public override void NodeGUI()
     {
-        HandleInput();
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         if (!bound && !binding)
