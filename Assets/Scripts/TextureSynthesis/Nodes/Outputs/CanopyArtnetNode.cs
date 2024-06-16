@@ -28,6 +28,8 @@ public class CanopyArtnetNode : TickingNode
     private List<byte[]> universes;
     private int numUniverses = 96;
 
+    public int mirrorPort = 6;
+
     public bool flipMirrorDirection = true;
     public int mirrorOffset = 27;
     int frameindex = 0;
@@ -83,7 +85,7 @@ public class CanopyArtnetNode : TickingNode
             dmxAlive = true;
         }
         GUILayout.EndHorizontal();
-        
+        mirrorPort = RTEditorGUI.IntField("Mirror port", mirrorPort);
         mirrorOffset = RTEditorGUI.IntSlider("Mirror offset", mirrorOffset, 0, 95);
         flipMirrorDirection = RTEditorGUI.Toggle(flipMirrorDirection, "Flip mirror direction");
         useDoubleDensity = RTEditorGUI.Toggle(useDoubleDensity, "Use double density");
@@ -135,11 +137,11 @@ public class CanopyArtnetNode : TickingNode
     public void setPixel(int r, int c, Color32 color)
     {
         // Special case behavior for infinity mirror at the innermost ring
-        // Mirror is tailed off #12
-        // It can thus use the end of universe 72
+        // Mirror is tailed off some port, uses the last 96 pixels on that port
+        // (Pixlite must be configured to accept)
         if (c == 0)
         {
-            var universeIndex = 71;
+            var universeIndex = 6 * mirrorPort - 1;
             var pixelIndex = (r + mirrorOffset) % 96;
             if (flipMirrorDirection)
             {
