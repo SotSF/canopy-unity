@@ -183,6 +183,21 @@ public class MinisControlArrayNode : TickingNode
         );
     }
 
+    private void FixKnobs()
+    {
+        int i = 0;
+        foreach (var control in controls)
+        {
+            control.outputKnob = (ValueConnectionKnob)dynamicConnectionPorts[i];
+            if (control.rescale)
+            {
+                control.minKnob = (ValueConnectionKnob)dynamicConnectionPorts[++i];
+                control.maxKnob = (ValueConnectionKnob)dynamicConnectionPorts[++i];
+            }
+            i++;
+        }
+    }
+
     public override void NodeGUI()
     {
         bool resized = false;
@@ -228,8 +243,12 @@ public class MinisControlArrayNode : TickingNode
                     }
                     if (control.rescale && dynamicConnectionPorts.Count >= 2)
                     {
-                        FloatKnobOrField(GUIContent.none, ref control.rescaleMin, (ValueConnectionKnob)control.minKnob);
-                        FloatKnobOrField(GUIContent.none, ref control.rescaleMax, (ValueConnectionKnob)control.maxKnob);
+                        if (control.minKnob == null || control.maxKnob == null)
+                        {
+                            FixKnobs();
+                        }
+                        FloatKnobOrField(GUIContent.none, ref control.rescaleMin, control.minKnob);
+                        FloatKnobOrField(GUIContent.none, ref control.rescaleMax, control.maxKnob);
                     }
                 }
                 else
