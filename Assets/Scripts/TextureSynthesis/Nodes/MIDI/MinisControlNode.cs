@@ -53,6 +53,7 @@ public class MinisControlNode : TickingNode
 
         // Register devices new
         InputSystem.onDeviceChange += OnDeviceAdded;
+        SetSize();
     }
 
     private void OnDeviceAdded(InputDevice device, InputDeviceChange change)
