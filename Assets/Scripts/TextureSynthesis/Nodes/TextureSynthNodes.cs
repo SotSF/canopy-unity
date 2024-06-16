@@ -83,6 +83,10 @@ namespace SecretFire.TextureSynth
 
         protected void FloatKnobOrSlider(ref float val, float min, float max, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
+            if (knob == null)
+            {
+                return;
+            }
             GUILayout.BeginHorizontal();
             GUILayout.Space(5);
             var defaultWidth = GUI.skin.label.fixedWidth;
@@ -100,6 +104,10 @@ namespace SecretFire.TextureSynth
         }
         protected void FloatKnobOrField(GUIContent label, ref float val, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
+            if (knob == null)
+            {
+                return;
+            }
             GUILayout.BeginHorizontal();
             knob.DisplayLayout();
             if (!knob.connected())
