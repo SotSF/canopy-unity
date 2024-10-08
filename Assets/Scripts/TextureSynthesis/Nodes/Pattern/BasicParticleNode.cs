@@ -33,7 +33,7 @@ public class BasicParticleNode : TickingNode
     private Camera cam;
     private GameObject sceneObj;
 
-    public void Awake()
+    public override void DoInit()
     {
         //vfxPrefab = Resources.Load<Transform>("Prefabs/");
         sceneObj = GameObject.Find("BasicParticleCam");
@@ -71,7 +71,7 @@ public class BasicParticleNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         emissionRate = emissionRateKnob.connected() ? emissionRateKnob.GetValue<float>() : emissionRate;
 

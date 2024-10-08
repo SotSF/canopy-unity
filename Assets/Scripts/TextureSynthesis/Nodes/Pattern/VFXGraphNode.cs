@@ -28,7 +28,7 @@ public class VFXGraphNode: TickingNode
     private Transform vfxPrefab;
     private Camera cam;
 
-    public void Awake()
+    public override void DoInit()
     {
         vfxPrefab = Resources.Load<Transform>("Prefabs/");
     }
@@ -73,8 +73,8 @@ public class VFXGraphNode: TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         emissionRate = emissionRateKnob.connected() ? emissionRateKnob.GetValue<float>(): emissionRate;
 

@@ -81,7 +81,7 @@ public class XboxFullControllerNode : TickingNode
     private bool leftBumper, rightBumper;
     private bool start, back;
 
-    public void Awake()
+    public override void DoInit()
     {
         if (controllerChoice == null || controllerChoice.names.Count == 0)
         {
@@ -145,8 +145,8 @@ public class XboxFullControllerNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         if (controllerChoice.Selected != lastSelected)
         {

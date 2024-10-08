@@ -53,7 +53,7 @@ public class jptestNode : TickingNode
     private List<PatternObject> objects = new List<PatternObject>();
     private int tick = 0;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/FirefliesPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
         fadeKernel = patternShader.FindKernel("FadeKernel");
@@ -108,8 +108,8 @@ public class jptestNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         patternShader.SetInt("width", outputSize.x);
         patternShader.SetInt("height", outputSize.y);

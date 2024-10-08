@@ -50,7 +50,7 @@ public class PanNode : TickingNode {
     public RadioButtonSet offsetMode;
     public RadioButtonSet sampleMode;
 
-    private void Awake()
+    public override void DoInit()
     {
         panShader = Resources.Load<ComputeShader>("NodeShaders/PanFilter");
         bilinearMirrorKernel = panShader.FindKernel("BilinearMirror");
@@ -245,7 +245,7 @@ public class PanNode : TickingNode {
 
     float lastStep = 0;
     Vector2Int inputSize = new Vector2Int(0, 0);
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || tex == null)

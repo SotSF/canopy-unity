@@ -43,21 +43,16 @@ public class KeySignalNode : TickingNode
     float timeDown = 0;
     float timeUp = 0;
 
-    private void Awake()
+    public override void DoInit()
     {
-        if (bindingKeys == null){
-            bindingKeys = new List<KeyCode>();
-        }
-        if (boundKeys == null)
-        {
-            boundKeys = new List<KeyCode>();
-        }
+        bindingKeys ??= new List<KeyCode>();
+        boundKeys ??= new List<KeyCode>();
         InputHandler inputHandler = HandleInput;
         NodeEditorInputSystem.hotkeyHandlers.Add(new KeyValuePair<HotkeyAttribute, Delegate>(null, inputHandler));
     }
     public delegate void InputHandler(NodeEditorInputInfo e);
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         if (useEasing)
         {

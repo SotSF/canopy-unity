@@ -22,7 +22,7 @@ abstract public class PatternNode : TickingNode
 
     private Vector2Int outputSize = Vector2Int.zero;
 
-    private void Awake()
+    public override void DoInit()
     {
         patternShader = Resources.Load<ComputeShader>(string.Format("PatternShaders/{0}Pattern}", GetID));
         patternKernel = patternShader.FindKernel("PatternKernel");
@@ -68,7 +68,7 @@ abstract public class PatternNode : TickingNode
         patternShader.Dispatch(patternKernel, threadGroupX, threadGroupY, 1);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         // Bind the
         BindAndExecute();

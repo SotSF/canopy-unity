@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/VectorDecomposer")]
-public class VectorDecomposerNode : Node
+public class VectorDecomposerNode : TextureSynthNode
 {
     public override string GetID => "VectorDecomposerNode";
     public override string Title { get { return "VectorDecomposer"; } }
@@ -62,7 +62,7 @@ public class VectorDecomposerNode : Node
     }
 
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (!inputVectorKnob.connected())
         {

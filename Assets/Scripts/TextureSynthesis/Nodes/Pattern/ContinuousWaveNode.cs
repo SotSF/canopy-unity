@@ -24,8 +24,8 @@ public class ContinuousWaveNode : TickingNode
     private RenderTexture outputTex;
 
     private ComputeShader continuousWaveShader;
-    private int kernel; 
-    private void Awake()
+    private int kernel;
+    public override void DoInit()
     {
         continuousWaveShader = Resources.Load<ComputeShader>("NodeShaders/ContinuousWavePattern");
         kernel = continuousWaveShader.FindKernel("Pattern");
@@ -46,10 +46,5 @@ public class ContinuousWaveNode : TickingNode
     public override void NodeGUI()
     {
         
-    }
-
-    public override bool Calculate()
-    {
-        return true;
     }
 }

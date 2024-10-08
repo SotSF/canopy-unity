@@ -1,10 +1,11 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 [Node(false, "Pattern/AnalogSynth")]
-public class AnalogSynthNode: Node
+public class AnalogSynthNode: TextureSynthNode
 {
     public const string ID = "synthNode";
     public override string GetID { get { return ID; } }
@@ -32,7 +33,7 @@ public class AnalogSynthNode: Node
     private ComputeShader synthShader;
     private int kernelId;
 
-    private void Awake()
+    public override void DoInit()
     {
         synthShader = Resources.Load<ComputeShader>("NodeShaders/SynthPattern");
         kernelId = synthShader.FindKernel("CSMain");
@@ -69,7 +70,7 @@ public class AnalogSynthNode: Node
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         var newPeriod = periodInputKnob.connected() ? periodInputKnob.GetValue<float>() : period;
         var newPhase = phaseInputKnob.connected() ? phaseInputKnob.GetValue<float>() : phase;

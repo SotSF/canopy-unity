@@ -9,7 +9,7 @@ using System.Linq;
 using UnityEngine;
 
 [Node(false, "Canopy/SimulationView")]
-public class CanopySimulationNode : TickingNode
+public class CanopySimulationNode : TextureSynthNode
 {
     public override string GetID => "CanopySimulationView";
     public override string Title { get { return "CanopySimulationView"; } }
@@ -24,7 +24,7 @@ public class CanopySimulationNode : TickingNode
     private Camera cam;
     private GameObject sceneObj;
 
-    public void Awake()
+    public override void DoInit()
     {
         sceneObj = GameObject.Find("CanopyCam");
         cam = sceneObj.GetComponent<Camera>();
@@ -47,10 +47,5 @@ public class CanopySimulationNode : TickingNode
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
-    }
-
-    public override bool Calculate()
-    {
-        return true;
     }
 }

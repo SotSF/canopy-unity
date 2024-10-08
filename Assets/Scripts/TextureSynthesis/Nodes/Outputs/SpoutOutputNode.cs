@@ -35,7 +35,7 @@ public class SpoutOutputNode : TextureSynthNode
     public string name = "spoutSender";
     public bool sendAlpha = false;
 
-    private void Awake()
+    public override void DoInit()
     {
         prefab = Resources.Load<GameObject>("Prefabs/SpoutSender");
     }
@@ -84,7 +84,7 @@ public class SpoutOutputNode : TextureSynthNode
         spoutController.AttachTexture(outputTex);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture tex = inputTexKnob.GetValue<Texture>();
         if (!inputTexKnob.connected() || tex == null)

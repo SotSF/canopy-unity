@@ -2,11 +2,12 @@
 using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 using UnityEngine;
 using UnityEngine.Video;
 
 [Node(false, "Pattern/VortexGenerator")]
-public class VortexGeneratorNode : Node
+public class VortexGeneratorNode : TextureSynthNode
 {
     public const string ID = "vortexGeneratorNode";
     public override string GetID { get { return ID; } }
@@ -36,7 +37,7 @@ public class VortexGeneratorNode : Node
     private int patternKernel;
     private Texture2D noiseTex;
 
-    private void Awake()
+    public override void DoInit()
     {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/VortexGeneratorPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
@@ -123,7 +124,7 @@ public class VortexGeneratorNode : Node
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         turbScale = turbScaleKnob.connected() ? turbScaleKnob.GetValue<float>() : turbScale;
         if (turbScale != oldScale)

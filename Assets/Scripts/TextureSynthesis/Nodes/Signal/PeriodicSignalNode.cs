@@ -49,7 +49,7 @@ namespace SecretFire.TextureSynth.Signals
 
         public float expSpikeLevel = 22;
 
-        public void Awake()
+        public override void DoInit()
         {
             signalGenerators["sine"] = CalcSine;
             signalGenerators["square"] = CalcSquare;
@@ -151,7 +151,7 @@ namespace SecretFire.TextureSynth.Signals
         }
 
         float offset;
-        public override bool Calculate()
+        public override bool DoCalc()
         {
             float value = 0;
             float t = Time.time;

@@ -27,7 +27,7 @@ public class AnimatedNode : TickingNode
     int currentIndex = 0;
     VideoClip[] animatedTextures;
 
-    private void Awake()
+    public override void DoInit()
     {
         animatedTextures = Resources.LoadAll<VideoClip>("AnimatedTextures");
         if (Application.isPlaying)
@@ -89,7 +89,7 @@ public class AnimatedNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         // Assign output channels
         if (nextIndex != currentIndex)

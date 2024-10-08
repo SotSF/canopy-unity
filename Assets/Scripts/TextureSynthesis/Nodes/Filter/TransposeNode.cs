@@ -29,7 +29,7 @@ public class TransposeNode : TextureSynthNode
     private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
-    private void Awake()
+    public override void DoInit()
     {
         TransposeShader = Resources.Load<ComputeShader>("NodeShaders/TransposeFilter");
         kernelId = TransposeShader.FindKernel("CSMain");
@@ -57,7 +57,7 @@ public class TransposeNode : TextureSynthNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || tex == null)

@@ -29,7 +29,7 @@ public class ChromaKeyNode : TextureSynthNode
     private Vector2Int outputSize = Vector2Int.zero;
     public RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/ChromaKeyFilter");
         patternKernel = patternShader.FindKernel("PatternKernel");
     }
@@ -89,7 +89,7 @@ public class ChromaKeyNode : TextureSynthNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
     
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture inputTex = inputTexKnob.GetValue<Texture>();
         if (!inputTexKnob.connected () || inputTex == null)

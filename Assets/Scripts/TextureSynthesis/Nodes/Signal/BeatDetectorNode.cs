@@ -8,7 +8,7 @@ namespace TexSynth.Audio.BeatDetection
 {
 
     [Node(false, "Signal/BeatDetector")]
-    public class BeatDetectorNode : Node
+    public class BeatDetectorNode : TextureSynthNode
     {
         public override string GetID => "BeatDetectorNode";
         public override string Title { get { return "BeatDetector"; } }
@@ -29,8 +29,8 @@ namespace TexSynth.Audio.BeatDetection
             if (GUI.changed)
                 NodeEditor.curNodeCanvas.OnNodeChange(this);
         }
-    
-        public override bool Calculate()
+
+        public override bool DoCalc()
         {
             beatDetectedKnob.SetValue(beatDetected);
             return true;

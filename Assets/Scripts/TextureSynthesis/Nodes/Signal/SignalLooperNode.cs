@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/SignalLooper")]
-public class SignalLooperNode : Node
+public class SignalLooperNode : TextureSynthNode
 {
     public override string GetID => "SignalLooperNode";
     public override string Title { get { return "SignalLooper"; } }
@@ -39,7 +39,7 @@ public class SignalLooperNode : Node
 
     public List<float> clipSamples;
 
-    public void Awake()
+    public override void DoInit()
     {
         if (clipSamples == null)
         {
@@ -146,7 +146,7 @@ public class SignalLooperNode : Node
         }
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         // Handle event input controls
         if (recordControlKnob.GetValue<bool>())

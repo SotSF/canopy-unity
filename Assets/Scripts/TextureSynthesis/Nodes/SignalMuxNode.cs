@@ -7,7 +7,7 @@ using System.Linq;
 using UnityEngine;
 
 [Node(false, "Signal/SignalMux")]
-public class SignalMuxNode : Node
+public class SignalMuxNode : TextureSynthNode
 {
     public override string GetID => "SignalMuxNode";
     public override string Title { get { return "SignalMux"; } }
@@ -112,8 +112,8 @@ public class SignalMuxNode : Node
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         if (controlKnob.GetValue<bool>())
         {

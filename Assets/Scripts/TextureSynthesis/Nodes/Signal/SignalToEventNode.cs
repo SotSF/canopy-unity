@@ -32,7 +32,7 @@ public class SignalToEventNode : TickingNode
     bool wasOverThreshold;
     float signalValue;
 
-    public void Awake()
+    public override void DoInit()
     {
         if (triggerMode == null)
         {
@@ -62,7 +62,7 @@ public class SignalToEventNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         signalValue = inputSignalKnob.GetValue<float>();
         switch (triggerMode.SelectedOption())

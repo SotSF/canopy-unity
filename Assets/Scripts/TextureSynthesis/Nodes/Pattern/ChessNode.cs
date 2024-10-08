@@ -43,7 +43,8 @@ public class ChessNode : TickingNode
     private (int, int) cursor;
     private List<(Chess.BoardSpace, Chess.BoardState)> noMoves;
 
-    private void Awake(){
+    public override void DoInit()
+    { 
         outputTex = new Texture2D(16, 16);
         outputTex.filterMode = FilterMode.Point;
         engine = new Chess.ChessEngine();
@@ -233,8 +234,8 @@ public class ChessNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         RenderBoard(engine.board);
         outputTexKnob.SetValue<Texture>(outputTex);

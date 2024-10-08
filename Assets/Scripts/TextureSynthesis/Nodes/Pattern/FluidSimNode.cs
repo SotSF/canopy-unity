@@ -138,7 +138,7 @@ public class FluidSimNode : TickingNode
     }
 
 
-    private void Awake()
+    public override void DoInit()
     {
         fluidSimShader = Resources.Load<ComputeShader>("NodeShaders/EulerFluidSimPattern");
         dyeKernel = fluidSimShader.FindKernel("applyDye");
@@ -378,7 +378,7 @@ public class FluidSimNode : TickingNode
 
     
     float lastStep = 0;
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (timeMultiplierKnob.connected())
         {

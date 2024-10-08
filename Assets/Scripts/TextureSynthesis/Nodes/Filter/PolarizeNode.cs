@@ -1,10 +1,11 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 
 [Node(false, "Filter/Polarize")]
-public class PolarizeNode : Node
+public class PolarizeNode : TextureSynthNode
 {
     public const string ID = "polarizeNode";
     public override string GetID { get { return ID; } }
@@ -26,7 +27,7 @@ public class PolarizeNode : Node
     private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
 
-    private void Awake()
+    public override void DoInit()
     {
         PolarizeShader = Resources.Load<ComputeShader>("NodeShaders/PolarizeFilter");
         kernelId = PolarizeShader.FindKernel("CSMain");
@@ -55,7 +56,7 @@ public class PolarizeNode : Node
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || tex == null)

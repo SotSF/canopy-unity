@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEngine;
 
 [Node(false, "Signal/DynMathExpr")]
-public class DynamicMathExprNode : Node
+public class DynamicMathExprNode : TextureSynthNode
 {
     public override string GetID => "DynMathExprNode";
     public override string Title { get { return "DynMathExpr"; } }
@@ -45,7 +45,7 @@ public class DynamicMathExprNode : Node
         _DefaultSize = new Vector2(160, (1 + targetPortCount) * 120);
     }
 
-    private void Awake()
+    public override void DoInit()
     {
 
         interpreter = new Interpreter();
@@ -167,7 +167,7 @@ public class DynamicMathExprNode : Node
                     stringexpr, 
                     exprParams.GetRange(0, activePortCount).ToArray()
                 );
-                Calculate();
+                DoCalc();
             }
             catch (Exception e)
             {
@@ -209,7 +209,7 @@ public class DynamicMathExprNode : Node
     }
 
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (exprFunc != null)
         {

@@ -24,7 +24,8 @@ public class GameOfLifeNode : TickingNode
     public RenderTexture outputState;
     private RenderTexture inputState;
 
-    private void Awake(){
+    public override void DoInit()
+    {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/GameOfLifePattern");
         patternKernel = patternShader.FindKernel("GameOfLife");
         InitializeRenderTexture();
@@ -82,8 +83,8 @@ public class GameOfLifeNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         if (running)
         {

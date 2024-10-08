@@ -35,7 +35,7 @@ public class SpaceshipGameNode : TickingNode
 
     private SpaceshipGameController gameController;
 
-    public void Awake()
+    public override void DoInit()
     {
         gameController = SpaceshipGameController.instance;
     }
@@ -51,10 +51,7 @@ public class SpaceshipGameNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-
-
-
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         gameOutputKnob.SetValue<Texture>(gameController.gameBoardTex);
         fluidVelocityOutputKnob.SetValue<Texture>(gameController.fluidVelocityTex);

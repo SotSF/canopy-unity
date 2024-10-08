@@ -57,7 +57,7 @@ public class VoronoiNode : TickingNode
     }
     private List<VoronoiPoint> points;
 
-    private void Awake()
+    public override void DoInit()
     {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/VoronoiPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
@@ -152,7 +152,7 @@ public class VoronoiNode : TickingNode
         }
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         MovePoints();
         FillPointBuffer();

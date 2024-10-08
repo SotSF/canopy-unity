@@ -5,7 +5,7 @@ using SecretFire.TextureSynth;
 using UnityEngine;
 
 [Node(false, "Audio/BandAvg")]
-public class BandAvgNode : Node
+public class BandAvgNode : TextureSynthNode
 {
     public override string GetID => "BandAvgNode";
     public override string Title { get { return "BandAvg"; } }
@@ -40,8 +40,8 @@ public class BandAvgNode : Node
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         var spectrum = spectrumDataKnob.GetValue<float[]>();
         if (spectrum != null)

@@ -1,9 +1,10 @@
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
+using SecretFire.TextureSynth;
 using UnityEngine;
 
 [Node(false, "Filter/Kaleidoscope")]
-public class KaleidoscopeNode : Node
+public class KaleidoscopeNode : TextureSynthNode
 {
     public const string ID = "kaleidoscopeNode";
     public override string GetID { get { return ID; } }
@@ -32,7 +33,7 @@ public class KaleidoscopeNode : Node
     public int reflections = 4;
     public int previousReflections = 4;
 
-    private void Awake()
+    private void DoInit()
     {
         KaleidoscopeShader = Resources.Load<ComputeShader>("NodeShaders/KaleidoscopeFilter");
         kernelId = KaleidoscopeShader.FindKernel("CSMain");
@@ -67,7 +68,7 @@ public class KaleidoscopeNode : Node
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || tex == null)

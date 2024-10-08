@@ -5,7 +5,7 @@ using SecretFire.TextureSynth;
 using UnityEngine;
 
 [Node(false, "Filter/GradientFilter")]
-public class GradientFilterNode : Node
+public class GradientFilterNode : TextureSynthNode
 {
     public override string GetID => "GradientFilterNode";
     public override string Title { get { return "Gradient"; } }
@@ -34,7 +34,7 @@ public class GradientFilterNode : Node
     private bool center = false;
     public RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/GradientFilter");
         patternKernel = patternShader.FindKernel("PatternKernel");
     }
@@ -91,7 +91,7 @@ public class GradientFilterNode : Node
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
     
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture inputTex = inputTexKnob.GetValue<Texture>();
         if (!inputTexKnob.connected () || inputTex == null)

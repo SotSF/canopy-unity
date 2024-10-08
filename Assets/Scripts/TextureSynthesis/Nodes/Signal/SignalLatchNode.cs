@@ -40,12 +40,6 @@ public class SignalLatchNode : TickingNode
 
     public float sensitivity;
 
-    public void Awake()
-    {
-
-    }
-
-
     public override void NodeGUI()
     {
         GUILayout.BeginHorizontal();
@@ -77,7 +71,7 @@ public class SignalLatchNode : TickingNode
     }
 
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (!controlSignalKnob.connected())
         {

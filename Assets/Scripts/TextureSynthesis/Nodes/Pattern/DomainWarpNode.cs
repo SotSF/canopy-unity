@@ -33,7 +33,7 @@ public class DomainWarpNode : TickingNode
     private Vector2Int outputSize = new Vector2Int(256, 256);
     private RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/DomainWarpPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
         InitializeRenderTexture();
@@ -69,8 +69,8 @@ public class DomainWarpNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         patternShader.SetInt("width", outputSize.x);
         patternShader.SetInt("height", outputSize.y);

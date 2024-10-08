@@ -95,7 +95,7 @@ public class MinisControlArrayNode : TickingNode
 
     private int bindingIndex = 0;
 
-    private void Awake()
+    public override void DoInit()
     {
         if (controls == null){
             controls = new List<BoundMidiControl>();
@@ -188,6 +188,7 @@ public class MinisControlArrayNode : TickingNode
         int i = 0;
         foreach (var control in controls)
         {
+            if (i >= dynamicConnectionPorts.Count) break;
             control.outputKnob = (ValueConnectionKnob)dynamicConnectionPorts[i];
             if (control.rescale)
             {
@@ -281,7 +282,7 @@ public class MinisControlArrayNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
     
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         int i = 0;
         foreach (var control in controls)

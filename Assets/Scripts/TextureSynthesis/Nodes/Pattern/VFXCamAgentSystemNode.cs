@@ -55,7 +55,7 @@ public class VFXCamAgentSystemNode : TickingNode
     private GameObject sceneObj;
     private VisualEffect effect;
 
-    public void Awake()
+    public override void DoInit()
     {
         //vfxPrefab = Resources.Load<Transform>("Prefabs/");
         sceneObj = GameObject.Find("VFXCam");
@@ -95,7 +95,7 @@ public class VFXCamAgentSystemNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         emissionRate = emissionRateKnob.connected() ? emissionRateKnob.GetValue<float>() : emissionRate;
         particleSize = sizeKnob.connected() ? sizeKnob.GetValue<float>() : particleSize;

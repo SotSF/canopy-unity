@@ -41,7 +41,7 @@ public class MinisControlNode : TickingNode
         _DefaultSize = new Vector2(150, rescale ? 125 : 85);
     }
 
-    private void Awake()
+    public override void DoInit()
     {
 
         midiDevices = new List<Minis.MidiDevice>();
@@ -180,7 +180,7 @@ public class MinisControlNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
     
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         float val = rawMIDIValue;
         if (rescale)

@@ -39,7 +39,7 @@ public class CropNode : TextureSynthNode
 
     public RadioButtonSet edgeWrapMode;
 
-    private void Awake()
+    public override void DoInit()
     {
         CropShader = Resources.Load<ComputeShader>("NodeShaders/CropScaleTileFilter");
         tileKernel = CropShader.FindKernel("TileKernel");
@@ -102,7 +102,7 @@ public class CropNode : TextureSynthNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         width = widthInputKnob.connected() ? widthInputKnob.GetValue<float>() : width;
         height = heightInputKnob.connected() ? heightInputKnob.GetValue<float>() : height;

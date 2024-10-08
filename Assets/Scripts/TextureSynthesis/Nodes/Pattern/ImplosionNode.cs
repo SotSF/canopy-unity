@@ -31,7 +31,7 @@ public class ImplosionNode : TickingNode
     private Transform particlePrefab;
     private Camera cam;
 
-    public void Awake()
+    public override void DoInit()
     {
         particlePrefab = Resources.Load<Transform>("Prefabs/");
     }
@@ -85,8 +85,8 @@ public class ImplosionNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         emissionRate = emissionRateKnob.connected() ? emissionRateKnob.GetValue<float>(): emissionRate;
         speedFactor = speedFactorKnob.connected() ? speedFactorKnob.GetValue<float>(): speedFactor;

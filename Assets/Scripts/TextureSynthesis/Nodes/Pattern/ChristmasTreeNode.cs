@@ -55,7 +55,7 @@ public class ChristmasTreeNode : TickingNode
 
     public TinselFunction tinselOne;
 
-    private void Awake()
+    public override void DoInit()
     {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/VortexGeneratorPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
@@ -206,7 +206,7 @@ public class ChristmasTreeNode : TickingNode
         treeTex.Apply();
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         tinselOne.phase = Time.time/10;
         tinselOne.amplitude = tinselAmplitude;

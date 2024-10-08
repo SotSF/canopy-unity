@@ -3,9 +3,10 @@ using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
 using UnityEngine;
 using System;
+using SecretFire.TextureSynth;
 
 [Node(false, "Canopy/CanopyProjection")]
-public class CanopyNode : Node
+public class CanopyNode : TextureSynthNode
 {
     public const string ID = "canopyMain";
     public override string GetID { get { return ID; } }
@@ -33,12 +34,6 @@ public class CanopyNode : Node
     private Light lightCaster;
 
     private bool hasAwoken = false;
-    private bool isInitialized = false;
-
-    private void Awake()
-    {
-        isInitialized = false;
-    }
 
     private void ReleaseTextures()
     {
@@ -58,7 +53,7 @@ public class CanopyNode : Node
         ReleaseTextures();
     }
 
-    private void Initialize()
+    public override void DoInit()
     {
         canopyMainShader = Resources.Load<ComputeShader>("NodeShaders/CanopyMain");
         mainKernel = canopyMainShader.FindKernel("CanopyMain");
@@ -70,7 +65,6 @@ public class CanopyNode : Node
         lightCaster = GameObject.Find("Canopy").GetComponentInChildren<Light>();
         RenderToCanopySimulation(outputTex);
         Debug.Log("Canopy called Initialize");
-        isInitialized = true;
     }
 
     private void InitializeTextures()
@@ -95,7 +89,7 @@ public class CanopyNode : Node
         polarize = RTEditorGUI.Toggle(polarize, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
         if (GUILayout.Button("Reinitialize"))
         {
-            isInitialized = false;
+            initialized = false;
         }
         GUILayout.EndHorizontal();
         var lastBox = GUILayoutUtility.GetLastRect();
@@ -130,12 +124,8 @@ public class CanopyNode : Node
         canopyMaterial.SetTexture("Frame", texture);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
-        if (!isInitialized)
-        {
-            Initialize();
-        }
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (tex != null)
         {

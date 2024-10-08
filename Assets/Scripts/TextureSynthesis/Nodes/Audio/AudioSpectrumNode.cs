@@ -56,7 +56,7 @@ public class AudioSpectrumNode : TickingNode
 
     private float[] spectrumData;
 
-    public void Awake()
+    public override void DoInit()
     {
         if (scalingModeSelection == null || scalingModeSelection.names.Count == 0)
         {
@@ -197,8 +197,8 @@ public class AudioSpectrumNode : TickingNode
         // }
         return null;
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         CheckCaptureParams();
         // smoother.AdvanceFrame();

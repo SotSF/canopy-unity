@@ -29,7 +29,7 @@ public class AugustNodeNode : TickingNode
     private float controlSignal = 0;
     public RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/AugustNodeFilter");
         patternKernel = patternShader.FindKernel("PatternKernel");
     }
@@ -67,8 +67,8 @@ public class AugustNodeNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         Texture inputTex = inputTexKnob.GetValue<Texture>();
         if (!inputTexKnob.connected () || inputTex == null)

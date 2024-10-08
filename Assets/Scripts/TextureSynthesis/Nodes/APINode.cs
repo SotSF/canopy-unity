@@ -59,7 +59,7 @@ public class ApiNode : TickingNode
         public float value;
     }
 
-    public void Awake()
+    public void DoInit()
     {
         outKnobs = new Dictionary<string, ValueConnectionKnob>();
         values = new Dictionary<string, float>();
@@ -152,7 +152,7 @@ public class ApiNode : TickingNode
         requests.Add(request);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (endpoint == null || endpoint == "")
         {

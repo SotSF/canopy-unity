@@ -25,7 +25,8 @@ public class SpectrumVisualizerNode : TickingNode
     private Vector2Int outputSize = new Vector2Int(75,96);
     public RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit()
+    {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/SpectrumVisualizerFilter");
         patternKernel = patternShader.FindKernel("PatternKernel");
         InitializeRenderTexture();
@@ -57,8 +58,8 @@ public class SpectrumVisualizerNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         var dummySpectrum = new float[32];
         

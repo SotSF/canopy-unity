@@ -37,7 +37,7 @@ public class MergeNode : TextureSynthNode
     private RenderTexture outputTex;
     public RadioButtonSet mergeModeSelection;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/MergeFilter");
         layerKernel = patternShader.FindKernel("LayerKernel");
         fadeKernel = patternShader.FindKernel("FadeKernel");
@@ -100,7 +100,7 @@ public class MergeNode : TextureSynthNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
     
-    public override bool Calculate()
+    public override bool DoCalc()
     {
 
         Texture texL = texLKnob.GetValue<Texture>();

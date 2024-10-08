@@ -4,9 +4,10 @@ using NodeEditorFramework;
 using System.Collections.Generic;
 using System.Linq;
 using NodeEditorFramework.TextureComposer;
+using SecretFire.TextureSynth;
 
 [Node(false, "Texture/TextureBank")]
-public class TextureBankNode : Node
+public class TextureBankNode : TextureSynthNode
 {
     public const string ID = "TextureBankNode";
     public override string GetID => "TextureBankNode";
@@ -16,15 +17,13 @@ public class TextureBankNode : Node
     public override bool AutoLayout => true;
 
     public List<string> texNames;
-    public SerialDict<string, ValueConnectionKnob> texKnobs;
     private List<Texture2D> textures;
 
-    public void Awake() {
-        Debug.Log("TexBank Awake() called");
+    public override void DoInit() {
+        Debug.Log("TexBank DoInit() called");
         LoadTextures();
-        Calculate();
+        DoCalc();
     }
-
 
     protected override void OnAddConnection(ConnectionPort port, ConnectionPort connection)
     {
@@ -34,17 +33,7 @@ public class TextureBankNode : Node
 
     public void LoadTextures()
     {
-        //var foo = ConnectionPortStyles.GetPortStyle("tex");
-        ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Output", Direction.Out, typeof(Texture), NodeSide.Bottom);
-        var texStyle = ConnectionPortStyles.GetPortStyle(outKnobAttribs.StyleID);
-        this.TimedDebug("texStyleID: " + outKnobAttribs.StyleID,2);
-        texStyle.SetColor(Color.yellow);
         textures = new List<Texture2D>(Resources.LoadAll<Texture2D>("StaticTextures"));
-        //Debug.Log("Num tex: "+textures.Count);
-        if (texKnobs == null){
-            texKnobs = new SerialDict<string, ValueConnectionKnob>();
-            //Debug.Log("Empty tex knobs");
-        }
         if (texNames == null)
             texNames = new List<string>();
         List<string> loadedValues = new List<string>(textures.Select(t => t.name));
@@ -52,31 +41,34 @@ public class TextureBankNode : Node
         removedValues.ExceptWith(loadedValues);
         HashSet<string> addedValues = new HashSet<string>(loadedValues);
         addedValues.ExceptWith(texNames);
-        //Rewire connection ports from loaded strings
-        foreach (string texName in texNames)
-        {
-            //Debug.Log("name: "+texName+" texture");
-            texKnobs[texName] = (ValueConnectionKnob)dynamicConnectionPorts[texNames.IndexOf(texName)];
-        }
         //Remove any ports for textures that were removed
         foreach (string texName in removedValues)
         {
-            dynamicConnectionPorts.Remove(texKnobs[texName]);
+            int index = texNames.IndexOf(texName);
+            dynamicConnectionPorts.RemoveAt(index);
         }
-        // Add ports for any textures that were added
         foreach (string texName in addedValues)
         {
-            texKnobs[texName] = CreateValueConnectionKnob(outKnobAttribs);
             texNames.Add(texName);
         }
+        // Add ports for any textures that were added
+        while (dynamicConnectionPorts.Count < texNames.Count)
+        {
+            int createdIndex = dynamicConnectionPorts.Count;
+            ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute(texNames[createdIndex], Direction.Out, typeof(Texture), NodeSide.Bottom);
+            var texStyle = ConnectionPortStyles.GetPortStyle(outKnobAttribs.StyleID);
+            texStyle.SetColor(Color.yellow);
+            var outKnob = CreateValueConnectionKnob(outKnobAttribs);
+        }
     }
+
+    private ValueConnectionKnob texKnobs(string texName) => ((ValueConnectionKnob)dynamicConnectionPorts[texNames.IndexOf(texName)]);
 
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
         if (GUILayout.Button("Reinitialize")){
-            LoadTextures();
-            Calculate();
+            DoInit();
         }
         GUILayout.BeginHorizontal();
         int i = 0;
@@ -84,34 +76,46 @@ public class TextureBankNode : Node
         {
             GUILayout.BeginVertical();
             NodeUIElements.TexInfo(tex, width:64, height: 64);
-            texKnobs[tex.name].SetPosition(i * 70 + 35);
+            texKnobs(tex.name).SetPosition(i * 70 + 35);
             GUILayout.EndVertical();
             i++;
         }
         GUILayout.EndHorizontal();
         GUILayout.EndVertical();
     }
+    private bool texturesSet = false;
 
-    public override bool Calculate()
+    private bool NeedLoadTextures => !texturesSet || dynamicConnectionPorts.Where(p => ((ValueConnectionKnob)p).IsValueNull).Count() > 0;
+
+    public override bool DoCalc()
     {
-        if (textures == null || texKnobs == null)
+        if (NeedLoadTextures)
         {
-            try
+            if (textures == null)
             {
-                LoadTextures();
-            } catch (UnityException e)
+                try
+                {
+                    LoadTextures();
+                } catch (UnityException e)
+                {
+                    Debug.Log(e+":\n\n"+e.Message);
+                }
+            }
+            foreach (var tex in textures)
             {
-                Debug.Log(e+":\n\n"+e.Message);
-            }
-        }
-        foreach (var tex in textures)
-        {
-            if (texKnobs.ContainsKey(tex.name)){
-                texKnobs[tex.name].SetValue(tex);
-                //Debug.Log("Set tex "+tex.name+" for knob");
-            }
-            else{
-                Debug.Log("Couldn't find knob for "+tex.name);
+                if (texNames.Contains(tex.name))
+                {
+                    var knob = texKnobs(tex.name);
+                    knob.SetValue(tex);
+                    var texStyle = ConnectionPortStyles.GetPortStyle(knob.styleID);
+                    texStyle.SetColor(Color.yellow);
+                    //Debug.Log("Set tex "+tex.name+" for knob");
+                }
+                else
+                {
+                    Debug.Log("Couldn't find knob for "+tex.name);
+                }
+                texturesSet = true;
             }
         }
         return true;

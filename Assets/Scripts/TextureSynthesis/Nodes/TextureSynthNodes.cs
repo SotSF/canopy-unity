@@ -3,6 +3,7 @@ using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace SecretFire.TextureSynth
 {
@@ -68,6 +69,40 @@ namespace SecretFire.TextureSynth
 
     public abstract class TextureSynthNode : Node
     {
+        [NonSerialized]
+        protected bool initialized = false;
+        public void Awake()
+        {
+            if (!NodeEditor.IsInitializing && !initialized && Application.isPlaying)
+            {
+                TryInit();
+            }
+        }
+
+        public bool TryInit()
+        {
+            try
+            {
+                DoInit();
+                initialized = true;
+                return true;
+            }
+            catch (Exception err)
+            {
+                Debug.Log("Exception during node init:");
+                Debug.LogException(err);
+                return false;
+            }
+        }
+
+        public override bool Calculate()
+        {
+            if (!initialized) return TryInit();
+            return DoCalc();
+        }
+        public virtual bool DoCalc() { return true; }
+        public virtual void DoInit() { }
+
         static GUIStyle _sliderStyle;
         static GUIStyle sliderStyle {
             get {

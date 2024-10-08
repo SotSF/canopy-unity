@@ -38,7 +38,7 @@ public class HSVNode : TextureSynthNode
     private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
     private Vector2Int inputSize;
-    private void Awake()
+    public override void DoInit()
     {
         HSVShader = Resources.Load<ComputeShader>("NodeShaders/HSVFilter");
         kernelId = HSVShader.FindKernel("CSMain");
@@ -71,7 +71,7 @@ public class HSVNode : TextureSynthNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || tex == null)

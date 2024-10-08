@@ -45,7 +45,8 @@ public class FractalNode : TickingNode
     private Vector2Int outputSize = new Vector2Int(2048,2048);
     public RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit()
+    { 
         patternShader = Resources.Load<ComputeShader>("NodeShaders/FractalPattern");
         patternKernel = patternShader.FindKernel("JuliaKernel");
         InitializeRenderTexture();
@@ -91,8 +92,8 @@ public class FractalNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         patternShader.SetInts("outputSize", outputSize.x, outputSize.y);
         patternShader.SetInt("maxIterations", maxIterations);

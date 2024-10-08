@@ -28,8 +28,8 @@ public class TimeSecondsNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         outputSignal = Time.time;
         outputSignalKnob.SetValue(outputSignal);

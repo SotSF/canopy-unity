@@ -23,7 +23,6 @@ public class TextureMuxNode : TickingNode
     [ValueConnectionKnob("control", Direction.In, typeof(bool), NodeSide.Left)]
     public ValueConnectionKnob controlKnob;
 
-
     [ValueConnectionKnob("autoplay", Direction.In, typeof(bool), NodeSide.Left)]
     public ValueConnectionKnob autoplayKnob;
 
@@ -40,8 +39,8 @@ public class TextureMuxNode : TickingNode
     public RadioButtonSet mergeModeSelection;
 
     public int activeTextureIndex = 0;
-    private int targetPortCount => activePortCount + 1;
     private int activePortCount => dynamicConnectionPorts.Where(port => port.connected()).Count();
+    private int targetPortCount => activePortCount + 1;
     private int openPortIndex => activePortCount;
 
     private int lastTextureIndex;
@@ -49,7 +48,7 @@ public class TextureMuxNode : TickingNode
     public float fadeBeginTime;
     private bool fading = false;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/TexMuxFade");
         fadeKernel = patternShader.FindKernel("FadeKernel");
         if (mergeModeSelection == null || mergeModeSelection.names.Count == 0)
@@ -82,9 +81,9 @@ public class TextureMuxNode : TickingNode
         }
         else if (dynamicConnectionPorts.Count < targetPortCount)
         {
-            ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(Texture), NodeSide.Top);
+            ValueConnectionKnobAttribute inputTexKnobAttribs = new ValueConnectionKnobAttribute("Add input", Direction.In, typeof(Texture), NodeSide.Top);
             while (dynamicConnectionPorts.Count < targetPortCount)
-                CreateValueConnectionKnob(outKnobAttribs);
+                CreateValueConnectionKnob(inputTexKnobAttribs);
             changed = true;
         }
         if (changed)
@@ -209,7 +208,7 @@ public class TextureMuxNode : TickingNode
     }
 
     Vector2Int inputSize = new Vector2Int(0, 0);
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (targetPortCount > 1)
         {
@@ -242,7 +241,7 @@ public class TextureMuxNode : TickingNode
                 patternShader.SetFloat("height", outputTex.height);
 
                 patternShader.SetFloat("crossfader", (Time.time - lastCycleTime) / cycleFadeTime);
-                patternShader.SetTexture(fadeKernel, "texL", lastTex);
+                patternShader.SetTexture(fadeKernel, "texL", lastTex??activeTex);
                 patternShader.SetTexture(fadeKernel, "texR", activeTex);
                 patternShader.SetTexture(fadeKernel, "outputTex", outputTex);
 

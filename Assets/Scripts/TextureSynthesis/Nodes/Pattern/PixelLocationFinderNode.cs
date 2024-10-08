@@ -33,7 +33,7 @@ public class PixelLocationFinderNode : TickingNode
     private List<byte[]> universes;
 
     DmxController controller;
-    public void Awake()
+    public override void DoInit()
     {
         controller = GameObject.Find("DMXController").GetComponent<DmxController>();
         ip = controller.remoteIP;
@@ -111,7 +111,7 @@ public class PixelLocationFinderNode : TickingNode
         controller.Send(2, universe2);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (running && Time.time - lastCycleTime > litTime)
         {

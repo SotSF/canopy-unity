@@ -32,7 +32,7 @@ public class DropsNode : TickingNode
     private List<Drop> drops = new List<Drop>();
     private int tick = 0;
 
-    private void Awake(){
+    public override void DoInit(){
         
 
         patternShader = Resources.Load<ComputeShader>("NodeShaders/DropsPattern");
@@ -82,8 +82,8 @@ public class DropsNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
        
 

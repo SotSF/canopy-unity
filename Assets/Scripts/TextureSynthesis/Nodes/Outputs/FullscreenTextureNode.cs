@@ -21,7 +21,8 @@ public class FullscreenTextureNode : TextureSynthNode
     private Vector2 outputSize;
 
     private Texture inputTex;
-    private void Awake(){
+    public override void DoInit()
+    { 
         //patternShader = Resources.Load<ComputeShader>("NodeShaders/ChromaKeyFilter");
         //patternKernel = patternShader.FindKernel("PatternKernel");
     }
@@ -46,8 +47,8 @@ public class FullscreenTextureNode : TextureSynthNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         if (inputTexKnob.connected())
         {

@@ -46,7 +46,7 @@ public class CanopyArtnetNode : TickingNode
     }
 
     DmxController controller;
-    public void Awake()
+    public override void DoInit()
     {
         controller = GameObject.Find("DMXController").GetComponent<DmxController>();
         ip = controller.remoteIP;
@@ -217,7 +217,7 @@ public class CanopyArtnetNode : TickingNode
     float lastSendTime;
     float fps = 24;
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture inputTex = inputTexKnob.GetValue<Texture>();
         if (!inputTexKnob.connected() || inputTex == null)

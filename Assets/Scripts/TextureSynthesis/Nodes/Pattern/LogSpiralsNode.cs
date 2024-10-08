@@ -72,7 +72,8 @@ public class LogSpiralsNode : TickingNode
     private Vector2Int outputSize = Vector2Int.zero;
     public RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit()
+    {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/LogSpiralsPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
         InitializeRenderTexture();
@@ -116,8 +117,8 @@ public class LogSpiralsNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         globalTimeFactor = globalTimeFactorKnob.connected() ? globalTimeFactorKnob.GetValue<float>() : globalTimeFactor;
         patternShader.SetFloat("globalTimeFactor", globalTimeFactor);

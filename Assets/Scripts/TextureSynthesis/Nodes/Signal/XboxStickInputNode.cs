@@ -87,8 +87,8 @@ public class XboxStickInputNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         float epsilon = 0.000001f;
 

@@ -7,7 +7,7 @@ using System;
 using UnityEngine;
 
 [Node(false, "Signal/ZZObsoleteMathExpr")]
-public class MathExprNode : Node
+public class MathExprNode : TextureSynthNode
 {
     public override string GetID => "MathExprNode";
     public override string Title { get { return "MathExpr"; } }
@@ -35,7 +35,7 @@ public class MathExprNode : Node
     private Lambda exprFunc;
     private string errorMsg = "";
 
-    private void Awake()
+    public override void DoInit()
     {
         interpreter = new Interpreter();
         MathWrapper.SetInterpreterEnv(interpreter);
@@ -125,7 +125,7 @@ public class MathExprNode : Node
     }
 
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (exprFunc != null)
         {

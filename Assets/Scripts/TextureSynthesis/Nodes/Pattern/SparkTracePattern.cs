@@ -42,7 +42,7 @@ public class SparkTracePattern : TickingNode {
     public bool mirror;
     public float speed, angle;
 
-    private void Awake()
+    public override void DoInit()
     {
         panShader = Resources.Load<ComputeShader>("NodeShaders/PanFilter");
         bilinearMirrorKernel = panShader.FindKernel("BilinearMirror");
@@ -95,7 +95,7 @@ public class SparkTracePattern : TickingNode {
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (!textureInputKnob.connected() || tex == null)

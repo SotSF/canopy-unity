@@ -11,22 +11,29 @@ float TAU = 6.283185307179586;
 bool pulse;
 RWTexture2D<float4> OutputTex;
 
+int port;
+
 [numthreads(16, 16, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-	if (id.y == strip)
+	float4 litcolor = pulse ? float4(cos(time), 0.3,sin(time),1) : float4(0.5,0.5,0.5,1);
+	float4 darkcolor = float4(0,0,0,1);
+	float4 color = darkcolor;
+	if (port > 0)
 	{
-		if (pulse)
+		int firststrip = (port-1) * 6;
+		int laststrip = (port-0) * 6;
+		if (id.y >= firststrip && id.y < laststrip)
 		{
-			OutputTex[id.xy] = float4(cos(time),0.3,sin(time),1);
-		}
-		else
-		{
-			OutputTex[id.xy] = float4(1,1,1,1);
+			color = litcolor;
 		}
 	}
 	else
 	{
-		OutputTex[id.xy] = float4(0,0,0,1);
+		if (id.y == strip)
+		{
+			color = litcolor;
+		}
 	}
+	OutputTex[id.xy] = color;
 }

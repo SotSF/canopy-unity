@@ -31,7 +31,7 @@ public class SectorNode : TickingNode
     private const int numPixels = 448;
 
     DmxController controller;
-    public void Awake()
+    public override void DoInit()
     {
         var controllerObj = GameObject.Find("DMXController");
         if (controllerObj != null) {
@@ -249,7 +249,7 @@ public class SectorNode : TickingNode
 
     float lastCalced = 0;
     public float targetFPS = 60;
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (Time.time - lastCalced > (1 / targetFPS))
         {

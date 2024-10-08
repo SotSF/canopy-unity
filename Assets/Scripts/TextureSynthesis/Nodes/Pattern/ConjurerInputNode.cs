@@ -30,7 +30,7 @@ public class ConjurerInputNode : TickingNode
 
     private ConjurerController conjurerController;
 
-    public void Awake()
+    public override void DoInit()
     {
         conjurerController = ConjurerController.instance;
     }
@@ -49,7 +49,7 @@ public class ConjurerInputNode : TickingNode
 
 
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         texOutputKnob.SetValue<Texture>(conjurerController.inputTex);
         return true;

@@ -46,7 +46,8 @@ public class SuperformulaNode : TickingNode
 
     private RenderTexture outputTex;
 
-    private void Awake(){
+    public override void DoInit()
+    {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/SuperformulaPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
         InitializeRenderTexture();
@@ -91,8 +92,8 @@ public class SuperformulaNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         a = aKnob.connected() ? aKnob.GetValue<float>(): a;
         b = bKnob.connected() ? bKnob.GetValue<float>() : b;

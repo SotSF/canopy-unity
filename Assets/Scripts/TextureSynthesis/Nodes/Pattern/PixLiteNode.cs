@@ -26,7 +26,7 @@ public class PixLiteNode : TickingNode
 
     public override Vector2 DefaultSize => _DefaultSize;
 
-    public void Awake()
+    public override void DoInit()
     {
         // Open WebSocket connection to PixLite
         websocket = new WebSocket("ws://192.168.50.5/v1.5?user=admin&auth=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU");
@@ -66,7 +66,7 @@ public class PixLiteNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         // Scale brightness to 0-31
         var brightnessInt = (int)(brightness * 31);

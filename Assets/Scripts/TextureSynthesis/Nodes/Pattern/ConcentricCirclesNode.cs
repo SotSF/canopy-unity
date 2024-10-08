@@ -30,7 +30,7 @@ public class ConcentricCirclesNode : TickingNode
     private bool Continuous = false;
     private bool Invert = false;
 
-    private void Awake(){
+    public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/ConcentricCirclesPattern");
         patternKernel = patternShader.FindKernel("PatternKernel");
         clearKernel = patternShader.FindKernel("ClearKernel");
@@ -69,8 +69,8 @@ public class ConcentricCirclesNode : TickingNode
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
-    public override bool Calculate()
+
+    public override bool DoCalc()
     {
         if (Continuous)
         {

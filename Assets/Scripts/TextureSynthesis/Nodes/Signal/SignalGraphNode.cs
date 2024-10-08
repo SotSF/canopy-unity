@@ -54,7 +54,8 @@ public class SignalGraphNode : TickingNode
 
     float windowMaxX = 1, windowMinX = -1, windowMaxY = 1, windowMinY = -1;
 
-    private void Awake(){
+    public override void DoInit()
+    {
         timeValues = new List<float>(257);
         signalValues = new List<float>(257);
         graphShader = Resources.Load<ComputeShader>("NodeShaders/GraphView");
@@ -115,7 +116,7 @@ public class SignalGraphNode : TickingNode
 
 
     float lastCalc = 0;
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         // Only calculate once per frame
         if (Time.time - lastCalc < Time.deltaTime)
