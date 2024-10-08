@@ -19,6 +19,7 @@ namespace NodeEditorFramework
 		// The NodeCanvas which represents the currently drawn Node Canvas; globally accessed
 		public static NodeCanvas curNodeCanvas;
 		public static NodeEditorState curEditorState;
+		public static bool IsInitializing = false;
 
 		// GUI callback control
 		internal static Action NEUpdate;
@@ -76,7 +77,9 @@ namespace NodeEditorFramework
 		/// </summary>
 		private static void setupBaseFramework ()
 		{
-			CheckEditorPath ();
+			IsInitializing = true;
+
+            CheckEditorPath ();
 
 			// Init Resource system. Can be called anywhere else, too, if it's needed before.
 			ResourceManager.SetDefaultResourcePath (editorPath + "Resources/");
@@ -98,8 +101,8 @@ namespace NodeEditorFramework
 		#if UNITY_EDITOR
 			UnityEditor.EditorApplication.update -= Update;
 			UnityEditor.EditorApplication.update += Update;
-		#endif
-
+#endif
+			IsInitializing = false;
 			initiatedBase = true;
 		}
 

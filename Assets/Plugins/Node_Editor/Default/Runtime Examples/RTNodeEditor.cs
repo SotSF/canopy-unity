@@ -26,6 +26,16 @@ namespace NodeEditorFramework.Standard
 
 		private void Start () 
 		{
+			if (canvas == null)
+			{
+                Debug.Log("RTNode editor: canvas == null");
+				CanvasManager canvasSource = GetComponent<CanvasManager>();
+				canvas = canvasSource.canvas;
+			}
+			else
+			{
+				Debug.Log("RTNode editor: canvas == " + canvas);
+			}
 			NormalReInit();
 		}
 
