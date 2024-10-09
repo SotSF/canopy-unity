@@ -33,7 +33,7 @@ public class KaleidoscopeNode : TextureSynthNode
     public int reflections = 4;
     public int previousReflections = 4;
 
-    private void DoInit()
+    public override void DoInit()
     {
         KaleidoscopeShader = Resources.Load<ComputeShader>("NodeShaders/KaleidoscopeFilter");
         kernelId = KaleidoscopeShader.FindKernel("CSMain");

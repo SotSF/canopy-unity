@@ -7,7 +7,7 @@ namespace Lightsale.Products.Smartsticks
     {
         LineRenderer lPath;
         LineRenderer rPath;
-        PoiPatternSet pattern;
+        public PoiPatternSet pattern;
         public float lHandStartPhase;
         public float rHandStartPhase;
         public bool connectEnds = true;

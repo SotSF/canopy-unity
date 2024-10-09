@@ -226,7 +226,7 @@ public class ChristmasTreeNode : TickingNode
         patternShader.SetInt("width", outputTex.width);
         patternShader.SetInt("height", outputTex.height);
         patternShader.SetTexture(patternKernel, "OutputTex", outputTex);
-        uint tx, ty, tz;
+        //uint tx, ty, tz;
         //patternShader.GetKernelThreadGroupSizes(patternKernel, out tx, out ty, out tz);
         //patternShader.Dispatch(patternKernel, Mathf.CeilToInt(outputTex.width / tx), Mathf.CeilToInt(outputTex.height / ty), 1);
         DrawTree();

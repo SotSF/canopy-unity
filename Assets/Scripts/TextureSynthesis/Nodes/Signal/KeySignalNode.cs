@@ -80,6 +80,7 @@ public class KeySignalNode : TickingNode
         }
         heldKnob.SetValue<bool>(held);
         releasedKnob.SetValue<bool>(released);
+        released = false;
         return true;
     }
          
@@ -123,7 +124,8 @@ public class KeySignalNode : TickingNode
                         binding = false;
                         bound = true;
                     }
-                } else if (bound)
+                }
+                else if (bound)
                 {
                     var removedKey = bindingKeys.Remove(e.keyCode);
                     if (removedKey && inputActive)
@@ -131,6 +133,7 @@ public class KeySignalNode : TickingNode
                         timeUp = Time.time;
                         inputActive = false;
                         held = false;
+                        released = true;
                     }
                 }
                 break;

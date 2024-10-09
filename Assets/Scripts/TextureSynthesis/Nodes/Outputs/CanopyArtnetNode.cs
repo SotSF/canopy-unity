@@ -208,8 +208,8 @@ public class CanopyArtnetNode : TickingNode
             }
             catch (System.Exception err)
             {
+                Debug.Log($"Couldn't send ArtNet due to {err.Message}, disabling DMX");
                 dmxAlive = false;
-                Debug.LogException(err);
             }
         }
     }

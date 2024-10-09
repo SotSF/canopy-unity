@@ -33,8 +33,6 @@ public class CanopyNode : TextureSynthNode
     public bool seamless;
     private Light lightCaster;
 
-    private bool hasAwoken = false;
-
     private void ReleaseTextures()
     {
         if (outputTex != null)

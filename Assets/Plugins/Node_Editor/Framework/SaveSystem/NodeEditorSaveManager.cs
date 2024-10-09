@@ -27,7 +27,7 @@ namespace NodeEditorFramework
 		/// </summary>
 		public static string[] GetSceneSaves()
 		{
-			return Object.FindObjectsOfType<NodeCanvasSceneSave>()
+			return Object.FindObjectsByType<NodeCanvasSceneSave>(FindObjectsSortMode.None)
 				.Where((NodeCanvasSceneSave save) => save.savedNodeCanvas != null && save.saveName.ToLower() != "lastsession")
 #if UNITY_5_3_OR_NEWER || UNITY_5_3
 				.Select((NodeCanvasSceneSave save) => SceneManager.sceneCount > 1 ? (save.gameObject.scene.name + "::" + save.saveName) : save.saveName)
@@ -80,7 +80,7 @@ namespace NodeEditorFramework
 			}
 #endif
 
-			NodeCanvasSceneSave sceneSave = Object.FindObjectsOfType<NodeCanvasSceneSave>()
+			NodeCanvasSceneSave sceneSave = Object.FindObjectsByType<NodeCanvasSceneSave>(FindObjectsSortMode.None)
 #if UNITY_5_3_OR_NEWER || UNITY_5_3 // Filter by scene
 				.Where((NodeCanvasSceneSave save) => !sceneSpecified || save.savedNodeCanvas == null || save.gameObject.scene.name == scene)
 #endif
@@ -116,7 +116,7 @@ namespace NodeEditorFramework
 
 			if (sceneSaveHolder == null)
 			{ // Fetch scene save holder from scene
-				sceneSaveHolder = Object.FindObjectsOfType<NodeCanvasSceneSave>()
+				sceneSaveHolder = Object.FindObjectsByType<NodeCanvasSceneSave>(FindObjectsSortMode.None)
 					.Select(s => s.gameObject).Distinct()
 					.OrderBy(g => g.name == sceneSaveHolderName ? 1 : 2)
 #if UNITY_5_3_OR_NEWER || UNITY_5_3

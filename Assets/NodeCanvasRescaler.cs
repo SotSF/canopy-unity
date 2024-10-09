@@ -8,11 +8,6 @@ public class NodeCanvasRescaler : UIBehaviour
 {
     public RTNodeEditor nodeCanvas;
 
-    public void Awake()
-    {
-        
-    }
-
     protected override void OnRectTransformDimensionsChange()
     {
         base.OnRectTransformDimensionsChange();

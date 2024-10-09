@@ -99,6 +99,13 @@ namespace WebSocketServer {
             }
         }
 
+        public void OnDestroy()
+        {
+            Debug.Log($"Shutting down websocket on {address}:{port}");
+            tcpListener.Stop();
+            tcpListenerThread.Abort();
+        }
+
         // private void HandleConnection (object parameter) {
         //     WebSocketConnection connection = (WebSocketConnection)parameter;
         //     while (true) {

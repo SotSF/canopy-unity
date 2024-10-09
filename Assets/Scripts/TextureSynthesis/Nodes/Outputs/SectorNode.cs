@@ -220,7 +220,7 @@ public class SectorNode : TickingNode
         }
     }
 
-    byte seq = 1;
+    //byte seq = 1;
     bool dmxAlive = true;
     public void SendDMX()
     {
@@ -242,6 +242,7 @@ public class SectorNode : TickingNode
             catch (System.Exception err)
             {
                 // DMX is down, ignore
+                Debug.Log($"Couldn't send ArtNet due to {err.Message}, disabling DMX");
                 dmxAlive = false;
             }
         }

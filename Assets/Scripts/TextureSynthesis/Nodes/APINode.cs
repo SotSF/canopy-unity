@@ -32,7 +32,6 @@ public class ApiNode : TickingNode
     [ValueConnectionKnob("Endpoint", Direction.In, typeof(string))]
     public ValueConnectionKnob endpointInputKnob;
 
-    private int targetPortCount = 0;
     private float lastCheck = 0;
 
     public int activeSignalIndex = 0;
@@ -45,7 +44,9 @@ public class ApiNode : TickingNode
     private Dictionary<string, ValueConnectionKnob> outKnobs;
 
     private List<UnityWebRequest> requests;
+    private const int maxOpenRequests = 20;
 
+#pragma warning disable 0649
     [System.Serializable]
     struct ApiResponse
     {
@@ -58,8 +59,8 @@ public class ApiNode : TickingNode
         public string name;
         public float value;
     }
-
-    public void DoInit()
+#pragma warning restore 0649
+    public override void DoInit()
     {
         outKnobs = new Dictionary<string, ValueConnectionKnob>();
         values = new Dictionary<string, float>();
@@ -147,9 +148,10 @@ public class ApiNode : TickingNode
 
     void Request(string endpoint)
     {
-        var request = UnityWebRequest.Get(endpoint);
-        request.Send();
-        requests.Add(request);
+        var requestObj = UnityWebRequest.Get(endpoint);
+        var requestTask = requestObj.SendWebRequest();
+        //requestObj.Send();
+        requests.Add(requestObj);
     }
 
     public override bool DoCalc()
@@ -162,8 +164,15 @@ public class ApiNode : TickingNode
 
         if (check && Time.time - lastCheck > (1 / pollhz))
         {
-            Request(endpoint);
-            lastCheck = Time.time;
+            if (requests.Count < maxOpenRequests)
+            {
+                Request(endpoint);
+                lastCheck = Time.time;
+            }
+            else
+            {
+                this.TimedDebug($"APINode stopping outbound requests, exceeded max open requests of {maxOpenRequests}");
+            }
         }
 
         for (int i = 0; i < requests.Count; i++)

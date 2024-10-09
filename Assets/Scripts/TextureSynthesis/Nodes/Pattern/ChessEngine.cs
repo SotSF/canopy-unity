@@ -26,26 +26,49 @@ namespace Chess
         public int r;
         public int c;
         public Coord(int r, int c) { this.r = r; this.c = c; }
-        public Coord((int,int) rc) { r = rc.Item1; c = rc.Item2; }
+        public Coord((int, int) rc) { r = rc.Item1; c = rc.Item2; }
+
         public bool onBoard()
         {
             return r >= 0 && r < 8 && c >= 0 && c < 8;
         }
+
         public static Coord operator +(Coord a, (int, int) b)
         {
             return new Coord(a.r + b.Item1, a.c + b.Item2);
         }
-        public static implicit operator Coord((int,int) rc)
+
+        public static implicit operator Coord((int, int) rc)
         {
             return new Coord(rc.Item1, rc.Item2);
         }
+
         public static bool operator ==(Coord a, Coord b)
         {
             return a.r == b.r && a.c == b.c;
         }
+
         public static bool operator !=(Coord a, Coord b)
         {
             return a.r != b.r || a.c != b.c;
+        }
+
+        // Overriding Object.Equals
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Coord))
+            {
+                return false;
+            }
+            Coord other = (Coord)obj;
+            return this == other;
+        }
+
+        // Overriding Object.GetHashCode
+        public override int GetHashCode()
+        {
+            // Hash code based on the fields
+            return (r, c).GetHashCode();
         }
     }
 
@@ -53,13 +76,33 @@ namespace Chess
     {
         public Color color;
         public PieceType type;
+
         public static bool operator ==(Piece a, Piece b)
         {
             return a.color == b.color && a.type == b.type;
         }
+
         public static bool operator !=(Piece a, Piece b)
         {
             return a.color != b.color || a.type != b.type;
+        }
+
+        // Overriding Object.Equals
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Piece))
+            {
+                return false;
+            }
+            Piece other = (Piece)obj;
+            return this == other;
+        }
+
+        // Overriding Object.GetHashCode
+        public override int GetHashCode()
+        {
+            // Hash code based on the fields
+            return (color, type).GetHashCode();
         }
     }
 

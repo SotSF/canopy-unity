@@ -852,9 +852,9 @@ namespace XboxCtrlrInput
 					r = Input.GetAxis(axisCode);
 					r = AdjustAxisValues(r, axis, controllerNumber);
 				} 
-				catch (ArgumentException e) 
+				catch (ArgumentException err)
 				{
-					
+					Debug.LogException(err);
 				}
 			}
 			
@@ -1072,7 +1072,7 @@ namespace XboxCtrlrInput
                    
                     // TODO: Remove condition for XboxController.All when the time comes
                     // Users of XCI: Feel free to remove XboxController.All if you like having no warnings
-                    if(controllerNumber == XboxController.Any || controllerNumber == XboxController.All)
+                    if(controllerNumber == XboxController.Any)
                     {
                         // Examine all controllers it see if any are connected
                         for(int i = 1; i <= 4; i++)

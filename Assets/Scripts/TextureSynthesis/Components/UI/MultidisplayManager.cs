@@ -43,18 +43,22 @@ public class MultidisplayManager : MonoBehaviour
 
     internal Vector2 GetEditorGameWindowSize(int index)
     {
-#if  UNITY_EDITOR
-        System.Reflection.Assembly assembly = typeof(EditorWindow).Assembly;
-        System.Type GameView = assembly.GetType("UnityEditor.GameView");
-        var gameWindow = EditorWindow.GetWindow(GameView);
-        var GetSizeMethod = GameView.GetMethod("GetPlayModeViewSize", System.Reflection.BindingFlags.NonPublic);
-        var ViewArrayInfo = GameView.GetField("s_PlayModeViews", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-        //var ViewArray = ViewArrayInfo.GetValue(null) as List<object>;
-        //var window = ViewArray[index];
-        //System.Object Res = GetSizeMethod.Invoke(null, null);
-        return new Vector2(gameWindow.position.width,gameWindow.position.height);
+#if UNITY_EDITOR
+        {
+            System.Reflection.Assembly assembly = typeof(EditorWindow).Assembly;
+            System.Type GameView = assembly.GetType("UnityEditor.GameView");
+            var gameWindow = EditorWindow.GetWindow(GameView);
+            var GetSizeMethod = GameView.GetMethod("GetPlayModeViewSize", System.Reflection.BindingFlags.NonPublic);
+            var ViewArrayInfo = GameView.GetField("s_PlayModeViews", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            //var ViewArray = ViewArrayInfo.GetValue(null) as List<object>;
+            //var window = ViewArray[index];
+            //System.Object Res = GetSizeMethod.Invoke(null, null);
+            return new Vector2(gameWindow.position.width,gameWindow.position.height);
+        }
 #endif
+#pragma warning disable CS0162 // Unreachable code detected - is reachable due to pragma
         return Vector2.zero;
+#pragma warning restore CS0162 // Unreachable code detected
     }
 
     internal Vector2 GetDisplaySize(int displayIndex)

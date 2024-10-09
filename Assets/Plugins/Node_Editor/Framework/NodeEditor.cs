@@ -22,7 +22,9 @@ namespace NodeEditorFramework
 		public static bool IsInitializing = false;
 
 		// GUI callback control
+#pragma warning disable 0649
 		internal static Action NEUpdate;
+#pragma warning restore 0649
 		public static void Update () { if (NEUpdate != null) NEUpdate (); }
 		public static Action ClientRepaints;
 		public static void RepaintClients () { if (ClientRepaints != null) ClientRepaints (); }

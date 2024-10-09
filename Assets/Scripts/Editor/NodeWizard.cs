@@ -319,7 +319,7 @@ public class NodeWizard : ScriptableWizard
 
         // Generate full method 
         string calculate = $@"
-    public override bool Calculate()
+    public override bool DoCalc()
     {{
 {texInputGuards}
 {numericAssigns.ToString()}
