@@ -105,7 +105,6 @@ public class VoronoiNode : TickingNode
                 velocity = new Vector2(Random.Range(-1.0f,1.0f), Random.Range(-1.0f, 1.0f)) / velocityFactor
             });
         }
-        Debug.Log($"Points: [{string.Join("\n", points.Select(p => p.ToString()))}]");
     }
 
     private void FillPointBuffer()
