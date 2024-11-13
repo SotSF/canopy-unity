@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 // Unity & Unity events
 using UnityEngine;
 using UnityEngine.Events;
+using System.Text;
 
 namespace WebSocketServer {
     [System.Serializable]
@@ -132,27 +133,32 @@ namespace WebSocketServer {
         public virtual void OnError(WebSocketConnection connection) {}
 
 
-        // private void SendMessage() {
-        //     if (connectedTcpClient == null) {
-        //         return;
-        //     }
+        private void SendMessage()
+        {
+            if (connectedTcpClient == null)
+            {
+                return;
+            }
 
-        //     try {
-        //         // Get a stream object for writing.
-        //         NetworkStream stream = connectedTcpClient.GetStream();
-        //         if (stream.CanWrite) {
-        //             string serverMessage = "This is a message from your server.";
-        //             // Convert string message to byte array.
-        //             byte[] serverMessageAsByteArray = Encoding.ASCII.GetBytes(serverMessage);
-        //             // Write byte array to socketConnection stream.
-        //             stream.Write(serverMessageAsByteArray, 0, serverMessageAsByteArray.Length);
-        //             Debug.Log("Server sent his message - should be received by client");
-        //         }
-        //     }
-        //     catch (SocketException socketException) {
-        //         Debug.Log("Socket exception: " + socketException);
-        //     }
-        // }
+            try
+            {
+                // Get a stream object for writing.
+                NetworkStream stream = connectedTcpClient.GetStream();
+                if (stream.CanWrite)
+                {
+                    string serverMessage = "This is a message from your server.";
+                    // Convert string message to byte array.
+                    byte[] serverMessageAsByteArray = Encoding.ASCII.GetBytes(serverMessage);
+                    // Write byte array to socketConnection stream.
+                    stream.Write(serverMessageAsByteArray, 0, serverMessageAsByteArray.Length);
+                    Debug.Log("Server sent his message - should be received by client");
+                }
+            }
+            catch (SocketException socketException)
+            {
+                Debug.Log("Socket exception: " + socketException);
+            }
+        }
     }
 }
 
