@@ -1,0 +1,24 @@
+#include "GraphicsUtils.compute"
+#include "HSV.compute"
+
+#pragma kernel PatternKernel
+
+int width;
+int height;
+float z;
+float xScale;
+float yScale;
+float lineWidth;
+
+RWTexture2D<float4> OutputTex;
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    float part_one = sin(xScale*id.x)*cos(yScale*id.y);
+    float part_two = sin(yScale*id.y)*cos(z);
+    float part_three = sin(z) * cos(xScale * id.x);
+    float value = part_one + part_two + part_three;
+    float color = smoothstep(-0.01*lineWidth,0.01*lineWidth, value);
+    OutputTex[id.xy] = float4(color, color, color, 1);
+}

@@ -14,6 +14,6 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 {
 	int2 coords = int2(id.y, id.x);
 	float osc = sin( TAU * time / rotationPeriod);
-	float color = osc + width / 
+	// float color = osc + width / 
 	OutputTex[id.xy] = float4(InputTex[coords].x, InputTex[coords].y, InputTex[coords].z, 1.0f);
 }

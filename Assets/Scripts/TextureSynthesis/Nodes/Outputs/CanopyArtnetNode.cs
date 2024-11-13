@@ -24,7 +24,7 @@ public class CanopyArtnetNode : TickingNode
 
     private RenderTexture buffer;
 
-    private string ip;
+    public string ip;
     private List<byte[]> universes;
     private int numUniverses = 96;
 

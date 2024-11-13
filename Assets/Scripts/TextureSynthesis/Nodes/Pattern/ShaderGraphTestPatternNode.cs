@@ -86,9 +86,14 @@ public class ShaderGraphTestPatternNode : DynamicPatternNode
             else if (portType == typeof(Texture))
             {
                 Texture tex = port.GetValue<Texture>();
-                if (lastTexInputs[inputPortNames[i]] != tex)
-                {
-                    graphMaterial.SetTexture(inputPortNames[i], tex);
+                try {
+                    if (lastTexInputs[inputPortNames[i]] != tex)
+                    {
+                        graphMaterial.SetTexture(inputPortNames[i], tex);
+                    }
+                }
+                catch {
+                    
                 }
             }
         }
