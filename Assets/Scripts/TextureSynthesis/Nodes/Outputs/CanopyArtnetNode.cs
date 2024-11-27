@@ -119,9 +119,9 @@ public class CanopyArtnetNode : TickingNode
         if (r % 2 == 1)
         {
             // Zig-zag odd numbered strips
-            return passedPixels + ((pixelsPerStrip-1) - c);
+            return (passedPixels-1) + ((pixelsPerStrip-1) - (c-1));
         }
-        return passedPixels + c;
+        return passedPixels + (c-1);
     }
 
     private int pixelIndexToUniverseIndex(int pixIndex)
@@ -158,7 +158,8 @@ public class CanopyArtnetNode : TickingNode
             universe[startOffset + 0] = color.r;
             universe[startOffset + 1] = color.g;
             universe[startOffset + 2] = color.b;
-        } else
+        } 
+        else
         {
             var port = stripToPort(r);
             var pixelIndex = pixelIndexInPort(r, c);
@@ -180,8 +181,7 @@ public class CanopyArtnetNode : TickingNode
         {
             for (int c = 0; c < pixelsPerStrip; c++)
             {
-                var col = c;
-                Color32 color = tex.GetPixel(col, r);
+                Color32 color = tex.GetPixel(c, r);
                 setPixel(r,c, color);
             }
         }
