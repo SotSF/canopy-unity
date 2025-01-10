@@ -10,6 +10,12 @@ using System.Linq;
 using NodeEditorFramework.Utilities;
 using static ConjurerControllerNode;
 
+namespace System.Runtime.CompilerServices
+{
+    // Dummy class to make the compiler happy :')
+    // Enables using some C# 9 features like record types
+    internal static class IsExternalInit { }
+}
 
 [Node(false, "Conjurer/ConjurerApi")]
 public class ConjurerControllerNode : TickingNode
@@ -20,7 +26,7 @@ public class ConjurerControllerNode : TickingNode
     public override string Title { get { return "ConjurerController"; } }
 
     WebSocket websocket;
-    private const string CONJURER_API_URL = "ws://127.0.0.1:8081";
+    private const string CONJURER_API_URL = "ws://localhost:8081";
 
     private Vector2 _DefaultSize = new Vector2(250, 180);
 
@@ -62,8 +68,20 @@ public class ConjurerControllerNode : TickingNode
         public Dictionary<string, object> data;
     }
 
+    public record ConjurerApiEventRecord
+    {
+        public string @event;
+    }
+
+    public record ConjurerApiEventData
+    {
+        public record ConjurerStateUpdate(string Foo) : ConjurerApiEventData();
+
+        private ConjurerApiEventData() { }
+    }
+
     [Serializable]
-    public class  ConjurerCommandDescription
+    public class ConjurerCommandDescription
     {
         public string name;
         public Dictionary<string, ConjurerParameterType> @params;
@@ -161,9 +179,7 @@ public class ConjurerControllerNode : TickingNode
     {
         var eventMessage = System.Text.Encoding.UTF8.GetString(rawEventBytes);
         ConjurerStateUpdate stateUpdate = JsonConvert.DeserializeObject<ConjurerStateUpdate>(eventMessage);
-        Debug.Log($"Conjurer state update received:\n" +
-            $" browser_tab_state: {stateUpdate.browser_tab_state}\n" +
-            $" current mode: {stateUpdate.current_mode}");
+        Debug.Log($"Conjurer state update received:\n {eventMessage}");
         // Do something with Conjurer message!
     }
 
