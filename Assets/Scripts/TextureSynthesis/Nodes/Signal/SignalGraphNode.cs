@@ -45,6 +45,7 @@ public class SignalGraphNode : TickingNode
     private int horizontalAxisKernel;
     private int verticalAxisKernel;
     private int graphKernel;
+    private int graphSDFKernel;
     private RenderTexture graphTexture;
 
     private Vector2Int outputSize = new Vector2Int(128,128);
@@ -63,6 +64,7 @@ public class SignalGraphNode : TickingNode
         horizontalAxisKernel = graphShader.FindKernel("horizontalAxis");
         verticalAxisKernel = graphShader.FindKernel("verticalAxis");
         graphKernel = graphShader.FindKernel("graph");
+        graphSDFKernel = graphShader.FindKernel("graphSDF");
         InitializeRenderTexture();
     }
 
@@ -79,6 +81,12 @@ public class SignalGraphNode : TickingNode
         RenderTexture.active = graphTexture;
         GL.Clear(false, true, Color.black);
         RenderTexture.active = null;
+        // Set render texture
+        graphShader.SetTexture(gridPointsKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(horizontalAxisKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(verticalAxisKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(graphKernel, "outputTex", graphTexture);
+        graphShader.SetTexture(graphSDFKernel, "outputTex", graphTexture);
     }
     
     public override void NodeGUI()
@@ -174,11 +182,7 @@ public class SignalGraphNode : TickingNode
         graphShader.SetVector("backgroundColor", new Color(0.1f, 0.1f, 0.1f, 1));
         graphShader.SetVector("labelColor", Color.white);
 
-        // Set render texture
-        graphShader.SetTexture(gridPointsKernel, "outputTex", graphTexture);
-        graphShader.SetTexture(horizontalAxisKernel, "outputTex", graphTexture);
-        graphShader.SetTexture(verticalAxisKernel, "outputTex", graphTexture);
-        graphShader.SetTexture(graphKernel, "outputTex", graphTexture);
+
 
         // Dispatch kernels
         uint tx, ty, tz;
@@ -200,10 +204,11 @@ public class SignalGraphNode : TickingNode
             graphShader.Dispatch(verticalAxisKernel, 1, Mathf.CeilToInt(outputSize.y / 256f), 1);
         }
 
-        if (signalValues.Count > 0)
+        if (signalValues.Count > 1)
         {
             //this.TimedDebug("Drawing graph points");
-            graphShader.Dispatch(graphKernel, 1, 1, 1);
+            //graphShader.Dispatch(graphKernel, 1, 1, 1);
+            graphShader.Dispatch(graphSDFKernel, threadGroupX, threadGroupY, 1);
         }
 
         outputTexKnob.SetValue(graphTexture);
