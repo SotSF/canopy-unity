@@ -1,4 +1,4 @@
-using NodeEditorFramework;
+﻿using NodeEditorFramework;
 using SecretFire.TextureSynth;
 using UnityEngine;
 using NativeWebSocket;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using NodeEditorFramework.Utilities;
-using static ConjurerControllerNode;
+using Conjurer.Api;
 
 
 [Node(false, "Conjurer/ConjurerApi")]
@@ -20,31 +20,21 @@ public class ConjurerControllerNode : TickingNode
     public override string Title { get { return "ConjurerController"; } }
 
     WebSocket websocket;
-    private const string CONJURER_API_URL = "ws://127.0.0.1:8081";
+    private const string CONJURER_API_URL = "ws://localhost:8081";
 
     private Vector2 _DefaultSize = new Vector2(250, 180);
 
     public override Vector2 DefaultSize => _DefaultSize;
 
-    private IEnumerable<ConnectionPort> connectedPorts => dynamicConnectionPorts.Where(port => port.connected());
-    private int activePortCount => connectedPorts.Count();
-    private int openPortIndex => activePortCount;
-    private int targetPortCount => activePortCount + 1;
+    private StateUpdateData conjurerState;
 
     [ValueConnectionKnob("repetitionsPerSpiralTurn", Direction.In, "Float")]
     public ValueConnectionKnob repetitionsPerSpiralTurnKnob;
 
     private void SetSize()
     {
-        _DefaultSize = new Vector2(160, (1 + targetPortCount) * 120);
+        _DefaultSize = new Vector2(280, 100+(dynamicConnectionPorts.Count) * 25);
     }
-
-    public enum ConjurerParameterType
-    {
-        @string,
-        number
-    }
-
 
     public enum ConjurerMode
     {
@@ -53,88 +43,7 @@ public class ConjurerControllerNode : TickingNode
         emcee,
         experienceCreator
     }
-    public ConjurerMode currentConjurerMode = ConjurerMode.emcee;
-
-    [Serializable]
-    public class ConjurerApiEvent
-    {
-        public string @event;
-        public Dictionary<string, object> data;
-    }
-
-    [Serializable]
-    public class  ConjurerCommandDescription
-    {
-        public string name;
-        public Dictionary<string, ConjurerParameterType> @params;
-    }
-
-    [Serializable]
-    public class ConjurerCommandInstance : ConjurerApiEvent
-    {
-        public ConjurerCommandInstance(string commandName, params ConjurerParameterState[] @params)
-        {
-            @event = "command";
-            data = new Dictionary<string, object>
-            {
-                { "command", commandName },
-                { "params", @params }
-            };
-        }
-    }
-
-    [Serializable]
-    public class ConjurerModeDescription
-    {
-        public string name;
-        public List<ConjurerCommandDescription> commands;
-    }
-
-    [Serializable]
-    public class ConjurerParameterDescription : Dictionary<string, string>
-    {
-        // Description represents the names and types of values to be passed as a paremeter,
-        // eg for "update_parameter" command, there is a COMMAND parameter with fields
-        // "name" => "string" (the type) and "value" => "number" (the type)
-    }
-
-    [Serializable]
-    public class ConjurerParameterState : Dictionary<string, object>
-    {
-        // Parameter state represents the actual value of a parameter, where the V of the KV is
-        // probably a float or string, eg "name" => "u_meander_factor", "value" => "0.51", etc
-    }
-
-    [Serializable]
-    public class ConjurerPatternDescription
-    {
-        public string name;
-        public Dictionary<string, ConjurerParameterState> @params;
-    }
-
-    [Serializable]
-    public class ConjurerPlaygroundMode : ConjurerModeDescription
-    {
-        public List<string> patterns_available;
-        public ConjurerPatternDescription current_pattern;
-
-        public ConjurerPlaygroundMode()
-        {
-            name = "playground";
-        }
-    }
-
-    [Serializable]
-    public class ConjurerStateUpdate : ConjurerApiEvent
-    {
-        public string browser_tab_state;
-        public List<string> modes_available;
-        public ConjurerModeDescription current_mode;
-        public ConjurerStateUpdate()
-        {
-            @event = "conjurer_state_update";
-        }
-    }
+    private ConjurerMode currentConjurerMode = ConjurerMode.disconnected;
 
     public void OnOpenProtocolInit()
     {
@@ -143,8 +52,15 @@ public class ConjurerControllerNode : TickingNode
 
     private void Cleanup()
     {
-        websocket.CancelConnection();
-        websocket.Close();
+        try
+        {
+            websocket.CancelConnection();
+            websocket.Close();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
 
     public void OnDestroy()
@@ -160,11 +76,90 @@ public class ConjurerControllerNode : TickingNode
     public void OnConjurerApiEvent(byte[] rawEventBytes)
     {
         var eventMessage = System.Text.Encoding.UTF8.GetString(rawEventBytes);
-        ConjurerStateUpdate stateUpdate = JsonConvert.DeserializeObject<ConjurerStateUpdate>(eventMessage);
-        Debug.Log($"Conjurer state update received:\n" +
-            $" browser_tab_state: {stateUpdate.browser_tab_state}\n" +
-            $" current mode: {stateUpdate.current_mode}");
-        // Do something with Conjurer message!
+        Debug.Log($"Conjurer state update received:\n {eventMessage}");
+        try
+        {
+            ConjurerApiEvent evt = JsonConvert.DeserializeObject<ConjurerApiEvent>(eventMessage);
+            if (evt.@event == "conjurer_state_update")
+            {
+                var parsedData = JsonConvert.DeserializeObject<StateUpdateData>(evt.data.ToString());
+                OnConjurerStateUpdate(parsedData);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
+    }
+
+    public bool OnConjurerStateUpdate(StateUpdateData stateUpdate)
+    {
+        conjurerState = stateUpdate;
+        Debug.Log($"parsed update current mode:\n {stateUpdate.current_mode}");
+        currentConjurerMode = Enum.Parse<ConjurerMode>(stateUpdate.current_mode.name);
+        switch (currentConjurerMode)
+        {
+            case ConjurerMode.disconnected:
+                break;
+            case ConjurerMode.vj:
+                OnPatternSelect(stateUpdate.current_mode.current_pattern);
+                break;
+            case ConjurerMode.emcee:
+                break;
+            case ConjurerMode.experienceCreator:
+                break;  
+        }
+        Debug.Log($"Set mode to {Enum.GetName(typeof(ConjurerMode), currentConjurerMode)}");
+        return false;
+    }
+
+    private PatternData currentPattern;
+    private bool[] patternValChanged;
+    private float[] patternParamVals;
+    private bool[] transmitPatternData;
+
+    private bool doUpdatePorts = false;
+
+    public void OnPatternSelect(PatternData pattern)
+    {
+        // Update ports etc, initialize arrays
+        currentPattern = pattern;
+        doUpdatePorts = true;
+    }
+
+    public void UpdatePorts()
+    {
+        var numParams = currentPattern.@params.Count;
+
+        patternValChanged = new bool[numParams];
+        patternParamVals = new float[numParams];
+        transmitPatternData = new bool[numParams];
+
+        // Add / rename ports
+        for (int i = 0; i < numParams; i++)
+        {
+            var param = currentPattern.@params.ElementAt(i).Value;
+            patternParamVals[i] = param.value;
+            transmitPatternData[i] = false;
+            if (i < dynamicConnectionPorts.Count)
+            {
+                dynamicConnectionPorts[i].name = param.name;
+            }
+            else
+            {
+                CreateValueConnectionKnob(new ValueConnectionKnobAttribute(param.name, Direction.In, typeof(float), NodeSide.Left));
+            }
+        }
+        // Remove excess ports
+        if (numParams < dynamicConnectionPorts.Count)
+        {
+            for (int i = dynamicConnectionPorts.Count - 1; i > numParams - 1; i--)
+            {
+                DeleteConnectionPort(i);
+            }
+        }
+        SetSize();
+        doUpdatePorts = false;
     }
 
     public override void DoInit()
@@ -189,128 +184,135 @@ public class ConjurerControllerNode : TickingNode
         websocket.Connect();
     }
 
+    private void PatternParamGui(PatternParameter param, int paramIdx)
+    {
+        var curVal = patternParamVals[paramIdx];
+        var knob = (ValueConnectionKnob)dynamicConnectionPorts[paramIdx];
+        GUILayout.BeginHorizontal();
+        if (param.min.HasValue && param.max.HasValue)
+        {
+            FloatKnobOrSlider(ref curVal, param.min.Value, param.max.Value, knob);
+        }
+        else
+        {
+            FloatKnobOrField(GUIContent.none, ref curVal, knob, GUILayout.Width(60));
+        }
+        if (curVal != patternParamVals[paramIdx])
+        {
+            patternValChanged[paramIdx] = true;
+            patternParamVals[paramIdx] = curVal;
+        }
+        transmitPatternData[paramIdx] = GUILayout.Toggle(transmitPatternData[paramIdx], "🆒");
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+    }
+
+    private void VjModeGui()
+    {
+        GUILayout.BeginVertical();
+        for (int i = 0; i < currentPattern.@params.Count; i++)
+        {
+            var param = currentPattern.@params.ElementAt(i).Value;
+            PatternParamGui(param, i);
+            GUILayout.Space(3);
+        }
+
+        GUILayout.EndVertical();
+    }
+
     public void EmceeModeGui()
     {
         string msg = null;
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Previous track"))
-        {
-            ConjurerCommandInstance prevCmd = new ConjurerCommandInstance("previous_track");
-
-            msg = JsonConvert.SerializeObject(prevCmd);
-
-        }
-        if (GUILayout.Button("Play/Pause"))
-        {
-            ConjurerCommandInstance playPauseCmd = new ConjurerCommandInstance("toggle_playing");
-            msg = JsonConvert.SerializeObject(playPauseCmd);
-        }
-        if (GUILayout.Button("Next track"))
-        {
-            ConjurerCommandInstance nextTrackCmd = new ConjurerCommandInstance("next_track");
-            msg = JsonConvert.SerializeObject(nextTrackCmd);
-        }
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Shuffle"))
-        {
-            ConjurerCommandInstance prevCmd = new ConjurerCommandInstance("shuffle");
-
-            msg = JsonConvert.SerializeObject(prevCmd);
-
-        }
-        if (GUILayout.Button("Loop all"))
-        {
-            ConjurerCommandInstance playPauseCmd = new ConjurerCommandInstance("loop_all");
-            msg = JsonConvert.SerializeObject(playPauseCmd);
-        }
-        if (GUILayout.Button("Restart"))
-        {
-            ConjurerCommandInstance nextTrackCmd = new ConjurerCommandInstance("restart");
-            msg = JsonConvert.SerializeObject(nextTrackCmd);
-        }
+        //if (GUILayout.Button("Restart"))
+        //{
+        //    ConjurerCommandInstance nextTrackCmd = new ConjurerCommandInstance("restart");
+        //    msg = JsonConvert.SerializeObject(nextTrackCmd);
+        //}
         GUILayout.EndHorizontal();
         if (msg != null)
         {
             Debug.Log($"Sending message: {msg}");
-            openRequests[msg] = websocket.SendText(msg);
+            websocket.SendText(msg);
         }
-    }
-
-    public void VjModeGui()
-    {
-
     }
 
     public override void NodeGUI()
     {
+        if (doUpdatePorts)
+        {
+            UpdatePorts();
+        }
         GUILayout.BeginVertical();
-        // Rate limit requests to Conjurer? Probably not necessary
-        MAX_OPEN_REQUESTS = RTEditorGUI.IntField("Max reqs", MAX_OPEN_REQUESTS);
-        MAX_REQUESTS_PER_SECOND = RTEditorGUI.IntField("Max rps", MAX_REQUESTS_PER_SECOND);
 
         GUILayout.Label("WebSocket state: " + Enum.GetName(typeof(WebSocketState), websocket.State));
         if (GUILayout.Button("Reconnect") && websocket.State != WebSocketState.Open)
         {
             websocket.Connect();
         }
-        EmceeModeGui();
-        //switch (currentConjurerMode)
-        //{
-        //    case ConjurerMode.disconnected:
-        //        break;
-        //    case ConjurerMode.vj:
-        //        VjModeGui();
-        //        break;
-        //    case ConjurerMode.emcee:
-        //        EmceeModeGui();
-        //        break;
-        //    case ConjurerMode.experienceCreator:
-        //        break;
-        //}
+        switch (currentConjurerMode)
+        {
+            case ConjurerMode.disconnected:
+                break;
+            case ConjurerMode.vj:
+                VjModeGui();
+                break;
+            case ConjurerMode.emcee:
+                EmceeModeGui();
+                break;
+            case ConjurerMode.experienceCreator:
+                break;
+        }
         GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    public float repetitionsPerSpiralTurn;
-    public int MAX_OPEN_REQUESTS = 1;
-    public int MAX_REQUESTS_PER_SECOND = 22;
-    private float lastRequestTime = 0;
-    private Dictionary<string, Task> openRequests = new Dictionary<string, Task>();
+
     public override bool DoCalc()
     {
-        var completedRequests = openRequests.Where(req => req.Value.IsCompleted).ToList();
-        foreach (var req in completedRequests)
+        if (doUpdatePorts)
         {
-            //Debug.Log($"Completed request: {req.Key}: {req.Value.Status}");
+            UpdatePorts();
         }
-        openRequests = openRequests.Where(req => !req.Value.IsCompleted).ToDictionary(req => req.Key, req => req.Value);
-        //Parameter target: "repetitionsPerSpiralTurn"
-
-        if (repetitionsPerSpiralTurnKnob.connected())
+        switch (currentConjurerMode)
         {
-            repetitionsPerSpiralTurn = repetitionsPerSpiralTurnKnob.GetValue<float>();
-            ConjurerCommandInstance updateParamCmd = new ConjurerCommandInstance("update_parameter",
-                new ConjurerParameterState() { 
-                    { "name", "u_repetitionsPerSpiralTurn" },
-                    { "value", repetitionsPerSpiralTurn } 
+            case ConjurerMode.disconnected:
+                break;
+            case ConjurerMode.vj:
+                var paramUpdates = new List<PatternParameter>();
+                for (int i = 0; i < currentPattern?.@params.Count; i++)
+                {
+                    if (dynamicConnectionPorts[i].connected())
+                    {
+                        var knobVal = ((ValueConnectionKnob)dynamicConnectionPorts[i]).GetValue<float>();
+                        if (knobVal != patternParamVals[i])
+                        {
+                            patternValChanged[i] = true;
+                            patternParamVals[i] = knobVal;
+                        }
+                    }
+                    if (transmitPatternData[i] && patternValChanged[i])
+                    {
+                        var paramId = currentPattern.@params.ElementAt(i).Key;
+                        var param = currentPattern.@params.ElementAt(i).Value;
+                        var val = patternParamVals[i];
+                        paramUpdates.Add(new PatternParameter(paramId, val));
+                        patternValChanged[i] = false;
+                    }
                 }
-            );
-            var msg = JsonConvert.SerializeObject(updateParamCmd);
-            openRequests[msg] = websocket.SendText(msg);
+                if (paramUpdates.Count > 0)
+                {
+                    CommandMessage updateParams = new CommandMessage("update_parameter", paramUpdates.ToArray());
+                    var msgJson = JsonConvert.SerializeObject(updateParams);
+                    websocket.SendText(msgJson);
+                }
+                break;
+            case ConjurerMode.emcee:
+                break;
+            case ConjurerMode.experienceCreator:
+                break;
         }
-
-        var impliedRps = 1 / (Time.time - lastRequestTime);
-        //if (openRequests.Count < MAX_OPEN_REQUESTS && impliedRps < MAX_REQUESTS_PER_SECOND)
-        //{
-        //    if (websocket.State == WebSocketState.Open)
-        //    {
-
-        //        lastRequestTime = Time.time;
-        //    }
-        //}
 
         return true;
     }

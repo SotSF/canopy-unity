@@ -2,6 +2,7 @@
 #pragma kernel horizontalAxis
 #pragma kernel verticalAxis
 #pragma kernel graph
+#pragma kernel graphSDF
 
 float2 windowMin;
 float2 windowMax;
@@ -61,33 +62,38 @@ void calculateGraphParameters(in int2 pos, out float2 pixelSize, out float2 posi
     scale = getScale(pixelSize);
 }
 
-/* Draw the graph of the signal based on the input data points*/
-[numthreads(256, 1, 1)]
-void graph(uint3 id : SV_DispatchThreadID)
+float segmentSDF(float2 p, float2 a, float2 b)
 {
-	if (id.x >= numPoints)
+	float2 pa = p - a, ba = b - a;
+	float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+	return length(pa - ba * h);
+}
+
+[numthreads(16, 16, 1)]
+void graphSDF(uint3 id : SV_DispatchThreadID)
+{
+	if (numPoints <= 1)
 		return;
-    
-	uint prevIndex = id.x > 0 ? id.x - 1 : 0;
 
-    // Datapoints are packed into float4s because of HLSL packing logic. 
-    // The (index >> 2) and (index & 3) bits pull the desired float back out.
-	float2 p0 = float2(xValues[prevIndex >> 2][prevIndex & 3], yValues[prevIndex >> 2][prevIndex & 3]);
-	float2 p1 = float2(xValues[id.x >> 2][id.x & 3], yValues[id.x >> 2][id.x & 3]);
-
-    int2 imagePoint0 = floor(lerp(0, texSize - int2(1, 1), (p0 - windowMin) / (windowMax - windowMin)));
-    int2 imagePoint1 = ceil(lerp(0, texSize - int2(1, 1), (p1 - windowMin) / (windowMax - windowMin)));
-    outputTex[imagePoint1] = lineColor;
-    
-	int yIncrement = imagePoint1.y > imagePoint0.y ? -1 : 1;
-	int xIncrement = imagePoint1.x > imagePoint0.x ? -1 : 1;
-    
-	for (int y = imagePoint1.y - yIncrement; abs(y - imagePoint0.y) > 0; y += yIncrement)
+	float minDist = 1e12;
+	for (uint idx = 1; idx < numPoints; idx++)
 	{
-		for (int x = imagePoint1.x; abs(x - imagePoint0.x) > 0; x += xIncrement)
-		{
-			outputTex[int2(x, y + yIncrement)] = lineColor;
-		}
+		int lastIdx = idx - 1;
+	// Datapoints are packed into float4s because of HLSL packing logic. 
+	// The (index >> 2) and (index & 3) bits pull the desired float back out.
+		float2 p0 = float2(xValues[lastIdx >> 2][lastIdx & 3], yValues[lastIdx >> 2][lastIdx & 3]);
+		float2 p1 = float2(xValues[idx >> 2][idx & 3], yValues[idx >> 2][idx & 3]);
+		
+		int2 imagePoint0 = floor(lerp(0, texSize - int2(1, 1), (p0 - windowMin) / (windowMax - windowMin)));
+		int2 imagePoint1 = ceil(lerp(0, texSize - int2(1, 1), (p1 - windowMin) / (windowMax - windowMin)));
+		
+		float d = segmentSDF(id.xy, imagePoint0, imagePoint1);
+		minDist = min(minDist, d);
+	}
+	
+	if (minDist < 1.0f)
+	{
+		outputTex[id.xy] = lineColor;
 	}
 }
 
@@ -95,71 +101,75 @@ void graph(uint3 id : SV_DispatchThreadID)
 [numthreads(256, 1, 1)]
 void horizontalAxis(uint3 id : SV_DispatchThreadID)
 {
-    if (windowMin.y < 0 && windowMax.y > 0) {
-        //the pixel y value of the graph zero
-        int yVal = lerp(0, texSize.y - 1, -windowMin.y / float(windowMax.y - windowMin.y));
-        uint2 index = uint2(id.x, yVal);
+	if (windowMin.y < 0 && windowMax.y > 0)
+	{
+    //the pixel y value of the graph zero
+		int yVal = lerp(0, texSize.y - 1, -windowMin.y / float(windowMax.y - windowMin.y));
+		uint2 index = uint2(id.x, yVal);
 
-        float2 pixelSize, position, scale;
-        calculateGraphParameters(index, pixelSize, position, scale);
+		float2 pixelSize, position, scale;
+		calculateGraphParameters(index, pixelSize, position, scale);
 
-        float horizontalTickSpacing = pow10(scale.x);
-        outputTex[index] = labelColor;
+		float horizontalTickSpacing = pow10(scale.x);
+		outputTex[index] = labelColor;
 
-        float remainder = (abs(position.x) + horizontalTickSpacing / 2) % horizontalTickSpacing;
-        float dist = abs(remainder - (horizontalTickSpacing / 2));
-        float4 tickcolor = lerp(labelColor, backgroundColor, dist / pixelSize.x);
-        outputTex[index + uint2(0, 1)] = tickcolor;
-        outputTex[index - uint2(0, 1)] = tickcolor;
-        outputTex[index + uint2(0, 2)] = tickcolor;
-        outputTex[index - uint2(0, 2)] = tickcolor;
-    }
+		float remainder = (abs(position.x) + horizontalTickSpacing / 2) % horizontalTickSpacing;
+		float dist = abs(remainder - (horizontalTickSpacing / 2));
+		float4 tickcolor = lerp(labelColor, backgroundColor, dist / pixelSize.x);
+		outputTex[index + uint2(0, 1)] = tickcolor;
+		outputTex[index - uint2(0, 1)] = tickcolor;
+		outputTex[index + uint2(0, 2)] = tickcolor;
+		outputTex[index - uint2(0, 2)] = tickcolor;
+	}
 }
 
 /* Draw the vertical axis with ticks based on the window size*/
 [numthreads(1, 256, 1)]
 void verticalAxis(uint3 id : SV_DispatchTHreadID)
 {
-    if (windowMin.x < 0 && windowMax.x > 0) {
-        int xVal = lerp(0, texSize.x - 1, -windowMin.x / float(windowMax.x - windowMin.x));
-        uint2 index = uint2(xVal, id.y);
+	if (windowMin.x < 0 && windowMax.x > 0)
+	{
+		int xVal = lerp(0, texSize.x - 1, -windowMin.x / float(windowMax.x - windowMin.x));
+		uint2 index = uint2(xVal, id.y);
 
-        float2 pixelSize, position, scale;
-        calculateGraphParameters(index, pixelSize, position, scale);
+		float2 pixelSize, position, scale;
+		calculateGraphParameters(index, pixelSize, position, scale);
 
-        float verticalTickSpacing = pow10(scale.y);
-        outputTex[index] = labelColor;
+		float verticalTickSpacing = pow10(scale.y);
+		outputTex[index] = labelColor;
 
-        float remainder = (abs(position.y) + verticalTickSpacing / 2) % verticalTickSpacing;
-        float dist = abs(remainder - (verticalTickSpacing / 2));
-        float4 tickcolor = lerp(labelColor, backgroundColor, dist / pixelSize.y);
-        outputTex[index + uint2(1, 0)] = tickcolor;
-        outputTex[index - uint2(1, 0)] = tickcolor;
-        outputTex[index + uint2(2, 0)] = tickcolor;
-        outputTex[index - uint2(2, 0)] = tickcolor;
-    }
+		float remainder = (abs(position.y) + verticalTickSpacing / 2) % verticalTickSpacing;
+		float dist = abs(remainder - (verticalTickSpacing / 2));
+		float4 tickcolor = lerp(labelColor, backgroundColor, dist / pixelSize.y);
+		outputTex[index + uint2(1, 0)] = tickcolor;
+		outputTex[index - uint2(1, 0)] = tickcolor;
+		outputTex[index + uint2(2, 0)] = tickcolor;
+		outputTex[index - uint2(2, 0)] = tickcolor;
+	}
 }
 
 /* Draw grid points for each "major" tick throughout the graph, and fill the background*/
 [numthreads(16, 16, 1)]
 void gridPoints(uint3 id : SV_DispatchThreadID)
 {
-    float2 pixelSize, position, scale;
+	float2 pixelSize, position, scale;
 
-    calculateGraphParameters(id.xy, pixelSize, position, scale);
-    // Spacing in graph units of grid points.
-    // Place gridpoints at 5x the major tick spacing (eg at the 5 with ticks every 1 unit)
-    float2 gridpointSpacing = 5 * float2(pow10(scale.x), pow10(scale.y));
+	calculateGraphParameters(id.xy, pixelSize, position, scale);
+// Spacing in graph units of grid points.
+// Place gridpoints at 5x the major tick spacing (eg at the 5 with ticks every 1 unit)
+	float2 gridpointSpacing = 5 * float2(pow10(scale.x), pow10(scale.y));
 
-    // The distance the pixel is between grid points
-    float2 gridpointRemainder = (abs(position) + (gridpointSpacing/2)) % gridpointSpacing;
-    float2 dist = abs(gridpointRemainder - (gridpointSpacing / 2));
+// The distance the pixel is between grid points
+	float2 gridpointRemainder = (abs(position) + (gridpointSpacing / 2)) % gridpointSpacing;
+	float2 dist = abs(gridpointRemainder - (gridpointSpacing / 2));
 
-    if (dist.x <= pixelSize.x/2 && dist.y <= pixelSize.y/2) {
-        /*outputTex[id.xy] = lerp(labelColor, backgroundColor, length(dist / pixelSize));*/
-        outputTex[id.xy] = labelColor;
-    }
-    else {
-        outputTex[id.xy] = backgroundColor;
-    }
+	if (dist.x <= pixelSize.x / 2 && dist.y <= pixelSize.y / 2)
+	{
+    /*outputTex[id.xy] = lerp(labelColor, backgroundColor, length(dist / pixelSize));*/
+		outputTex[id.xy] = labelColor;
+	}
+	else
+	{
+		outputTex[id.xy] = backgroundColor;
+	}
 }
