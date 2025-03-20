@@ -1,0 +1,76 @@
+// Gray-scott reaction-diffusion
+
+#pragma kernel reactionDiffusion
+#pragma kernel addInput
+
+#define ONE_2D float2(1,1)
+#define ZERO_2D float2(0,0)
+#define LEFT_2D float2(-1,0)
+#define RIGHT_2D float2(1,0)
+#define DOWN_RIGHT_2D float2(1,-1)
+#define DOWN_LEFT_2D float2(-1,-1)
+#define UP_RIGHT_2D float2(1,1)
+#define UP_LEFT_2D float2(-1,1)
+#define UP_2D float2(0,1)
+#define DOWN_2D float2(0,-1)
+
+float timestep;
+
+uint width;
+uint height;
+
+float diffusionRateA;
+float diffusionRateB;
+
+float killRate;
+float feedRate;
+
+float inputMultiplier;
+Texture2D<float> inputField;
+
+RWTexture2D<float> aField; // used for a-chem in rx-diff, reused as an output field for addInput
+RWTexture2D<float> bField;
+
+float laplacian(uint2 id, RWTexture2D<float> field)
+{
+    float center = field[id];
+    float2 maxDim = float2(width, height) - ONE_2D;
+    // Cardinals
+    float left = field[clamp(id + LEFT_2D, ZERO_2D, maxDim)];
+    float right = field[clamp(id + RIGHT_2D, ZERO_2D, maxDim)];
+    float up = field[clamp(id + UP_2D, ZERO_2D, maxDim)];
+    float down = field[clamp(id + DOWN_2D, ZERO_2D, maxDim)];
+    
+    // Diagonals
+    float upLeft = field[clamp(id + UP_LEFT_2D, ZERO_2D, maxDim)];
+    float upRight = field[clamp(id + UP_RIGHT_2D, ZERO_2D, maxDim)];
+    float downLeft = field[clamp(id + DOWN_LEFT_2D, ZERO_2D, maxDim)];
+    float downRight = field[clamp(id + DOWN_RIGHT_2D, ZERO_2D, maxDim)];
+    
+    float diagonalWeight = 0.7071f; // 1/sqrt(2) for diagonal distance
+    
+    return  (left + right + up + down) 
+            + (upLeft + upRight + downLeft + downRight) * diagonalWeight
+             - (4 * center)
+             - (4 * diagonalWeight * center);
+}
+
+[numthreads(16, 16, 1)]
+void addInput(uint3 id : SV_DispatchThreadID)
+{
+    aField[id.xy] = aField[id.xy] + inputField[id.xy] * inputMultiplier;
+}
+
+[numthreads(16, 16, 1)]
+void reactionDiffusion(uint3 id : SV_DispatchThreadID)
+{
+    float a = aField[id.xy];
+    float b = bField[id.xy];
+    float reaction = a * b * b;
+    float feed = feedRate * (1 - a);
+    float kill = (killRate + feedRate) * b;
+    float diffA = diffusionRateA * laplacian(id.xy, aField);
+    float diffB = diffusionRateB * laplacian(id.xy, bField);
+    aField[id.xy] = a + (diffA - reaction + feed)*timestep;
+    bField[id.xy] = b + (diffB + reaction - kill)*timestep;
+}
