@@ -156,6 +156,25 @@ namespace SecretFire.TextureSynth
             GUILayout.EndHorizontal();
         }
 
+        protected void FloatKnobOrFieldVertical(GUIContent label, ref float val, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
+        {
+            if (knob == null)
+            {
+                return;
+            }
+            GUILayout.BeginVertical();
+            knob.DisplayLayout();
+            if (!knob.connected())
+            {
+                val = RTEditorGUI.FloatField(label, val, layoutOpts);
+            }
+            else
+            {
+                val = knob.GetValue<float>();
+            }
+            GUILayout.EndVertical();
+        }
+
         protected void FloatKnobOrField(string label, ref float val, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
             FloatKnobOrField(new GUIContent(label), ref val, knob, layoutOpts);
