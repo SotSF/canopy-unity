@@ -49,10 +49,10 @@ float laplacian(uint2 id, RWTexture2D<float> field)
     
     float diagonalWeight = 0.7071f; // 1/sqrt(2) for diagonal distance
     
-    return  (left + right + up + down) 
+	return clamp((left + right + up + down)
             + (upLeft + upRight + downLeft + downRight) * diagonalWeight
              - (4 * center)
-             - (4 * diagonalWeight * center);
+             - (4 * diagonalWeight * center), 0, 1);
 }
 
 [numthreads(16, 16, 1)]
@@ -71,6 +71,6 @@ void reactionDiffusion(uint3 id : SV_DispatchThreadID)
     float kill = (killRate + feedRate) * b;
     float diffA = diffusionRateA * laplacian(id.xy, aField);
     float diffB = diffusionRateB * laplacian(id.xy, bField);
-    aField[id.xy] = a + (diffA - reaction + feed)*timestep;
-    bField[id.xy] = b + (diffB + reaction - kill)*timestep;
+	aField[id.xy] = clamp(a + (diffA - reaction + feed) * timestep, 0, 1);
+	bField[id.xy] = clamp(b + (diffB + reaction - kill) * timestep, 0, 1);
 }

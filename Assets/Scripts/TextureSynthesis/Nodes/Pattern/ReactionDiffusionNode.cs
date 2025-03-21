@@ -117,6 +117,7 @@ public class ReactionDiffusion : TickingNode
     {
         reactionDiffusionShader = Resources.Load<ComputeShader>("NodeShaders/ReactionDiffusionPattern");
         reactionDiffusionKernel = reactionDiffusionShader.FindKernel("reactionDiffusion");
+        addInputKernel = reactionDiffusionShader.FindKernel("addInput");
         reactionDiffusionShader.SetInt("width", outputSize.x);
         reactionDiffusionShader.SetInt("height", outputSize.y);
         InitializeRenderTextures();
@@ -200,18 +201,20 @@ public class ReactionDiffusion : TickingNode
     }
     private void SimulateReaction()
     {
+        reactionDiffusionShader.SetFloat("timestep", timestep*timeMultiplier);
         reactionDiffusionShader.SetInt("width", outputSize.x);
         reactionDiffusionShader.SetInt("height", outputSize.y);
-        reactionDiffusionShader.SetFloat("feedRate", feedRate);
-        reactionDiffusionShader.SetFloat("killRate", killRate);
-        reactionDiffusionShader.SetFloat("timestep", timestep);
         reactionDiffusionShader.SetFloat("diffusionRateA", aDiffusionRate);
         reactionDiffusionShader.SetFloat("diffusionRateB", bDiffusionRate);
+        reactionDiffusionShader.SetFloat("killRate", killRate);
+        reactionDiffusionShader.SetFloat("feedRate", feedRate);
         reactionDiffusionShader.SetTexture(reactionDiffusionKernel, "aField", aField);
         reactionDiffusionShader.SetTexture(reactionDiffusionKernel, "bField", bField);
+        reactionDiffusionShader.SetTexture(reactionDiffusionKernel, "inputField", scaledBuffer);
         var groupSizeX = Mathf.CeilToInt((outputSize.x) / 16f);
         var groupSizeY = Mathf.CeilToInt((outputSize.y) / 16f);
         reactionDiffusionShader.Dispatch(reactionDiffusionKernel, groupSizeX, groupSizeY, 1);
+        Graphics.Blit(bField, outputTex);
     }
 
     
