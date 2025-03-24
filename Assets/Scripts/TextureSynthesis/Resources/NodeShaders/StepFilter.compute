@@ -24,6 +24,7 @@ void StepKernel(uint3 id : SV_DispatchThreadID)
 	float newX = (iWidth / float(oWidth)) * id.x;
 	float newY = (iHeight / float(oHeight)) * id.y;
 	float4 sampled = InputTex.SampleLevel(SmpLinearClamp, float2(newX, newY) / dimensions, 0);
-	float4 stepped = sampled * smoothstep(min, max, length(sampled));
+	float4 smoothstepped = sampled * smoothstep(min, max, length(sampled));
+	float4 stepped = sampled * step(min, length(sampled));
 	OutputTex[id.xy] = stepped;
 }
