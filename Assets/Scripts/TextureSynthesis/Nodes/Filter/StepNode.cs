@@ -29,6 +29,8 @@ public class StepNode : TextureSynthNode
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture),NodeSide.Bottom, 180)]
     public ValueConnectionKnob textureOutputKnob;
 
+    public bool smooth = false;
+
     private ComputeShader stepShader;
     private RenderTexture outputTex;
     private Vector2Int outputSize = Vector2Int.zero;
@@ -63,6 +65,7 @@ public class StepNode : TextureSynthNode
         GUILayout.BeginHorizontal();
        
         GUILayout.BeginVertical();
+        smooth = GUILayout.Toggle(smooth, "Smooth", GUILayout.MaxWidth(64));
         GUILayout.FlexibleSpace();
         GUILayout.Box(outputTex, GUILayout.MaxHeight(64), GUILayout.MaxWidth(64));
         GUILayout.Space(4);
@@ -91,6 +94,7 @@ public class StepNode : TextureSynthNode
             outputSize = new Vector2Int(inputTex.width, inputTex.height);
             InitializeRenderTexture();
         }
+        stepShader.SetBool("smooth", smooth);
         stepShader.SetTexture(stepKernel, "InputTex", inputTex);
         stepShader.SetTexture(stepKernel, "OutputTex", outputTex);
         stepShader.SetInt("iWidth", inputTex.width);

@@ -12,6 +12,8 @@ uint oHeight;
 
 SamplerState SmpLinearClamp;
 
+bool smooth;
+
 float min;
 float max;
 
@@ -26,5 +28,5 @@ void StepKernel(uint3 id : SV_DispatchThreadID)
 	float4 sampled = InputTex.SampleLevel(SmpLinearClamp, float2(newX, newY) / dimensions, 0);
 	float4 smoothstepped = sampled * smoothstep(min, max, length(sampled));
 	float4 stepped = sampled * step(min, length(sampled));
-	OutputTex[id.xy] = stepped;
+	OutputTex[id.xy] = smooth ? smoothstepped : stepped;
 }
