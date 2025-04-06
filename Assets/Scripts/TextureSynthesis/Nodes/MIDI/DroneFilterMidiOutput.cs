@@ -17,7 +17,7 @@ public class DroneFilterMidiOutputNode : TickingNode
     public override string GetID => "DroneFilterMidiOutputNode";
     public override string Title { get { return "DroneFilterMidiOutput"; } }
 
-    private Vector2 _DefaultSize = new Vector2(150, 85);
+    private Vector2 _DefaultSize = new Vector2(250, 400);
     public override Vector2 DefaultSize => _DefaultSize;
 
     bool binding = false;
@@ -37,7 +37,7 @@ public class DroneFilterMidiOutputNode : TickingNode
     private Minis.MidiDevice boundDevice;
     private void SetSize()
     {
-        _DefaultSize = new Vector2(150, rescale ? 125 : 85);
+        _DefaultSize = _DefaultSize;
     }
 
     public override void DoInit()
@@ -45,6 +45,7 @@ public class DroneFilterMidiOutputNode : TickingNode
         channel = 1;
         _probe = new MidiProbe(MidiProbe.Mode.Out);
         SetSize();
+        lastSendTime = 0;
     }
 
     // Scan and open all the available output ports.
@@ -59,10 +60,13 @@ public class DroneFilterMidiOutputNode : TickingNode
 
     public void ShowMidiDevicesGUI()
     {
-        foreach (var device in _ports)
+        for (var i = 0; i < _probe.PortCount; i++)
         {
-            if (device == null) continue;
-            var deviceLabel = $"MidiPort: {device.ToString()}";
+            var name = _probe.GetPortName(i);
+            if(IsRealPort(name))
+            {
+                GUILayout.Label(name);
+            }
         }
     }
 
@@ -70,8 +74,8 @@ public class DroneFilterMidiOutputNode : TickingNode
     {
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
-        ShowMidiDevicesGUI();
         sendMIDI = RTEditorGUI.Toggle(sendMIDI, "Send midi messages to output ports");
+        ShowMidiDevicesGUI();
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
@@ -93,24 +97,31 @@ public class DroneFilterMidiOutputNode : TickingNode
         foreach (var p in _ports) p?.Dispose();
         _ports.Clear();
     }
-
+    float maxFrameRate = 10;
+    float lastSendTime = 0;
     public override bool DoCalc()
     {
+        if (lastSendTime != 0)
+        {
+            var deltaFrame = Time.time - lastSendTime;
+            var fps = 1/deltaFrame;
+            if (fps > maxFrameRate)
+            {
+                return false;
+            }
+        }
         float val = rawMIDIValue;
         ScanPorts();
         foreach (var port in _ports)
         {
-            if (port == null) continue;
-            if (rescale)
+            if (port == null || !sendMIDI) continue;
+            for (int i = 1; i < 6; i++)
             {
-                val = Mathf.Lerp(rescaleMin, rescaleMax, rawMIDIValue);
-            }
-            foreach (var controlId in new int[]{ 1, 2, 3, 4, 5 })
-            {
-                port.SendControlChange(channel, controlID, (byte)(255*(Mathf.Sin(Time.time+controlId)+1)));
-
+                // Debug.Log($"{port.ToString()}");
+                port.SendControlChange(1, i, (byte)i*20);
             }
         }
+        lastSendTime = Time.time;
         return true;
     }
 }
