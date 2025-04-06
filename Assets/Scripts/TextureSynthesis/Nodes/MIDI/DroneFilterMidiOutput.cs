@@ -109,13 +109,13 @@ public class DroneFilterMidiOutputNode : TickingNode
         {
             if (i == 0)
             {
-                inputTex.GetPixelBilinear(0, 0);
-                Color.RGBToHSV(inputTex.GetPixelBilinear(0, 0), out h, out s, out v);
+                var color = inputTex.GetPixelBilinear(0, 0);
+                Color.RGBToHSV(color, out h, out s, out v);
             }
             else
             {
-                inputTex.GetPixelBilinear(0.5f, i/5.0f);
-                Color.RGBToHSV(inputTex.GetPixelBilinear(0, 0), out h, out s, out v);
+                var color = inputTex.GetPixelBilinear(0.5f, i/5.0f);
+                Color.RGBToHSV(color, out h, out s, out v);
             }
             ccVals.Add(v);
         }
