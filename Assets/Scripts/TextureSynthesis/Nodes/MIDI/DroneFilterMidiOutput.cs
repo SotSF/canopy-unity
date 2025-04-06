@@ -42,96 +42,27 @@ public class DroneFilterMidiOutputNode : TickingNode
 
     public override void DoInit()
     {
-
-        midiDevices = new List<Minis.MidiDevice>();
-        var match = new InputDeviceMatcher().WithInterface("Minis");
-        foreach (InputDevice device in InputSystem.devices){
-            if (match.MatchPercentage(device.description) > 0)
-                midiDevices.Add(device as Minis.MidiDevice);
-        }
-
-        // Register devices new
-        InputSystem.onDeviceChange += OnDeviceAdded;
+        channel = 1;
+        _probe = new MidiProbe(MidiProbe.Mode.Out);
         SetSize();
     }
 
-    private void OnDeviceAdded(InputDevice device, InputDeviceChange change)
+    // Scan and open all the available output ports.
+    void ScanPorts()
     {
-        var midiDevice = device as Minis.MidiDevice;
-        if (midiDevice == null || change != InputDeviceChange.Added) 
-            return;
-        midiDevices.Add(midiDevice);
-        Debug.Log("MIDI Device added");
-        if (bound && boundDevice == null)
+        for (var i = 0; i < _probe.PortCount; i++)
         {
-            if (midiDevice.channel == channel){
-                boundDevice = midiDevice;
-                midiDevice.onWillControlChange += ReceiveMIDIMessage;
-            }
-        }
-        else if (binding){
-            midiDevice.onWillControlChange += OnBindEvent;
-        }
-    }
-
-    private void foo(MidiNoteControl arg1, float arg2)
-    {
-        boundDevice.onWillNoteOn -= foo;
-    }
-
-    void BeginBindingMinis()
-    {
-        binding = true;
-        foreach (var device in midiDevices)
-        {
-            device.onWillControlChange += OnBindEvent;
-        }
-    }
-
-    private void OnBindEvent(MidiValueControl cc, float value)
-    {
-        foreach (var device in midiDevices)
-        {
-            device.onWillControlChange -= OnBindEvent;
-        }
-        boundDevice = cc.device as Minis.MidiDevice;
-        boundDevice.onWillNoteOn += foo;
-        boundDevice.onWillControlChange += ReceiveMIDIMessage;
-        channel = boundDevice.channel;
-        controlID = cc.controlNumber;
-        binding = false;
-        bound = true;
-    }
-
-    void ReceiveMIDIMessage(Minis.MidiValueControl cc, float value)
-    {
-        if (cc.controlNumber == controlID)
-        {
-            rawMIDIValue = value;
+            var name = _probe.GetPortName(i);
+            _ports.Add(IsRealPort(name) ? new MidiOutPort(i) : null);
         }
     }
 
     public void ShowMidiDevicesGUI()
     {
-        foreach (var device in midiDevices)
+        foreach (var device in _ports)
         {
             if (device == null) continue;
-            var deviceLabel = $"ID: {device.deviceId}, Name: {device.displayName} ({device.shortDisplayName}), {device.name}";
-            if (device.deviceId == boundDevice?.deviceId)
-            {
-                deviceLabel = "(bound) " + deviceLabel;
-                GUILayout.Label(deviceLabel);
-            }
-            else
-            {
-                GUILayout.Label(deviceLabel);
-                if (GUILayout.Button("Bind"))
-                {
-                    boundDevice = device;
-                    channel = device.channel;
-                    bound = true;
-                }
-            }
+            var deviceLabel = $"MidiPort: {device.ToString()}";
         }
     }
 
@@ -140,20 +71,45 @@ public class DroneFilterMidiOutputNode : TickingNode
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         ShowMidiDevicesGUI();
-
+        sendMIDI = RTEditorGUI.Toggle(sendMIDI, "Send midi messages to output ports");
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
+
+    MidiProbe _probe;
+    List<MidiOutPort> _ports = new List<MidiOutPort>();
+    public bool sendMIDI = false;
+    bool IsRealPort(string name)
+    {
+        return !name.Contains("Through") && !name.Contains("RtMidi");
+    }
+
+    // Close and release all the opened ports.
+    void DisposePorts()
+    {
+        foreach (var p in _ports) p?.Dispose();
+        _ports.Clear();
+    }
+
     public override bool DoCalc()
     {
         float val = rawMIDIValue;
-        if (boundDevice != null)
+        ScanPorts();
+        foreach (var port in _ports)
         {
-            RtMidi.Unmanaged.
+            if (port == null) continue;
+            if (rescale)
+            {
+                val = Mathf.Lerp(rescaleMin, rescaleMax, rawMIDIValue);
+            }
+            foreach (var controlId in new int[]{ 1, 2, 3, 4, 5 })
+            {
+                port.SendControlChange(channel, controlID, (byte)(255*(Mathf.Sin(Time.time+controlId)+1)));
+
+            }
         }
         return true;
     }
