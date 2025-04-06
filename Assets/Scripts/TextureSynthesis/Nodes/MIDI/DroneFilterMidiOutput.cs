@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Layouts;
-
+using RtMidi.LowLevel;
 
 
 [Node(false, "MIDI/DroneFilterMidiOutput")]
@@ -16,7 +16,6 @@ public class DroneFilterMidiOutputNode : TickingNode
 {
     public override string GetID => "DroneFilterMidiOutputNode";
     public override string Title { get { return "DroneFilterMidiOutput"; } }
-
 
     private Vector2 _DefaultSize = new Vector2(150, 85);
     public override Vector2 DefaultSize => _DefaultSize;
@@ -152,7 +151,10 @@ public class DroneFilterMidiOutputNode : TickingNode
     public override bool DoCalc()
     {
         float val = rawMIDIValue;
- 
+        if (boundDevice != null)
+        {
+            RtMidi.Unmanaged.
+        }
         return true;
     }
 }
