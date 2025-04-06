@@ -77,6 +77,9 @@ public class DroneFilterMidiOutputNode : TickingNode
         GUILayout.BeginVertical();
         sendMIDI = RTEditorGUI.Toggle(sendMIDI, "Send midi messages to output ports");
         ShowMidiDevicesGUI();
+
+        GUILayout.Box(buffer, GUILayout.Width(200), GUILayout.Height(200));
+        var str = $"{ccVals[0]}, {ccVals[1]}, {ccVals[2]}, {ccVals[3]}, {ccVals[4]}";
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
@@ -99,9 +102,9 @@ public class DroneFilterMidiOutputNode : TickingNode
         _ports.Clear();
     }
 
-    List<float> CalcCcValues(Texture2D inputTex)
+    float[] ccVals = new float[5];
+    void CalcCcValues(Texture2D inputTex)
     {
-        List<float> ccVals = new List<float>(5);
         var width = inputTex.width;
         var height = inputTex.height;
         float h, s, v;
@@ -117,20 +120,19 @@ public class DroneFilterMidiOutputNode : TickingNode
                 var color = inputTex.GetPixelBilinear(0.5f, i/5.0f);
                 Color.RGBToHSV(color, out h, out s, out v);
             }
-            ccVals.Add(v);
+            ccVals[i]=v;
         }
-        return ccVals;
     }
     private void InitializeRenderTexture()
     {
-        buffer = new RenderTexture(inputSize.x, inputSize.y, 24);
+        buffer = new RenderTexture(outputSize.x, outputSize.y, 24);
         buffer.enableRandomWrite = true;
         buffer.Create();
     }
 
 
     private Vector2Int outputSize = Vector2Int.zero;
-    private Vector2Int inputSize;
+    private Vector2Int inputSize = new Vector2Int();
     private RenderTexture buffer;
     float maxFrameRate = 10;
     float lastSendTime = 0;
@@ -166,15 +168,14 @@ public class DroneFilterMidiOutputNode : TickingNode
         ScanPorts();
         Graphics.Blit(tex, buffer);
         Texture2D tex2d = buffer.ToTexture2D();
-        var vals = CalcCcValues(tex2d);
+        CalcCcValues(tex2d);
 
         foreach (var port in _ports)
         {
             if (port == null || !sendMIDI) continue;
-            Debug.Log("Num vals: "+vals.Count);
             for (int i = 1; i < 6; i++)
             {
-                port.SendControlChange(1, i, (byte)vals[i-1]);
+                port.SendControlChange(1, i, (byte)ccVals[i-1]);
             }
         }
         lastSendTime = Time.time;
