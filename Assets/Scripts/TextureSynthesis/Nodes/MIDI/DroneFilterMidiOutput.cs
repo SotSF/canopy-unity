@@ -24,7 +24,7 @@ public class DroneFilterMidiOutputNode : TickingNode
     bool binding = false;
     public bool bound = false;
 
-    [ValueConnectionKnob("inputTex", Direction.Out, typeof(Texture), NodeSide.Top)]
+    [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
     public ValueConnectionKnob inputTexKnob;
 
     public float rawMIDIValue;
@@ -105,10 +105,11 @@ public class DroneFilterMidiOutputNode : TickingNode
         var width = inputTex.width;
         var height = inputTex.height;
         float h, s, v;
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
         {
             if (i == 0)
             {
+                inputTex.GetPixelBilinear(0, 0);
                 Color.RGBToHSV(inputTex.GetPixelBilinear(0, 0), out h, out s, out v);
             }
             else
@@ -116,7 +117,7 @@ public class DroneFilterMidiOutputNode : TickingNode
                 inputTex.GetPixelBilinear(0.5f, i/5.0f);
                 Color.RGBToHSV(inputTex.GetPixelBilinear(0, 0), out h, out s, out v);
             }
-            ccVals[i] = v;
+            ccVals.Add(v);
         }
         return ccVals;
     }
@@ -170,10 +171,10 @@ public class DroneFilterMidiOutputNode : TickingNode
         foreach (var port in _ports)
         {
             if (port == null || !sendMIDI) continue;
+            Debug.Log("Num vals: "+vals.Count);
             for (int i = 1; i < 6; i++)
             {
-                // Debug.Log($"{port.ToString()}");
-                port.SendControlChange(1, i, (byte)vals[i]);
+                port.SendControlChange(1, i, (byte)vals[i-1]);
             }
         }
         lastSendTime = Time.time;
