@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Layouts;
 using RtMidi.LowLevel;
+using UnityEngine.LightTransport;
 
 
 [Node(false, "MIDI/DroneFilterMidiOutput")]
@@ -97,8 +98,43 @@ public class DroneFilterMidiOutputNode : TickingNode
         foreach (var p in _ports) p?.Dispose();
         _ports.Clear();
     }
+
+    List<float> CalcCcValues(Texture2D inputTex)
+    {
+        List<float> ccVals = new List<float>(5);
+        var width = inputTex.width;
+        var height = inputTex.height;
+        float h, s, v;
+        for (int i = 0; i < 4; i++)
+        {
+            if (i == 0)
+            {
+                Color.RGBToHSV(inputTex.GetPixelBilinear(0, 0), out h, out s, out v);
+            }
+            else
+            {
+                inputTex.GetPixelBilinear(0.5f, i/5.0f);
+                Color.RGBToHSV(inputTex.GetPixelBilinear(0, 0), out h, out s, out v);
+            }
+            ccVals[i] = v;
+        }
+        return ccVals;
+    }
+    private void InitializeRenderTexture()
+    {
+        buffer = new RenderTexture(inputSize.x, inputSize.y, 24);
+        buffer.enableRandomWrite = true;
+        buffer.Create();
+    }
+
+
+    private Vector2Int outputSize = Vector2Int.zero;
+    private Vector2Int inputSize;
+    private RenderTexture buffer;
     float maxFrameRate = 10;
     float lastSendTime = 0;
+
+
     public override bool DoCalc()
     {
         if (lastSendTime != 0)
@@ -111,14 +147,33 @@ public class DroneFilterMidiOutputNode : TickingNode
             }
         }
         float val = rawMIDIValue;
+
+
+        Texture tex = inputTexKnob.GetValue<Texture>();
+        if (!inputTexKnob.connected() || tex == null)
+        {
+            return true;
+        }
+        inputSize.x = tex.width;
+        inputSize.y = tex.height;
+        if (inputSize != outputSize)
+        {
+            outputSize = inputSize;
+            InitializeRenderTexture();
+        }
+
         ScanPorts();
+        Graphics.Blit(tex, buffer);
+        Texture2D tex2d = buffer.ToTexture2D();
+        var vals = CalcCcValues(tex2d);
+
         foreach (var port in _ports)
         {
             if (port == null || !sendMIDI) continue;
             for (int i = 1; i < 6; i++)
             {
                 // Debug.Log($"{port.ToString()}");
-                port.SendControlChange(1, i, (byte)i*20);
+                port.SendControlChange(1, i, (byte)vals[i]);
             }
         }
         lastSendTime = Time.time;
