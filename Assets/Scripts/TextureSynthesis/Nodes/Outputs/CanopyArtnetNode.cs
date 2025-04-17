@@ -13,7 +13,7 @@ public class CanopyArtnetNode : TickingNode
 {
     public override string GetID => "CanopyArtnetNode";
     public override string Title { get { return "CanopyArtNet"; } }
-    private Vector2 _DefaultSize = new Vector2(220, 180);
+    private Vector2 _DefaultSize = new Vector2(220, 200);
 
     public override Vector2 DefaultSize => _DefaultSize;
 
@@ -29,6 +29,8 @@ public class CanopyArtnetNode : TickingNode
     private int numUniverses = 96;
 
     public int mirrorPort = 6;
+
+    public int maxFrameRate = 60;
 
     public bool flipMirrorDirection = true;
     public int mirrorOffset = 27;
@@ -89,7 +91,8 @@ public class CanopyArtnetNode : TickingNode
         mirrorOffset = RTEditorGUI.IntSlider("Mirror offset", mirrorOffset, 0, 95);
         flipMirrorDirection = RTEditorGUI.Toggle(flipMirrorDirection, "Flip mirror direction");
         useDoubleDensity = RTEditorGUI.Toggle(useDoubleDensity, "Use double density");
-        GUILayout.Label($"FPS: {fps}");
+        maxFrameRate = RTEditorGUI.IntField("Max frame rate", maxFrameRate);
+        GUILayout.Label($"FPS: {fps:0}");
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
@@ -199,6 +202,10 @@ public class CanopyArtnetNode : TickingNode
                 {
                     var deltaFrame = Time.time - lastSendTime;
                     fps = 1/deltaFrame;
+                    if (fps > maxFrameRate)
+                    {
+                        return;
+                    }
                 }
                 for (short i = 0; i < numUniverses; i++)
                 {
