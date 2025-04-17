@@ -138,7 +138,7 @@ public class CanopyNode : TextureSynthNode
             canopyMainShader.SetBool("polarize", polarize);
             canopyMainShader.SetInt("width", tex.width);
 
-            canopyMainShader.Dispatch(kernelId, Constants.PIXELS_PER_STRIP / 25, Constants.NUM_STRIPS / 16, 1);
+            canopyMainShader.Dispatch(kernelId, (int)Mathf.Ceil(Constants.PIXELS_PER_STRIP / 25.0f), Constants.NUM_STRIPS / 16, 1);
             textureOutputKnob.SetValue(outputTex);
             // Assign output channels
         }
