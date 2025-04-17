@@ -15,6 +15,10 @@ SamplerState SmpLinearMirror;
 uint width;
 uint height;
 
+
+#define PI 3.14159265f
+#define TAU 6.2831853f
+
 /* Rotates a coordinate xy about a center point by theta degrees*/
 float2 rotate(float2 xy, float2 center, float theta)
 {
@@ -32,7 +36,6 @@ float2 rotate(float2 xy, float2 center, float theta)
  * its position in a standard 2D layout, using the Canopy's physical
  * parameters to inform the transformation. */
 float2 canopyDepolarize(uint2 pixel, float2 dimensions) {
-    float pi = 3.14159265;
     float2 center = float2(0, 0);
     float apexRadius = 0.332f;    // Radius of the dark center in meters
     float stripLength = 2.5f;     // Length of the strips in meters
@@ -40,7 +43,7 @@ float2 canopyDepolarize(uint2 pixel, float2 dimensions) {
                                                    // 0 and 2pi are the same angle so we don't fully cover [0-1]
     float normalizedPixelStripPosition = pixel.x / 151.0f; // position along strip in [0-1]
     float normalizedX = ((stripLength*normalizedPixelStripPosition) + apexRadius) / (stripLength + apexRadius);
-    float2 rotatedPixel = rotate(float2(normalizedX, 0), center, 2 * pi * normalizedStripAngle);
+    float2 rotatedPixel = rotate(float2(normalizedX, 0), center, normalizedStripAngle * TAU);
     float normalizedDimension = min(dimensions.x, dimensions.y);
     return (normalizedDimension*rotatedPixel / 2) + (normalizedDimension / 2);
 }
