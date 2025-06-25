@@ -1,0 +1,104 @@
+﻿#include "HSV.compute"
+
+#pragma kernel CSAnalyzeHue
+#pragma kernel CSApplyHueShift
+
+// Input/Output textures
+Texture2D<float4> InputTex;
+RWTexture2D<float4> OutputTex;
+
+// Parameters
+uint2 TextureSize;
+
+// Analysis results buffers (CPU will read these)
+#define HUE_BUCKETS 10
+#define BUCKET_WIDTH 0.1
+RWStructuredBuffer<uint> GlobalHueBuckets; // HUE_BUCKETS elements
+
+// Parameters for apply pass (CPU will set this after analysis)
+float CalculatedHueShift;
+
+// Shared data for hue analysis
+groupshared uint HueBuckets[HUE_BUCKETS];
+
+float3 applyHueShift(in float3 color, float hueShift)
+{
+    float3 hsv = RGBtoHSV(color);
+    // Proper hue wraparound handling
+    hsv.x = hsv.x + hueShift;
+    // Handle wraparound manually since % doesn't work well with negatives
+    if (hsv.x < 0.0)
+        hsv.x += 1.0;
+    if (hsv.x >= 1.0)
+        hsv.x -= 1.0;
+    return HSVtoRGB(hsv);
+}
+
+[numthreads(16, 16, 1)]
+void CSAnalyzeHue(uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupID, uint groupIndex : SV_GroupIndex)
+{
+    // Initialize shared memory on first thread of each group
+    if (groupIndex == 0)
+    {
+        for (int i = 0; i < HUE_BUCKETS; i++)
+        {
+            HueBuckets[i] = 0;
+        }
+    }
+    
+    GroupMemoryBarrierWithGroupSync();
+    
+    // Check bounds but don't return early - all threads must participate in sync
+    bool validPixel = (id.x < TextureSize.x && id.y < TextureSize.y);
+    
+    // Only process valid pixels
+    if (validPixel)
+    {
+        // Sample pixel and convert to HSV
+        float4 pixel = InputTex[id.xy];
+        float3 hsv = RGBtoHSV(pixel.rgb);
+        
+        // Only consider pixels with sufficient saturation and brightness to avoid grays/whites/blacks
+        if (hsv.y > 0.1 && hsv.z > 0.1)
+        {
+            // Determine which hue bucket this pixel belongs to
+            int bucketIndex = (int) (hsv.x / BUCKET_WIDTH);
+            bucketIndex = clamp(bucketIndex, 0, HUE_BUCKETS - 1);
+            
+            // Atomically update bucket data
+            InterlockedAdd(HueBuckets[bucketIndex], 1);
+            
+            // Atomically update bucket count only
+            InterlockedAdd(HueBuckets[bucketIndex], 1);
+        }
+    }
+    
+    GroupMemoryBarrierWithGroupSync();
+    
+    // Have one thread per group contribute to global analysis
+    if (groupIndex == 0)
+    {
+        // Accumulate this group's results into global buffers
+        for (int i = 0; i < HUE_BUCKETS; i++)
+        {
+            if (HueBuckets[i] > 0)
+            {
+                InterlockedAdd(GlobalHueBuckets[i], HueBuckets[i]);
+            }
+        }
+    }
+}
+
+[numthreads(16, 16, 1)]
+void CSApplyHueShift(uint3 id : SV_DispatchThreadID)
+{
+    // Only process pixels within texture bounds
+    if (id.x >= TextureSize.x || id.y >= TextureSize.y)
+        return;
+    
+    // Apply the pre-calculated hue shift to pixel
+    float4 inputPixel = InputTex[id.xy];
+    float3 shiftedColor = applyHueShift(inputPixel.rgb, CalculatedHueShift);
+    
+    OutputTex[id.xy] = float4(shiftedColor, inputPixel.a);
+}
