@@ -156,8 +156,15 @@ public class PixLiteNode : TickingNode
 
     private void Cleanup()
     {
-        websocket.CancelConnection();
-        websocket.Close();
+        try
+        {
+            websocket.CancelConnection();
+            websocket.Close();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
 
     public void OnDestroy()
