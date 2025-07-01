@@ -27,7 +27,7 @@ abstract public class DynamicPatternNode : TickingNode
 
     public override void DoInit()
     {
-
+        SetSize();
     }
 
     protected void SetupPorts()
@@ -40,10 +40,10 @@ abstract public class DynamicPatternNode : TickingNode
             CreateValueConnectionKnob(inputKnobAttribs);
             resized = true;
         }
-        if (resized)
-        {
+        //if (resized)
+        //{
             SetSize();
-        }
+        //}
     }
 
     int signalPorts => dynamicConnectionPorts.Where(p => ((ValueConnectionKnob)p).side == NodeSide.Left).Count();
@@ -53,7 +53,7 @@ abstract public class DynamicPatternNode : TickingNode
 
         _DefaultSize = new Vector2(
             (1 + texPorts) * 100,
-            (1 + signalPorts) * 60 + 50
+            (1 + signalPorts) * 25 + 150
         );
     }
 
@@ -71,6 +71,7 @@ abstract public class DynamicPatternNode : TickingNode
     GUILayoutOption width25 = GUILayout.Width(25);
     GUILayoutOption width50 = GUILayout.Width(50);
     GUILayoutOption width100 = GUILayout.Width(100);
+    GUILayoutOption width150 = GUILayout.Width(100);
     GUILayoutOption height25 = GUILayout.Height(25);
     GUILayoutOption height50 = GUILayout.Height(50);
     GUILayoutOption height100 = GUILayout.Height(100);
@@ -85,8 +86,12 @@ abstract public class DynamicPatternNode : TickingNode
             if (port.side == NodeSide.Top)
             {
                 GUILayout.BeginVertical();
-                var portName = inputPortNames[i].Substring("_LW_".Length);
-                GUILayout.Label(portName, width100);
+                var portName = inputPortNames[i];
+                if (portName.StartsWith("_LW_"))
+                {
+                    portName = portName.Substring("_LW_".Length);
+                }
+                GUILayout.Label(portName, width150);
                 GUILayout.Space(4);
                 GUILayout.Box(port.GetValue<Texture>(), width25, height25);
                 port.SetPosition();
@@ -95,7 +100,7 @@ abstract public class DynamicPatternNode : TickingNode
         }
         GUILayout.EndHorizontal();
 
-        GUILayout.BeginHorizontal();
+
         // Draw signal ports up/down
         GUILayout.BeginVertical();
         for (int i = 0; i < dynamicConnectionPorts.Count; i++)
@@ -105,14 +110,18 @@ abstract public class DynamicPatternNode : TickingNode
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(2);
-                var portName = inputPortNames[i].Substring("_LW_".Length);
+                var portName = inputPortNames[i];
+                if (portName.StartsWith("_LW_"))
+                {
+                    portName = portName.Substring("_LW_".Length);
+                }
                 if (port.valueType == typeof(float))
                 {
-                    GUILayout.Label(string.Format($"{portName}: {port.GetValue<float>():0.00}"));
+                    GUILayout.Label(string.Format($"{portName}: {port.GetValue<float>():0.00}"), GUILayout.ExpandWidth(true));
                 }
                 else
                 {
-                    GUILayout.Label(string.Format($"{portName}: {port.GetValue()}"));
+                    GUILayout.Label(string.Format($"{portName}: {port.GetValue()}"), GUILayout.ExpandWidth(true));
                 }
                 port.SetPosition();
                 GUILayout.EndHorizontal();
@@ -122,13 +131,19 @@ abstract public class DynamicPatternNode : TickingNode
         // End signal ports
 
         // Draw rendered image
+        GUILayout.BeginVertical();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical();
         GUILayout.Box(outputTex, width100, height100);
         textureOutputKnob.DisplayLayout();
         GUILayout.EndVertical();
-        GUILayout.Space(4);
+        GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
+        GUILayout.Space(4);
+        GUILayout.EndVertical();
+
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

@@ -13,7 +13,7 @@ public class VFXCamAgentSystemNode : TickingNode
 {
     public override string GetID => "VFXCamAgentSystem";
     public override string Title { get { return "VFXCamAgentSystem"; } }
-    private Vector2 _DefaultSize = new Vector2(200, 200);
+    private Vector2 _DefaultSize = new Vector2(250, 200);
 
     public override Vector2 DefaultSize => _DefaultSize;
 
@@ -62,6 +62,7 @@ public class VFXCamAgentSystemNode : TickingNode
         cam = sceneObj.GetComponentsInChildren<Camera>().First();
         outputTex = cam.targetTexture;
         effect = sceneObj.GetComponentsInChildren<VisualEffect>().First();
+        //effect.visualEffectAsset.GetExposedProperties();
         inputTexProp = "InputTex";
         emissionRateProp = "EmissionRate";
         sizeProp = "SizeMultiplier";
@@ -74,11 +75,11 @@ public class VFXCamAgentSystemNode : TickingNode
     {
         GUILayout.BeginVertical();
         inputTexKnob.DisplayLayout();
-
-        FloatKnobOrSlider(ref emissionRate, 0, 100, emissionRateKnob);
-        FloatKnobOrSlider(ref particleSize, 0, 10, sizeKnob);
-        FloatKnobOrSlider(ref vortexSpeed, -100, 100, vortexSpeedKnob);
-        FloatKnobOrSlider(ref rotationSpeed, 0, 1, rotationSpeedKnob);
+        
+        FloatKnobOrSlider(ref emissionRate, 0, 100, emissionRateKnob, GUILayout.MaxWidth(140));
+        FloatKnobOrSlider(ref particleSize, 0, 10, sizeKnob, GUILayout.MaxWidth(140));
+        FloatKnobOrSlider(ref vortexSpeed, -100, 100, vortexSpeedKnob, GUILayout.MaxWidth(140));
+        FloatKnobOrSlider(ref rotationSpeed, 0, 1, rotationSpeedKnob, GUILayout.MaxWidth(140));
 
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();

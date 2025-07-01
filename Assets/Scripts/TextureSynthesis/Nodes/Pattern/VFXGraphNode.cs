@@ -3,82 +3,95 @@ using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 using UnityEngine;
+using UnityEngine.VFX.Utility;
+using UnityEngine.VFX;
+using System.Linq;
+using NUnit.Framework;
+using System.Collections.Generic;
+using System;
 
 [Node(false, "Pattern/VFXGraph")]
-public class VFXGraphNode: TickingNode
+public class VFXGraphNode: DynamicPatternNode
 {
     public override string GetID => "VFXGraph";
     public override string Title { get { return "VFXGraph"; } }
-    private Vector2 _DefaultSize = new Vector2(200, 200);
+    private Vector2 _DefaultSize = new Vector2(250, 200);
 
-    public override Vector2 DefaultSize => _DefaultSize;
-
-    
-    [ValueConnectionKnob("emissionRate", Direction.In, typeof(float), NodeSide.Left)]
-    public ValueConnectionKnob emissionRateKnob;
-
-    [ValueConnectionKnob("outputTex", Direction.Out, typeof(Texture), NodeSide.Bottom)]
-    public ValueConnectionKnob outputTexKnob;
-
-    private Vector2Int outputSize = Vector2Int.zero;
-    private float emissionRate = 200;
-    //private float speedFactor = 1;
-    private RenderTexture outputTex;
-
-    private Transform vfxPrefab;
     private Camera cam;
+    private GameObject sceneObj;
+    private VisualEffect effect;
+
+    public string gameObjectName = "VFXCam";
+    private Dictionary<string, Texture> lastTexInputs;
+
+    public void initBuffers()
+    {
+        inputPortNames = new List<string>();
+        inputPortTypes = new List<Type>();
+        lastTexInputs = new Dictionary<string, Texture>();
+    }
 
     public override void DoInit()
     {
-        vfxPrefab = Resources.Load<Transform>("Prefabs/");
-    }
-
-    private void InitializeRenderTexture()
-    {
-        
-        if (outputTex != null)
+        //vfxPrefab = Resources.Load<Transform>("Prefabs/");
+        initBuffers();
+        sceneObj = GameObject.Find(gameObjectName);
+        cam = sceneObj.GetComponentsInChildren<Camera>().First();
+        outputTex = cam.targetTexture;
+        effect = sceneObj.GetComponentsInChildren<VisualEffect>().First();
+        // Query exposed properties from the VFX Graph
+        List<VFXExposedProperty> exposedProperties = new List<VFXExposedProperty>(); ;
+        effect.visualEffectAsset.GetExposedProperties(exposedProperties);
+        foreach (var prop in exposedProperties)
         {
-            outputTex.Release();
+            inputPortNames.Add(prop.name);
+            inputPortTypes.Add(prop.type);
+            if (prop.type == typeof(Texture))
+            {
+                lastTexInputs[prop.name] = null;
+            }
+            Debug.Log($"Exposed property: {prop.name}");
         }
-        outputTex = new RenderTexture(outputSize.x, outputSize.y, 0);
-        outputTex.enableRandomWrite = true;
-        outputTex.Create();
-
-    }
-    
-    public override void NodeGUI()
-    {
-        GUILayout.BeginVertical();
-        
-        emissionRateKnob.DisplayLayout();
-        if (!emissionRateKnob.connected())
-        {
-            emissionRate = RTEditorGUI.Slider(emissionRate, 0, 1000);
-        } else
-        {
-            emissionRate = emissionRateKnob.GetValue<float>();
-        }
-
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.Box(outputTex, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
-        GUILayout.EndHorizontal();
-        GUILayout.Space(4);
-
-        GUILayout.EndVertical();
-        
-        outputTexKnob.SetPosition(180);
-
-        if (GUI.changed)
-            NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
     public override bool DoCalc()
     {
-        emissionRate = emissionRateKnob.connected() ? emissionRateKnob.GetValue<float>(): emissionRate;
+        for (int i = 0; i < dynamicConnectionPorts.Count; i++)
+        {
+            var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
+            var portType = port.valueType;
+            if (portType == typeof(float))
+            {
+                float val = port.GetValue<float>();
+                effect.SetFloat(inputPortNames[i], val);
+            }
+            else if (portType == typeof(int))
+            {
+                int val = port.GetValue<int>();
+                effect.SetInt(inputPortNames[i], val);
+            }
+            else if (portType == typeof(Texture))
+            {
+                Texture val = port.GetValue<Texture>();
+                try
+                {
+                    if (lastTexInputs[inputPortNames[i]] != val)
+                    {
+                        effect.SetTexture(inputPortNames[i], val);
+                    }
+                }
+                catch
+                {
 
-        outputTexKnob.SetValue(outputTex);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Unsupported type {portType} for VFX Graph input {inputPortNames[i]}.");
+            }
+        }
+        textureOutputKnob.SetValue(outputTex);
         return true;
     }
 }
+
