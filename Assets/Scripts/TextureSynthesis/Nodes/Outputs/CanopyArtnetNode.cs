@@ -28,12 +28,12 @@ public class CanopyArtnetNode : TickingNode
     private List<byte[]> universes;
     private int numUniverses = 96;
 
-    public int mirrorPort = 6;
+    public int mirrorPort = 4;
 
     public int maxFrameRate = 60;
 
-    public bool flipMirrorDirection = true;
-    public int mirrorOffset = 27;
+    public bool flipMirrorDirection = false;
+    public int mirrorOffset = 70;
     int frameindex = 0;
 
     const int singleDensitypixelsPerStrip = 76;
