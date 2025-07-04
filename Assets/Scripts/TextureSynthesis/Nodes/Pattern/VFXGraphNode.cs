@@ -54,6 +54,30 @@ public class VFXGraphNode: DynamicPatternNode
         }
     }
 
+    public void CleanExistingConnections()
+    {
+        for (int i = dynamicConnectionPorts.Count - 1; i >= 0; i--)
+        {
+            var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
+            port.ClearConnections();
+            dynamicConnectionPorts.RemoveAt(i);
+        }
+    }
+
+    public override void NodeGUI()
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("VFX Name:");
+        gameObjectName = GUILayout.TextField(gameObjectName);
+        if (GUILayout.Button("Load VFX"))
+        {
+            CleanExistingConnections();
+            DoInit();
+        }
+        GUILayout.EndHorizontal();
+        base.NodeGUI();
+    }
+
     public override bool DoCalc()
     {
         for (int i = 0; i < dynamicConnectionPorts.Count; i++)
