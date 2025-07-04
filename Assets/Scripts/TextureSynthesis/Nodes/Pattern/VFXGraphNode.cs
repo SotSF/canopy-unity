@@ -78,40 +78,48 @@ public class VFXGraphNode: DynamicPatternNode
         base.NodeGUI();
     }
 
+    public override float GetPortPropValue(string portName)
+    {
+        return effect.GetFloat(portName);
+    }
+
     public override bool DoCalc()
     {
         for (int i = 0; i < dynamicConnectionPorts.Count; i++)
         {
             var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
             var portType = port.valueType;
-            if (portType == typeof(float))
+            if (port.connections.Count > 0)
             {
-                float val = port.GetValue<float>();
-                effect.SetFloat(inputPortNames[i], val);
-            }
-            else if (portType == typeof(int))
-            {
-                int val = port.GetValue<int>();
-                effect.SetInt(inputPortNames[i], val);
-            }
-            else if (portType == typeof(Texture))
-            {
-                Texture val = port.GetValue<Texture>();
-                try
+                if (portType == typeof(float))
                 {
-                    if (lastTexInputs[inputPortNames[i]] != val)
+                    float val = port.GetValue<float>();
+                    effect.SetFloat(inputPortNames[i], val);
+                }
+                else if (portType == typeof(int))
+                {
+                    int val = port.GetValue<int>();
+                    effect.SetInt(inputPortNames[i], val);
+                }
+                else if (portType == typeof(Texture))
+                {
+                    Texture val = port.GetValue<Texture>();
+                    try
                     {
-                        effect.SetTexture(inputPortNames[i], val);
+                        if (lastTexInputs[inputPortNames[i]] != val)
+                        {
+                            effect.SetTexture(inputPortNames[i], val);
+                        }
+                    }
+                    catch
+                    {
+
                     }
                 }
-                catch
+                else
                 {
-
+                    Debug.LogWarning($"Unsupported type {portType} for VFX Graph input {inputPortNames[i]}.");
                 }
-            }
-            else
-            {
-                Debug.LogWarning($"Unsupported type {portType} for VFX Graph input {inputPortNames[i]}.");
             }
         }
         textureOutputKnob.SetValue(outputTex);

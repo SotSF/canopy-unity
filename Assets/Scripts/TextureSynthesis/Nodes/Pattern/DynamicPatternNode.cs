@@ -11,7 +11,7 @@ using UnityEngine;
 
 abstract public class DynamicPatternNode : TickingNode
 {
-    private Vector2 _DefaultSize = new Vector2(150, 100);
+    private Vector2 _DefaultSize = new Vector2(250, 100);
 
     public override Vector2 DefaultSize => _DefaultSize;
 
@@ -52,7 +52,7 @@ abstract public class DynamicPatternNode : TickingNode
     {
 
         _DefaultSize = new Vector2(
-            (1 + texPorts) * 100,
+            (1 + texPorts) * 100 + 100,
             (1 + signalPorts) * 25 + 150
         );
     }
@@ -75,6 +75,12 @@ abstract public class DynamicPatternNode : TickingNode
     GUILayoutOption height25 = GUILayout.Height(25);
     GUILayoutOption height50 = GUILayout.Height(50);
     GUILayoutOption height100 = GUILayout.Height(100);
+
+    public virtual float GetPortPropValue(string portName)
+    {
+        throw new NotImplementedException();
+    }
+
     public override void NodeGUI()
     {
         SetupPorts();
@@ -117,7 +123,16 @@ abstract public class DynamicPatternNode : TickingNode
                 }
                 if (port.valueType == typeof(float))
                 {
-                    GUILayout.Label(string.Format($"{portName}: {port.GetValue<float>():0.00}"), GUILayout.ExpandWidth(true));
+                    float val = 0;
+                    try
+                    {
+                        val = GetPortPropValue(portName);
+                    } 
+                    catch (NotImplementedException ex)
+                    {
+                        val = port.GetValue<float>();
+                    }
+                    GUILayout.Label(string.Format($"{portName}: {val:0.00}"), GUILayout.ExpandWidth(true));
                 }
                 else
                 {
