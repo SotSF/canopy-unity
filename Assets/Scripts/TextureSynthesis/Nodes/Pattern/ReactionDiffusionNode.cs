@@ -9,6 +9,10 @@ using SecretFire.TextureSynth;
 [Node(false, "Pattern/ReactionDiffusion")]
 public class ReactionDiffusion : TickingNode
 {
+    /* Some fun parameter values:
+     * Spiraling waves: Feed rate 0.02031, Kill rate 0.05149, A diff 0.01, B diff 0.005, 
+     * 
+     * */
     public override string GetID => "ReactionDiffusionNode";
     public override string Title { get { return "ReactionDiffusion"; } }
     private Vector2 _DefaultSize = new Vector2(680, 240);
