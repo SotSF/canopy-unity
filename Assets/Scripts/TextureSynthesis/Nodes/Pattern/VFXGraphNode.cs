@@ -24,7 +24,10 @@ public class VFXGraphNode: DynamicPatternNode
     public string gameObjectName = "VFXCam";
     private Dictionary<string, Texture> lastTexInputs;
 
-    public void initBuffers()
+    public bool vfxBound = false;
+    public string[] visualEffectNames = new string[] { "VFXCam", "TrailCam", "TorusCam" };
+
+    public void InitBuffers()
     {
         inputPortNames = new List<string>();
         inputPortTypes = new List<Type>();
@@ -33,12 +36,52 @@ public class VFXGraphNode: DynamicPatternNode
 
     public override void DoInit()
     {
-        //vfxPrefab = Resources.Load<Transform>("Prefabs/");
-        initBuffers();
+        InitBuffers();
+        if (!vfxBound)
+        {
+            CleanExistingConnections();
+            return;
+        }
+        EnableFx();
+    }
+
+    public void CleanExistingConnections()
+    {
+        for (int i = dynamicConnectionPorts.Count - 1; i >= 0; i--)
+        {
+            var port = dynamicConnectionPorts[i];
+            port.ClearConnections();
+            // This is the correct way, not dynamicConnectionPorts.RemoveAt(i)
+            // TODO: Fix all other instances of dynamicConnectionPorts.RemoveAt(i) ?
+            DeleteConnectionPort(port);
+        }
+    }
+
+    private int selectedVfxIdx = 0;
+    protected override void TopGUI()
+    {
+        if (vfxBound) return;
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("VFX Name:");
+        selectedVfxIdx = GUILayout.SelectionGrid(selectedVfxIdx, visualEffectNames, 1);
+        if (GUILayout.Button("Load VFX"))
+        {
+            gameObjectName = visualEffectNames[selectedVfxIdx];
+            CleanExistingConnections();
+            vfxBound = true;
+            DoInit();
+        }
+        GUILayout.EndHorizontal();
+    }
+
+    private void EnableFx()
+    {
         sceneObj = GameObject.Find(gameObjectName);
-        cam = sceneObj.GetComponentsInChildren<Camera>().First();
+        cam = sceneObj.GetComponentsInChildren<Camera>(true).First();
+        cam.gameObject.SetActive(true);
         outputTex = cam.targetTexture;
         effect = sceneObj.GetComponentsInChildren<VisualEffect>().First();
+        effect.Play();
         // Query exposed properties from the VFX Graph
         List<VFXExposedProperty> exposedProperties = new List<VFXExposedProperty>(); ;
         effect.visualEffectAsset.GetExposedProperties(exposedProperties);
@@ -50,32 +93,28 @@ public class VFXGraphNode: DynamicPatternNode
             {
                 lastTexInputs[prop.name] = null;
             }
-            Debug.Log($"Exposed property: {prop.name}");
+            //Debug.Log($"Exposed property: {prop.name}");
         }
     }
 
-    public void CleanExistingConnections()
+    private void DisableFx()
     {
-        for (int i = dynamicConnectionPorts.Count - 1; i >= 0; i--)
-        {
-            var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
-            port.ClearConnections();
-            dynamicConnectionPorts.RemoveAt(i);
-        }
+        vfxBound = false;
+        gameObjectName = "";
+        effect.Stop();
+        cam.gameObject.SetActive(false);
+        outputTex = null;
+        InitBuffers();
+        CleanExistingConnections();
     }
 
-    public override void NodeGUI()
+    protected override void BottomGUI()
     {
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("VFX Name:");
-        gameObjectName = GUILayout.TextField(gameObjectName);
-        if (GUILayout.Button("Load VFX"))
+        if (!vfxBound) return;
+        if (GUILayout.Button("Unbind VFX"))
         {
-            CleanExistingConnections();
-            DoInit();
+            DisableFx();
         }
-        GUILayout.EndHorizontal();
-        base.NodeGUI();
     }
 
     public override float GetPortPropValue(string portName)

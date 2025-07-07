@@ -81,6 +81,16 @@ abstract public class DynamicPatternNode : TickingNode
         throw new NotImplementedException();
     }
 
+    protected virtual void TopGUI()
+    {
+        // Override this method to add custom GUI elements below the texture input ports but above the signals
+    }
+
+    protected virtual void BottomGUI()
+    {
+        // Override this method to add custom GUI elements above the final output texture but below the signals
+    }
+
     public override void NodeGUI()
     {
         SetupPorts();
@@ -106,6 +116,7 @@ abstract public class DynamicPatternNode : TickingNode
         }
         GUILayout.EndHorizontal();
 
+        TopGUI();
 
         // Draw signal ports up/down
         GUILayout.BeginVertical();
@@ -144,6 +155,7 @@ abstract public class DynamicPatternNode : TickingNode
         }
         GUILayout.EndVertical();
         // End signal ports
+        BottomGUI();
 
         // Draw rendered image
         GUILayout.BeginVertical();

@@ -1,23 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8880211727059020197
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
-  m_Name: MainEditorState
-  m_EditorClassIdentifier: 
-  canvas: {fileID: 0}
-  parentEditor: {fileID: 0}
-  selectedNode: {fileID: -842912534656622694}
-  panOffset: {x: 486.59998, y: -55.000015}
-  zoom: 1.4
---- !u!114 &-8519202642524724686
+--- !u!114 &-8758435065380878731
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -29,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: rescaleMax
   m_EditorClassIdentifier: 
-  body: {fileID: 3433038903541935845}
+  body: {fileID: -7762438605213579789}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
@@ -37,7 +20,7 @@ MonoBehaviour:
   side: 4
   sidePosition: 117.145004
   sideOffset: 0
---- !u!114 &-7998281009371869255
+--- !u!114 &-8563970597784113425
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,646 +32,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 3878800054538038888}
+  body: {fileID: -2262555950755212778}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
   _connections:
-  - {fileID: 8932731040435331556}
+  - {fileID: -972947591331325170}
   side: 2
   sidePosition: 29.145
   sideOffset: 0
---- !u!114 &-7601786778950848998
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: SpawnRate
-  m_EditorClassIdentifier: 
-  body: {fileID: 7435464900338927423}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: 663651750060692279}
-  side: 4
-  sidePosition: 167.145
-  sideOffset: 0
---- !u!114 &-7572363246420193511
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: 
-  body: {fileID: -3413182584154149735}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: 1163630829979316484}
-  side: 2
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &-7413062705843770104
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: inputTex
-  m_EditorClassIdentifier: 
-  body: {fileID: -842912534656622694}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: -660713040104305328}
-  side: 3
-  sidePosition: 20
-  sideOffset: 0
---- !u!114 &-6109922727066251413
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: output
-  m_EditorClassIdentifier: 
-  body: {fileID: -2064187277350630413}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: 2280614595849072224}
-  side: 2
-  sidePosition: 140
-  sideOffset: 0
---- !u!114 &-5665799670888233585
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: texL
-  m_EditorClassIdentifier: 
-  body: {fileID: 7940569546679131423}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 2479821066367959666}
-  side: 3
-  sidePosition: 20
-  sideOffset: 0
---- !u!114 &-4411268212601071126
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: 
-  body: {fileID: 4979065665591716671}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: -3169879704377008460}
-  side: 2
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &-4225232844139742135
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: 
-  body: {fileID: -1536594653458306323}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: 8096681949146381979}
-  - {fileID: -1399510542868109666}
-  side: 2
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &-4090783868117681851
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: 
-  body: {fileID: -3890085674472783364}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: -3943652969193508312}
-  side: 2
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &-4055020054515653286
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMin
-  m_EditorClassIdentifier: 
-  body: {fileID: -3413182584154149735}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 98.145004
-  sideOffset: 0
---- !u!114 &-3943652969193508312
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Acceleration
-  m_EditorClassIdentifier: 
-  body: {fileID: 7435464900338927423}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: -4090783868117681851}
-  side: 4
-  sidePosition: 56.145
-  sideOffset: 0
---- !u!114 &-3890085674472783364
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: 
-  position: {x: -924.3999, y: -592.2001}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  bound: 1
-  valueKnob: {fileID: -4090783868117681851}
-  rawMIDIValue: 0
-  rescaleMin: 0
-  rescaleMax: 1
-  rescale: 0
-  controlID: 26
-  channel: 0
---- !u!114 &-3879667403611664366
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMax
-  m_EditorClassIdentifier: 
-  body: {fileID: -3413182584154149735}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 117.145004
-  sideOffset: 0
---- !u!114 &-3413182584154149735
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: 
-  position: {x: -926.6, y: -407.8}
-  dynamicConnectionPorts:
-  - {fileID: -4055020054515653286}
-  - {fileID: -3879667403611664366}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  bound: 1
-  valueKnob: {fileID: -7572363246420193511}
-  rawMIDIValue: 0
-  rescaleMin: 0
-  rescaleMax: 4
-  rescale: 1
-  controlID: 25
-  channel: 0
---- !u!114 &-3169879704377008460
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Add input
-  m_EditorClassIdentifier: 
-  body: {fileID: -2064187277350630413}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: -4411268212601071126}
-  side: 4
-  sidePosition: 74.145004
-  sideOffset: 0
---- !u!114 &-2321508060817202847
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Add input
-  m_EditorClassIdentifier: 
-  body: {fileID: -2064187277350630413}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 96
-  sideOffset: 0
---- !u!114 &-2106787033664759561
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMin
-  m_EditorClassIdentifier: 
-  body: {fileID: 4979065665591716671}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 98.145004
-  sideOffset: 0
---- !u!114 &-2064187277350630413
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09ec9c2c05710b145a427bcfde88f2ca, type: 3}
-  m_Name: DynMathExpr
-  m_EditorClassIdentifier: 
-  position: {x: -738.80005, y: 195.19998}
-  dynamicConnectionPorts:
-  - {fileID: 8096681949146381979}
-  - {fileID: -3169879704377008460}
-  - {fileID: -2321508060817202847}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: -6109922727066251413}
-  stringexpr: a+b
---- !u!114 &-2055051419804437661
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 40d9030a2b5654840863bdf18241cc86, type: 3}
-  m_Name: CanopySimulationView
-  m_EditorClassIdentifier: 
-  position: {x: -342.2, y: -699.6}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &-1658038456015082600
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMax
-  m_EditorClassIdentifier: 
-  body: {fileID: 4979065665591716671}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 117.145004
-  sideOffset: 0
---- !u!114 &-1542791680481013620
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0533ce5c1fade04fa42401d691f1b59, type: 3}
-  m_Name: Step
-  m_EditorClassIdentifier: 
-  position: {x: -512.8, y: 117.200005}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 6824735173281584345}
-  minInputKnob: {fileID: -1399510542868109666}
-  min: 0.43307087
-  maxInputKnob: {fileID: 2280614595849072224}
-  max: 0.5833858
-  textureOutputKnob: {fileID: 2546268562743820428}
-  smooth: 1
---- !u!114 &-1536594653458306323
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: 
-  position: {x: -922.4, y: 131.4}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  bound: 1
-  valueKnob: {fileID: -4225232844139742135}
-  rawMIDIValue: 0.43307087
-  rescaleMin: 0
-  rescaleMax: 1
-  rescale: 0
-  controlID: 29
-  channel: 0
---- !u!114 &-1399510542868109666
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Min
-  m_EditorClassIdentifier: 
-  body: {fileID: -1542791680481013620}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: -4225232844139742135}
-  side: 4
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &-1339835251289389141
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: GradientCenter
-  m_EditorClassIdentifier: 
-  body: {fileID: 7435464900338927423}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: 3418832825341025971}
-  side: 4
-  sidePosition: 78.145004
-  sideOffset: 0
---- !u!114 &-1012006764767075589
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: GradientWidth
-  m_EditorClassIdentifier: 
-  body: {fileID: 7435464900338927423}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: 5509982094691847947}
-  side: 4
-  sidePosition: 123.145004
-  sideOffset: 0
---- !u!114 &-842912534656622694
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e27d8fb3c56e0794193c01e38e893346, type: 3}
-  m_Name: CanopyArtNet
-  m_EditorClassIdentifier: 
-  position: {x: -609.19995, y: 778.19995}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  inputTexKnob: {fileID: -7413062705843770104}
-  useDoubleDensity: 1
-  ip: 192.168.1.71
-  mirrorPort: 4
-  maxFrameRate: 60
-  flipMirrorDirection: 0
-  mirrorOffset: 70
---- !u!114 &-660713040104305328
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: 
-  body: {fileID: 8549158699822048556}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: -7413062705843770104}
-  side: 1
-  sidePosition: 40
-  sideOffset: 0
---- !u!114 &-420902476945353454
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: texR
-  m_EditorClassIdentifier: 
-  body: {fileID: 7940569546679131423}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 2546268562743820428}
-  side: 3
-  sidePosition: 60
-  sideOffset: 0
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26a89c36c30b2e940804d7efcccaf0bd, type: 3}
-  m_Name: New Calculation Canvas
-  m_EditorClassIdentifier: 
-  editorStates:
-  - {fileID: -8880211727059020197}
-  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\GenericVFXGraphTest
-  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\GenericVFXGraphTest.asset
-  livesInScene: 0
-  nodes:
-  - {fileID: -3890085674472783364}
-  - {fileID: 3272111555644017738}
-  - {fileID: -3413182584154149735}
-  - {fileID: 8598035254083533067}
-  - {fileID: 3433038903541935845}
-  - {fileID: 2132669630793756291}
-  - {fileID: -1536594653458306323}
-  - {fileID: 4979065665591716671}
-  - {fileID: -2064187277350630413}
-  - {fileID: 3878800054538038888}
-  - {fileID: 7435464900338927423}
-  - {fileID: -1542791680481013620}
-  - {fileID: 7940569546679131423}
-  - {fileID: -2055051419804437661}
-  - {fileID: 8549158699822048556}
-  - {fileID: -842912534656622694}
-  groups:
-  - rect:
-      serializedVersion: 2
-      x: -989.39996
-      y: -623
-      width: 269.8
-      height: 730.4
-    title: MIDI controls
-    _color: {r: 0, g: 0, b: 1, a: 1}
---- !u!114 &663651750060692279
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: 
-  body: {fileID: 2132669630793756291}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: -7601786778950848998}
-  side: 2
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &1144648277844288993
+--- !u!114 &-7911128535441791443
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -700,16 +53,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: In
   m_EditorClassIdentifier: 
-  body: {fileID: 8549158699822048556}
+  body: {fileID: -5319551861092413990}
   direction: 1
   maxConnectionCount: 0
   styleID: UnityEngine.Texture
   _connections:
-  - {fileID: 3844861355352959722}
+  - {fileID: 5584626073017019991}
   side: 3
   sidePosition: 20
   sideOffset: 0
---- !u!114 &1163630829979316484
+--- !u!114 &-7795550079447040762
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -719,18 +72,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: GradientSelect
+  m_Name: Add input
   m_EditorClassIdentifier: 
-  body: {fileID: 7435464900338927423}
+  body: {fileID: 6260879069281646397}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
-  _connections:
-  - {fileID: -7572363246420193511}
+  _connections: []
   side: 4
-  sidePosition: 101.145004
+  sidePosition: 96
   sideOffset: 0
---- !u!114 &2132669630793756291
+--- !u!114 &-7762438605213579789
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -744,125 +96,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   position: {x: -932.3999, y: -52.6}
   dynamicConnectionPorts:
-  - {fileID: 7753525018244772403}
-  - {fileID: 2362737372603582542}
+  - {fileID: -7325973638055258281}
+  - {fileID: -8758435065380878731}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
-  valueKnob: {fileID: 663651750060692279}
+  valueKnob: {fileID: 6162854616563588509}
   rawMIDIValue: 0.047244094
   rescaleMin: 0
   rescaleMax: 1000
   rescale: 1
   controlID: 18
   channel: 0
---- !u!114 &2280614595849072224
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Max
-  m_EditorClassIdentifier: 
-  body: {fileID: -1542791680481013620}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: -6109922727066251413}
-  side: 4
-  sidePosition: 51.145
-  sideOffset: 0
---- !u!114 &2362737372603582542
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMax
-  m_EditorClassIdentifier: 
-  body: {fileID: 2132669630793756291}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 117.145004
-  sideOffset: 0
---- !u!114 &2479821066367959666
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: 
-  body: {fileID: 7435464900338927423}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 6824735173281584345}
-  - {fileID: -5665799670888233585}
-  side: 1
-  sidePosition: 100
-  sideOffset: 0
---- !u!114 &2546268562743820428
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: 
-  body: {fileID: -1542791680481013620}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: -420902476945353454}
-  side: 1
-  sidePosition: 180
-  sideOffset: 0
---- !u!114 &3272111555644017738
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: 
-  position: {x: -924.6, y: -500.19995}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  bound: 1
-  valueKnob: {fileID: 3418832825341025971}
-  rawMIDIValue: 0.44094488
-  rescaleMin: 0
-  rescaleMax: 1
-  rescale: 0
-  controlID: 16
-  channel: 0
---- !u!114 &3418832825341025971
+--- !u!114 &-7491447931992946354
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -874,41 +119,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 3272111555644017738}
+  body: {fileID: 4787327222368184736}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
   _connections:
-  - {fileID: -1339835251289389141}
+  - {fileID: 7711763051910637426}
   side: 2
   sidePosition: 29.145
   sideOffset: 0
---- !u!114 &3433038903541935845
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: 
-  position: {x: -929.19995, y: -184.79999}
-  dynamicConnectionPorts:
-  - {fileID: 5427990345714711315}
-  - {fileID: -8519202642524724686}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  bound: 1
-  valueKnob: {fileID: 7786699280935625278}
-  rawMIDIValue: 0.070866145
-  rescaleMin: 0
-  rescaleMax: 10
-  rescale: 1
-  controlID: 22
-  channel: 0
---- !u!114 &3844861355352959722
+--- !u!114 &-7477912788422699568
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -918,87 +138,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: outputTex
+  m_Name: texL
   m_EditorClassIdentifier: 
-  body: {fileID: 7940569546679131423}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 1144648277844288993}
-  side: 1
-  sidePosition: 180
-  sideOffset: 0
---- !u!114 &3878800054538038888
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: 
-  position: {x: -910.39996, y: 419.40002}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  bound: 1
-  valueKnob: {fileID: -7998281009371869255}
-  rawMIDIValue: 0
-  rescaleMin: 0
-  rescaleMax: 1
-  rescale: 0
-  controlID: 31
-  channel: 0
---- !u!114 &4061765362693660559
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Gravity
-  m_EditorClassIdentifier: 
-  body: {fileID: 7435464900338927423}
+  body: {fileID: -3646458955719194050}
   direction: 1
   maxConnectionCount: 0
-  styleID: System.Single
+  styleID: UnityEngine.Texture
   _connections:
-  - {fileID: 7786699280935625278}
-  side: 4
-  sidePosition: 145.145
+  - {fileID: 5584626073017019991}
+  side: 3
+  sidePosition: 20
   sideOffset: 0
---- !u!114 &4979065665591716671
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: 
-  position: {x: -922.8, y: 224.4}
-  dynamicConnectionPorts:
-  - {fileID: -2106787033664759561}
-  - {fileID: -1658038456015082600}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  bound: 1
-  valueKnob: {fileID: -4411268212601071126}
-  rawMIDIValue: 0.14173229
-  rescaleMin: 0.01
-  rescaleMax: 1
-  rescale: 1
-  controlID: 30
-  channel: 0
---- !u!114 &5427990345714711315
+--- !u!114 &-7325973638055258281
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1010,7 +161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: rescaleMin
   m_EditorClassIdentifier: 
-  body: {fileID: 3433038903541935845}
+  body: {fileID: -7762438605213579789}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
@@ -1018,28 +169,7 @@ MonoBehaviour:
   side: 4
   sidePosition: 98.145004
   sideOffset: 0
---- !u!114 &5509982094691847947
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: 
-  body: {fileID: 8598035254083533067}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: -1012006764767075589}
-  side: 2
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &6824735173281584345
+--- !u!114 &-6984662752954784280
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1051,145 +181,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: In
   m_EditorClassIdentifier: 
-  body: {fileID: -1542791680481013620}
+  body: {fileID: 5324052993045749851}
   direction: 1
   maxConnectionCount: 0
   styleID: UnityEngine.Texture
   _connections:
-  - {fileID: 2479821066367959666}
+  - {fileID: 5174890110331010203}
   side: 3
   sidePosition: 20
   sideOffset: 0
---- !u!114 &7435464900338927423
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3d9d06db17939645a18e6566c8f2129, type: 3}
-  m_Name: VFXGraph
-  m_EditorClassIdentifier: 
-  position: {x: -666.6, y: -513.2}
-  dynamicConnectionPorts:
-  - {fileID: -3943652969193508312}
-  - {fileID: -1339835251289389141}
-  - {fileID: 1163630829979316484}
-  - {fileID: -1012006764767075589}
-  - {fileID: 4061765362693660559}
-  - {fileID: -7601786778950848998}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureOutputKnob: {fileID: 2479821066367959666}
-  gameObjectName: TrailCam
---- !u!114 &7753525018244772403
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMin
-  m_EditorClassIdentifier: 
-  body: {fileID: 2132669630793756291}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 98.145004
-  sideOffset: 0
---- !u!114 &7786699280935625278
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: 
-  body: {fileID: 3433038903541935845}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: 4061765362693660559}
-  side: 2
-  sidePosition: 29.145
-  sideOffset: 0
---- !u!114 &7940569546679131423
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f732b79ddd86354ba528c0df735f951, type: 3}
-  m_Name: Merge
-  m_EditorClassIdentifier: 
-  position: {x: -542, y: 334.20004}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  texLKnob: {fileID: -5665799670888233585}
-  texRKnob: {fileID: -420902476945353454}
-  crossfaderKnob: {fileID: 8932731040435331556}
-  outputTexKnob: {fileID: 3844861355352959722}
-  crossfader: 0
-  mergeModeSelection:
-    values: 0100
-    names:
-    - Simple
-    - Layers
---- !u!114 &8096681949146381979
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Add input
-  m_EditorClassIdentifier: 
-  body: {fileID: -2064187277350630413}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: -4225232844139742135}
-  side: 4
-  sidePosition: 51.145
-  sideOffset: 0
---- !u!114 &8549158699822048556
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3469be317986434faaea3445fa2db15, type: 3}
-  m_Name: Canopy
-  m_EditorClassIdentifier: 
-  position: {x: -627.8, y: 575.2}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 1144648277844288993}
-  textureOutputKnob: {fileID: -660713040104305328}
-  polarize: 1
-  seamless: 0
---- !u!114 &8598035254083533067
+--- !u!114 &-6613953220990508435
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1205,14 +206,749 @@ MonoBehaviour:
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   bound: 1
-  valueKnob: {fileID: 5509982094691847947}
+  valueKnob: {fileID: -5847550838888506265}
   rawMIDIValue: 1
   rescaleMin: 0
   rescaleMax: 1
   rescale: 0
   controlID: 17
   channel: 0
---- !u!114 &8932731040435331556
+--- !u!114 &-5847550838888506265
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: 
+  body: {fileID: -6613953220990508435}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: 8185360591083725045}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-5386250130432454939
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: 
+  body: {fileID: 5597181660584944994}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -3992234397481946274}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-5319551861092413990
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0533ce5c1fade04fa42401d691f1b59, type: 3}
+  m_Name: Step
+  m_EditorClassIdentifier: 
+  position: {x: -512.8, y: 117.200005}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureInputKnob: {fileID: -7911128535441791443}
+  minInputKnob: {fileID: 8262454095344146804}
+  min: 0.43307087
+  maxInputKnob: {fileID: -3843584271258203432}
+  max: 0.5833858
+  textureOutputKnob: {fileID: 69677484651357335}
+  smooth: 1
+--- !u!114 &-5310202922815270971
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e27d8fb3c56e0794193c01e38e893346, type: 3}
+  m_Name: CanopyArtNet
+  m_EditorClassIdentifier: 
+  position: {x: -609.19995, y: 778.19995}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  inputTexKnob: {fileID: -4454012878039265881}
+  useDoubleDensity: 1
+  ip: 192.168.1.71
+  mirrorPort: 4
+  maxFrameRate: 60
+  flipMirrorDirection: 0
+  mirrorOffset: 70
+--- !u!114 &-4962328002878466087
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMin
+  m_EditorClassIdentifier: 
+  body: {fileID: 4787327222368184736}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 98.145004
+  sideOffset: 0
+--- !u!114 &-4930238979406488842
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMin
+  m_EditorClassIdentifier: 
+  body: {fileID: -2262555950755212778}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 98.145004
+  sideOffset: 0
+--- !u!114 &-4648234673224299447
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
+  m_Name: MainEditorState
+  m_EditorClassIdentifier: 
+  canvas: {fileID: 0}
+  parentEditor: {fileID: 0}
+  selectedNode: {fileID: -7762438605213579789}
+  panOffset: {x: 275, y: -62.000015}
+  zoom: 1.4
+--- !u!114 &-4462104497741719836
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Add input
+  m_EditorClassIdentifier: 
+  body: {fileID: 6260879069281646397}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: 3565364796987755637}
+  side: 4
+  sidePosition: 51.145
+  sideOffset: 0
+--- !u!114 &-4454012878039265881
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: inputTex
+  m_EditorClassIdentifier: 
+  body: {fileID: -5310202922815270971}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 8647749810138197153}
+  side: 3
+  sidePosition: 20
+  sideOffset: 0
+--- !u!114 &-4007573304562553868
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: SpawnRate
+  m_EditorClassIdentifier: 
+  body: {fileID: 4864041288810449628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: 6162854616563588509}
+  side: 4
+  sidePosition: 144.145
+  sideOffset: 0
+--- !u!114 &-3992234397481946274
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Acceleration
+  m_EditorClassIdentifier: 
+  body: {fileID: 4864041288810449628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -5386250130432454939}
+  side: 4
+  sidePosition: 33.145
+  sideOffset: 0
+--- !u!114 &-3968427127089032347
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMax
+  m_EditorClassIdentifier: 
+  body: {fileID: -2262555950755212778}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 117.145004
+  sideOffset: 0
+--- !u!114 &-3843584271258203432
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Max
+  m_EditorClassIdentifier: 
+  body: {fileID: -5319551861092413990}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -1568895342040343079}
+  side: 4
+  sidePosition: 51.145
+  sideOffset: 0
+--- !u!114 &-3646458955719194050
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f732b79ddd86354ba528c0df735f951, type: 3}
+  m_Name: Merge
+  m_EditorClassIdentifier: 
+  position: {x: -542, y: 334.20004}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  texLKnob: {fileID: -7477912788422699568}
+  texRKnob: {fileID: 5778048902286047138}
+  crossfaderKnob: {fileID: 4964581812493926656}
+  outputTexKnob: {fileID: 5174890110331010203}
+  crossfader: 0
+  mergeModeSelection:
+    values: 0100
+    names:
+    - Simple
+    - Layers
+--- !u!114 &-3627702029484483905
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: 
+  position: {x: -924.6, y: -500.19995}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  bound: 1
+  valueKnob: {fileID: -2008182039311875179}
+  rawMIDIValue: 0.44094488
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
+  controlID: 16
+  channel: 0
+--- !u!114 &-3302550226071899620
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: GradientCenter
+  m_EditorClassIdentifier: 
+  body: {fileID: 4864041288810449628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -2008182039311875179}
+  side: 4
+  sidePosition: 55.145
+  sideOffset: 0
+--- !u!114 &-2721998326822384754
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: GradientSelect
+  m_EditorClassIdentifier: 
+  body: {fileID: 4864041288810449628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -1831695234049198766}
+  side: 4
+  sidePosition: 78.145004
+  sideOffset: 0
+--- !u!114 &-2262555950755212778
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: 
+  position: {x: -929.19995, y: -184.79999}
+  dynamicConnectionPorts:
+  - {fileID: -4930238979406488842}
+  - {fileID: -3968427127089032347}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  bound: 1
+  valueKnob: {fileID: -8563970597784113425}
+  rawMIDIValue: 0.070866145
+  rescaleMin: 0
+  rescaleMax: 10
+  rescale: 1
+  controlID: 22
+  channel: 0
+--- !u!114 &-2008182039311875179
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: 
+  body: {fileID: -3627702029484483905}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -3302550226071899620}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-1831695234049198766
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: 
+  body: {fileID: 4790130788541956618}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -2721998326822384754}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-1568895342040343079
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: output
+  m_EditorClassIdentifier: 
+  body: {fileID: 6260879069281646397}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -3843584271258203432}
+  side: 2
+  sidePosition: 140
+  sideOffset: 0
+--- !u!114 &-972947591331325170
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Gravity
+  m_EditorClassIdentifier: 
+  body: {fileID: 4864041288810449628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -8563970597784113425}
+  side: 4
+  sidePosition: 122.145004
+  sideOffset: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26a89c36c30b2e940804d7efcccaf0bd, type: 3}
+  m_Name: New Calculation Canvas
+  m_EditorClassIdentifier: 
+  editorStates:
+  - {fileID: -4648234673224299447}
+  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\GenericVFXGraphTest
+  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\GenericVFXGraphTest.asset
+  livesInScene: 0
+  nodes:
+  - {fileID: 2417016173420374363}
+  - {fileID: 4787327222368184736}
+  - {fileID: 6260879069281646397}
+  - {fileID: 6512400618193575291}
+  - {fileID: -5319551861092413990}
+  - {fileID: -3646458955719194050}
+  - {fileID: 8197547711197881985}
+  - {fileID: 5324052993045749851}
+  - {fileID: -5310202922815270971}
+  - {fileID: 4864041288810449628}
+  - {fileID: 4790130788541956618}
+  - {fileID: -3627702029484483905}
+  - {fileID: 5597181660584944994}
+  - {fileID: -6613953220990508435}
+  - {fileID: -2262555950755212778}
+  - {fileID: -7762438605213579789}
+  groups:
+  - rect:
+      serializedVersion: 2
+      x: -989.39996
+      y: -623
+      width: 269.8
+      height: 730.4
+    title: MIDI controls
+    _color: {r: 0, g: 0, b: 1, a: 1}
+--- !u!114 &69677484651357335
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: 
+  body: {fileID: -5319551861092413990}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 5778048902286047138}
+  side: 1
+  sidePosition: 180
+  sideOffset: 0
+--- !u!114 &654430874821533784
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: 
+  body: {fileID: 6512400618193575291}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: 4964581812493926656}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &2249545828312752193
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMin
+  m_EditorClassIdentifier: 
+  body: {fileID: 4790130788541956618}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 98.145004
+  sideOffset: 0
+--- !u!114 &2417016173420374363
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: 
+  position: {x: -922.4, y: 131.4}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  bound: 1
+  valueKnob: {fileID: 3565364796987755637}
+  rawMIDIValue: 0.43307087
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
+  controlID: 29
+  channel: 0
+--- !u!114 &3022570156019752210
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMax
+  m_EditorClassIdentifier: 
+  body: {fileID: 4787327222368184736}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 117.145004
+  sideOffset: 0
+--- !u!114 &3565364796987755637
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: 
+  body: {fileID: 2417016173420374363}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -4462104497741719836}
+  - {fileID: 8262454095344146804}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &4350059395964675108
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMax
+  m_EditorClassIdentifier: 
+  body: {fileID: 4790130788541956618}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 117.145004
+  sideOffset: 0
+--- !u!114 &4787327222368184736
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: 
+  position: {x: -922.8, y: 224.4}
+  dynamicConnectionPorts:
+  - {fileID: -4962328002878466087}
+  - {fileID: 3022570156019752210}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  bound: 1
+  valueKnob: {fileID: -7491447931992946354}
+  rawMIDIValue: 0.14173229
+  rescaleMin: 0.01
+  rescaleMax: 1
+  rescale: 1
+  controlID: 30
+  channel: 0
+--- !u!114 &4790130788541956618
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: 
+  position: {x: -926.6, y: -407.8}
+  dynamicConnectionPorts:
+  - {fileID: 2249545828312752193}
+  - {fileID: 4350059395964675108}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  bound: 1
+  valueKnob: {fileID: -1831695234049198766}
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 4
+  rescale: 1
+  controlID: 25
+  channel: 0
+--- !u!114 &4864041288810449628
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3d9d06db17939645a18e6566c8f2129, type: 3}
+  m_Name: VFXGraph
+  m_EditorClassIdentifier: 
+  position: {x: -666.6, y: -513.2}
+  dynamicConnectionPorts:
+  - {fileID: -3992234397481946274}
+  - {fileID: -3302550226071899620}
+  - {fileID: -2721998326822384754}
+  - {fileID: 8185360591083725045}
+  - {fileID: -972947591331325170}
+  - {fileID: -4007573304562553868}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureOutputKnob: {fileID: 5584626073017019991}
+  gameObjectName: TrailCam
+  vfxBound: 1
+  visualEffectNames:
+  - VFXCam
+  - TrailCam
+  - TorusCam
+--- !u!114 &4964581812493926656
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1224,12 +960,281 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: crossfader
   m_EditorClassIdentifier: 
-  body: {fileID: 7940569546679131423}
+  body: {fileID: -3646458955719194050}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
   _connections:
-  - {fileID: -7998281009371869255}
+  - {fileID: 654430874821533784}
   side: 4
   sidePosition: 49
+  sideOffset: 0
+--- !u!114 &5174890110331010203
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: outputTex
+  m_EditorClassIdentifier: 
+  body: {fileID: -3646458955719194050}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: -6984662752954784280}
+  side: 1
+  sidePosition: 180
+  sideOffset: 0
+--- !u!114 &5324052993045749851
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3469be317986434faaea3445fa2db15, type: 3}
+  m_Name: Canopy
+  m_EditorClassIdentifier: 
+  position: {x: -627.8, y: 575.2}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureInputKnob: {fileID: -6984662752954784280}
+  textureOutputKnob: {fileID: 8647749810138197153}
+  polarize: 1
+  seamless: 0
+--- !u!114 &5584626073017019991
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: 
+  body: {fileID: 4864041288810449628}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: -7911128535441791443}
+  - {fileID: -7477912788422699568}
+  side: 1
+  sidePosition: 100
+  sideOffset: 0
+--- !u!114 &5597181660584944994
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: 
+  position: {x: -924.3999, y: -592.2001}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  bound: 1
+  valueKnob: {fileID: -5386250130432454939}
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
+  controlID: 26
+  channel: 0
+--- !u!114 &5778048902286047138
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: texR
+  m_EditorClassIdentifier: 
+  body: {fileID: -3646458955719194050}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 69677484651357335}
+  side: 3
+  sidePosition: 60
+  sideOffset: 0
+--- !u!114 &6162854616563588509
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: 
+  body: {fileID: -7762438605213579789}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -4007573304562553868}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &6260879069281646397
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09ec9c2c05710b145a427bcfde88f2ca, type: 3}
+  m_Name: DynMathExpr
+  m_EditorClassIdentifier: 
+  position: {x: -738.80005, y: 195.19998}
+  dynamicConnectionPorts:
+  - {fileID: -4462104497741719836}
+  - {fileID: 7711763051910637426}
+  - {fileID: -7795550079447040762}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: -1568895342040343079}
+  stringexpr: a+b
+--- !u!114 &6512400618193575291
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: 
+  position: {x: -910.39996, y: 419.40002}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  bound: 1
+  valueKnob: {fileID: 654430874821533784}
+  rawMIDIValue: 0
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
+  controlID: 31
+  channel: 0
+--- !u!114 &7711763051910637426
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Add input
+  m_EditorClassIdentifier: 
+  body: {fileID: 6260879069281646397}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -7491447931992946354}
+  side: 4
+  sidePosition: 74.145004
+  sideOffset: 0
+--- !u!114 &8185360591083725045
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: GradientWidth
+  m_EditorClassIdentifier: 
+  body: {fileID: 4864041288810449628}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -5847550838888506265}
+  side: 4
+  sidePosition: 100.145004
+  sideOffset: 0
+--- !u!114 &8197547711197881985
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40d9030a2b5654840863bdf18241cc86, type: 3}
+  m_Name: CanopySimulationView
+  m_EditorClassIdentifier: 
+  position: {x: -342.2, y: -699.6}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &8262454095344146804
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Min
+  m_EditorClassIdentifier: 
+  body: {fileID: -5319551861092413990}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: 3565364796987755637}
+  side: 4
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &8647749810138197153
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: 
+  body: {fileID: 5324052993045749851}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: -4454012878039265881}
+  side: 1
+  sidePosition: 40
   sideOffset: 0
