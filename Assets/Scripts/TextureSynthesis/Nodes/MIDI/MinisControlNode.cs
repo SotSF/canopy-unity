@@ -61,8 +61,10 @@ public class MinisControlNode : TickingNode
         var midiDevice = device as Minis.MidiDevice;
         if (midiDevice == null || change != InputDeviceChange.Added) 
             return;
+        if (midiDevices.Contains(midiDevice))
+            return; // Already added
         midiDevices.Add(midiDevice);
-        Debug.Log("MIDI Device added");
+        Debug.Log($"MIDI Device added: ${midiDevice.deviceId}");
         if (bound && boundDevice == null)
         {
             if (midiDevice.channel == channel){
