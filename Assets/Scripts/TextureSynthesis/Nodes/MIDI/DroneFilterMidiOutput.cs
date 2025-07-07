@@ -1,15 +1,13 @@
 
-using Minis;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
-using System;
+
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Layouts;
+
 using RtMidi.LowLevel;
-using UnityEngine.LightTransport;
+
 
 
 [Node(false, "MIDI/DroneFilterMidiOutput")]
