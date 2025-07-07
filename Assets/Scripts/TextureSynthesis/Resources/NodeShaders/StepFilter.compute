@@ -1,6 +1,7 @@
 ﻿#pragma kernel StepKernel
 
 #define TRANSPARENT float4(0,0,0,0)
+#define SQRT_3 1.73205080757
 Texture2D<float4> InputTex;
 RWTexture2D<float4> OutputTex;
 
@@ -26,7 +27,7 @@ void StepKernel(uint3 id : SV_DispatchThreadID)
 	float newX = (iWidth / float(oWidth)) * id.x;
 	float newY = (iHeight / float(oHeight)) * id.y;
 	float4 sampled = InputTex.SampleLevel(SmpLinearClamp, float2(newX, newY) / dimensions, 0);
-	float4 smoothstepped = sampled * smoothstep(min, max, length(sampled));
-	float4 stepped = sampled * step(min, length(sampled));
+	float4 smoothstepped = sampled * smoothstep(min, max, length(sampled.xyz) / SQRT_3);
+	float4 stepped = sampled * step(min, length(sampled.xyz) / SQRT_3);
 	OutputTex[id.xy] = smooth ? smoothstepped : stepped;
 }
