@@ -52,7 +52,7 @@ abstract public class DynamicPatternNode : TickingNode
     {
 
         _DefaultSize = new Vector2(
-            (1 + texPorts) * 100 + 100,
+            (1 + texPorts) * 32 + 168,
             (1 + signalPorts) * 25 + 150
         );
     }
