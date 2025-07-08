@@ -158,6 +158,8 @@ public class PixLiteNode : TickingNode
     {
         try
         {
+            if (websocket == null)
+                return;
             websocket.CancelConnection();
             websocket.Close();
         }

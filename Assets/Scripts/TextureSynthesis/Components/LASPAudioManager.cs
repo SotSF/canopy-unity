@@ -4,6 +4,7 @@ public class LASPAudioManager : MonoBehaviour
 {
     public static SpectrumAnalyzer spectrumAnalyzer;
     public static AudioLevelTracker audioLevelTracker;
+    public static SpectrumToTexture spectrumTexture;
     public InputStream inputStream;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -11,6 +12,7 @@ public class LASPAudioManager : MonoBehaviour
     {
         spectrumAnalyzer = GetComponent<SpectrumAnalyzer>();
         audioLevelTracker = GetComponent<AudioLevelTracker>();
+        spectrumTexture = GetComponent<SpectrumToTexture>();
     }
 
 }

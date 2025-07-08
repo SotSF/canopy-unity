@@ -22,7 +22,7 @@ public class SpectrumVisualizerNode : TickingNode
 
     private ComputeShader patternShader;
     private int patternKernel;
-    private Vector2Int outputSize = new Vector2Int(75,96);
+    private Vector2Int outputSize = new Vector2Int(128,128);
     public RenderTexture outputTex;
 
     public override void DoInit()
@@ -61,12 +61,12 @@ public class SpectrumVisualizerNode : TickingNode
 
     public override bool DoCalc()
     {
-        var dummySpectrum = new float[32];
+        //var dummySpectrum = new float[32];
         
-        for (int i = 0; i < 32; i++)
-        {
-            dummySpectrum[i] = 0.5f;
-        }
+        //for (int i = 0; i < 32; i++)
+        //{
+        //    dummySpectrum[i] = 0.5f;
+        //}
 
         spectrumData = spectrumDataKnob.GetValue<float[]>();
         if (spectrumData != null)

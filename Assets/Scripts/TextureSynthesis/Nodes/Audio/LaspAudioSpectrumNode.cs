@@ -17,6 +17,9 @@ public class LaspAudioSpectrumNode : TickingNode
     [ValueConnectionKnob("spectrumData", Direction.Out, typeof(float[]), NodeSide.Right)]
     public ValueConnectionKnob spectrumDataKnob;
 
+    [ValueConnectionKnob("audioLevel", Direction.Out, typeof(float), NodeSide.Right)]
+    public ValueConnectionKnob audioLevelKnob;
+
     public bool capturing = false;
     public RadioButtonSet scalingModeSelection;
     public RadioButtonSet captureModeSelection;
@@ -43,14 +46,10 @@ public class LaspAudioSpectrumNode : TickingNode
         RadioButtons(scalingModeSelection);
         GUILayout.EndVertical();
 
-
         GUILayout.EndHorizontal();
-
-
-        GUILayout.BeginHorizontal();
 
         spectrumDataKnob.DisplayLayout();
-        GUILayout.EndHorizontal();
+        audioLevelKnob.DisplayLayout();
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
@@ -69,6 +68,7 @@ public class LaspAudioSpectrumNode : TickingNode
         {
             spectrumDataKnob.SetValue(LASPAudioManager.spectrumAnalyzer.spectrumSpan.ToArray());
         }
+        audioLevelKnob.SetValue(LASPAudioManager.audioLevelTracker.normalizedLevel);
         return true;
     }
 }
