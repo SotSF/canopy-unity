@@ -78,6 +78,7 @@ public class DroneFilterMidiOutputNode : TickingNode
 
         GUILayout.Box(buffer, GUILayout.Width(200), GUILayout.Height(200));
         var str = $"{ccVals[0]}, {ccVals[1]}, {ccVals[2]}, {ccVals[3]}, {ccVals[4]}";
+        GUILayout.Label(str);
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
@@ -90,7 +91,7 @@ public class DroneFilterMidiOutputNode : TickingNode
     public bool sendMIDI = false;
     bool IsRealPort(string name)
     {
-        return !name.Contains("Through") && !name.Contains("RtMidi");
+        return !name.Contains("Through") && !name.Contains("RtMidi") && !name.Contains("ix");
     }
 
     // Close and release all the opened ports.
@@ -100,7 +101,7 @@ public class DroneFilterMidiOutputNode : TickingNode
         _ports.Clear();
     }
 
-    float[] ccVals = new float[5];
+    byte[] ccVals = new byte[5];
     void CalcCcValues(Texture2D inputTex)
     {
         var width = inputTex.width;
@@ -118,7 +119,8 @@ public class DroneFilterMidiOutputNode : TickingNode
                 var color = inputTex.GetPixelBilinear(0.5f, i/5.0f);
                 Color.RGBToHSV(color, out h, out s, out v);
             }
-            ccVals[i]=v;
+            var baseVal = (byte) ((255*v) % 255);
+            ccVals[i]= baseVal == 0 ? (byte)1 : baseVal > 255 ? (byte)255 : baseVal;
         }
     }
     private void InitializeRenderTexture()
@@ -144,7 +146,7 @@ public class DroneFilterMidiOutputNode : TickingNode
             var fps = 1/deltaFrame;
             if (fps > maxFrameRate)
             {
-                return false;
+                return true;
             }
         }
         float val = rawMIDIValue;
@@ -173,7 +175,7 @@ public class DroneFilterMidiOutputNode : TickingNode
             if (port == null || !sendMIDI) continue;
             for (int i = 1; i < 6; i++)
             {
-                port.SendControlChange(1, i, (byte)ccVals[i-1]);
+                port.SendControlChange(1, i, ccVals[i-1]);
             }
         }
         lastSendTime = Time.time;
