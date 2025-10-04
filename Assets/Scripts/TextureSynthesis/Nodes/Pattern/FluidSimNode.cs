@@ -384,6 +384,18 @@ public class FluidSimNode : TickingNode
         {
             timeMultiplier = timeMultiplierKnob.GetValue<float>();
         }
+        if (dyeInputLevelKnob.connected())
+        {
+            dyeInputLevel = dyeInputLevelKnob.GetValue<float>();
+        }
+        if (dyeDecayKnob.connected())
+        {
+            dyeDecay = dyeDecayKnob.GetValue<float>();
+        }
+        if (forceMultiplierKnob.connected())
+        {
+            forceMultiplier = forceMultiplierKnob.GetValue<float>();
+        }
         if (applyForceKnob.GetValue<bool>())
         {
             ApplyVelocity(forceMultiplier);
