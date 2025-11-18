@@ -73,16 +73,20 @@ public class SignalLatchNode : TickingNode
 
     public override bool DoCalc()
     {
+        if (sensitivityKnob.connected())
+        {
+            sensitivity = sensitivityKnob.GetValue<float>();
+        }
         if (!controlSignalKnob.connected())
         {
             outputSignalKnob.SetValue(latchedValue);
             return true;
         }
         var inputValue = controlSignalKnob.GetValue<float>();
-        var sensitivity = sensitivityKnob.connected() ? sensitivityKnob.GetValue<float>() : 1;
+        var sensitivityValue = sensitivityKnob.connected() ? sensitivityKnob.GetValue<float>() : 1;
         if (additive)
         {
-            latchedValue += inputValue * sensitivity;
+            latchedValue += inputValue * sensitivityValue;
         } else
         {
             if (latchControlKnob.connected()){

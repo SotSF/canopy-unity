@@ -247,6 +247,10 @@ public class PixLiteNode : TickingNode
     private Dictionary<string, Task> openRequests = new Dictionary<string, Task>();
     public override bool DoCalc()
     {
+        if (brightnessKnob.connected())
+        {
+            brightness = brightnessKnob.GetValue<float>();
+        }
         // Scale brightness to 0-31
         var brightnessInt = (int)(brightness * 31);
         var prevBrightnessInt = (int)(prevBrightness * 31);

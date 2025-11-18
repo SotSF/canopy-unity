@@ -63,6 +63,14 @@ public class TriggeredTransitionNode : TickingNode
 
     public override bool Calculate()
     {
+        if (startValueKnob.connected())
+        {
+            startValue = startValueKnob.GetValue<float>();
+        }
+        if (endValueKnob.connected())
+        {
+            endValue = endValueKnob.GetValue<float>();
+        }
         if (!triggerEventKnob.connected())
         {
             outputSignalKnob.SetValue(startValue);

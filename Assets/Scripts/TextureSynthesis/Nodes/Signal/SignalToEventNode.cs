@@ -64,6 +64,10 @@ public class SignalToEventNode : TickingNode
 
     public override bool DoCalc()
     {
+        if (thresholdKnob.connected())
+        {
+            threshold = thresholdKnob.GetValue<float>();
+        }
         signalValue = inputSignalKnob.GetValue<float>();
         switch (triggerMode.SelectedOption())
         {

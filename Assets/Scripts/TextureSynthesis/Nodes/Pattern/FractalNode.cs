@@ -95,6 +95,18 @@ public class FractalNode : TickingNode
 
     public override bool DoCalc()
     {
+        if (radiusKnob.connected())
+        {
+            radius = radiusKnob.GetValue<float>();
+        }
+        if (zoomKnob.connected())
+        {
+            zoom = zoomKnob.GetValue<float>();
+        }
+        if (biasKnob.connected())
+        {
+            bias = biasKnob.GetValue<float>();
+        }
         patternShader.SetInts("outputSize", outputSize.x, outputSize.y);
         patternShader.SetInt("maxIterations", maxIterations);
         patternShader.SetInt("order", order);

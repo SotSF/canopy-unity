@@ -153,12 +153,20 @@ public class VoronoiNode : TickingNode
 
     public override bool DoCalc()
     {
-        MovePoints();
-        FillPointBuffer();
         if (speedKnob.connected())
         {
             speed = speedKnob.GetValue<float>();
         }
+        if (gravityKnob.connected())
+        {
+            G = gravityKnob.GetValue<float>();
+        }
+        if (repulsionKnob.connected())
+        {
+            R = repulsionKnob.GetValue<float>();
+        }
+        MovePoints();
+        FillPointBuffer();
         patternShader.SetInt("width", outputTex.width);
         patternShader.SetInt("height", outputTex.height);
         patternShader.SetInt("numPoints", maxPoints);

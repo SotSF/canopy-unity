@@ -229,6 +229,22 @@ public class ReactionDiffusion : TickingNode
         {
             timeMultiplier = timeMultiplierKnob.GetValue<float>();
         }
+        if (feedRateKnob.connected())
+        {
+            feedRate = feedRateKnob.GetValue<float>();
+        }
+        if (killRateKnob.connected())
+        {
+            killRate = killRateKnob.GetValue<float>();
+        }
+        if (aDiffusionRateKnob.connected())
+        {
+            aDiffusionRate = aDiffusionRateKnob.GetValue<float>();
+        }
+        if (bDiffusionRateKnob.connected())
+        {
+            bDiffusionRate = bDiffusionRateKnob.GetValue<float>();
+        }
         if (running && Time.time - lastStep > 1/60f)
         {
             if (continuousA)

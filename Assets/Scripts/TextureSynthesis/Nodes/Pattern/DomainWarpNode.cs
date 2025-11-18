@@ -72,6 +72,14 @@ public class DomainWarpNode : TickingNode
 
     public override bool DoCalc()
     {
+        if (hKnob.connected())
+        {
+            h = hKnob.GetValue<float>();
+        }
+        if (timeMultiplierKnob.connected())
+        {
+            timeScale = timeMultiplierKnob.GetValue<float>();
+        }
         patternShader.SetInt("width", outputSize.x);
         patternShader.SetInt("height", outputSize.y);
         patternShader.SetFloat("h", h);

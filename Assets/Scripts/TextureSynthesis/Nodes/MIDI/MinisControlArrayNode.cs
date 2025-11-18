@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Layouts;
 
 
 
@@ -90,87 +88,75 @@ public class MinisControlArrayNode : TickingNode
 
     public int numControls => controls.Count;
 
-    private List<Minis.MidiDevice> midiDevices;
-    private Minis.MidiDevice boundDevice;
-
+    private string nodeInstanceId;
     private int bindingIndex = 0;
 
     public override void DoInit()
     {
+        nodeInstanceId = GetInstanceID().ToString();
+
         if (controls == null){
             controls = new List<BoundMidiControl>();
             controls.Add(new BoundMidiControl(this));
         }
-        midiDevices = new List<Minis.MidiDevice>();
-        var match = new InputDeviceMatcher().WithInterface("Minis");
-        foreach (InputDevice device in InputSystem.devices){
-            if (match.MatchPercentage(device.description) > 0)
-                midiDevices.Add(device as Minis.MidiDevice);
-        }
 
-        // Register devices new
-        InputSystem.onDeviceChange += OnDeviceAdded;
-    }
-
-    private void OnDeviceAdded(InputDevice device, InputDeviceChange change)
-    {
-        var midiDevice = device as Minis.MidiDevice;
-        if (midiDevice == null || change != InputDeviceChange.Added) 
-            return;
-        midiDevices.Add(midiDevice);
-        Debug.Log("MIDI Device added");
-        if (controls.Any(cc => cc.bound) && boundDevice == null)
+        // Register any already-bound controls with MidiDeviceManager
+        foreach (var control in controls)
         {
-            if (midiDevice.channel == channel){
-                boundDevice = midiDevice;
-                midiDevice.onWillControlChange += ReceiveMIDIMessage;
+            if (control.bound)
+            {
+                string controlKey = $"{nodeInstanceId}_ctrl{control.controlIndex}";
+                MidiDeviceManager.Instance.RegisterControlHandler(controlKey, channel, control.controlID,
+                    (cc, value) => ReceiveMIDIMessageForControl(control, cc, value));
             }
         }
-        else if (controls.Any(cc => cc.binding)){
-            midiDevice.onWillControlChange += OnBindEvent;
+    }
+
+    private void OnDestroy()
+    {
+        // Unregister all controls from MidiDeviceManager
+        if (MidiDeviceManager.Instance != null)
+        {
+            MidiDeviceManager.Instance.UnregisterNode(nodeInstanceId);
         }
     }
 
-    private void foo(MidiNoteControl arg1, float arg2)
+    private void OnDisable()
     {
-        boundDevice.onWillNoteOn -= foo;
+        OnDestroy();
     }
 
     void BeginBindingMinis()
     {
         controls[bindingIndex].binding = true;
-        foreach (var device in midiDevices)
-        {
-            device.onWillControlChange += OnBindEvent;
-        }
+        MidiDeviceManager.Instance.BeginControlBinding(nodeInstanceId, OnBindComplete);
     }
 
-    private void OnBindEvent(MidiValueControl cc, float value)
+    private void OnBindComplete(Minis.MidiDevice device, int deviceChannel, int deviceControlID)
     {
-        foreach (var device in midiDevices)
-        {
-            device.onWillControlChange -= OnBindEvent;
-        }
-        boundDevice = cc.device as Minis.MidiDevice;
-        boundDevice.onWillNoteOn += foo;
-        boundDevice.onWillControlChange += ReceiveMIDIMessage;
-        channel = boundDevice.channel;
-        controls[bindingIndex].controlID = cc.controlNumber;
+        channel = deviceChannel;
+        controls[bindingIndex].controlID = deviceControlID;
+        controls[bindingIndex].controlIndex = bindingIndex;
         controls[bindingIndex].binding = false;
         controls[bindingIndex].bound = true;
         controls[bindingIndex].AddOutputPort();
+
+        // Register handler for this control
+        var control = controls[bindingIndex];
+        string controlKey = $"{nodeInstanceId}_ctrl{control.controlIndex}";
+        MidiDeviceManager.Instance.RegisterControlHandler(controlKey, channel, control.controlID,
+            (cc, value) => ReceiveMIDIMessageForControl(control, cc, value));
+
+        // Add new empty control slot
         controls.Add(new BoundMidiControl(this));
         SetSize();
     }
 
-    void ReceiveMIDIMessage(Minis.MidiValueControl cc, float value)
+    void ReceiveMIDIMessageForControl(BoundMidiControl control, Minis.MidiValueControl cc, float value)
     {
-        foreach (var control in controls)
+        if (cc.controlNumber == control.controlID)
         {
-            if (cc.controlNumber == control.controlID)
-            {
-                control.rawMIDIValue = value;
-            }
+            control.rawMIDIValue = value;
         }
     }
 
@@ -227,6 +213,10 @@ public class MinisControlArrayNode : TickingNode
                     control.outputKnob.DisplayLayout(content);
                     if (GUILayout.Button("Unbind"))
                     {
+                        // Unregister from MidiDeviceManager
+                        string controlKey = $"{nodeInstanceId}_ctrl{control.controlIndex}";
+                        MidiDeviceManager.Instance.UnregisterControlHandler(controlKey, channel, control.controlID);
+
                         control.controlID = 0;
                         control.bound = false;
                         control.deleted = true;
@@ -265,11 +255,6 @@ public class MinisControlArrayNode : TickingNode
             GUILayout.EndHorizontal();
         }
         controls.RemoveAll(cc => cc.deleted);
-        int activeCount = controls.Sum(cc => cc.bound || cc.binding ? 1 : 0);
-        if (activeCount == 0 && boundDevice != null)
-        {
-            boundDevice.onWillControlChange -= ReceiveMIDIMessage;
-        }
         GUILayout.FlexibleSpace();
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
@@ -289,6 +274,17 @@ public class MinisControlArrayNode : TickingNode
         {
             if (control.bound)
             {
+                if (control.rescale && control.minKnob != null && control.maxKnob != null)
+                {
+                    if (control.minKnob.connected())
+                    {
+                        control.rescaleMin = control.minKnob.GetValue<float>();
+                    }
+                    if (control.maxKnob.connected())
+                    {
+                        control.rescaleMax = control.maxKnob.GetValue<float>();
+                    }
+                }
                 float val = control.rawMIDIValue;
                 if (control.rescale)
                 {

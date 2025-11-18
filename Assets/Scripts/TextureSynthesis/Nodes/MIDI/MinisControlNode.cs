@@ -3,11 +3,7 @@ using Minis;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Layouts;
 
 
 
@@ -34,8 +30,8 @@ public class MinisControlNode : TickingNode
     public int controlID;
 
     public int channel;
-    private List<Minis.MidiDevice> midiDevices;
-    private Minis.MidiDevice boundDevice;
+    private string nodeInstanceId;
+
     private void SetSize()
     {
         _DefaultSize = new Vector2(150, rescale ? 125 : 85);
@@ -43,43 +39,28 @@ public class MinisControlNode : TickingNode
 
     public override void DoInit()
     {
-
-        midiDevices = new List<Minis.MidiDevice>();
-        var match = new InputDeviceMatcher().WithInterface("Minis");
-        foreach (InputDevice device in InputSystem.devices){
-            if (match.MatchPercentage(device.description) > 0)
-                midiDevices.Add(device as Minis.MidiDevice);
-        }
-
-        // Register devices new
-        InputSystem.onDeviceChange += OnDeviceAdded;
+        nodeInstanceId = GetInstanceID().ToString();
         SetSize();
-    }
 
-    private void OnDeviceAdded(InputDevice device, InputDeviceChange change)
-    {
-        var midiDevice = device as Minis.MidiDevice;
-        if (midiDevice == null || change != InputDeviceChange.Added) 
-            return;
-        if (midiDevices.Contains(midiDevice))
-            return; // Already added
-        midiDevices.Add(midiDevice);
-        Debug.Log($"MIDI Device added: ${midiDevice.deviceId}");
-        if (bound && boundDevice == null)
+        // If already bound, register with MidiDeviceManager
+        if (bound)
         {
-            if (midiDevice.channel == channel){
-                boundDevice = midiDevice;
-                midiDevice.onWillControlChange += ReceiveMIDIMessage;
-            }
-        }
-        else if (binding){
-            midiDevice.onWillControlChange += OnBindEvent;
+            MidiDeviceManager.Instance.RegisterControlHandler(nodeInstanceId, channel, controlID, ReceiveMIDIMessage);
         }
     }
 
-    private void foo(MidiNoteControl arg1, float arg2)
+    private void OnDestroy()
     {
-        boundDevice.onWillNoteOn -= foo;
+        // Unregister from MidiDeviceManager
+        if (MidiDeviceManager.Instance != null)
+        {
+            MidiDeviceManager.Instance.UnregisterNode(nodeInstanceId);
+        }
+    }
+
+    private void OnDisable()
+    {
+        OnDestroy();
     }
 
     void SetRescalePorts()
@@ -102,25 +83,18 @@ public class MinisControlNode : TickingNode
     void BeginBindingMinis()
     {
         binding = true;
-        foreach (var device in midiDevices)
-        {
-            device.onWillControlChange += OnBindEvent;
-        }
+        MidiDeviceManager.Instance.BeginControlBinding(nodeInstanceId, OnBindComplete);
     }
 
-    private void OnBindEvent(MidiValueControl cc, float value)
+    private void OnBindComplete(Minis.MidiDevice device, int deviceChannel, int deviceControlID)
     {
-        foreach (var device in midiDevices)
-        {
-            device.onWillControlChange -= OnBindEvent;
-        }
-        boundDevice = cc.device as Minis.MidiDevice;
-        boundDevice.onWillNoteOn += foo;
-        boundDevice.onWillControlChange += ReceiveMIDIMessage;
-        channel = boundDevice.channel;
-        controlID = cc.controlNumber;
+        channel = deviceChannel;
+        controlID = deviceControlID;
         binding = false;
         bound = true;
+
+        // Register handler with MidiDeviceManager
+        MidiDeviceManager.Instance.RegisterControlHandler(nodeInstanceId, channel, controlID, ReceiveMIDIMessage);
     }
 
     void ReceiveMIDIMessage(Minis.MidiValueControl cc, float value)
@@ -150,7 +124,7 @@ public class MinisControlNode : TickingNode
                 GUILayout.Label(label);
                 if (GUILayout.Button("Unbind"))
                 {
-                    boundDevice.onWillControlChange -= ReceiveMIDIMessage;
+                    MidiDeviceManager.Instance.UnregisterControlHandler(nodeInstanceId, channel, controlID);
                     controlID = 0;
                     bound = false;
                 }
@@ -184,6 +158,17 @@ public class MinisControlNode : TickingNode
     
     public override bool DoCalc()
     {
+        if (rescale && dynamicConnectionPorts.Count >= 2)
+        {
+            if (((ValueConnectionKnob)dynamicConnectionPorts[0]).connected())
+            {
+                rescaleMin = ((ValueConnectionKnob)dynamicConnectionPorts[0]).GetValue<float>();
+            }
+            if (((ValueConnectionKnob)dynamicConnectionPorts[1]).connected())
+            {
+                rescaleMax = ((ValueConnectionKnob)dynamicConnectionPorts[1]).GetValue<float>();
+            }
+        }
         float val = rawMIDIValue;
         if (rescale)
         {
