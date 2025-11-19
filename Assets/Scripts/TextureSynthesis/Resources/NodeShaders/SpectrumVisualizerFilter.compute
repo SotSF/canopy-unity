@@ -4,13 +4,16 @@
 Texture2D<float4> inputTex;
 uint spectrumSize;
 float hueOffset;
-float4 spectrumData[32];
+float4 spectrumData[256];
 float gradStart = 0.25f;
 float gradEnd = 0.6f;
 #define BLACK float4(0,0,0,1)
 //#define TRANSPARENT float4(.5,.55,1,1);
 #define TRANSPARENT float4(0,0,0,0);
 RWTexture2D<float4> outputTex;
+
+Texture2D<float4> gradientTex;
+SamplerState samplergradientTex;
 
 [numthreads(16, 16, 1)]
 void PatternKernel(uint3 id : SV_DispatchThreadID)
@@ -22,8 +25,10 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
 	float binValue = spectrumData[spectrumIndex >> 2][spectrumIndex & 3];
 	
 	float barHeight = lerp(0, 128, binValue);
-	float hue = (hueOffset + (float(spectrumIndex) / spectrumSize)) % 1;
-	float4 color = float4(HSVtoRGB(float3(.5, 1, 1)), 1);
+	
+    float t = (float)spectrumIndex / (float)spectrumSize;
+    float4 color = gradientTex.SampleLevel(samplergradientTex, float2(t, 0.5), 0);
+
 	float4 result = id.x < barHeight ? color : TRANSPARENT;
     outputTex[id.xy] = result;
 }
