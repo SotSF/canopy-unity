@@ -17,10 +17,10 @@ public class HSVNode : TextureSynthNode
 
     public override Vector2 DefaultSize => _DefaultSize;
 
-    [ValueConnectionKnob("Texture", Direction.In, typeof(Texture), NodeSide.Top, 20)]
+    [ValueConnectionKnob("InTex", Direction.In, typeof(Texture), NodeSide.Top, 20)]
     public ValueConnectionKnob textureInputKnob;
 
-    [ValueConnectionKnob("Texture", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
+    [ValueConnectionKnob("OutTex", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
     [ValueConnectionKnob("H", Direction.In, "Float")]
@@ -60,11 +60,9 @@ public class HSVNode : TextureSynthNode
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
-        textureInputKnob.DisplayLayout();
         FloatKnobOrSlider(ref hue, 0, 1, hueKnob);
         FloatKnobOrSlider(ref saturation, 0, 1, satKnob);
         FloatKnobOrSlider(ref value, 0, 1, valKnob);
-        textureOutputKnob.DisplayLayout();
         GUILayout.EndVertical();
 
         if (GUI.changed)

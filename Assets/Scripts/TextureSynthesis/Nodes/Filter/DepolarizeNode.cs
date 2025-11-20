@@ -4,14 +4,14 @@ using SecretFire.TextureSynth;
 using UnityEngine;
 
 
-[Node(false, "Filter/Polarize")]
-public class PolarizeNode : TextureSynthNode
+[Node(false, "Filter/Depolarize")]
+public class DepolarizeNode : TextureSynthNode
 {
-    public const string ID = "polarizeNode";
+    public const string ID = "depolarizeNode";
     public override string GetID { get { return ID; } }
 
-    public override string Title { get { return "Polarize"; } }
-    private Vector2 _DefaultSize =new Vector2(100, 100);
+    public override string Title { get { return "Depolarize"; } }
+    private Vector2 _DefaultSize = new Vector2(150, 150);
 
     public override Vector2 DefaultSize => _DefaultSize;
 
@@ -21,17 +21,17 @@ public class PolarizeNode : TextureSynthNode
     [ValueConnectionKnob("Out", Direction.Out, typeof(Texture), NodeSide.Bottom, 40)]
     public ValueConnectionKnob textureOutputKnob;
 
-    private ComputeShader PolarizeShader;
+    private ComputeShader DepolarizeShader;
     private int kernelId;
     private RenderTexture outputTex;
     
-    // Fixed output size for Canopy
-    private Vector2Int outputSize = new Vector2Int(Constants.PIXELS_PER_STRIP, Constants.NUM_STRIPS);
+    // Fixed output size for Visualization (square)
+    private Vector2Int outputSize = new Vector2Int(512, 512);
 
     public override void DoInit()
     {
-        PolarizeShader = Resources.Load<ComputeShader>("NodeShaders/PolarizeFilter");
-        kernelId = PolarizeShader.FindKernel("Polarize");
+        DepolarizeShader = Resources.Load<ComputeShader>("NodeShaders/DepolarizeFilter");
+        kernelId = DepolarizeShader.FindKernel("Depolarize");
         InitializeRenderTexture();
     }
 
@@ -49,7 +49,7 @@ public class PolarizeNode : TextureSynthNode
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical();
         GUILayout.FlexibleSpace();
-        GUILayout.Box(outputTex, GUILayout.MaxWidth(64), GUILayout.MaxHeight(64));
+        GUILayout.Box(outputTex, GUILayout.MaxWidth(128), GUILayout.MaxHeight(128));
         GUILayout.FlexibleSpace();
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
@@ -74,15 +74,15 @@ public class PolarizeNode : TextureSynthNode
         }
 
         //Execute compute shader
-        PolarizeShader.SetInt("width", tex.width);
-        PolarizeShader.SetInt("height", tex.height);
-        PolarizeShader.SetTexture(kernelId, "OutputTex", outputTex);
-        PolarizeShader.SetTexture(kernelId, "InputTex", tex);
+        DepolarizeShader.SetInt("width", outputSize.x);
+        DepolarizeShader.SetInt("height", outputSize.y);
+        DepolarizeShader.SetTexture(kernelId, "OutputTex", outputTex);
+        DepolarizeShader.SetTexture(kernelId, "InputTex", tex);
         
-        // Threads match the [numthreads(25, 16, 1)] in the shader
-        var threadGroupX = Mathf.CeilToInt((float)outputSize.x / 25.0f);
+        // Threads match the [numthreads(16, 16, 1)] in the shader
+        var threadGroupX = Mathf.CeilToInt((float)outputSize.x / 16.0f);
         var threadGroupY = Mathf.CeilToInt((float)outputSize.y / 16.0f);
-        PolarizeShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
+        DepolarizeShader.Dispatch(kernelId, threadGroupX, threadGroupY, 1);
 
         // Assign output channels
         textureOutputKnob.SetValue(outputTex);

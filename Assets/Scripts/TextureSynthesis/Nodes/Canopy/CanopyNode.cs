@@ -1,4 +1,4 @@
-﻿using NodeEditorFramework;
+using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
 using UnityEngine;
@@ -29,7 +29,6 @@ public class CanopyNode : TextureSynthNode
     //private ComputeBuffer dataBuffer;
     private Vector3[] colorData;
     private int mainKernel;
-    public bool polarize;
     public bool seamless;
     private Light lightCaster;
 
@@ -84,7 +83,6 @@ public class CanopyNode : TextureSynthNode
         textureInputKnob.SetPosition(edgeOffset);
 
         GUILayout.BeginHorizontal();
-        polarize = RTEditorGUI.Toggle(polarize, new GUIContent("Polarize", "Polarize the input to be in canopy-world space"));
         if (GUILayout.Button("Reinitialize"))
         {
             initialized = false;
@@ -135,7 +133,6 @@ public class CanopyNode : TextureSynthNode
             canopyMainShader.SetInt("height", tex.height);
 
             //Execute compute shader
-            canopyMainShader.SetBool("polarize", polarize);
             canopyMainShader.SetInt("width", tex.width);
 
             canopyMainShader.Dispatch(kernelId, (int)Mathf.Ceil(Constants.PIXELS_PER_STRIP / 25.0f), Constants.NUM_STRIPS / 16, 1);

@@ -24,7 +24,7 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
 	// This indexing strategy is required due to the way shader architecture packs floats
 	float binValue = spectrumData[spectrumIndex >> 2][spectrumIndex & 3];
 	
-	float barHeight = lerp(0, 128, binValue);
+	float barHeight = lerp(0, 128, binValue * 2);
 	
     float t = (float)spectrumIndex / (float)spectrumSize;
     float4 color = gradientTex.SampleLevel(samplergradientTex, float2(t, 0.5), 0);

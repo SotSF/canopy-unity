@@ -26,7 +26,7 @@ public class SpectrumVisualizerNode : TickingNode
 
     private ComputeShader patternShader;
     private int patternKernel;
-    private Vector2Int outputSize = new Vector2Int(128,128);
+    private Vector2Int outputSize = new Vector2Int(256,256);
     public RenderTexture outputTex;
     private Texture2D gradientTex;
 
