@@ -63,7 +63,7 @@ void Depolarize(uint3 id : SV_DispatchThreadID)
         // Using SamplerState to handle interpolation
         // Coordinate system for SampleLevel is [0, 1]
         
-        float4 result = InputTex.SampleLevel(SmpLinearRepeat, float2(x, y), 0);
+        float4 result = InputTex.SampleLevel(SmpLinearClamp, float2(x, y), 0);
         OutputTex[id.xy] = result;
     }
 }
