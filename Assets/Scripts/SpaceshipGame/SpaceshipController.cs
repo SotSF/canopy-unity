@@ -20,7 +20,7 @@ public class SpaceshipController : MonoBehaviour
         velocity += new Vector3(input, 0, 0);
     }
 
-    void OnUpdateYAxis(float playerInput)
+    void OnUpdateYAxis(float playerInput){}
 
     void Update()
     {

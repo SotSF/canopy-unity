@@ -30,6 +30,9 @@ public class SpectrumVisualizerNode : TickingNode
     public RenderTexture outputTex;
     private Texture2D gradientTex;
 
+    public int width = 256;
+    public int height = 256;
+
     public override void DoInit()
     {
         patternShader = Resources.Load<ComputeShader>("NodeShaders/SpectrumVisualizerFilter");
@@ -92,7 +95,15 @@ public class SpectrumVisualizerNode : TickingNode
             UpdateGradientTexture();
         }
         #endif
-
+        width = RTEditorGUI.IntField("Width", width );
+        GUILayout.FlexibleSpace();
+        height = RTEditorGUI.IntField("Height", height);
+        if (width != outputSize.x || height != outputSize.y)
+        {
+            outputSize.x = width;
+            outputSize.y = height;
+            InitializeRenderTexture();
+        }
         GUILayout.FlexibleSpace();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
