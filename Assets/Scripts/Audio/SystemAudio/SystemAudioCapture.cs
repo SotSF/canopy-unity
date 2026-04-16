@@ -13,7 +13,7 @@ namespace Lasp
     {
         public static SystemAudioCapture Instance { get; private set; }
 
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         private const string DLL = "SystemAudioCapture";
 
         [DllImport(DLL)] private static extern int  SystemAudioCapture_Init(int sampleRate, int channels);

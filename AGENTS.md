@@ -4,7 +4,7 @@ This file provides guidance to Agentic AIs when working with code in this reposi
 
 ## Project Overview
 
-Canopy-unity is a node-editor based visualization and texture synthesis software built in Unity, primarily designed for [The Canopy](https://se.cretfi.re/canopy/). The system provides real-time visual effects generation through a graph-based node system combining C# logic with HLSL compute shaders.
+Canopy-unity is a node-editor based visualization and texture/video synthesis software built in Unity, primarily designed for [The Canopy](https://se.cretfi.re/canopy/), an LED art piece with ~14000 LEDs arranged in a radial array of 96 strips. The system provides real-time visual effects generation through a graph-based node system combining C# logic with HLSL compute shaders.
 
 **Unity Version**: 6000.0.21f1 (Unity 6)
 
