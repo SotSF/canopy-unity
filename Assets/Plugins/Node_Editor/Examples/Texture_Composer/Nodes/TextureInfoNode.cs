@@ -23,7 +23,7 @@ namespace NodeEditorFramework.TextureComposer
 			inputKnob.DisplayLayout(new GUIContent("Texture" + (tex != null ? ":" : " (null)"), "The texture to display information about."));
 			if (tex != null)
 			{
-				RTTextureViz.DrawTexture(tex, 64);
+				RTTextureViz.DrawTexture(tex, 256);
 				GUILayout.Label("'" + tex.name + "'");
 				GUILayout.Label("Size: " + tex.width + "x" + tex.height + "");
 			}
