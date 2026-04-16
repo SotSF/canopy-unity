@@ -30,17 +30,11 @@ public class Canopy: MonoBehaviour
     private Vector3 controlViewCanopyPosition = new Vector3(.75f, 1.6f, 3.3f);
     private Vector3 controlViewCameraPosition = new Vector3(0, 1.6f, 0);
 
-    public int numStrips = 96;
-    public int pixelsPerStrip = 75;
-    
-    const int pixelsPerMeter = 30;
 
     const int maxVerts = 65000;
     public bool simulatorMode = false;
     public bool sendToCanopy;
     public CanopyProtocol proto = CanopyProtocol.HTTP;
-
-    //private int numLEDs = numStrips * pixelsPerStrip;
 
     const float apexRadius = 0.332f;
     private void Awake()
@@ -76,7 +70,7 @@ public class Canopy: MonoBehaviour
 
     private Vector3 PixelToOffset(int stripIndex, int pixelIndex)
     {
-        float distance = (1f / pixelsPerMeter) * pixelIndex;
+        float distance = (1f / Constants.PIXELS_PER_METER) * pixelIndex;
         return new Vector3(0,0,distance);
     }
 
@@ -97,7 +91,8 @@ public class Canopy: MonoBehaviour
         {
             vertices = verts.ToArray(),
             uv = uvs.ToArray(),
-            triangles = tris.ToArray()
+            triangles = tris.ToArray(),
+            //indexFormat = UnityEngine.Rendering.IndexFormat.UInt32
         };
         filter.sharedMesh = mesh;
         verts.Clear();
@@ -133,8 +128,8 @@ public class Canopy: MonoBehaviour
         //int low = 0;
         //int high = 20;
 
-        float u = (float)pixelIndex / (pixelsPerStrip-1);
-        float v = (float)stripIndex / (numStrips-1);
+        float u = (pixelIndex + 0.5f) / Constants.PIXELS_PER_STRIP;
+        float v = (stripIndex + 0.5f) / Constants.NUM_STRIPS;
         Vector2 emissiveUV = new Vector2(u, v);
         //Vector2 dimUV = new Vector2(1, 1);
         //return new Vector2[pixelBase.vertexCount].Select((x,i) => i >= low && i < high ? emissiveUV : dimUV);
@@ -153,11 +148,11 @@ public class Canopy: MonoBehaviour
         List<Vector2> uvs = new List<Vector2>();
         List<int> tris = new List<int>();
 
-        Vector2[] catenary = MathUtils.Catenary(Vector2.zero, new Vector2(end.position.x-start.position.x, end.position.y-start.position.y), 2.5f, 75);
+        Vector2[] catenary = MathUtils.Catenary(Vector2.zero, new Vector2(end.position.x-start.position.x, end.position.y-start.position.y), 2.5f, 151);
 
-        for (int stripIndex = 0; stripIndex < numStrips; stripIndex++)
+        for (int stripIndex = 0; stripIndex < Constants.NUM_STRIPS; stripIndex++)
         {
-            for (int pixelIndex = 0; pixelIndex < pixelsPerStrip; pixelIndex++)
+            for (int pixelIndex = 0; pixelIndex < Constants.PIXELS_PER_STRIP; pixelIndex++)
             {
                 var numverts = verts.Count;
                 uvs.AddRange(GetUVs(pixelIndex, stripIndex));
@@ -193,6 +188,6 @@ public class Canopy: MonoBehaviour
 
     private Quaternion GetRotation(int stripIndex)
     {
-        return Quaternion.Euler(0, ((float)360*stripIndex)/numStrips, 0);
+        return Quaternion.Euler(0, ((float)-360*stripIndex)/Constants.NUM_STRIPS, 0);
     }
 }

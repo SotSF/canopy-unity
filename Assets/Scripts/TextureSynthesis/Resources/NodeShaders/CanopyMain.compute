@@ -14,8 +14,9 @@ uint height;
 [numthreads(25, 16, 1)]
 void CanopyMain(uint3 id : SV_DispatchThreadID)
 {
-    float2 maxDimensions = uint2(width - 1, height - 1);
-    float2 coord = id.xy;
-    float4 result = InputTex.SampleLevel(SmpPointRepeat, coord/maxDimensions, 0);
+    uint outWidth, outHeight;
+    OutputTex.GetDimensions(outWidth, outHeight);
+    float2 uv = (id.xy + 0.5) / float2(outWidth, outHeight);
+    float4 result = InputTex.SampleLevel(SmpPointRepeat, uv, 0);
     OutputTex[id.xy] = result;
 }
