@@ -20,50 +20,52 @@ SamplerState SmpPointMirror;
 SamplerState SmpPointRepeat;
 SamplerState SmpPointClamp;
 
+static const float2 edgeOffset = float2(0.5, 0.5);
+
 [numthreads(16, 16, 1)]
 void BilinearMirror(uint3 id : SV_DispatchThreadID)
 {
     float2 newOffset = id.xy + offset;
-    uint2 maxDimensions = uint2(width-1, height-1);
-    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearMirror, newOffset / maxDimensions, 0);
+    float2 maxDimensions = float2(width, height);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearMirror, (newOffset+edgeOffset) / maxDimensions, 0);
 }
 
 [numthreads(16, 16, 1)]
 void BilinearRepeat(uint3 id : SV_DispatchThreadID)
 {
     float2 newOffset = id.xy + offset;
-    uint2 maxDimensions = uint2(width - 1, height - 1);
-    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearRepeat, newOffset / maxDimensions, 0);
+    float2 maxDimensions = float2(width, height);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearRepeat, (newOffset+edgeOffset) / maxDimensions, 0);
 }
 
 [numthreads(16, 16, 1)]
 void BilinearClamp(uint3 id : SV_DispatchThreadID)
 {
 	float2 newOffset = id.xy + offset;
-	uint2 maxDimensions = uint2(width - 1, height - 1);
-	OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearClamp, newOffset / maxDimensions, 0);
+	float2 maxDimensions = float2(width, height);
+	OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearClamp, (newOffset+edgeOffset) / maxDimensions, 0);
 }
 
 [numthreads(16, 16, 1)]
 void PointMirror(uint3 id : SV_DispatchThreadID)
 {
     float2 newOffset = floor(id.xy + offset);
-    uint2 maxDimensions = uint2(width - 1, height - 1);
-    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointMirror, newOffset / maxDimensions, 0);
+    float2 maxDimensions = float2(width, height);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointMirror, (newOffset+edgeOffset) / maxDimensions, 0);
 }
 
 [numthreads(16, 16, 1)]
 void PointRepeat(uint3 id : SV_DispatchThreadID)
 {
     float2 newOffset = floor(id.xy + offset);
-    uint2 maxDimensions = uint2(width - 1, height - 1);
-    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointRepeat, newOffset / maxDimensions, 0);
+    float2 maxDimensions = float2(width, height);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointRepeat, (newOffset+edgeOffset) / maxDimensions, 0);
 }
 
 [numthreads(16, 16, 1)]
 void PointClamp(uint3 id : SV_DispatchThreadID)
 {
 	float2 newOffset = floor(id.xy + offset);
-	uint2 maxDimensions = uint2(width - 1, height - 1);
-	OutputTex[id.xy] = InputTex.SampleLevel(SmpPointClamp, newOffset / maxDimensions, 0);
+	float2 maxDimensions = float2(width, height);
+	OutputTex[id.xy] = InputTex.SampleLevel(SmpPointClamp, (newOffset+edgeOffset) / maxDimensions, 0);
 }

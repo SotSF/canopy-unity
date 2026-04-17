@@ -18,6 +18,10 @@ SamplerState SmpLinearRepeat;
 SamplerState SmpLinearMirror;
 SamplerState SmpLinearClamp;
 
+SamplerState SmpPointRepeat;
+SamplerState SmpPointMirror;
+SamplerState SmpPointClamp;
+
 [numthreads(16, 16, 1)]
 void CropScaleKernel(uint3 id : SV_DispatchThreadID)
 {
@@ -26,7 +30,7 @@ void CropScaleKernel(uint3 id : SV_DispatchThreadID)
     // if input is smaller than output, scale if scale selected, otherwise, fill black?
     float newX = applyScale ? (iWidth / float(oWidth)) * id.x : id.x;
     float newY = applyScale ? (iHeight / float(oHeight)) * id.y : id.y;
-    float4 sampled = InputTex.SampleLevel(SmpLinearClamp, float2(newX, newY)/dimensions, 0);
+    float4 sampled = InputTex.SampleLevel(SmpPointClamp, float2(newX, newY)/dimensions, 0);
     bool outOfBounds = (id.x >= iWidth || id.y >= iHeight) && !applyScale;
     OutputTex[id.xy] = !outOfBounds ? sampled : TRANSPARENT;
 }
@@ -35,12 +39,12 @@ void CropScaleKernel(uint3 id : SV_DispatchThreadID)
 void MirrorKernel(uint3 id : SV_DispatchThreadID)
 {
     float2 dimensions = float2(iWidth, iHeight);
-    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearMirror, id.xy/dimensions, 0);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointMirror, (id.xy+float2(0.5, 0.5))/dimensions, 0);
 }
 
 [numthreads(16, 16, 1)]
 void TileKernel(uint3 id : SV_DispatchThreadID)
 {
     float2 dimensions = float2(iWidth, iHeight);
-    OutputTex[id.xy] = InputTex.SampleLevel(SmpLinearRepeat, id.xy/dimensions, 0);
+    OutputTex[id.xy] = InputTex.SampleLevel(SmpPointRepeat, (id.xy+float2(0.5, 0.5))/dimensions, 0);
 }
