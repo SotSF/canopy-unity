@@ -35,10 +35,6 @@ public class TriggeredTransitionNode : TickingNode
     public float endValue = 1;
 
     public float outValue = 0;
-    public void Awake()
-    {
-
-    }
 
     public override void NodeGUI()
     {

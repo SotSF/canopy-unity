@@ -19,7 +19,6 @@ public class DroneFilterMidiOutputNode : TickingNode
     private Vector2 _DefaultSize = new Vector2(250, 400);
     public override Vector2 DefaultSize => _DefaultSize;
 
-    bool binding = false;
     public bool bound = false;
 
     [ValueConnectionKnob("inputTex", Direction.In, typeof(Texture), NodeSide.Top)]
@@ -34,16 +33,11 @@ public class DroneFilterMidiOutputNode : TickingNode
     public int channel;
     private List<Minis.MidiDevice> midiDevices;
     private Minis.MidiDevice boundDevice;
-    private void SetSize()
-    {
-        _DefaultSize = _DefaultSize;
-    }
 
     public override void DoInit()
     {
         channel = 1;
         _probe = new MidiProbe(MidiProbe.Mode.Out);
-        SetSize();
         lastSendTime = 0;
     }
 

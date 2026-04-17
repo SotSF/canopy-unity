@@ -32,18 +32,13 @@ abstract public class DynamicPatternNode : TickingNode
 
     protected void SetupPorts()
     {
-        bool resized = false;
         for (int i = dynamicConnectionPorts.Count; i < inputPortNames.Count; i++)
         {
-            var portSide = (typeof(Texture)).IsAssignableFrom(inputPortTypes[i]) ? NodeSide.Top : NodeSide.Left; 
+            var portSide = (typeof(Texture)).IsAssignableFrom(inputPortTypes[i]) ? NodeSide.Top : NodeSide.Left;
             ValueConnectionKnobAttribute inputKnobAttribs = new ValueConnectionKnobAttribute(inputPortNames[i], Direction.In, inputPortTypes[i], portSide);
             CreateValueConnectionKnob(inputKnobAttribs);
-            resized = true;
         }
-        //if (resized)
-        //{
-            SetSize();
-        //}
+        SetSize();
     }
 
     int signalPorts => dynamicConnectionPorts.Where(p => ((ValueConnectionKnob)p).side == NodeSide.Left).Count();
@@ -139,7 +134,7 @@ abstract public class DynamicPatternNode : TickingNode
                     {
                         val = GetPortPropValue(portName);
                     } 
-                    catch (NotImplementedException ex)
+                    catch (NotImplementedException)
                     {
                         val = port.GetValue<float>();
                     }

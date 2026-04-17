@@ -161,7 +161,7 @@ public class PixLiteNode : TickingNode
             if (websocket == null)
                 return;
             websocket.CancelConnection();
-            websocket.Close();
+            _ = websocket.Close();
         }
         catch (Exception e)
         {
@@ -209,7 +209,6 @@ public class PixLiteNode : TickingNode
 
         websocket.OnClose += (e) =>
         {
-            WebSocketCloseCode x;
             Debug.Log($"Pixlite websocket connection closed: {e.ToString()}");
         };
 
@@ -219,7 +218,7 @@ public class PixLiteNode : TickingNode
             //Debug.Log("Pixlite websocket message: " + message);
         };
 
-        websocket.Connect();
+        _ = websocket.Connect();
     }
 
     public override void NodeGUI()
@@ -233,7 +232,7 @@ public class PixLiteNode : TickingNode
         GUILayout.Label("WebSocket state: " + Enum.GetName(typeof(WebSocketState), websocket.State));
         if (GUILayout.Button("Reconnect") && websocket.State != WebSocketState.Open)
         {
-            websocket.Connect();
+            _ = websocket.Connect();
         }
         GUILayout.EndVertical();
 

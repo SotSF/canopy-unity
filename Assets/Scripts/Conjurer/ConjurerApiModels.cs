@@ -75,7 +75,7 @@ namespace Conjurer.Api
         public CommandDefinition[] commands { get; init; }
         public string[] patterns_available { get; init; }
         public string[] effects_available { get; init; }
-        public PatternData? current_pattern { get; init; }
+        public PatternData current_pattern { get; init; }
 
         public ModeData(string name, CommandDefinition[] commands)
         {
@@ -99,7 +99,7 @@ namespace Conjurer.Api
     public record ParamDefinition
     {
         public string name { get; init; }
-        public string? value { get; init; }
+        public string value { get; init; }
 
         public ParamDefinition(string name)
         {

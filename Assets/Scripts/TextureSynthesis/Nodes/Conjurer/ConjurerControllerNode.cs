@@ -57,7 +57,7 @@ public class ConjurerControllerNode : TickingNode
             try
             {
                 websocket.CancelConnection();
-                websocket.Close();
+                _ = websocket.Close();
             }
             catch (Exception e)
             {
@@ -178,13 +178,12 @@ public class ConjurerControllerNode : TickingNode
 
         websocket.OnClose += (e) =>
         {
-            WebSocketCloseCode x;
             Debug.Log($"Conjurer websocket connection closed: {e.ToString()}");
         };
 
         websocket.OnMessage += OnConjurerApiEvent;
 
-        websocket.Connect();
+        _ = websocket.Connect();
     }
 
     private void PatternParamGui(PatternParameter param, int paramIdx)
@@ -251,7 +250,7 @@ public class ConjurerControllerNode : TickingNode
         GUILayout.Label("WebSocket state: " + Enum.GetName(typeof(WebSocketState), websocket.State));
         if (GUILayout.Button("Reconnect") && websocket.State != WebSocketState.Open)
         {
-            websocket.Connect();
+            _ = websocket.Connect();
         }
         switch (currentConjurerMode)
         {
