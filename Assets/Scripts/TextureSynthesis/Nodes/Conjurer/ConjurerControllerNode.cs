@@ -52,14 +52,17 @@ public class ConjurerControllerNode : TickingNode
 
     private void Cleanup()
     {
-        try
+        if (websocket != null)
         {
-            websocket.CancelConnection();
-            websocket.Close();
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(e);
+            try
+            {
+                websocket.CancelConnection();
+                websocket.Close();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
         }
     }
 
