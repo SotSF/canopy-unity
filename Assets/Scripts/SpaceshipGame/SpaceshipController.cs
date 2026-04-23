@@ -2,21 +2,23 @@ using UnityEngine;
 
 public class SpaceshipController : MonoBehaviour
 {
-    public static GameObject GameField;
+    public static GameObject gameField;
     public static GameObject shipPrefab;
-    public GameObject shipInstance;
 
     private Vector3 velocity;
-    public const float VELOCITYSCALE = 5f;
+    public const float VELOCITYSCALE = .5f;
     // 16 feet (Canopy physical size) to meters (/2 for radius)
     public const float BOUNDARYRADIUS = 4.8768f / 2;
-    public const float FRICTIONFACTOR = 0.98f;
+    public const float FRICTIONFACTOR = 0.99f;
 
     public Color shipColor;
 
-    public static void CreateNewShip()
+    public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard)
     {
-
+        SpaceshipController ship = Instantiate(prefab, gameBoard.transform);
+        ship.velocity = Vector3.zero;
+        ship.transform.localPosition = Vector3.zero;
+        return ship;
     }
 
     void Start()
@@ -25,50 +27,54 @@ public class SpaceshipController : MonoBehaviour
         OnUpdateColor(shipColor);
     }
 
-    void OnUpdateXAxisControl(float input)
+    public void OnStickInput(Vector2 leftStick, Vector2 rightStick)
     {
-        float newXVelocity = input * VELOCITYSCALE;
-        velocity += new Vector3(input, 0, 0);
+        UpdateVelocity(leftStick);
+        // Right stick could be used for rotation or special actions
     }
 
-    void OnUpdateYAxisControl(float playerInput)
+    public void UpdateVelocity(Vector2 input)
     {
-        float newYVelocity = playerInput * VELOCITYSCALE;
-        velocity += new Vector3(0, playerInput, 0);
+        velocity += new Vector3(input.x, 0, input.y)*VELOCITYSCALE;
     }
 
-    void OnUpdateColor(Color color)
+
+    public void OnUpdateColor(Color color)
     {
-        if (shipInstance != null)
+        Renderer renderer = GetComponent<Renderer>();
+        if (renderer != null)
         {
-            Renderer renderer = shipInstance.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.material.SetColor("_EmissionColor", color);
-            }
+            renderer.material.SetColor("_EmissionColor", color);
         }
+
     }
 
-    void OnDoSpecialAction()
+    public void OnButtonPress(byte buttonId)
+    {
+        Debug.Log($"Got button press {buttonId.ToString()}");
+    }
+
+    public void OnDoSpecialAction()
     {
 
     }
 
     void Update()
     {
+        Vector3 positionUpdate = velocity * Time.deltaTime;
         // Continue moving in velocity direction
-        transform.position += velocity * Time.deltaTime;
+        transform.localPosition += positionUpdate;
 
         // Decay velocity
         velocity *= FRICTIONFACTOR;
 
         // Check bounds, bounce off circular boundary at edge
-        float distanceFromCenter = transform.position.magnitude;
+        float distanceFromCenter = transform.localPosition.magnitude;
         if (distanceFromCenter > BOUNDARYRADIUS)
         {
-            Vector3 normal = (Vector3.zero - transform.position).normalized;
+            Vector3 normal = (Vector3.zero - transform.localPosition).normalized;
             velocity = Vector3.Reflect(velocity, normal);
-            transform.position = transform.position.normalized * BOUNDARYRADIUS;
+            transform.localPosition = transform.localPosition.normalized * BOUNDARYRADIUS;
         }
     }
 }
