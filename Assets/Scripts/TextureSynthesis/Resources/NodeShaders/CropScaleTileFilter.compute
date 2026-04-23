@@ -30,7 +30,7 @@ void CropScaleKernel(uint3 id : SV_DispatchThreadID)
     // if input is smaller than output, scale if scale selected, otherwise, fill black?
     float newX = applyScale ? (iWidth / float(oWidth)) * id.x : id.x;
     float newY = applyScale ? (iHeight / float(oHeight)) * id.y : id.y;
-    float4 sampled = InputTex.SampleLevel(SmpPointClamp, float2(newX, newY)/dimensions, 0);
+    float4 sampled = InputTex.SampleLevel(SmpPointClamp, (float2(newX, newY)+float2(0.5, 0.5))/dimensions, 0);
     bool outOfBounds = (id.x >= iWidth || id.y >= iHeight) && !applyScale;
     OutputTex[id.xy] = !outOfBounds ? sampled : TRANSPARENT;
 }
