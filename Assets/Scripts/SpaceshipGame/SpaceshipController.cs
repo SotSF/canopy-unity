@@ -23,8 +23,8 @@ public class SpaceshipController : MonoBehaviour
 
     void Start()
     {
-        shipColor = Random.ColorHSV(0, 1, 0.5f, 1, 0.5f, 1);
-        OnUpdateColor(shipColor);
+        //shipColor = Random.ColorHSV(0, 1, 0.5f, 1, 0.5f, 1);
+        //OnUpdateColor(shipColor);
     }
 
     public void OnStickInput(Vector2 leftStick, Vector2 rightStick)
@@ -36,6 +36,7 @@ public class SpaceshipController : MonoBehaviour
     public void UpdateVelocity(Vector2 input)
     {
         velocity += new Vector3(input.x, 0, input.y)*VELOCITYSCALE;
+        velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameController.instance.maxSpeed);
     }
 
 

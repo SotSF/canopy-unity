@@ -14,7 +14,8 @@ public class SpaceshipGameController : MonoBehaviour
     public float innerRingDist = 256 / 8;
     public float outerRingDist = 256;
     public float velocityScaling = 0.25f;
-    public float maxSpeed = 10;
+    public float maxSpeed = 5f;
+
     public static SpaceshipGameController instance;
 
     // No more than 32 players
