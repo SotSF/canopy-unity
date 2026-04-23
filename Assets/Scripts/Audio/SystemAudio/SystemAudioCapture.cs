@@ -38,11 +38,6 @@ namespace Lasp
         [SerializeField, Range(-120, 0)] private float headDb  = 0;
         [SerializeField] private int spectrumResolution = 512;
 
-        [Header("Mel filterbank")]
-        [SerializeField] private int melBands = 64;
-        [SerializeField] private float melMinHz = 40f;
-        [SerializeField] private float melMaxHz = 8000f;
-
         [Header("Smoothing (seconds)")]
         [SerializeField, Range(0f, 1f)] private float attackTau  = 0.04f;
         [SerializeField, Range(0f, 2f)] private float releaseTau = 0.25f;
@@ -51,16 +46,17 @@ namespace Lasp
         public bool IsRunning => _running;
 
         private FftBuffer _fft;
-        private MelFilterbank _mel;
         private float[] _interleaved;
         private NativeArray<float> _mono;
         private float[] _spectrum;
-        private float[] _melRaw;
+        private float[] _fftRaw;
 
-        // Mel-binned spectrum, length == melBands. Values are normalized to
-        // [0, 1] against the [floorDb, headDb] range (inherited from the
-        // underlying FFT postprocess).
+        // Linear-frequency FFT magnitude spectrum, length == spectrumResolution.
+        // Values are normalized to [0, 1] against the [floorDb, headDb] range
+        // and smoothed per-bin with asymmetric attack/release.
         public float[] Spectrum => _spectrum;
+        public int SampleRate => sampleRate;
+        public int SpectrumResolution => spectrumResolution;
 
         public bool StartCapture()
         {
@@ -73,11 +69,10 @@ namespace Lasp
                 return false;
             }
             _fft = new FftBuffer(spectrumResolution * 2);
-            _mel = new MelFilterbank(spectrumResolution, sampleRate, melBands, melMinHz, melMaxHz);
             _mono = new NativeArray<float>(4096, Allocator.Persistent);
             _interleaved = new float[4096 * Mathf.Max(1, channels)];
-            _melRaw = new float[melBands];
-            _spectrum = new float[melBands];
+            _fftRaw = new float[spectrumResolution];
+            _spectrum = new float[spectrumResolution];
             _running = true;
             return true;
         }
@@ -143,7 +138,9 @@ namespace Lasp
             _fft.Push(_mono.Slice(0, got));
             _fft.Analyze(floorDb, headDb);
 
-            _mel.Apply(_fft.Spectrum.GetReadOnlySpan(), _melRaw);
+            var src = _fft.Spectrum;
+            int n = Mathf.Min(_fftRaw.Length, src.Length);
+            for (int i = 0; i < n; i++) _fftRaw[i] = src[i];
 
             // Per-bin asymmetric exponential smoothing. Fast attack, slow
             // release — behaves like a peak-follower so transients punch
@@ -153,7 +150,7 @@ namespace Lasp
             float aRelease = releaseTau > 0f ? 1f - Mathf.Exp(-dt / releaseTau) : 1f;
             for (int i = 0; i < _spectrum.Length; i++)
             {
-                float target = _melRaw[i];
+                float target = _fftRaw[i];
                 float prev   = _spectrum[i];
                 float a = target > prev ? aAttack : aRelease;
                 _spectrum[i] = prev + a * (target - prev);

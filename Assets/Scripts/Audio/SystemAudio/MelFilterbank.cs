@@ -5,7 +5,7 @@ namespace Lasp
     // Precomputed triangular mel filterbank. Applies to a linear-frequency
     // spectrum (one value per FFT bin covering [0, sampleRate/2]) and produces
     // `bandCount` perceptually-spaced bands over [minHz, maxHz].
-    internal sealed class MelFilterbank
+    public sealed class MelFilterbank
     {
         private readonly int _bandCount;
         private readonly int[] _binStart;   // inclusive
