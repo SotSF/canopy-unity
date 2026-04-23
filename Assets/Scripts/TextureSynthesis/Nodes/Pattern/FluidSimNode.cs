@@ -364,6 +364,12 @@ public class FluidSimNode : TickingNode
         ExecuteFullTexShader(advectionKernel);
         Graphics.Blit(resultField, dyeField);
 
+        // Re-zero the dye boundary: advection writes to border cells using the
+        // mirrored boundary velocity, which traces back into the interior and
+        // repaints the border with interior dye. Without this, border dye
+        // persists until it decays away.
+        ExecuteBoundaryShader(dyeField, 0);
+
         // Decay dye
         fluidSimShader.SetTexture(decayKernel, "uField", dyeField);
         ExecuteFullTexShader(decayKernel);

@@ -56,8 +56,11 @@ void advect(uint3 id : SV_DispatchThreadID)
     /*float2 coord = id.xy + ONE_2D;*/
     float2 coord = id.xy;
     float2 advectedPoint = coord - timestep * (uField[coord].xy) * gridNormalizingFactor;
-    float4 result = vField.SampleLevel(SmpLinearClamp, (advectedPoint+float2(.5,.5)) * gridNormalizingFactor, 0);
-    Result[coord] = result;
+    float2 samplePoint = (advectedPoint + float2(.5, .5)) * gridNormalizingFactor;
+    float4 result = vField.SampleLevel(SmpLinearClamp, samplePoint, 0);
+    // Check boundaries and zero if outside
+    float2 inside = step(0.0, samplePoint) * step(samplePoint, 1.0);
+    Result[coord] = result * inside.x * inside.y;
 }
 
 /* Decay the dye levels */
@@ -72,7 +75,13 @@ void decayDye(uint3 id: SV_DispatchThreadID)
 [numthreads(16, 16, 1)]
 void applyDye(uint3 id : SV_DispatchThreadID)
 {
-    Result[id.xy] = saturate(uField[id.xy] + dyeMultiplier * vField[id.xy]);
+    float4 sum = uField[id.xy] + dyeMultiplier * vField[id.xy];
+    // Clamp brightness while preserving hue: if any RGB channel exceeds 1,
+    // scale all three down by the max channel. Per-channel saturate() would
+    // drift non-primary hues toward white as the dominant channel hit 1 and
+    // the weaker channels kept climbing.
+    float scale = max(1.0, max(sum.r, max(sum.g, sum.b)));
+    Result[id.xy] = float4(sum.rgb / scale, saturate(sum.a));
 }
 
 /* Apply a texture force*/
