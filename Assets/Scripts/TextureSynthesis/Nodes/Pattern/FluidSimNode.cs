@@ -33,6 +33,10 @@ public class FluidSimNode : TickingNode
     public ValueConnectionKnob forceMultiplierKnob;
     public float forceMultiplier = 1;
 
+    [ValueConnectionKnob("vorticityEpsilon", Direction.In, typeof(float))]
+    public ValueConnectionKnob vorticityEpsilonKnob;
+    public float vorticityEpsilon = 5;
+
     [ValueConnectionKnob("timeMultiplier", Direction.In, typeof(float))]
     public ValueConnectionKnob timeMultiplierKnob;
     public float timeMultiplier = 1;
@@ -71,6 +75,8 @@ public class FluidSimNode : TickingNode
     private int decayKernel;
     private int horizontalBoundaryKernel;
     private int verticalBoundaryKernel;
+    private int vorticityKernel;
+    private int vorticityConfinementKernel;
 
     // Uses two channels (R,G) to store the 2vector field U(x,y)
     private RenderTexture velocityField;
@@ -78,6 +84,7 @@ public class FluidSimNode : TickingNode
     private RenderTexture dyeField;
     private RenderTexture resultField;
     private RenderTexture divergenceField;
+    private RenderTexture vorticityField;
     private RenderTexture scaledBuffer;
 
     private ComputeBuffer dataBuffer;
@@ -106,6 +113,7 @@ public class FluidSimNode : TickingNode
         dyeField = MakeRenderTexture();
         resultField = MakeRenderTexture();
         divergenceField = MakeRenderTexture();
+        vorticityField = MakeRenderTexture();
         scaledBuffer = MakeRenderTexture();
     }
 
@@ -122,7 +130,7 @@ public class FluidSimNode : TickingNode
 
     private void OnDestroy()
     {
-        RenderTexture[] textures = { outputTex, velocityField, pressureField, dyeField, resultField, divergenceField, scaledBuffer };
+        RenderTexture[] textures = { outputTex, velocityField, pressureField, dyeField, resultField, divergenceField, vorticityField, scaledBuffer };
         foreach (var t in textures)
         {
             if (t != null)
@@ -151,6 +159,8 @@ public class FluidSimNode : TickingNode
         clearPressureKernel = fluidSimShader.FindKernel("clearPressure");
         verticalBoundaryKernel = fluidSimShader.FindKernel("verticalBoundary");
         horizontalBoundaryKernel = fluidSimShader.FindKernel("horizontalBoundary");
+        vorticityKernel = fluidSimShader.FindKernel("computeVorticity");
+        vorticityConfinementKernel = fluidSimShader.FindKernel("applyVorticityConfinement");
 
 
         dataBuffer = new ComputeBuffer(512, Constants.FLOAT_BYTES * Constants.VEC4_LENGTH);
@@ -178,6 +188,7 @@ public class FluidSimNode : TickingNode
         FloatKnobOrSlider(ref dyeInputLevel, 0, 1, dyeInputLevelKnob);
         FloatKnobOrSlider(ref dyeDecay, 0, 1, dyeDecayKnob);
         FloatKnobOrSlider(ref forceMultiplier, 0, 4, forceMultiplierKnob);
+        FloatKnobOrSlider(ref vorticityEpsilon, 0, 20, vorticityEpsilonKnob);
         string cmd = running ? "Stop" : "Run";
         clicked = EventKnobOrButton(cmd, runKnob);
         if (clicked)
@@ -311,6 +322,24 @@ public class FluidSimNode : TickingNode
         //    Graphics.Blit(resultField, velocityField);
         //}
 
+        // Vorticity confinement: re-inject energy into swirling structures
+        // that semi-Lagrangian advection would otherwise over-damp. Must run
+        // before projection so the divergence it introduces gets cleaned up.
+        if (vorticityEpsilon > 0)
+        {
+            fluidSimShader.SetTexture(vorticityKernel, "uField", velocityField);
+            ExecuteInteriorShader(vorticityKernel);
+            Graphics.Blit(resultField, vorticityField);
+
+            fluidSimShader.SetFloat("vorticityEpsilon", vorticityEpsilon);
+            fluidSimShader.SetTexture(vorticityConfinementKernel, "uField", velocityField);
+            fluidSimShader.SetTexture(vorticityConfinementKernel, "vField", vorticityField);
+            ExecuteInteriorShader(vorticityConfinementKernel);
+            Graphics.Blit(resultField, velocityField);
+
+            ExecuteBoundaryShader(velocityField, -1);
+        }
+
         // Compute divergence
         fluidSimShader.SetTexture(divergenceKernel, "uField", velocityField);
         ExecuteInteriorShader(divergenceKernel);
@@ -401,6 +430,10 @@ public class FluidSimNode : TickingNode
         if (forceMultiplierKnob.connected())
         {
             forceMultiplier = forceMultiplierKnob.GetValue<float>();
+        }
+        if (vorticityEpsilonKnob.connected())
+        {
+            vorticityEpsilon = vorticityEpsilonKnob.GetValue<float>();
         }
         if (applyForceKnob.GetValue<bool>())
         {

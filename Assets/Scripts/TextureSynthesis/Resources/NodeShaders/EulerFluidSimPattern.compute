@@ -5,6 +5,8 @@
 #pragma kernel divergence
 #pragma kernel clearPressure
 #pragma kernel gradientDiff
+#pragma kernel computeVorticity
+#pragma kernel applyVorticityConfinement
 #pragma kernel applyForce
 #pragma kernel applyDye
 #pragma kernel decayDye
@@ -38,6 +40,7 @@ float forceMultiplier;
 float dyeMultiplier;
 
 float dyeDecay;
+float vorticityEpsilon;
 
 float forceRadius;
 float forceMag;
@@ -164,6 +167,46 @@ void gradientDiff(uint3 id : SV_DispatchThreadID)
     float4 updatedVelocity = uField[coord];
     updatedVelocity.xy -= (0.5 * gridNormalizingFactor) * float2(pR - pL, pU - pD);
     Result[coord] = updatedVelocity;
+}
+
+/* Scalar 2D curl of the velocity field (uField): omega = dv/dx - du/dy.
+ * Stored in Result.r so it can be sampled as a scalar in the confinement pass. */
+[numthreads(127, 2, 1)]
+void computeVorticity(uint3 id : SV_DispatchThreadID)
+{
+    float2 coord = id.xy + ONE_2D;
+    float vR = uField[coord + RIGHT_2D].y;
+    float vL = uField[coord + LEFT_2D].y;
+    float uU = uField[coord + UP_2D].x;
+    float uD = uField[coord + DOWN_2D].x;
+
+    float omega = 0.5 * gridNormalizingFactor * ((vR - vL) - (uU - uD));
+    Result[coord] = float4(omega, 0, 0, 1);
+}
+
+/* Fedkiw/Stam vorticity confinement: push energy back into rotational
+ * structures that semi-Lagrangian advection would otherwise over-damp.
+ * uField = velocity, vField = vorticity (from computeVorticity). */
+[numthreads(127, 2, 1)]
+void applyVorticityConfinement(uint3 id : SV_DispatchThreadID)
+{
+    float2 coord = id.xy + ONE_2D;
+
+    float wL = abs(vField[coord + LEFT_2D].x);
+    float wR = abs(vField[coord + RIGHT_2D].x);
+    float wU = abs(vField[coord + UP_2D].x);
+    float wD = abs(vField[coord + DOWN_2D].x);
+
+    float2 eta = 0.5 * gridNormalizingFactor * float2(wR - wL, wU - wD);
+    float2 N = eta / (length(eta) + 1e-5);
+
+    float omega = vField[coord].x;
+    // (N.x, N.y, 0) x (0, 0, omega) = (N.y * omega, -N.x * omega, 0)
+    float2 force = vorticityEpsilon * float2(N.y * omega, -N.x * omega);
+
+    float4 result = uField[coord];
+    result.xy += timestep * force;
+    Result[coord] = result;
 }
 
 
