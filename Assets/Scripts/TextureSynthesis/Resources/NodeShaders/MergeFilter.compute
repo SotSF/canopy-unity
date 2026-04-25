@@ -2,25 +2,86 @@
 #pragma kernel FadeKernel
 #pragma kernel LayerKernel
 
+// Simple-mode inputs
 Texture2D<float4> texL;
 Texture2D<float4> texR;
 float crossfader;
+
+// Layers-mode inputs (fixed slots; the C# side binds black + opacity 0 for unused).
+Texture2D<float4> layer0;
+Texture2D<float4> layer1;
+Texture2D<float4> layer2;
+Texture2D<float4> layer3;
+Texture2D<float4> layer4;
+Texture2D<float4> layer5;
+Texture2D<float4> layer6;
+Texture2D<float4> layer7;
+
+float opacity0;
+float opacity1;
+float opacity2;
+float opacity3;
+float opacity4;
+float opacity5;
+float opacity6;
+float opacity7;
+
+int layerCount;
+
 RWTexture2D<float4> outputTex;
 
+float4 sampleLayer(int idx, uint2 coord)
+{
+    if (idx == 0) return layer0[coord];
+    if (idx == 1) return layer1[coord];
+    if (idx == 2) return layer2[coord];
+    if (idx == 3) return layer3[coord];
+    if (idx == 4) return layer4[coord];
+    if (idx == 5) return layer5[coord];
+    if (idx == 6) return layer6[coord];
+    return layer7[coord];
+}
+
+float layerOpacity(int idx)
+{
+    if (idx == 0) return opacity0;
+    if (idx == 1) return opacity1;
+    if (idx == 2) return opacity2;
+    if (idx == 3) return opacity3;
+    if (idx == 4) return opacity4;
+    if (idx == 5) return opacity5;
+    if (idx == 6) return opacity6;
+    return opacity7;
+}
 
 [numthreads(16, 16, 1)]
 void LayerKernel(uint3 id : SV_DispatchThreadID)
 {
-	float4 src = texL[id.xy];
-	float4 dst = texR[id.xy];
-	float outA = src.a + dst.a * (1 - src.a);
-	float3 outRGB = (src.rgb * src.a + dst.rgb * dst.a * (1 - src.a)) / outA;
-	float4 result = float4(outRGB, outA);
-	outputTex[id.xy] = result;
+    // Standard "over" composite. Layer 0 is the topmost layer (rendered last on
+    // top of everything) and layer (layerCount - 1) is the bottom; we therefore
+    // walk from the bottom up. Inputs are treated as straight-alpha; we composite
+    // in premultiplied alpha for stability and unpremultiply at output so
+    // downstream nodes see straight-alpha.
+    float3 accRGB = float3(0, 0, 0);
+    float accA = 0;
+
+    [loop]
+    for (int i = layerCount - 1; i >= 0; i--)
+    {
+        float4 src = sampleLayer(i, id.xy);
+        float a = saturate(src.a * layerOpacity(i));
+        float3 srcPremul = src.rgb * a;
+        // src OVER acc
+        accRGB = srcPremul + accRGB * (1 - a);
+        accA   = a        + accA   * (1 - a);
+    }
+
+    float3 outRGB = accA > 1e-5 ? accRGB / accA : float3(0, 0, 0);
+    outputTex[id.xy] = float4(outRGB, accA);
 }
 
 [numthreads(16, 16, 1)]
 void FadeKernel(uint3 id : SV_DispatchThreadID)
 {
-	outputTex[id.xy] = lerp(texL[id.xy], texR[id.xy], crossfader);
+    outputTex[id.xy] = lerp(texL[id.xy], texR[id.xy], crossfader);
 }

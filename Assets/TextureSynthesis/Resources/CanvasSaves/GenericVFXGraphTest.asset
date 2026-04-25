@@ -472,7 +472,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: texL
+  m_Name: Layer
   m_EditorClassIdentifier: 
   body: {fileID: -4718675951122982295}
   direction: 1
@@ -749,11 +749,11 @@ MonoBehaviour:
   m_Name: Merge
   m_EditorClassIdentifier: 
   position: {x: -766.27997, y: 431.30005}
-  dynamicConnectionPorts: []
+  dynamicConnectionPorts:
+  - {fileID: -3221460974356263439}
+  - {fileID: -935324920243415503}
+  - {fileID: 1587339100242104910}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  texLKnob: {fileID: -3221460974356263439}
-  texRKnob: {fileID: -935324920243415503}
-  crossfaderKnob: {fileID: 1587339100242104910}
   outputTexKnob: {fileID: -7421711177287920068}
   crossfader: 0.27559054
   mergeModeSelection:
@@ -2908,11 +2908,11 @@ MonoBehaviour:
   m_Name: Merge
   m_EditorClassIdentifier: 
   position: {x: -407.62997, y: 861.86523}
-  dynamicConnectionPorts: []
+  dynamicConnectionPorts:
+  - {fileID: -6784910676330839714}
+  - {fileID: 729650649717477753}
+  - {fileID: 2927576155602863956}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  texLKnob: {fileID: -6784910676330839714}
-  texRKnob: {fileID: 729650649717477753}
-  crossfaderKnob: {fileID: 2927576155602863956}
   outputTexKnob: {fileID: -7784736525695205859}
   crossfader: 1
   mergeModeSelection:
@@ -3353,7 +3353,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: texL
+  m_Name: Layer
   m_EditorClassIdentifier: 
   body: {fileID: -5960507384471022545}
   direction: 1
@@ -3916,7 +3916,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: texR
+  m_Name: Layer
   m_EditorClassIdentifier: 
   body: {fileID: -5960507384471022545}
   direction: 1
@@ -4418,7 +4418,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: texR
+  m_Name: Layer
   m_EditorClassIdentifier: 
   body: {fileID: -4718675951122982295}
   direction: 1
@@ -6008,7 +6008,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: crossfader
+  m_Name: opacity
   m_EditorClassIdentifier: 
   body: {fileID: -5960507384471022545}
   direction: 1
@@ -6297,7 +6297,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: crossfader
+  m_Name: opacity
   m_EditorClassIdentifier: 
   body: {fileID: -4718675951122982295}
   direction: 1

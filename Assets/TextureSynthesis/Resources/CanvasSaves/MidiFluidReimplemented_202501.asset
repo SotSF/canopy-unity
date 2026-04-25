@@ -117,13 +117,15 @@ MonoBehaviour:
   m_Name: Merge
   m_EditorClassIdentifier: 
   position: {x: 744.6, y: -535.79987}
-  dynamicConnectionPorts: []
+  dynamicConnectionPorts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  texLKnob: {fileID: 6993442650787710794}
-  texRKnob: {fileID: -7376398690161052854}
-  crossfaderKnob: {fileID: 6000342180901313877}
   outputTexKnob: {fileID: -8700555764414731468}
   crossfader: 1
+  layerOrder: 
+  layerOpacities: []
   mergeModeSelection:
     values: 0100
     names:
@@ -509,6 +511,8 @@ MonoBehaviour:
   dyeDecay: 3.023622
   forceMultiplierKnob: {fileID: -8927579220820826713}
   forceMultiplier: 2.1417322
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: -1216611711109028552}
   timeMultiplier: 0.1406163
   runKnob: {fileID: -6861172607073480947}
@@ -712,13 +716,15 @@ MonoBehaviour:
   m_Name: Merge
   m_EditorClassIdentifier: 
   position: {x: 1423.8002, y: -101.50012}
-  dynamicConnectionPorts: []
+  dynamicConnectionPorts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  texLKnob: {fileID: 7941741794463778755}
-  texRKnob: {fileID: 8586305045682142197}
-  crossfaderKnob: {fileID: -1720995461549001931}
   outputTexKnob: {fileID: 8316268632704673944}
   crossfader: 1
+  layerOrder: 
+  layerOpacities: []
   mergeModeSelection:
     values: 0100
     names:
@@ -1471,7 +1477,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: -5611167590389901987}
   useDoubleDensity: 1
-  ip: 169.254.48.147
+  ip: 192.168.1.138
   mirrorPort: 4
   maxFrameRate: 60
   flipMirrorDirection: 0
@@ -1675,7 +1681,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: -5721180607904273467}
   direction: 1
@@ -4224,7 +4230,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 8872182011297478621}
   direction: 1
@@ -4701,7 +4707,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 2753381368115534965}
   direction: 2
@@ -4729,7 +4735,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: 1036221960189648167}
   textureOutputKnob: {fileID: 6859338515785603291}
-  polarize: 1
   seamless: 0
 --- !u!114 &3391242710439316314
 MonoBehaviour:
@@ -5369,7 +5374,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 2753381368115534965}
   direction: 1
@@ -6026,7 +6031,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: -5721180607904273467}
   direction: 2
@@ -6354,7 +6359,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 8872182011297478621}
   direction: 2
