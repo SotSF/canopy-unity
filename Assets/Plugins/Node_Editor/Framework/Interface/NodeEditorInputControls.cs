@@ -255,10 +255,22 @@ namespace NodeEditorFramework
 
 		#region Zoom
 
+		private const float MinZoom = 0.25f;
+		private const float MaxZoom = 4.0f;
+		private const float ZoomScrollDivisor = 15.0f;
+
 		[EventHandlerAttribute (EventType.ScrollWheel)]
 		private static void HandleZooming (NodeEditorInputInfo inputInfo) 
 		{
-			inputInfo.editorState.zoom = (float)Math.Round (Math.Min (4.0, Math.Max (0.6, inputInfo.editorState.zoom + inputInfo.inputEvent.delta.y / 15)), 2);
+			NodeEditorState state = inputInfo.editorState;
+			float oldZoom = state.zoom;
+			float newZoom = (float)Math.Round (Math.Min (MaxZoom, Math.Max (MinZoom, oldZoom + inputInfo.inputEvent.delta.y / ZoomScrollDivisor)), 2);
+			if (Math.Abs (newZoom - oldZoom) > float.Epsilon)
+			{
+				Vector2 zoomMouseOffset = inputInfo.inputPos - state.canvasRect.position - state.zoomPos;
+				state.panOffset += zoomMouseOffset * (newZoom - oldZoom);
+				state.zoom = newZoom;
+			}
 			NodeEditor.RepaintClients ();
 		}
 
@@ -314,4 +326,3 @@ namespace NodeEditorFramework
 
 	}
 }
-
