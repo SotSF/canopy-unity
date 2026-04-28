@@ -3,25 +3,36 @@ using Minis;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
+using System.Collections.Generic;
 using UnityEngine;
 
 
 
 [Node(false, "MIDI/MIDIControlMinis")]
-public class MinisControlNode : TickingNode
+public class MinisControlNode : SignalNode
 {
     public override string GetID => "MinisControlNode";
     public override string Title { get { return "MinisControl"; } }
 
 
     private Vector2 _DefaultSize = new Vector2(150, 85);
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
     bool binding = false;
     public bool bound = false;
 
     [ValueConnectionKnob("value", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob valueKnob;
+
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = valueKnob,
+            getValue   = () => valueKnob.GetValue<float>(),
+            label      = "Value",
+        };
+    }
 
     public float rawMIDIValue;
     public float rescaleMin = 0;
@@ -49,13 +60,14 @@ public class MinisControlNode : TickingNode
         }
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         // Unregister from MidiDeviceManager
         if (MidiDeviceManager.Instance != null)
         {
             MidiDeviceManager.Instance.UnregisterNode(nodeInstanceId);
         }
+        base.OnDestroy();
     }
 
     private void OnDisable()
@@ -107,6 +119,7 @@ public class MinisControlNode : TickingNode
 
     public override void NodeGUI()
     {
+        GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         if (!bound && !binding)
@@ -149,8 +162,10 @@ public class MinisControlNode : TickingNode
         }
 
         GUILayout.EndVertical();
-        valueKnob.DisplayLayout();
         GUILayout.EndHorizontal();
+
+        DrawSparkline();
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

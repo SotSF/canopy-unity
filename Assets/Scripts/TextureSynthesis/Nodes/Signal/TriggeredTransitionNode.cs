@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/TriggeredTransition")]
-public class TriggeredTransitionNode : TickingNode
+public class TriggeredTransitionNode : SignalNode
 {
     public override string GetID => "TriggeredTransitionNode";
     public override string Title { get { return "TriggeredTransition"; } }
@@ -17,7 +17,7 @@ public class TriggeredTransitionNode : TickingNode
 
     private Vector2 _DefaultSize = new Vector2(220, 150);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
 
     [ValueConnectionKnob("triggerEvent", Direction.In, typeof(bool), NodeSide.Left)]
@@ -25,7 +25,7 @@ public class TriggeredTransitionNode : TickingNode
 
     [ValueConnectionKnob("startValue", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob startValueKnob;
-    
+
     [ValueConnectionKnob("endValue", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob endValueKnob;
 
@@ -36,10 +36,21 @@ public class TriggeredTransitionNode : TickingNode
 
     public float outValue = 0;
 
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = outputSignalKnob,
+            getValue   = () => outputSignalKnob.GetValue<float>(),
+            label      = "Output",
+        };
+    }
+
     public override void NodeGUI()
     {
+        GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
-        
+
         GUILayout.BeginVertical();
         triggerEventKnob.DisplayLayout();
         FloatKnobOrField("Start value", ref startValue, startValueKnob);
@@ -49,15 +60,17 @@ public class TriggeredTransitionNode : TickingNode
 
         GUILayout.FlexibleSpace();
         GUILayout.Label(string.Format("Value: {0:0.0000}", outValue));
-        outputSignalKnob.DisplayLayout();
         GUILayout.EndHorizontal();
+
+        DrawSparkline();
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
 
-    public override bool Calculate()
+    public override bool DoCalc()
     {
         if (startValueKnob.connected())
         {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/VectorDecomposer")]
-public class VectorDecomposerNode : TextureSynthNode
+public class VectorDecomposerNode : SignalNode
 {
     public override string GetID => "VectorDecomposerNode";
     public override string Title { get { return "VectorDecomposer"; } }
@@ -15,9 +15,9 @@ public class VectorDecomposerNode : TextureSynthNode
 
     public override bool AutoLayout => true;
 
-    private Vector2 _DefaultSize = new Vector2(180, 150); 
+    private Vector2 _DefaultSize = new Vector2(180, 150);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("Input vector", Direction.In, typeof(Vector2), NodeSide.Left)]
     public ValueConnectionKnob inputVectorKnob;
@@ -31,10 +31,27 @@ public class VectorDecomposerNode : TextureSynthNode
     public float xValue;
     public float yValue;
 
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = xOutputKnob,
+            getValue   = () => xOutputKnob.GetValue<float>(),
+            label      = "X",
+        };
+        yield return new SignalChannel
+        {
+            outputKnob = yOutputKnob,
+            getValue   = () => yOutputKnob.GetValue<float>(),
+            label      = "Y",
+        };
+    }
+
     public override void NodeGUI()
     {
+        GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
-        
+
         GUILayout.BeginVertical();
         inputVectorKnob.DisplayLayout();
         GUILayout.EndVertical();
@@ -42,20 +59,14 @@ public class VectorDecomposerNode : TextureSynthNode
         GUILayout.FlexibleSpace();
 
         GUILayout.BeginVertical();
-
-        GUILayout.BeginHorizontal();
         GUILayout.Label(string.Format("x: {0:0.0000}", xValue));
-        xOutputKnob.DisplayLayout();
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
         GUILayout.Label(string.Format("y: {0:0.0000}", yValue));
-        yOutputKnob.DisplayLayout();
-        GUILayout.EndHorizontal();
-
         GUILayout.EndVertical();
 
         GUILayout.EndHorizontal();
+
+        DrawSparkline();
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

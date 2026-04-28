@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 734693608660882002}
   direction: 1
@@ -231,7 +231,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: 4298522162324441229}
   textureOutputKnob: {fileID: -1931624852116312970}
-  polarize: 1
   seamless: 0
 --- !u!114 &-7993621882164856463
 MonoBehaviour:
@@ -1705,6 +1704,8 @@ MonoBehaviour:
   dyeDecay: 2.6456692
   forceMultiplierKnob: {fileID: 914863926835864223}
   forceMultiplier: 1
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: -4097920217584687983}
   timeMultiplier: 0.05059212
   runKnob: {fileID: -4374255409725383302}
@@ -1727,7 +1728,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 734693608660882002}
   direction: 2
@@ -2104,6 +2105,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   outputTexKnob: {fileID: -6987158645402812928}
   crossfader: 1
+  layerOrder: 0000000001000000
+  layerOpacities:
+  - 1
+  - 1
   mergeModeSelection:
     values: 0100
     names:
@@ -2206,7 +2211,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: -2451195433075824012}
   direction: 1
@@ -2295,7 +2300,39 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   spectrumDataKnob: {fileID: -7827044871891412768}
   outputTexKnob: {fileID: 8055953464540770468}
+  barGradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 1, b: 1, a: 1}
+    key1: {r: 0, g: 0, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
   outputTex: {fileID: 0}
+  width: 256
+  height: 256
 --- !u!114 &-629325208452753546
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4166,8 +4203,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   editorStates:
   - {fileID: -4906282277889125241}
-  saveName: WeddingCanvas_v0
-  savePath: Assets/TextureSynthesis/Resources/CanvasSaves/WeddingCanvas_v0.asset
+  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\WeddingCanvas_v0
+  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\WeddingCanvas_v0.asset
   livesInScene: 0
   nodes:
   - {fileID: -2838577860260508847}
@@ -4286,7 +4323,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: -2451195433075824012}
   direction: 2
@@ -4593,6 +4630,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   outputTexKnob: {fileID: -379748787971670448}
   crossfader: 1
+  layerOrder: 0000000001000000
+  layerOpacities:
+  - 1
+  - 1
   mergeModeSelection:
     values: 0100
     names:
@@ -7003,7 +7044,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: 3940688851318407528}
   useDoubleDensity: 1
-  ip: 192.168.1.71
+  ip: 192.168.1.138
   mirrorPort: 12
   maxFrameRate: 60
   flipMirrorDirection: 0

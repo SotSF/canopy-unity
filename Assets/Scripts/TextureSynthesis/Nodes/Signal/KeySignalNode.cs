@@ -9,13 +9,13 @@ using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 
 [Node(false, "Signal/KeySignal")]
-public class KeySignalNode : TickingNode
+public class KeySignalNode : SignalNode
 {
     public override string GetID => "KeySignal";
     public override string Title { get { return "KeySignal"; } }
     private Vector2 _DefaultSize = new Vector2(150, 100);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("Out", Direction.Out, typeof(float))]
     public ValueConnectionKnob signalOutputKnob;
@@ -31,6 +31,16 @@ public class KeySignalNode : TickingNode
     [ValueConnectionKnob("released", Direction.Out, typeof(bool), NodeSide.Right)]
     public ValueConnectionKnob releasedKnob;
     bool released;
+
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = signalOutputKnob,
+            getValue   = () => signalOutputKnob.GetValue<float>(),
+            label      = "Out",
+        };
+    }
 
     public List<KeyCode> bindingKeys;
     public List<KeyCode> boundKeys;
@@ -142,6 +152,7 @@ public class KeySignalNode : TickingNode
 
     public override void NodeGUI()
     {
+        GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
         if (!bound && !binding)
@@ -175,12 +186,14 @@ public class KeySignalNode : TickingNode
         useEasing = RTEditorGUI.Toggle(useEasing, new GUIContent("Use easing", "Apply an easing curve to key input transitions"));
         GUILayout.EndVertical();
         GUILayout.BeginVertical();
-        signalOutputKnob.DisplayLayout();
         pressedKnob.DisplayLayout();
         heldKnob.DisplayLayout();
         releasedKnob.DisplayLayout();
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
+
+        DrawSparkline();
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

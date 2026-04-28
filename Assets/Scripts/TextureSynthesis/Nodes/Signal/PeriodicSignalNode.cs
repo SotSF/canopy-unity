@@ -10,15 +10,25 @@ using UnityEngine;
 namespace SecretFire.TextureSynth.Signals
 {
     [Node(false, "Signal/PeriodicSignal")]
-    public class PeriodicSignalNode : TickingNode
+    public class PeriodicSignalNode : SignalNode
     {
+        protected override IEnumerable<SignalChannel> GetSignalChannels()
+        {
+            yield return new SignalChannel
+            {
+                outputKnob = outputKnob,
+                getValue   = () => outputKnob.GetValue<float>(),
+                label      = "Output",
+            };
+        }
+
         public const string ID = "periodicSignal";
         public override string GetID { get { return ID; } }
 
         public override string Title { get { return "PeriodicSignal"; } }
         private Vector2 _DefaultSize = new Vector2(230, 250);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+        protected override Vector2 BaseDefaultSize => _DefaultSize;
 
         [ValueConnectionKnob("Period", Direction.In, typeof(float))]
         public ValueConnectionKnob periodInputKnob;
@@ -70,7 +80,6 @@ namespace SecretFire.TextureSynth.Signals
             GUILayout.BeginVertical();
             GUILayout.Label("Param config:");
             RadioButtons(paramStyle);
-            outputKnob.DisplayLayout();
             GUILayout.EndVertical();
 
             GUILayout.EndHorizontal();
@@ -92,6 +101,7 @@ namespace SecretFire.TextureSynth.Signals
             FloatKnobOrSlider(ref period, 0.01f, 50, periodInputKnob);
             FloatKnobOrSlider(ref phase, -period, period, phaseInputKnob);
             GUILayout.Space(4);
+            DrawSparkline();
             GUILayout.EndVertical();
 
             if (GUI.changed)

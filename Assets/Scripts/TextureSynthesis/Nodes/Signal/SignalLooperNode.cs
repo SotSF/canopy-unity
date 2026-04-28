@@ -7,14 +7,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/SignalLooper")]
-public class SignalLooperNode : TextureSynthNode
+public class SignalLooperNode : SignalNode
 {
     public override string GetID => "SignalLooperNode";
     public override string Title { get { return "SignalLooper"; } }
 
     private Vector2 _DefaultSize = new Vector2(150, 150);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("inputSignal", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob inputSignalKnob;
@@ -24,6 +24,16 @@ public class SignalLooperNode : TextureSynthNode
     public ValueConnectionKnob recordControlKnob;
     [ValueConnectionKnob("outputSignal", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputSignalKnob;
+
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = outputSignalKnob,
+            getValue   = () => outputSignalKnob.GetValue<float>(),
+            label      = "Output",
+        };
+    }
 
 
     public bool clipRecorded;
@@ -121,6 +131,7 @@ public class SignalLooperNode : TextureSynthNode
             }
         }
 
+        DrawSparkline();
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

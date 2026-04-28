@@ -4,17 +4,18 @@ using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/ZZObsoleteMathExpr")]
-public class MathExprNode : TextureSynthNode
+public class MathExprNode : SignalNode
 {
     public override string GetID => "MathExprNode";
     public override string Title { get { return "MathExpr"; } }
 
     private Vector2 _DefaultSize = new Vector2(150, 100);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("a", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob aKnob;
@@ -25,6 +26,16 @@ public class MathExprNode : TextureSynthNode
 
     [ValueConnectionKnob("output", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputKnob;
+
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = outputKnob,
+            getValue   = () => outputKnob.GetValue<float>(),
+            label      = "Output",
+        };
+    }
 
     private string lastexpr = "";
     public string stringexpr;
@@ -64,9 +75,9 @@ public class MathExprNode : TextureSynthNode
             GUILayout.Label(string.Format("Error: {0}", errorMsg));
         else
             GUILayout.Label(string.Format("Result: {0:0.000}", output));
-        outputKnob.DisplayLayout();
         GUILayout.EndHorizontal();
 
+        DrawSparkline();
         GUILayout.EndVertical();
 
 

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Signal/Latch")]
-public class SignalLatchNode : TickingNode
+public class SignalLatchNode : SignalNode
 {
     public override string GetID => "SignalLatchNode";
     public override string Title { get { return "SignalLatch"; } }
@@ -17,7 +17,7 @@ public class SignalLatchNode : TickingNode
 
     private Vector2 _DefaultSize = new Vector2(220, 150);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
 
     [ValueConnectionKnob("latchControl", Direction.In, typeof(bool), NodeSide.Left)]
@@ -32,6 +32,16 @@ public class SignalLatchNode : TickingNode
     [ValueConnectionKnob("outputSignal", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputSignalKnob;
 
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = outputSignalKnob,
+            getValue   = () => outputSignalKnob.GetValue<float>(),
+            label      = "Output",
+        };
+    }
+
     public bool additive = true;
     public float latchedValue;
     public bool useRange;
@@ -42,8 +52,9 @@ public class SignalLatchNode : TickingNode
 
     public override void NodeGUI()
     {
+        GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
-        
+
         GUILayout.BeginVertical();
         latchControlKnob.DisplayLayout();
         controlSignalKnob.DisplayLayout();
@@ -63,8 +74,10 @@ public class SignalLatchNode : TickingNode
 
         GUILayout.FlexibleSpace();
         GUILayout.Label(string.Format("Value: {0:0.0000}", latchedValue));
-        outputSignalKnob.DisplayLayout();
         GUILayout.EndHorizontal();
+
+        DrawSparkline();
+        GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

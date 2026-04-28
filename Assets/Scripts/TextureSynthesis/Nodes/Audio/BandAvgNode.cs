@@ -2,23 +2,34 @@
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Node(false, "Audio/BandAvg")]
-public class BandAvgNode : TextureSynthNode
+public class BandAvgNode : SignalNode
 {
     public override string GetID => "BandAvgNode";
     public override string Title { get { return "BandAvg"; } }
 
     private Vector2 _DefaultSize = new Vector2(150, 100);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("spectrumData", Direction.In, typeof(float[]), NodeSide.Left)]
     public ValueConnectionKnob spectrumDataKnob;
 
     [ValueConnectionKnob("outputSignal", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputSignalKnob;
+
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = outputSignalKnob,
+            getValue   = () => outputSignalKnob.GetValue<float>(),
+            label      = "Output",
+        };
+    }
 
     public int filterLowEnd;
     public int filterHighEnd;
@@ -34,8 +45,8 @@ public class BandAvgNode : TextureSynthNode
         filterHighEnd = RTEditorGUI.IntSlider(filterHighEnd, filterLowEnd, spectrumSize);
         GUILayout.BeginHorizontal();
         spectrumDataKnob.DisplayLayout();
-        outputSignalKnob.DisplayLayout();
         GUILayout.EndHorizontal();
+        DrawSparkline();
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);

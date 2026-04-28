@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEngine;
 
 [Node(false, "Signal/DynMathExpr")]
-public class DynamicMathExprNode : TextureSynthNode
+public class DynamicMathExprNode : SignalNode
 {
     public override string GetID => "DynMathExprNode";
     public override string Title { get { return "DynMathExpr"; } }
@@ -18,11 +18,21 @@ public class DynamicMathExprNode : TextureSynthNode
 
     private Vector2 _DefaultSize = new Vector2(160, (1 + 1) * 120);
 
-    public override Vector2 DefaultSize => _DefaultSize;
-    public override Vector2 MinSize => new Vector2(160, 120);
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
+    protected override Vector2 BaseMinSize => new Vector2(160, 120);
 
     [ValueConnectionKnob("output", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob outputKnob;
+
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        yield return new SignalChannel
+        {
+            outputKnob = outputKnob,
+            getValue   = () => outputKnob.GetValue<float>(),
+            label      = "Output",
+        };
+    }
 
     private string lastexpr = "";
     public string stringexpr;
@@ -148,8 +158,8 @@ public class DynamicMathExprNode : TextureSynthNode
             GUILayout.Label(string.Format("Error: {0}", errorMsg));
         else
             GUILayout.Label(string.Format("Result: {0:0.000}", output));
-        outputKnob.DisplayLayout();
 
+        DrawSparkline();
         GUILayout.EndVertical();
 
 
