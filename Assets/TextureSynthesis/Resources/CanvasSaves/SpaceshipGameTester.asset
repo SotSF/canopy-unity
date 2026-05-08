@@ -182,6 +182,8 @@ MonoBehaviour:
   dyeDecay: 0.9661017
   forceMultiplierKnob: {fileID: 290380105757593441}
   forceMultiplier: 1
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: -8590745425484082967}
   timeMultiplier: 1.0080479
   runKnob: {fileID: -7798258017841171467}
@@ -428,8 +430,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   editorStates:
   - {fileID: -5428885305683944902}
-  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\SpaceshipGameTester
-  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\SpaceshipGameTester.asset
+  saveName: SpaceshipGameTester
+  savePath: Assets/TextureSynthesis/Resources/CanvasSaves/SpaceshipGameTester.asset
   livesInScene: 0
   nodes:
   - {fileID: 6261294535380556177}

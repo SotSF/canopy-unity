@@ -3798,6 +3798,8 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   outputTex: {fileID: 0}
+  width: 256
+  height: 256
 --- !u!114 &-1557537108032543405
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4292,8 +4294,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   editorStates:
   - {fileID: 8427984929016583326}
-  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\AudioReactiveFluid_20251118
-  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\AudioReactiveFluid_20251118.asset
+  saveName: AudioReactiveFluid_20251118
+  savePath: Assets/TextureSynthesis/Resources/CanvasSaves/AudioReactiveFluid_20251118.asset
   livesInScene: 0
   nodes:
   - {fileID: 5598775358039779920}
@@ -5632,7 +5634,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: -4575746211228321472}
   useDoubleDensity: 1
-  ip: 169.254.48.147
+  ip: 192.168.1.138
   mirrorPort: 11
   maxFrameRate: 60
   flipMirrorDirection: 0
@@ -7742,6 +7744,8 @@ MonoBehaviour:
   dyeDecay: 2.519685
   forceMultiplierKnob: {fileID: -4996207373656782919}
   forceMultiplier: 0.81889766
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: 5705333897115730356}
   timeMultiplier: 0.4129208
   runKnob: {fileID: -1099423238999597595}
@@ -8019,6 +8023,8 @@ MonoBehaviour:
     m_NumColorKeys: 4
     m_NumAlphaKeys: 2
   outputTex: {fileID: 0}
+  width: 256
+  height: 256
 --- !u!114 &5742586415778339717
 MonoBehaviour:
   m_ObjectHideFlags: 1
