@@ -13,6 +13,9 @@ public class SpaceshipController : MonoBehaviour
 
     public Color shipColor;
 
+    // Velocity along polar axes, ie radial (in/out) speed and circumferential (around circle speed)
+    private Vector2 polarVelocity;
+
     public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard)
     {
         SpaceshipController ship = Instantiate(prefab, gameBoard.transform);
