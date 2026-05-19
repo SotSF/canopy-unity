@@ -96,7 +96,7 @@ namespace WebSocketServer {
                 }
             }
             catch (SocketException socketException) {
-                Debug.Log("SocketException " + socketException.ToString());
+                Debug.Log($"Got SocketException trying to start on {address}:{port}:\n" + socketException.ToString());
             }
         }
 

@@ -9,12 +9,7 @@ using WebSocketServer;
 
 public class SpaceshipGameController : MonoBehaviour
 {
-    private static Vector2Int gameBoardSize = new Vector2Int(512, 512);
-    private static Vector2 gameBoardCenter = new Vector2(255, 255);
-    public float innerRingDist = 256 / 8;
-    public float outerRingDist = 256;
-    public float velocityScaling = 0.25f;
-    public float maxSpeed = 5f;
+
 
     public static SpaceshipGameController instance;
 
@@ -39,7 +34,7 @@ public class SpaceshipGameController : MonoBehaviour
         instance = this;
         ships = new Dictionary<string, SpaceshipController>();
 
-        fluidVelocityTex = new RenderTexture(gameBoardSize.x, gameBoardSize.y, 0);
+        fluidVelocityTex = new RenderTexture(SpaceshipGameConstants.Instance.gameBoardSize.x, SpaceshipGameConstants.Instance.gameBoardSize.y, 0);
         fluidVelocityTex.useMipMap = false;
         fluidVelocityTex.autoGenerateMips = false;
         fluidVelocityTex.enableRandomWrite = true;
@@ -92,7 +87,7 @@ public class SpaceshipGameController : MonoBehaviour
 
     private Vector2 RandomPosition()
     {
-        return new Vector2(Random.Range(0, gameBoardSize.x), Random.Range(0, gameBoardSize.y));
+        return new Vector2(Random.Range(0, SpaceshipGameConstants.Instance.gameBoardSize.x), Random.Range(0, SpaceshipGameConstants.Instance.gameBoardSize.y));
     }
 
 
@@ -134,7 +129,7 @@ public class SpaceshipGameController : MonoBehaviour
                     var b = data[3];
                     Color32 color = new Color32(r, g, b, 255);
                     ship.OnUpdateColor(color);
-                    Debug.Log($"Received ColorChange event for conn {conn} to {color}");
+                    // Debug.Log($"Received ColorChange event for conn {conn} to {color}");
                     break;
                 case SpaceshipGameEventType.Update:
                     float data1 = System.BitConverter.ToSingle(data, 1);

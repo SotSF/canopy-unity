@@ -2,16 +2,9 @@ using UnityEngine;
 
 public class SpaceshipController : MonoBehaviour
 {
-    public static GameObject gameField;
-    public static GameObject shipPrefab;
-
     private Vector3 velocity;
-    public const float VELOCITYSCALE = .5f;
-    // 16 feet (Canopy physical size) to meters (/2 for radius)
-    public const float BOUNDARYRADIUS = 4.8768f / 2;
-    public const float FRICTIONFACTOR = 0.99f;
-
     public Color shipColor;
+    public SpaceshipProjectile projectilePrefab;
 
     public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard)
     {
@@ -35,8 +28,8 @@ public class SpaceshipController : MonoBehaviour
 
     public void UpdateVelocity(Vector2 input)
     {
-        velocity += new Vector3(input.x, 0, input.y)*VELOCITYSCALE;
-        velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameController.instance.maxSpeed);
+        velocity += new Vector3(input.x, 0, input.y)*SpaceshipGameConstants.Instance.velocityScalingFactor;
+        velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameConstants.Instance.maxSpeed);
     }
 
 
@@ -53,10 +46,22 @@ public class SpaceshipController : MonoBehaviour
     public void OnButtonPress(byte buttonId)
     {
         Debug.Log($"Got button press {buttonId.ToString()}");
+        FireProjectile();
     }
 
     public void OnDoSpecialAction()
     {
+
+    }
+
+    public void FireProjectile()
+    {
+        SpaceshipProjectile projectile = Instantiate(projectilePrefab, 
+            transform.position,
+            transform.rotation,
+            transform.parent);
+        projectile.gameObject.SetActive(true);
+        projectile.velocity = transform.forward * SpaceshipGameConstants.Instance.projectileInitialSpeed;
 
     }
 
@@ -67,15 +72,15 @@ public class SpaceshipController : MonoBehaviour
         transform.localPosition += positionUpdate;
 
         // Decay velocity
-        velocity *= FRICTIONFACTOR;
+        velocity *= SpaceshipGameConstants.Instance.frictionFactor;
 
         // Check bounds, bounce off circular boundary at edge
         float distanceFromCenter = transform.localPosition.magnitude;
-        if (distanceFromCenter > BOUNDARYRADIUS)
+        if (distanceFromCenter > SpaceshipGameConstants.Instance.boundaryRadius)
         {
             Vector3 normal = (Vector3.zero - transform.localPosition).normalized;
             velocity = Vector3.Reflect(velocity, normal);
-            transform.localPosition = transform.localPosition.normalized * BOUNDARYRADIUS;
+            transform.localPosition = transform.localPosition.normalized * SpaceshipGameConstants.Instance.boundaryRadius;
         }
     }
 }
