@@ -9,7 +9,7 @@ public class SystemAudioSpectrumNode : TickingNode
     public override string GetID => "SystemAudioSpectrumNode";
     public override string Title { get { return "SystemAudioSpectrum"; } }
 
-    private Vector2 _DefaultSize = new Vector2(220, 120);
+    private Vector2 _DefaultSize = new Vector2(220, 190);
     public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("spectrumData", Direction.Out, typeof(float[]), NodeSide.Right)]
@@ -17,6 +17,15 @@ public class SystemAudioSpectrumNode : TickingNode
 
     [ValueConnectionKnob("sampleRate", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob sampleRateKnob;
+
+    [ValueConnectionKnob("attackTau", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob attackTauKnob;
+
+    [ValueConnectionKnob("releaseTau", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob releaseTauKnob;
+
+    public float attackTau  = 0.04f;
+    public float releaseTau = 0.25f;
 
     public override void NodeGUI()
     {
@@ -35,6 +44,10 @@ public class SystemAudioSpectrumNode : TickingNode
 
         spectrumDataKnob.DisplayLayout();
         sampleRateKnob.DisplayLayout();
+
+        FloatKnobOrSlider(ref attackTau,  0f, 1f, attackTauKnob);
+        FloatKnobOrSlider(ref releaseTau, 0f, 2f, releaseTauKnob);
+
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
@@ -46,6 +59,8 @@ public class SystemAudioSpectrumNode : TickingNode
         if (capture == null || !capture.IsRunning) return false;
         spectrumDataKnob.SetValue(capture.Spectrum);
         sampleRateKnob.SetValue((float)capture.SampleRate);
+        capture.AttackTau  = attackTauKnob.connected()  ? attackTauKnob.GetValue<float>()  : attackTau;
+        capture.ReleaseTau = releaseTauKnob.connected() ? releaseTauKnob.GetValue<float>() : releaseTau;
         return true;
     }
 }

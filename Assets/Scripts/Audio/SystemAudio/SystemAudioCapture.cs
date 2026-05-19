@@ -42,6 +42,9 @@ namespace Lasp
         [SerializeField, Range(0f, 1f)] private float attackTau  = 0.04f;
         [SerializeField, Range(0f, 2f)] private float releaseTau = 0.25f;
 
+        public float AttackTau  { get => attackTau;  set => attackTau  = Mathf.Clamp(value, 0f, 1f); }
+        public float ReleaseTau { get => releaseTau; set => releaseTau = Mathf.Clamp(value, 0f, 2f); }
+
         private bool _running;
         public bool IsRunning => _running;
 
