@@ -3,24 +3,23 @@ using UnityEngine;
 public class SpaceshipController : MonoBehaviour
 {
     private Vector3 velocity;
-    public Color shipColor;
     public SpaceshipProjectile projectilePrefab;
 
     // Velocity along polar axes, ie radial (in/out) speed and circumferential (around circle speed)
     private Vector2 polarVelocity;
+    private bool calibrated;
+
+    new public Renderer renderer;
 
     public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard)
     {
         SpaceshipController ship = Instantiate(prefab, gameBoard.transform);
         ship.velocity = Vector3.zero;
-        ship.transform.localPosition = Vector3.zero;
+        // Instantiate near edge of game board
+        var rotation = Quaternion.Euler(0, 0, 0);
+        ship.transform.localPosition = rotation * Vector3.right * 0.75f * SpaceshipGameConstants.Instance.boundaryRadius;
+        ship.calibrated = false;
         return ship;
-    }
-
-    void Start()
-    {
-        //shipColor = Random.ColorHSV(0, 1, 0.5f, 1, 0.5f, 1);
-        //OnUpdateColor(shipColor);
     }
 
     public void OnStickInput(Vector2 leftStick, Vector2 rightStick)
@@ -38,12 +37,29 @@ public class SpaceshipController : MonoBehaviour
 
     public void OnUpdateColor(Color color)
     {
-        Renderer renderer = GetComponent<Renderer>();
         if (renderer != null)
         {
-            renderer.material.SetColor("_EmissionColor", color);
+            renderer.material.SetColor("_Color", color);
         }
+    }
 
+    public void OnCalibrationStatus(byte status)
+    {
+        if (status == 0)
+        {
+            calibrated = false;
+            renderer.material.SetFloat("_Flashing", 1);
+        }
+        else
+        {
+            calibrated = true;
+            renderer.material.SetFloat("_Flashing", 0);
+        }
+    }
+
+    public void OnCalibrateRotation(float angleRadians)
+    {
+        transform.localPosition = Quaternion.Euler(0, angleRadians*Mathf.Rad2Deg, 0) * transform.localPosition;
     }
 
     public void OnButtonPress(byte buttonId)

@@ -61,7 +61,10 @@ public class SpaceshipGameController : MonoBehaviour
     {
         Update = 1,
         ChangeColor,
-        Press
+        Press,
+        Gyro,
+        Rotate,
+        CalibrationStatus
     }
 
     struct SpaceshipGameEvent
@@ -81,8 +84,8 @@ public class SpaceshipGameController : MonoBehaviour
     public void OnClose(WebSocketConnection connection)
     {
         var leavingPlayer = ships[connection.id];
-        Destroy(leavingPlayer.gameObject);
         ships.Remove(connection.id);
+        Destroy(leavingPlayer.gameObject);
     }
 
     private Vector2 RandomPosition()
@@ -129,7 +132,7 @@ public class SpaceshipGameController : MonoBehaviour
                     var b = data[3];
                     Color32 color = new Color32(r, g, b, 255);
                     ship.OnUpdateColor(color);
-                    // Debug.Log($"Received ColorChange event for conn {conn} to {color}");
+                    Debug.Log($"Received ColorChange event for conn {conn} to {color}");
                     break;
                 case SpaceshipGameEventType.Update:
                     float data1 = System.BitConverter.ToSingle(data, 1);
@@ -143,6 +146,14 @@ public class SpaceshipGameController : MonoBehaviour
                     var buttonId = data[1];
                     ship.OnButtonPress(buttonId);
                     Debug.Log($"Received Press event for conn {conn} for button {buttonId}");
+                    break;
+                case SpaceshipGameEventType.Rotate:
+                    float radians = System.BitConverter.ToSingle(data, 1);
+                    ship.OnCalibrateRotation(radians);
+                    break;
+                case SpaceshipGameEventType.CalibrationStatus:
+                    byte status = data[1];
+                    ship.OnCalibrationStatus(status);
                     break;
             }
             ships[conn] = ship;
