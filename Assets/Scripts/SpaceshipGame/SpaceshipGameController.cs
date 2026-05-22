@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,8 @@ public class SpaceshipGameController : MonoBehaviour
 
     public SpaceshipController spaceshipPrefab;
     public GameObject gameBoard;
+
+    public WebSocketServer.WebSocketServer server;
 
     int fluidVelocityKernel;
 
@@ -51,10 +54,23 @@ public class SpaceshipGameController : MonoBehaviour
 
     public static float dragFactor = 0.005f;
     public float playerSize = 2;
-
+    // 1 byte for event id, 4 bytes for two floats r & theta. Pre-initialize with the position event type representation
+    private byte[] shipPositionEventBuffer = new byte[1 + 4 * 2] { (byte)SpaceshipGameEventType.ShipPosition,0,0,0,0,0,0,0,0 }; 
     void Update()
     {
+        foreach (var kvPair in ships)
+        {
+            var id = kvPair.Key;
+            var ship = kvPair.Value;
 
+            float r = ship.transform.localPosition.magnitude / SpaceshipGameConstants.Instance.boundaryRadius;
+            float theta = Mathf.Atan2(ship.transform.localPosition.z, ship.transform.localPosition.x);
+            byte[] rBytes = BitConverter.GetBytes(r);
+            byte[] thetaBytes = BitConverter.GetBytes(theta);
+            Buffer.BlockCopy(rBytes, 0, shipPositionEventBuffer, 1, 4);
+            Buffer.BlockCopy(thetaBytes, 0, shipPositionEventBuffer, 5, 4);
+            server.SendBinary(id, shipPositionEventBuffer);
+        }
     }
 
     enum SpaceshipGameEventType
@@ -64,7 +80,9 @@ public class SpaceshipGameController : MonoBehaviour
         Press,
         Gyro,
         Rotate,
-        CalibrationStatus
+        CalibrationStatus,
+        ShipPosition,
+        TouchPosition
     }
 
     struct SpaceshipGameEvent
@@ -87,12 +105,6 @@ public class SpaceshipGameController : MonoBehaviour
         ships.Remove(connection.id);
         Destroy(leavingPlayer.gameObject);
     }
-
-    private Vector2 RandomPosition()
-    {
-        return new Vector2(Random.Range(0, SpaceshipGameConstants.Instance.gameBoardSize.x), Random.Range(0, SpaceshipGameConstants.Instance.gameBoardSize.y));
-    }
-
 
 /*
       Binary format
@@ -154,6 +166,11 @@ public class SpaceshipGameController : MonoBehaviour
                 case SpaceshipGameEventType.CalibrationStatus:
                     byte status = data[1];
                     ship.OnCalibrationStatus(status);
+                    break;
+                case SpaceshipGameEventType.TouchPosition:
+                    float touchR = System.BitConverter.ToSingle(data, 1);
+                    float touchTheta = System.BitConverter.ToSingle(data, 5);
+                    ship.OnTouchInput(touchR, touchTheta);
                     break;
             }
             ships[conn] = ship;

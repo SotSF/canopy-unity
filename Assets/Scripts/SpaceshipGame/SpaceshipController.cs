@@ -34,6 +34,16 @@ public class SpaceshipController : MonoBehaviour
         velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameConstants.Instance.maxSpeed);
     }
 
+    public void OnTouchInput(float r, float theta)
+    {
+        // Convert polar input to canopy position and compute direction from ship to touch point
+        // then use that direction to update velocity
+        var scaledRadius = r * SpaceshipGameConstants.Instance.boundaryRadius;
+        Vector3 targetPosition = new Vector3(scaledRadius * Mathf.Cos(theta), 0, scaledRadius * Mathf.Sin(theta));
+        Vector3 direction = targetPosition - transform.localPosition;
+        velocity += direction.normalized* SpaceshipGameConstants.Instance.velocityScalingFactor;
+        velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameConstants.Instance.maxSpeed);
+    }
 
     public void OnUpdateColor(Color color)
     {
