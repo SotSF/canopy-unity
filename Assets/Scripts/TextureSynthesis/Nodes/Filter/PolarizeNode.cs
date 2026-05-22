@@ -76,6 +76,11 @@ public class PolarizeNode : TextureSynthNode
         //Execute compute shader
         PolarizeShader.SetInt("width", tex.width);
         PolarizeShader.SetInt("height", tex.height);
+        PolarizeShader.SetInt("NumPixels", Constants.PIXELS_PER_STRIP);
+        PolarizeShader.SetInt("NumStrips", Constants.NUM_STRIPS);
+        PolarizeShader.SetFloat("ApexRadius", Canopy.instance.ApexRadius);
+        PolarizeShader.SetFloat("CanopyOuterRadius", Canopy.instance.CanopyOuterRadius);
+        PolarizeShader.SetBuffer(kernelId, "RadialDistances", Canopy.instance.RadialDistanceBuffer);
         PolarizeShader.SetTexture(kernelId, "OutputTex", outputTex);
         PolarizeShader.SetTexture(kernelId, "InputTex", tex);
         

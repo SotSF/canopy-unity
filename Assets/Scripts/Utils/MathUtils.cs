@@ -126,6 +126,45 @@ public static class MathUtils
         return Catenary(a, b, rLength, N, 1);
     }
 
+    /**
+     * Like Catenary, but the returned N points are spaced uniformly by arc length
+     * along the curve rather than by horizontal X. This matches the physical reality
+     * of LEDs at fixed spacing along a hanging strip: each consecutive pair of points
+     * is exactly rLength / (N-1) of curve length apart.
+     */
+    public static Vector2[] CatenaryArcLength(Vector2 a, Vector2 b, float rLength, int N)
+    {
+        // Oversample the catenary, then resample by cumulative arc length.
+        int oversample = Mathf.Max(N * 16, 4096);
+        Vector2[] dense = Catenary(a, b, rLength, oversample);
+
+        float[] cumArc = new float[oversample];
+        cumArc[0] = 0f;
+        for (int i = 1; i < oversample; i++)
+        {
+            cumArc[i] = cumArc[i - 1] + (dense[i] - dense[i - 1]).magnitude;
+        }
+        float totalArc = cumArc[oversample - 1];
+
+        Vector2[] result = new Vector2[N];
+        result[0] = dense[0];
+        result[N - 1] = dense[oversample - 1];
+
+        int j = 0;
+        for (int i = 1; i < N - 1; i++)
+        {
+            float targetArc = (i / (float)(N - 1)) * totalArc;
+            while (j < oversample - 2 && cumArc[j + 1] < targetArc)
+            {
+                j++;
+            }
+            float span = cumArc[j + 1] - cumArc[j];
+            float t = span > 1e-9f ? (targetArc - cumArc[j]) / span : 0f;
+            result[i] = Vector2.Lerp(dense[j], dense[j + 1], t);
+        }
+        return result;
+    }
+
 
     /********************************************************************************
      * Helper methods

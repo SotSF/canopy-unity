@@ -37,10 +37,58 @@ public class Canopy: MonoBehaviour
     public CanopyProtocol proto = CanopyProtocol.HTTP;
 
     const float apexRadius = 0.332f;
+    const float stripLength = 2.5f;
+
+    private ComputeBuffer radialDistanceBuffer;
+    private Vector2[] catenaryPoints;
+
+    /** Per-pixel horizontal distance from the apex side of the strip, in meters.
+     *  Built at Awake from an arc-length-resampled catenary so entry i is the
+     *  true horizontal projection of LED i (which is i/PIXELS_PER_METER meters
+     *  along the physical strip). Consumed by Polarize/Depolarize compute shaders. */
+    public ComputeBuffer RadialDistanceBuffer => radialDistanceBuffer;
+
+    /** apexRadius + horizontal distance of the outermost LED. With sag this is
+     *  less than apexRadius + stripLength. The compute shaders use this to size
+     *  the canopy disk within their output textures. */
+    public float CanopyOuterRadius { get; private set; }
+
+    public float ApexRadius => apexRadius;
+
     private void Awake()
     {
         originalRotation = Quaternion.identity;
         instance = this;
+        InitializeCatenaryBuffer();
+    }
+
+    private void OnDestroy()
+    {
+        radialDistanceBuffer?.Release();
+        radialDistanceBuffer = null;
+    }
+
+    private Vector2[] ComputeCatenaryPoints()
+    {
+        Vector2 a = Vector2.zero;
+        Vector2 b = new Vector2(end.position.x - start.position.x, end.position.y - start.position.y);
+        return MathUtils.CatenaryArcLength(a, b, stripLength, Constants.PIXELS_PER_STRIP);
+    }
+
+    private void InitializeCatenaryBuffer()
+    {
+        catenaryPoints = ComputeCatenaryPoints();
+
+        float[] horizDist = new float[Constants.PIXELS_PER_STRIP];
+        for (int i = 0; i < Constants.PIXELS_PER_STRIP; i++)
+        {
+            horizDist[i] = catenaryPoints[i].x;
+        }
+        CanopyOuterRadius = apexRadius + horizDist[Constants.PIXELS_PER_STRIP - 1];
+
+        radialDistanceBuffer?.Release();
+        radialDistanceBuffer = new ComputeBuffer(Constants.PIXELS_PER_STRIP, sizeof(float));
+        radialDistanceBuffer.SetData(horizDist);
     }
     public void EnterSimulationMode()
     {
@@ -148,7 +196,7 @@ public class Canopy: MonoBehaviour
         List<Vector2> uvs = new List<Vector2>();
         List<int> tris = new List<int>();
 
-        Vector2[] catenary = MathUtils.Catenary(Vector2.zero, new Vector2(end.position.x-start.position.x, end.position.y-start.position.y), 2.5f, 151);
+        Vector2[] catenary = ComputeCatenaryPoints();
 
         for (int stripIndex = 0; stripIndex < Constants.NUM_STRIPS; stripIndex++)
         {

@@ -9,6 +9,15 @@ SamplerState SmpLinearClamp;
 uint width;
 uint height;
 
+// Per-pixel horizontal distance from the apex side of the strip, in meters.
+// Length = NumPixels. Used to inverse-map a physical radius back to an LED
+// index along the catenary-curved strip.
+StructuredBuffer<float> RadialDistances;
+float ApexRadius;
+float CanopyOuterRadius;
+uint NumPixels;
+uint NumStrips;
+
 #define PI 3.14159265f
 #define TAU 6.2831853f
 
@@ -16,54 +25,57 @@ uint height;
 void Depolarize(uint3 id : SV_DispatchThreadID)
 {
     float2 outputDims = float2(width, height);
-    float2 uv = id.xy / outputDims;
-    
-    // Convert UV [0,1] to Centered [-1, 1]
-    float2 centered = uv * 2.0 - 1.0;
-    
-    // Convert Cartesian to Polar
+    // Texel-center UV.
+    float2 uv = (id.xy + 0.5) / outputDims;
+
+    // Convert UV to centered coordinates [-1, 1] where 1 = CanopyOuterRadius
+    // from the center. Aspect-correct so the canopy stays circular when the
+    // output isn't square.
+    float minDim = min(outputDims.x, outputDims.y);
+    float2 centered = float2(
+        (uv.x - 0.5) * (outputDims.x / minDim) * 2.0,
+        (uv.y - 0.5) * (outputDims.y / minDim) * 2.0
+    );
+
     float r = length(centered);
     float theta = atan2(centered.y, centered.x);
-    
-    // Normalize theta from [-PI, PI] to [0, 1]
+
     float normalizedAngle = theta / TAU;
     if (normalizedAngle < 0) normalizedAngle += 1.0;
-    
-    // Map normalized angle to Y coordinate (strip index 0-95)
-    // Y is the angle
-    float y = normalizedAngle; 
 
-    // Map radius to X coordinate (pixel index 0-150)
-    // Physical parameters
-    float apexRadius = 0.332f;
-    float stripLength = 2.5f;
-    float totalRadius = stripLength + apexRadius;
-    
-    // r is 0..1 representing 0..totalRadius (if we fit the whole canopy in the square)
-    // Actually, let's say the square (-1..1) covers the diameter of the canopy.
-    // So r=1 is the edge of the canopy.
-    
-    // Inverse of: normalizedX = ((stripLength * normPos) + apexRadius) / totalRadius;
-    // r = ((stripLength * normPos) + apexRadius) / totalRadius;
-    // r * totalRadius = stripLength * normPos + apexRadius
-    // normPos = (r * totalRadius - apexRadius) / stripLength
-    
-    float normPos = (r * totalRadius - apexRadius) / stripLength;
-    
-    float x = normPos;
+    // Physical horizontal distance from the apex side of the strip.
+    float targetHorizDist = r * CanopyOuterRadius - ApexRadius;
+    float maxHorizDist = RadialDistances[NumPixels - 1];
 
-    if (normPos < 0 || normPos > 1) {
-        OutputTex[id.xy] = float4(0, 0, 0, 0); // Black/Transparent if out of bounds (hole or outside)
-    } else {
-        // Sample Input Texture
-        // Input Texture is 151x96
-        // x (0-1) maps to 0-150
-        // y (0-1) maps to 0-95
-        
-        // Using SamplerState to handle interpolation
-        // Coordinate system for SampleLevel is [0, 1]
-        
-        float4 result = InputTex.SampleLevel(SmpLinearClamp, float2(x, y), 0);
-        OutputTex[id.xy] = result;
+    if (targetHorizDist < 0 || targetHorizDist > maxHorizDist)
+    {
+        OutputTex[id.xy] = float4(0, 0, 0, 0);
+        return;
     }
+
+    // RadialDistances is monotonic increasing along the strip. Walk it to
+    // find the LED index that lies at targetHorizDist, then convert to a
+    // texel-centered UV into the input strip texture.
+    float pixelIdx = 0;
+    [loop]
+    for (uint i = 0; i < NumPixels - 1; i++)
+    {
+        float a = RadialDistances[i];
+        float b = RadialDistances[i + 1];
+        if (targetHorizDist >= a && targetHorizDist <= b)
+        {
+            float span = b - a;
+            float t = span > 1e-9 ? (targetHorizDist - a) / span : 0;
+            pixelIdx = (float)i + t;
+            break;
+        }
+    }
+
+    float x = (pixelIdx + 0.5) / (float)NumPixels;
+    // Strips wrap around, so apply the half-texel offset and let the repeat
+    // sampler handle the seam between strip 0 and strip NumStrips-1.
+    float y = (normalizedAngle * (float)NumStrips + 0.5) / (float)NumStrips;
+
+    float4 result = InputTex.SampleLevel(SmpLinearRepeat, float2(x, y), 0);
+    OutputTex[id.xy] = result;
 }

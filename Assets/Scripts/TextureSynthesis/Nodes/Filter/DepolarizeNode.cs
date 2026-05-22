@@ -76,6 +76,11 @@ public class DepolarizeNode : TextureSynthNode
         //Execute compute shader
         DepolarizeShader.SetInt("width", outputSize.x);
         DepolarizeShader.SetInt("height", outputSize.y);
+        DepolarizeShader.SetInt("NumPixels", Constants.PIXELS_PER_STRIP);
+        DepolarizeShader.SetInt("NumStrips", Constants.NUM_STRIPS);
+        DepolarizeShader.SetFloat("ApexRadius", Canopy.instance.ApexRadius);
+        DepolarizeShader.SetFloat("CanopyOuterRadius", Canopy.instance.CanopyOuterRadius);
+        DepolarizeShader.SetBuffer(kernelId, "RadialDistances", Canopy.instance.RadialDistanceBuffer);
         DepolarizeShader.SetTexture(kernelId, "OutputTex", outputTex);
         DepolarizeShader.SetTexture(kernelId, "InputTex", tex);
         
