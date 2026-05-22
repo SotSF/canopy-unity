@@ -183,6 +183,68 @@ namespace WebSocketServer {
             return null;
         }
 
+        // Builds a server-to-client frame: FIN=1, RSV=0, mask=0 (RFC 6455 requires server frames unmasked),
+        // payload length encoded per spec (7-bit / 7+16 / 7+64), big-endian extended lengths.
+        private static byte[] EncodeFrame(byte opcode, byte[] payload) {
+            if (payload == null) payload = Array.Empty<byte>();
+            int payloadLen = payload.Length;
+
+            int headerLen;
+            byte lenMarker;
+            if (payloadLen <= 125) {
+                headerLen = 2;
+                lenMarker = (byte)payloadLen;
+            } else if (payloadLen <= ushort.MaxValue) {
+                headerLen = 4;
+                lenMarker = 126;
+            } else {
+                headerLen = 10;
+                lenMarker = 127;
+            }
+
+            byte[] frame = new byte[headerLen + payloadLen];
+            frame[0] = (byte)(0x80 | (opcode & 0x0F));
+            frame[1] = lenMarker;
+
+            if (lenMarker == 126) {
+                frame[2] = (byte)((payloadLen >> 8) & 0xFF);
+                frame[3] = (byte)(payloadLen & 0xFF);
+            } else if (lenMarker == 127) {
+                // Top 4 bytes of the uint64 are always 0 since payloadLen is int.
+                frame[2] = 0; frame[3] = 0; frame[4] = 0; frame[5] = 0;
+                frame[6] = (byte)((payloadLen >> 24) & 0xFF);
+                frame[7] = (byte)((payloadLen >> 16) & 0xFF);
+                frame[8] = (byte)((payloadLen >> 8) & 0xFF);
+                frame[9] = (byte)(payloadLen & 0xFF);
+            }
+
+            if (payloadLen > 0) {
+                Buffer.BlockCopy(payload, 0, frame, headerLen, payloadLen);
+            }
+            return frame;
+        }
+
+        public static byte[] EncodeBinaryFrame(byte[] payload) {
+            return EncodeFrame((byte)WebSocketOpCode.Binary, payload);
+        }
+
+        public static byte[] EncodePingFrame(byte[] payload = null) {
+            return EncodeFrame((byte)WebSocketOpCode.Ping, payload);
+        }
+
+        public static byte[] EncodePongFrame(byte[] payload) {
+            return EncodeFrame((byte)WebSocketOpCode.Pong, payload);
+        }
+
+        // RFC 6455 §5.5.1: Close payload is a 2-byte big-endian status code optionally followed by a UTF-8 reason.
+        public static byte[] EncodeCloseFrame(ushort statusCode = 1000) {
+            byte[] payload = new byte[] {
+                (byte)((statusCode >> 8) & 0xFF),
+                (byte)(statusCode & 0xFF)
+            };
+            return EncodeFrame((byte)WebSocketOpCode.Close, payload);
+        }
+
         public static string DecodeText(WebSocketDataFrame dataframe) {
             if (dataframe.length > 0 && dataframe.mask) {
                 byte[] decoded = new byte[dataframe.length];
