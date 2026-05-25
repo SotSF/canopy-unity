@@ -270,15 +270,20 @@ namespace NodeEditorFramework
 		// CONTEXT CLICKS
 
 		[EventHandlerAttribute (EventType.MouseDown, 0)] // One of the highest priorities after node selection
-		private static void HandleContextClicks (NodeEditorInputInfo inputInfo) 
+		private static void HandleContextClicks (NodeEditorInputInfo inputInfo)
 		{
-			if (Event.current.button == 1) 
+			if (Event.current.button == 1)
 			{ // Handle context clicks on Node and canvas
 				GenericMenu contextMenu = new GenericMenu ();
-				if (inputInfo.editorState.focusedNode != null) // Node Context Click
+				bool canvasContext = inputInfo.editorState.focusedNode == null;
+				if (!canvasContext)
 					FillContextMenu (inputInfo, contextMenu, ContextType.Node);
-				else // Editor Context Click
+				else
 					FillContextMenu (inputInfo, contextMenu, ContextType.Canvas);
+				// Inline search bar on the canvas menu only — the node menu just
+				// has Delete/Duplicate, where filtering would be useless noise.
+				if (canvasContext)
+					contextMenu.searchEnabled = true;
 				contextMenu.ShowAsContext ();
 				Event.current.Use ();
 			}

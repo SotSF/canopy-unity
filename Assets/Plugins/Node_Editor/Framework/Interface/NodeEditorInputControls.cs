@@ -14,7 +14,7 @@ namespace NodeEditorFramework
 		#region Canvas Context Entries
 
 		[ContextFillerAttribute (ContextType.Canvas)]
-		private static void FillAddNodes (NodeEditorInputInfo inputInfo, GenericMenu canvasContextMenu) 
+		private static void FillAddNodes (NodeEditorInputInfo inputInfo, GenericMenu canvasContextMenu)
 		{ // Fill context menu with nodes to add to the canvas
 			NodeEditorState state = inputInfo.editorState;
 			List<string> nodes = NodeTypes.getCompatibleNodes (state.connectKnob);
@@ -35,6 +35,31 @@ namespace NodeEditorFramework
 			Node.Create (callback.message, NodeEditor.ScreenToCanvasSpace (callback.inputPos), callback.editorState.connectKnob);
 			callback.editorState.connectKnob = null;
 			NodeEditor.RepaintClients ();
+		}
+
+		// Spacebar opens a flat searchable palette of compatible nodes at the
+		// mouse position. Same spawn path as the right-click "Add" menu, just
+		// type-to-filter for fast keyboard-only workflows.
+		[HotkeyAttribute (KeyCode.Space, EventType.KeyDown)]
+		private static void OpenQuickAddPalette (NodeEditorInputInfo inputInfo)
+		{
+			// Don't hijack space while the user is typing in a node text field.
+			if (GUIUtility.keyboardControl > 0)
+				return;
+
+			NodeEditorState state = inputInfo.editorState;
+			GenericMenu palette = new GenericMenu ();
+			List<string> nodes = NodeTypes.getCompatibleNodes (state.connectKnob);
+			foreach (string node in nodes)
+			{
+				if (NodeCanvasManager.CheckCanvasCompability (node, state.canvas.GetType ()) && state.canvas.CanAddNode (node))
+					palette.AddItem (new GUIContent (NodeTypes.getNodeData (node).adress), false, CreateNodeCallback, new NodeEditorInputInfo (node, state));
+			}
+			palette.searchEnabled = true;
+			palette.forceFlatList = true;
+			palette.Show (inputInfo.inputPos);
+			// Consume the space key so it doesn't end up typed into the field.
+			inputInfo.inputEvent.Use ();
 		}
 
 		#endregion

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 #if UNITY_EDITOR
@@ -89,33 +90,113 @@ namespace NodeEditorFramework.Utilities
 		public static Texture2D expandRight;
 		public static float itemHeight;
 		public static GUIStyle selectedLabel;
+		// Scaled copies of node label styles, kept local to the popup so we
+		// don't enlarge knob/header labels on every node by enlarging nodeLabel.
+		public static GUIStyle itemLabel;
+		public static GUIStyle itemLabelSelected;
 
 		public float minWidth;
 
 		private const float minCloseDistance = 200;
+
+		// Multiplier on font size, row height, and arrow column for legibility
+		// on high-DPI displays.
+		private const float MenuScale = 1.5f;
+		private const float ExpandArrowSize = 12f * MenuScale;
+
+		// Search-bar mode. searchEnabled adds a text field at the top of the
+		// popup; forceFlatList keeps the popup in flat-list mode even when the
+		// query is empty (used by the spacebar quick-add palette).
+		public bool searchEnabled = false;
+		public bool forceFlatList = false;
+		private string searchQuery = "";
+		private int flatSelectedIndex = 0;
+		private int flatScrollIndex = 0;
+		private MenuItem[] cachedFlatLeaves = null;
+		private MenuItem[] cachedFiltered = null;
+		private string cachedFilteredQuery = null;
+		private const int MaxVisibleFlatRows = 14;
+		// Track the frame Show was called on so we can eat the trailing
+		// character event from the spacebar that opened the palette.
+		private int showFrame = int.MinValue;
+		private bool eatOpeningChar = false;
+		// TextEditor drives text editing directly so we don't need IMGUI focus
+		// (which doesn't work reliably inside OverlayGUI popups — the popup
+		// draws at different points in the OnGUI flow depending on event type,
+		// breaking IMGUI's focus state machine).
+		private TextEditor textEditor;
+		private static GUIStyle searchFieldStyle;
 
 		public PopupMenu () 
 		{
 			SetupGUI ();
 		}
 		
-		public void SetupGUI () 
+		public void SetupGUI ()
 		{
 			backgroundStyle = new GUIStyle (GUI.skin.box);
 			backgroundStyle.contentOffset = new Vector2 (2, 2);
 			expandRight = ResourceManager.LoadTexture ("Textures/expandRight.png");
-			itemHeight = GUI.skin.label.CalcHeight (new GUIContent ("text"), 100);
-			
+
+			GUIStyle baseLabel = NodeEditorGUI.nodeLabel ?? GUI.skin.label;
+			GUIStyle baseSelected = NodeEditorGUI.nodeLabelSelected ?? GUI.skin.label;
+			int basePx = baseLabel.fontSize > 0 ? baseLabel.fontSize : GUI.skin.label.fontSize;
+			int scaledPx = Mathf.RoundToInt (basePx * MenuScale);
+			itemLabel = new GUIStyle (baseLabel) { fontSize = scaledPx };
+			itemLabelSelected = new GUIStyle (baseSelected) { fontSize = scaledPx };
+			itemHeight = itemLabel.CalcHeight (new GUIContent ("text"), 100);
+
 			selectedLabel = new GUIStyle (GUI.skin.label);
 			selectedLabel.normal.background = RTEditorGUI.ColorToTex (1, new Color (0.4f, 0.4f, 0.4f));
+
+			searchFieldStyle = new GUIStyle (GUI.skin.textField) { fontSize = scaledPx };
 		}
+
+		// Minimum width used by both right-click and spacebar popups when
+		// search is enabled, so the search field and menu rows always agree.
+		private const float SearchPopupMinWidth = 260f;
 
 		public void Show (Vector2 pos, float MinWidth = 40)
 		{
 			minWidth = MinWidth;
-			position = calculateRect (pos, menuItems, minWidth);
+			if (searchEnabled && forceFlatList)
+			{
+				// Flat mode recomputes its rect in DrawFlatList every frame;
+				// only the anchor position matters here.
+				position = new Rect (pos.x, pos.y, 0, 0);
+			}
+			else if (searchEnabled)
+			{
+				// Redo the up/down flip with the search header included so the
+				// header never overlaps the menu and the whole popup fits.
+				// Use a shared minimum width so the header and body match.
+				Rect menuRect = calculateRect (pos, menuItems, minWidth);
+				float unifiedWidth = Mathf.Max (menuRect.width, SearchPopupMinWidth);
+				float headerHeight = SearchHeaderHeight ();
+				float totalHeight = menuRect.height + headerHeight;
+				bool down = (pos.y + totalHeight) <= Screen.height;
+				position = new Rect (pos.x, down ? pos.y : pos.y - totalHeight, unifiedWidth, menuRect.height);
+			}
+			else
+			{
+				position = calculateRect (pos, menuItems, minWidth);
+			}
 			selectedPath = "";
+			searchQuery = "";
+			flatSelectedIndex = 0;
+			flatScrollIndex = 0;
+			cachedFiltered = null;
+			cachedFilteredQuery = null;
+			showFrame = Time.frameCount;
+			eatOpeningChar = true;
 			OverlayGUI.OpenPopup (this);
+		}
+
+		private static float SearchHeaderHeight ()
+		{
+			GUIStyle style = searchFieldStyle ?? GUI.skin.textField;
+			float padY = backgroundStyle != null ? backgroundStyle.contentOffset.y : 2f;
+			return style.CalcHeight (new GUIContent ("Mg"), 100) + 4 + padY * 2 + 2;
 		}
 
 		public Vector2 Position { get { return position.position; } }
@@ -191,27 +272,381 @@ namespace NodeEditorFramework.Utilities
 		
 #region Drawing
 		
-		public void Draw () 
+		public void Draw ()
 		{
-			int inRect = DrawGroup (position, menuItems);
-			
-			while (groupToDraw != null && !close)
+			// Eat navigation keys before the search TextField sees them so the
+			// arrow/enter/escape navigation works while focus is in the field.
+			if (searchEnabled)
+				HandleSearchKeyboard ();
+
+			bool flat = searchEnabled && (forceFlatList || !string.IsNullOrEmpty (searchQuery));
+
+			int inRect;
+			if (flat)
 			{
-				MenuItem group = groupToDraw;
-				groupToDraw = null;
-				if (group.group) // Draw group and find if the mouse is in group rect
-					inRect = Mathf.Max(inRect, DrawGroup(group.groupPos, group.subItems));
+				inRect = DrawFlatList (position);
+			}
+			else if (searchEnabled)
+			{
+				// Search field above the existing hierarchical menu. The menu
+				// itself is drawn at a shifted Y so it sits beneath the field.
+				float fieldRowHeight;
+				inRect = DrawSearchHeader (position, out fieldRowHeight);
+				Rect bodyPos = new Rect (position.x, position.y + fieldRowHeight, position.width, position.height);
+				inRect = Mathf.Max (inRect, DrawGroup (bodyPos, menuItems));
+
+				while (groupToDraw != null && !close)
+				{
+					MenuItem group = groupToDraw;
+					groupToDraw = null;
+					if (group.group)
+						inRect = Mathf.Max (inRect, DrawGroup (group.groupPos, group.subItems));
+				}
+			}
+			else
+			{
+				inRect = DrawGroup (position, menuItems);
+
+				while (groupToDraw != null && !close)
+				{
+					MenuItem group = groupToDraw;
+					groupToDraw = null;
+					if (group.group) // Draw group and find if the mouse is in group rect
+						inRect = Mathf.Max(inRect, DrawGroup(group.groupPos, group.subItems));
+				}
 			}
 
-			if (close || inRect < 2 || (Event.current.type == EventType.MouseDown && inRect < 3)) 
+			if (close || inRect < 2 || (Event.current.type == EventType.MouseDown && inRect < 3))
 				OverlayGUI.ClosePopup ();
 
 			NodeEditor.RepaintClients ();
 		}
-		
-		private int DrawGroup (Rect pos, List<MenuItem> menuItems) 
+
+		// Renders a standalone search-field row above the hierarchical menu.
+		// Returns the inRect hit-test state and outputs the row's total height
+		// (including padding) so the caller can shift the body down.
+		private int DrawSearchHeader (Rect pos, out float rowHeight)
 		{
-			Rect rect = calculateRect (pos.position, menuItems, minWidth);
+			GUIStyle style = searchFieldStyle ?? GUI.skin.textField;
+			float fieldHeight = style.CalcHeight (new GUIContent ("Mg"), 100) + 4;
+			float padX = backgroundStyle.contentOffset.x;
+			float padY = backgroundStyle.contentOffset.y;
+			float width = Mathf.Max (pos.width, 200f);
+			rowHeight = fieldHeight + padY * 2 + 2;
+
+			Rect headerRect = new Rect (pos.x, pos.y, width, rowHeight);
+			GUI.BeginGroup (extendRect (headerRect, backgroundStyle.contentOffset), GUIContent.none, backgroundStyle);
+			Rect fieldRect = new Rect (padX, padY, width - padX * 2, fieldHeight - 4);
+			DrawRealSearchField (fieldRect, style);
+			GUI.EndGroup ();
+
+			return headerRect.Contains (Event.current.mousePosition) ? 3 : 1;
+		}
+
+		// Draws the search field. Text editing is driven by our owned
+		// TextEditor in HandleSearchKeyboard (IMGUI focus doesn't work inside
+		// OverlayGUI popups). The caret and selection are rendered as
+		// overlay rects positioned via GUIStyle.GetCursorPixelPosition, so
+		// the text never shifts as the caret blinks.
+		private static readonly Color SearchSelectionColor = new Color (0.30f, 0.55f, 0.95f, 0.45f);
+		private static readonly Color SearchCaretColor = new Color (0.95f, 0.95f, 0.95f, 1f);
+
+		private void DrawRealSearchField (Rect rect, GUIStyle style)
+		{
+			GUI.Box (rect, GUIContent.none, style);
+
+			Rect contentRect = new Rect (rect.x + 4, rect.y, rect.width - 8, rect.height);
+			GUIContent content = new GUIContent (searchQuery);
+
+			int cursor = textEditor != null
+				? Mathf.Clamp (textEditor.cursorIndex, 0, searchQuery.Length)
+				: searchQuery.Length;
+			int select = textEditor != null
+				? Mathf.Clamp (textEditor.selectIndex, 0, searchQuery.Length)
+				: cursor;
+
+			// Selection background (drawn before the text so the text sits on top).
+			if (Event.current.type == EventType.Repaint && cursor != select)
+			{
+				int a = Mathf.Min (cursor, select);
+				int b = Mathf.Max (cursor, select);
+				Vector2 pa = style.GetCursorPixelPosition (contentRect, content, a);
+				Vector2 pb = style.GetCursorPixelPosition (contentRect, content, b);
+				Color prev = GUI.color;
+				GUI.color = SearchSelectionColor;
+				GUI.DrawTexture (new Rect (pa.x, pa.y, pb.x - pa.x, style.lineHeight), Texture2D.whiteTexture);
+				GUI.color = prev;
+			}
+
+			GUI.Label (contentRect, searchQuery, style);
+
+			// Blinking caret as a 1-pixel rect — doesn't shift the text.
+			if (Event.current.type == EventType.Repaint && ((int)(Time.realtimeSinceStartup * 2) & 1) == 0)
+			{
+				Vector2 caretPos = style.GetCursorPixelPosition (contentRect, content, cursor);
+				Color prev = GUI.color;
+				GUI.color = SearchCaretColor;
+				GUI.DrawTexture (new Rect (caretPos.x, caretPos.y, 1, style.lineHeight), Texture2D.whiteTexture);
+				GUI.color = prev;
+			}
+		}
+
+		// Walks the hierarchy and returns every executable leaf, sorted by
+		// full path. Cached because the hierarchy is immutable once Show'd.
+		private MenuItem[] GetFlatLeaves ()
+		{
+			if (cachedFlatLeaves != null) return cachedFlatLeaves;
+			var leaves = new List<MenuItem> ();
+			var stack = new Stack<MenuItem> ();
+			for (int i = menuItems.Count - 1; i >= 0; i--) stack.Push (menuItems[i]);
+			while (stack.Count > 0)
+			{
+				var it = stack.Pop ();
+				if (it.separator) continue;
+				if (it.group)
+				{
+					if (it.subItems != null)
+						for (int i = it.subItems.Count - 1; i >= 0; i--) stack.Push (it.subItems[i]);
+				}
+				else
+				{
+					leaves.Add (it);
+				}
+			}
+			leaves.Sort ((a, b) => string.Compare (a.path ?? "", b.path ?? "", StringComparison.OrdinalIgnoreCase));
+			cachedFlatLeaves = leaves.ToArray ();
+			return cachedFlatLeaves;
+		}
+
+		private MenuItem[] GetFilteredLeaves ()
+		{
+			if (cachedFiltered != null && cachedFilteredQuery == searchQuery)
+				return cachedFiltered;
+			var all = GetFlatLeaves ();
+			if (string.IsNullOrEmpty (searchQuery))
+			{
+				cachedFiltered = all;
+			}
+			else
+			{
+				var result = new List<MenuItem> ();
+				foreach (var leaf in all)
+				{
+					if (leaf.path != null && leaf.path.IndexOf (searchQuery, StringComparison.OrdinalIgnoreCase) >= 0)
+						result.Add (leaf);
+				}
+				cachedFiltered = result.ToArray ();
+			}
+			cachedFilteredQuery = searchQuery;
+			return cachedFiltered;
+		}
+
+		private TextEditor EnsureTextEditor ()
+		{
+			if (textEditor == null)
+			{
+				textEditor = new TextEditor ();
+				textEditor.text = searchQuery;
+				textEditor.cursorIndex = searchQuery.Length;
+				textEditor.selectIndex = searchQuery.Length;
+			}
+			return textEditor;
+		}
+
+		private void SyncQueryFromEditor (TextEditor te)
+		{
+			if (te.text != searchQuery)
+			{
+				searchQuery = te.text;
+				cachedFiltered = null;
+				flatSelectedIndex = 0;
+				flatScrollIndex = 0;
+			}
+		}
+
+		private void HandleSearchKeyboard ()
+		{
+			var e = Event.current;
+			if (e.type != EventType.KeyDown) return;
+
+			// Eat the trailing character event from the spacebar that opened
+			// the palette. IMGUI fires a separate character KeyDown right
+			// after the keyCode one, on the same frame as Show was called.
+			// Restricted to ' ' so we don't swallow a real first character if
+			// the popup opens by some other means.
+			if (eatOpeningChar && Time.frameCount == showFrame
+			    && e.character == ' ' && e.keyCode == KeyCode.None)
+			{
+				eatOpeningChar = false;
+				e.Use ();
+				return;
+			}
+			if (Time.frameCount != showFrame)
+				eatOpeningChar = false;
+
+			// Navigation / dismissal: consume before TextEditor sees them, so
+			// the down-arrow drives list navigation rather than caret movement.
+			switch (e.keyCode)
+			{
+				case KeyCode.DownArrow:
+				{
+					var filtered = GetFilteredLeaves ();
+					if (filtered.Length > 0)
+						flatSelectedIndex = Mathf.Min (flatSelectedIndex + 1, filtered.Length - 1);
+					e.Use ();
+					return;
+				}
+				case KeyCode.UpArrow:
+				{
+					var filtered = GetFilteredLeaves ();
+					if (filtered.Length > 0)
+						flatSelectedIndex = Mathf.Max (flatSelectedIndex - 1, 0);
+					e.Use ();
+					return;
+				}
+				case KeyCode.Return:
+				case KeyCode.KeypadEnter:
+				{
+					var filtered = GetFilteredLeaves ();
+					if (filtered.Length > 0 && flatSelectedIndex < filtered.Length)
+					{
+						filtered[flatSelectedIndex].Execute ();
+						close = true;
+						e.Use ();
+					}
+					return;
+				}
+				case KeyCode.Escape:
+					close = true;
+					e.Use ();
+					return;
+			}
+
+			// Hand off to TextEditor for OS hotkeys: Shift+Home, Cmd+A,
+			// Home/End, Cmd+Backspace, arrow-within-text, clipboard, etc.
+			// HandleKeyEvent doesn't insert printable characters — that's a
+			// separate event we handle manually below.
+			var te = EnsureTextEditor ();
+			if (te.text != searchQuery)
+			{
+				te.text = searchQuery;
+				te.cursorIndex = te.selectIndex = searchQuery.Length;
+			}
+			if (te.HandleKeyEvent (e))
+			{
+				SyncQueryFromEditor (te);
+				e.Use ();
+				return;
+			}
+
+			// Insert printable characters via TextEditor so the cursor / any
+			// active selection are respected. Skip when a non-typing modifier
+			// is held so Cmd+V etc. don't accidentally type 'v'.
+			bool hasModifier = (e.modifiers & (EventModifiers.Control | EventModifiers.Alt | EventModifiers.Command)) != 0;
+			char c = e.character;
+			if (!hasModifier && c >= ' ' && c != 127)
+			{
+				te.Insert (c);
+				SyncQueryFromEditor (te);
+				e.Use ();
+			}
+		}
+
+		private int DrawFlatList (Rect pos)
+		{
+			var filtered = GetFilteredLeaves ();
+			if (filtered.Length == 0) flatSelectedIndex = 0;
+			else flatSelectedIndex = Mathf.Clamp (flatSelectedIndex, 0, filtered.Length - 1);
+
+			int visibleRows = Mathf.Max (1, Mathf.Min (filtered.Length, MaxVisibleFlatRows));
+			// Keep the highlighted row in view as it moves past the visible window.
+			if (flatSelectedIndex < flatScrollIndex) flatScrollIndex = flatSelectedIndex;
+			if (flatSelectedIndex >= flatScrollIndex + visibleRows) flatScrollIndex = flatSelectedIndex - visibleRows + 1;
+			flatScrollIndex = Mathf.Clamp (flatScrollIndex, 0, Mathf.Max (0, filtered.Length - visibleRows));
+
+			float fieldHeight = (searchFieldStyle ?? GUI.skin.textField).CalcHeight (new GUIContent ("Mg"), 100) + 4;
+			float rowsHeight = (filtered.Length == 0 ? 1 : visibleRows) * itemHeight;
+
+			float width = CalcFlatWidth (filtered, fieldHeight);
+			float padY = backgroundStyle.contentOffset.y;
+			float height = fieldHeight + rowsHeight + padY * 2 + 2;
+
+			bool down = (pos.position.y + height) <= Screen.height;
+			Rect rect = new Rect (pos.position.x, pos.position.y - (down ? 0 : height), width, height);
+
+			GUI.BeginGroup (extendRect (rect, backgroundStyle.contentOffset), GUIContent.none, backgroundStyle);
+
+			float padX = backgroundStyle.contentOffset.x;
+			Rect fieldRect = new Rect (padX, padY, width - padX * 2, fieldHeight - 4);
+			DrawRealSearchField (fieldRect, searchFieldStyle ?? GUI.skin.textField);
+
+			float rowY = fieldHeight + padY;
+			if (filtered.Length == 0)
+			{
+				GUI.Label (new Rect (padX, rowY, width - padX * 2, itemHeight),
+					new GUIContent ("(no matches)"), itemLabel);
+			}
+			else
+			{
+				for (int i = 0; i < visibleRows; i++)
+				{
+					int idx = flatScrollIndex + i;
+					if (idx >= filtered.Length) break;
+					var item = filtered[idx];
+					Rect rowRect = new Rect (padX, rowY, width - padX * 2, itemHeight);
+
+					if (rowRect.Contains (Event.current.mousePosition))
+					{
+						flatSelectedIndex = idx;
+						if (Event.current.type == EventType.MouseDown ||
+						    (Event.current.button != 1 && Event.current.type == EventType.MouseUp))
+						{
+							item.Execute ();
+							close = true;
+							Event.current.Use ();
+						}
+					}
+
+					var style = (idx == flatSelectedIndex) ? itemLabelSelected : itemLabel;
+					GUI.Label (rowRect, new GUIContent (item.path), style);
+					rowY += itemHeight;
+				}
+			}
+
+			GUI.EndGroup ();
+
+			position = rect;
+
+			int inRect = 1;
+			if (rect.Contains (Event.current.mousePosition))
+				inRect = 3;
+			else
+			{
+				Rect clickRect = new Rect (rect.x - minCloseDistance, rect.y - minCloseDistance, rect.width + 2 * minCloseDistance, rect.height + 2 * minCloseDistance);
+				if (clickRect.Contains (Event.current.mousePosition))
+					inRect = 2;
+			}
+			return inRect;
+		}
+
+		private float CalcFlatWidth (MenuItem[] items, float fieldHeight)
+		{
+			float w = Mathf.Max (minWidth, 260f);
+			GUIStyle measure = itemLabel ?? GUI.skin.label;
+			for (int i = 0; i < items.Length; i++)
+			{
+				float candidate = measure.CalcSize (new GUIContent (items[i].path)).x + 16f;
+				if (candidate > w) w = candidate;
+			}
+			return w;
+		}
+		
+		private int DrawGroup (Rect pos, List<MenuItem> menuItems)
+		{
+			// Honor a caller-supplied width floor — search mode passes a unified
+			// width so the body matches the header. Submenus pass 0 and keep
+			// the natural item-derived width.
+			Rect rect = calculateRect (pos.position, menuItems, Mathf.Max (minWidth, pos.width));
 
 			// DRAW GROUP
 			currentItemHeight = backgroundStyle.contentOffset.y;
@@ -253,11 +688,11 @@ namespace NodeEditorFramework.Utilities
 					selectedPath = item.path;
 
 				bool selected = selectedPath == item.path || selectedPath.Contains (item.path + "/");
-				GUI.Label (labelRect, item.content, selected? NodeEditorGUI.nodeLabelSelected : NodeEditorGUI.nodeLabel);
-				
-				if (item.group) 
+				GUI.Label (labelRect, item.content, selected? itemLabelSelected : itemLabel);
+
+				if (item.group)
 				{
-					GUI.DrawTexture (new Rect (labelRect.x+labelRect.width-12, labelRect.y+(labelRect.height-12)/2, 12, 12), expandRight);
+					GUI.DrawTexture (new Rect (labelRect.x+labelRect.width-ExpandArrowSize, labelRect.y+(labelRect.height-ExpandArrowSize)/2, ExpandArrowSize, ExpandArrowSize), expandRight);
 					if (selected)
 					{
 						item.groupPos = new Rect (groupRect.x+groupRect.width+4, groupRect.y+currentItemHeight-2, 0, 0);
@@ -289,6 +724,9 @@ namespace NodeEditorFramework.Utilities
 			Vector2 size;
 			float width = minWidth, height = 0;
 			
+			GUIStyle measure = itemLabel ?? GUI.skin.label;
+			float groupPad = ExpandArrowSize + 10f;
+			float itemPad = 10f * MenuScale;
 			for (int itemCnt = 0; itemCnt < menuItems.Count; itemCnt++)
 			{
 				MenuItem item = menuItems[itemCnt];
@@ -296,7 +734,7 @@ namespace NodeEditorFramework.Utilities
 					height += 3;
 				else
 				{
-					width = Mathf.Max (width, GUI.skin.label.CalcSize (item.content).x + (item.group? 22 : 10));
+					width = Mathf.Max (width, measure.CalcSize (item.content).x + (item.group? groupPad : itemPad));
 					height += itemHeight;
 				}
 			}
@@ -379,6 +817,19 @@ namespace NodeEditorFramework.Utilities
 		private static PopupMenu popup;
 
 		public Vector2 Position { get { return popup.Position; } }
+
+		// Forward search-mode flags through to the underlying PopupMenu.
+		// No-ops when the wrapper is using UnityEditor.GenericMenu.
+		public bool searchEnabled
+		{
+			get { return popup != null && popup.searchEnabled; }
+			set { if (popup != null) popup.searchEnabled = value; }
+		}
+		public bool forceFlatList
+		{
+			get { return popup != null && popup.forceFlatList; }
+			set { if (popup != null) popup.forceFlatList = value; }
+		}
 		
 		public GenericMenu (bool emulateEditor = false) 
 		{
