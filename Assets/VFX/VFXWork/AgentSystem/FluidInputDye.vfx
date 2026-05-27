@@ -81,38 +81,6 @@ MonoBehaviour:
   m_UIInfos: {fileID: 114340500867371532}
   m_CustomAttributes: []
   m_ParameterInfo:
-  - name: GradientCenter
-    path: GradientCenter
-    tooltip: This is a property with the Range mode
-    space: -1
-    spaceable: 0
-    sheetType: m_Float
-    realType: Single
-    defaultValue:
-      m_Type:
-        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 0.5
-    min: 0
-    max: 1
-    enumValues: []
-    descendantCount: 0
-  - name: GradientWidth
-    path: GradientWidth
-    tooltip: 
-    space: -1
-    spaceable: 0
-    sheetType: m_Float
-    realType: Single
-    defaultValue:
-      m_Type:
-        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 1
-    min: 0
-    max: 1
-    enumValues: []
-    descendantCount: 0
   - name: InputTex
     path: InputTex
     tooltip: 
@@ -209,8 +177,40 @@ MonoBehaviour:
     max: Infinity
     enumValues: []
     descendantCount: 0
+  - name: GradientWidth
+    path: GradientWidth
+    tooltip: 
+    space: -1
+    spaceable: 0
+    sheetType: m_Float
+    realType: Single
+    defaultValue:
+      m_Type:
+        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089
+      m_SerializableObject: 1
+    min: 0
+    max: 1
+    enumValues: []
+    descendantCount: 0
+  - name: GradientCenter
+    path: GradientCenter
+    tooltip: This is a property with the Range mode
+    space: -1
+    spaceable: 0
+    sheetType: m_Float
+    realType: Single
+    defaultValue:
+      m_Type:
+        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089
+      m_SerializableObject: 0.5
+    min: 0
+    max: 1
+    enumValues: []
+    descendantCount: 0
   m_ImportDependencies: []
-  m_GraphVersion: 18
+  m_GraphVersion: 19
   m_ResourceVersion: 1
   m_SubgraphDependencies:
   - {fileID: 5371698745253816930, guid: a54aa416ced65704fb162388052e6290, type: 3}
@@ -227,10 +227,6 @@ VisualEffectResource:
     m_RendererSettings:
       motionVectorGenerationMode: 0
       shadowCastingMode: 0
-      rayTracingMode: 0
-      receiveShadows: 0
-      reflectionProbeUsage: 0
-      lightProbeUsage: 0
     m_CullingFlags: 3
     m_UpdateMode: 0
     m_PreWarmDeltaTime: 0.05
@@ -3078,7 +3074,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617454}
   m_ExposedName: InputTex
   m_Exposed: 1
-  m_Order: 2
+  m_Order: 0
   m_Category: 
   m_Min:
     m_Type:
@@ -3150,7 +3146,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617489}
   m_ExposedName: EmissionRate
   m_Exposed: 1
-  m_Order: 3
+  m_Order: 1
   m_Category: 
   m_Min:
     m_Type:
@@ -3231,7 +3227,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617491}
   m_ExposedName: SizeMultiplier
   m_Exposed: 1
-  m_Order: 4
+  m_Order: 2
   m_Category: 
   m_Min:
     m_Type:
@@ -4634,7 +4630,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617590}
   m_ExposedName: VortexSpeed
   m_Exposed: 1
-  m_Order: 5
+  m_Order: 3
   m_Category: 
   m_Min:
     m_Type:
@@ -4884,7 +4880,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617597}
   m_ExposedName: VortexDistanceOffsetScaling
   m_Exposed: 1
-  m_Order: 6
+  m_Order: 4
   m_Category: 
   m_Min:
     m_Type:
@@ -5377,7 +5373,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617644}
   m_ExposedName: RotationSpeed
   m_Exposed: 1
-  m_Order: 7
+  m_Order: 5
   m_Category: 
   m_Min:
     m_Type:
@@ -6347,6 +6343,7 @@ MonoBehaviour:
   sortingPriority: 0
   m_SubOutputs:
   - {fileID: 8926484042661617750}
+  useBaseColorMap: 3
   colorMapping: 0
   uvMode: 0
   flipbookLayout: 0
@@ -6375,7 +6372,6 @@ MonoBehaviour:
   materialType: 0
   workflowMode: 0
   smoothnessSource: 0
-  useBaseColorMap: 3
   useOcclusionMap: 0
   useMetallicMap: 0
   useSpecularMap: 0
@@ -9773,7 +9769,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617839}
   m_ExposedName: GradientWidth
   m_Exposed: 1
-  m_Order: 1
+  m_Order: 6
   m_Category: 
   m_Min:
     m_Type:
@@ -9856,7 +9852,7 @@ MonoBehaviour:
   - {fileID: 8926484042661617841}
   m_ExposedName: GradientCenter
   m_Exposed: 1
-  m_Order: 0
+  m_Order: 7
   m_Category: 
   m_Min:
     m_Type:
