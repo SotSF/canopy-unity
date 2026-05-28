@@ -17,6 +17,22 @@ public class SpaceshipGameController : MonoBehaviour
     // No more than 32 players
     private Dictionary<string, SpaceshipController> ships;
 
+    // Players driven from the node canvas rather than a websocket connection. Kept
+    // separate from `ships` so the Update() loop never tries to send ship-position
+    // packets to a non-existent socket. Keyed by the player id carried in the input bundle.
+    private Dictionary<string, SpaceshipController> canvasShips;
+    // Last-seen input state per canvas player: button states for rising-edge ("fire on
+    // press") detection, and the last applied color so we only push color changes.
+    private Dictionary<string, CanvasPlayerState> canvasState;
+
+    private struct CanvasPlayerState
+    {
+        public bool fire;
+        public bool altFire;
+        public bool colorApplied;
+        public Color color;
+    }
+
     public RenderTexture gameBoardTex;
     public RenderTexture fluidVelocityTex;
 
@@ -36,6 +52,8 @@ public class SpaceshipGameController : MonoBehaviour
         }
         instance = this;
         ships = new Dictionary<string, SpaceshipController>();
+        canvasShips = new Dictionary<string, SpaceshipController>();
+        canvasState = new Dictionary<string, CanvasPlayerState>();
 
         fluidVelocityTex = new RenderTexture(SpaceshipGameConstants.Instance.gameBoardSize.x, SpaceshipGameConstants.Instance.gameBoardSize.y, 0);
         fluidVelocityTex.useMipMap = false;
@@ -70,6 +88,76 @@ public class SpaceshipGameController : MonoBehaviour
             Buffer.BlockCopy(rBytes, 0, shipPositionEventBuffer, 1, 4);
             Buffer.BlockCopy(thetaBytes, 0, shipPositionEventBuffer, 5, 4);
             server.SendBinary(id, shipPositionEventBuffer);
+        }
+    }
+
+    // Gets (or lazily creates) the ship for a canvas player. Idempotent, so it's safe to
+    // call every frame and after a Play restart (when canvasShips starts empty again).
+    public SpaceshipController AddCanvasPlayer(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+            return null;
+        if (!canvasShips.TryGetValue(id, out var ship) || ship == null)
+        {
+            ship = SpaceshipController.Create(spaceshipPrefab, gameObject);
+            canvasShips[id] = ship;
+            Debug.Log($"Added canvas player with id {id}");
+        }
+        return ship;
+    }
+
+    // Applies one frame of bundled canvas input to the matching ship.
+    public void ApplyCanvasInput(SpaceshipGamePlayerData data)
+    {
+        if (string.IsNullOrEmpty(data.playerId))
+            return;
+        var ship = AddCanvasPlayer(data.playerId);
+        if (ship == null)
+            return;
+
+        ship.OnStickInput(data.leftStick, data.rightStick);
+
+        canvasState.TryGetValue(data.playerId, out var prev);
+        var next = prev;
+
+        // Rising-edge so a held button fires once (mirrors the web Press event).
+        if (data.fire && !prev.fire)
+            ship.OnButtonPress(0);
+        if (data.altFire && !prev.altFire)
+            ship.OnButtonPress(1);
+        next.fire = data.fire;
+        next.altFire = data.altFire;
+
+        // Only push color on first sight or when it changes (mirrors the web ChangeColor event).
+        if (data.hasColor && (!prev.colorApplied || prev.color != data.color))
+        {
+            ship.OnUpdateColor(data.color);
+            next.colorApplied = true;
+            next.color = data.color;
+        }
+
+        canvasState[data.playerId] = next;
+    }
+
+    // Destroys canvas ships whose players are no longer being driven (port disconnected or
+    // source node removed), so the active id set is the single source of truth each frame.
+    public void ReconcileCanvasPlayers(HashSet<string> activeIds)
+    {
+        if (canvasShips.Count == 0)
+            return;
+        var stale = new List<string>();
+        foreach (var id in canvasShips.Keys)
+        {
+            if (!activeIds.Contains(id))
+                stale.Add(id);
+        }
+        foreach (var id in stale)
+        {
+            var ship = canvasShips[id];
+            canvasShips.Remove(id);
+            canvasState.Remove(id);
+            if (ship != null)
+                Destroy(ship.gameObject);
         }
     }
 

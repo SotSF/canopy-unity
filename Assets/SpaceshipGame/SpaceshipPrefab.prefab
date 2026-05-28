@@ -104,10 +104,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24bb2e2d072588648aeacb45216a49c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  shipColor: {r: 0, g: 0, b: 0, a: 0}
   projectilePrefab: {fileID: 6319737789347175507, guid: a29de5f2834cff74c892ff081763107c,
     type: 3}
-  shipMaterial: {fileID: 0}
   renderer: {fileID: 1197923671889538052}
 --- !u!1001 &3615570718566680217
 PrefabInstance:
@@ -117,6 +115,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 541102521142229932}
     m_Modifications:
+    - target: {fileID: 1754559349019117863, guid: a29de5f2834cff74c892ff081763107c,
+        type: 3}
+      propertyPath: m_Positions.Array.data[1].z
+      value: 0.19
+      objectReference: {fileID: 0}
+    - target: {fileID: 1754559349019117863, guid: a29de5f2834cff74c892ff081763107c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[0].time
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1754559349019117863, guid: a29de5f2834cff74c892ff081763107c,
+        type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[0].value
+      value: 0.027132034
+      objectReference: {fileID: 0}
     - target: {fileID: 5025008250238572012, guid: a29de5f2834cff74c892ff081763107c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -175,7 +188,7 @@ PrefabInstance:
     - target: {fileID: 8267130905949994231, guid: a29de5f2834cff74c892ff081763107c,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -33,9 +33,9 @@ public static class ExtensionMethods
             Debug.LogFormat(msg, vals);
     }
 
-    public static Texture2D ToTexture2D(this RenderTexture rTex)
+    public static Texture2D ToTexture2D(this RenderTexture rTex, TextureFormat format = TextureFormat.RGB24)
     {
-        Texture2D tex = new Texture2D(rTex.width, rTex.height, TextureFormat.RGB24, false);
+        Texture2D tex = new Texture2D(rTex.width, rTex.height, format, false);
         RenderTexture.active = rTex;
         tex.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
         tex.Apply();

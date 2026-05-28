@@ -13,7 +13,7 @@ public class CanopyArtnetNode : TickingNode
 {
     public override string GetID => "CanopyArtnetNode";
     public override string Title { get { return "CanopyArtNet"; } }
-    private Vector2 _DefaultSize = new Vector2(220, 200);
+    private Vector2 _DefaultSize = new Vector2(220, 220);
 
     public override Vector2 DefaultSize => _DefaultSize;
 
@@ -21,6 +21,11 @@ public class CanopyArtnetNode : TickingNode
     public ValueConnectionKnob inputTexKnob;
 
     public bool useDoubleDensity = true;
+
+    // Composite straight-alpha input over black (rgb *= alpha) before sending. The
+    // wire protocol carries no alpha, so without this a translucent texture (e.g. from
+    // a Merge node at partial opacity) would light the strips at full brightness.
+    public bool bakeAlpha = true;
 
     private RenderTexture buffer;
 
@@ -91,6 +96,7 @@ public class CanopyArtnetNode : TickingNode
         mirrorOffset = RTEditorGUI.IntSlider("Mirror offset", mirrorOffset, 0, 95);
         flipMirrorDirection = RTEditorGUI.Toggle(flipMirrorDirection, "Flip mirror direction");
         useDoubleDensity = RTEditorGUI.Toggle(useDoubleDensity, "Use double density");
+        bakeAlpha = RTEditorGUI.Toggle(bakeAlpha, "Bake alpha");
         maxFrameRate = RTEditorGUI.IntField("Max frame rate", maxFrameRate);
         GUILayout.Label($"FPS: {fps:0}");
         GUILayout.FlexibleSpace();
@@ -184,8 +190,15 @@ public class CanopyArtnetNode : TickingNode
         {
             for (int c = 0; c < pixelsPerStrip; c++)
             {
-                Color32 color = tex.GetPixel(c, r);
-                setPixel(r,c, color);
+                Color color = tex.GetPixel(c, r);
+                if (bakeAlpha)
+                {
+                    // Composite over black: opacity becomes brightness, since the wire carries no alpha.
+                    color.r *= color.a;
+                    color.g *= color.a;
+                    color.b *= color.a;
+                }
+                setPixel(r, c, color);
             }
         }
     }
@@ -232,7 +245,9 @@ public class CanopyArtnetNode : TickingNode
             return true;
         }
         Graphics.Blit(inputTex, buffer);
-        Texture2D tex2d = buffer.ToTexture2D();
+        // RGBA32 keeps the alpha channel that FillFromTexture needs to bake; RGB24 (the default)
+        // discards it, matching the legacy behavior when baking is off.
+        Texture2D tex2d = buffer.ToTexture2D(bakeAlpha ? TextureFormat.RGBA32 : TextureFormat.RGB24);
         FillFromTexture(tex2d);
 
         SendDMX();

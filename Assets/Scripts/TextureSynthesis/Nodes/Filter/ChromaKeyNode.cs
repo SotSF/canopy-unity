@@ -106,7 +106,8 @@ public class ChromaKeyNode : TextureSynthNode
             InitializeRenderTexture();
         }
         sensitivity = sensitivityKnob.connected() ? sensitivityKnob.GetValue<float>() : sensitivity;
-        var color = Color.HSVToRGB(h, s, v);
+        // A connected color source (e.g. ColorPicker) wins over the inline H/S/V sliders.
+        var color = keyColorKnob.connected() ? (Color)keyColorKnob.GetValue<Vector4>() : Color.HSVToRGB(h, s, v);
         patternShader.SetFloat("sensitivity", sensitivity);
         patternShader.SetInt("width", outputSize.x);
         patternShader.SetInt("height", outputSize.y);

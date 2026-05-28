@@ -1,0 +1,17 @@
+
+#pragma kernel CSMain
+
+Texture2D<float4> InputTex;
+RWTexture2D<float4> OutputTex;
+
+[numthreads(16, 16, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+	// Bake straight-alpha into RGB by compositing the source over an opaque black
+	// background, then emit a fully-opaque pixel. Downstream consumers that ignore
+	// alpha (e.g. the ArtNet output) then receive correctly dimmed colors instead
+	// of full-brightness RGB.
+	float4 src = InputTex[id.xy];
+	float a = saturate(src.a);
+	OutputTex[id.xy] = float4(src.rgb * a, 1.0);
+}
