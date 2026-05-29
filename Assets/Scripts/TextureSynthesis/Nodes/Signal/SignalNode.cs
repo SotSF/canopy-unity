@@ -63,9 +63,27 @@ namespace SecretFire.TextureSynth
         const float SparklineLabelColumnWidth   = 60f;
         const float SparklineValueColumnWidth   = 50f;
         const float SparklineKnobColumnWidth    = 60f;
+        const float SparklineKnobColumnWidthMax = 130f;
         const float SparklineRowPadding         = 8f;
         const float SparklineMinTexWidth        = 40f;
         protected virtual float SparklineExpandedRowHeight => SparklineTexHeight + 6f;
+
+        // Right-aligned, non-wrapping style for the per-row knob label. Reusing the framework's
+        // nodeLabelRight but with wordWrap off so long output names (e.g. "Tap/Bounce") occupy a
+        // single line in a fixed-width column instead of wrapping and inflating row height.
+        static GUIStyle _knobLabelStyle;
+        static GUIStyle KnobLabelStyle
+        {
+            get
+            {
+                if (_knobLabelStyle == null)
+                {
+                    var basis = NodeEditorGUI.nodeLabelRight ?? GUI.skin.label;
+                    _knobLabelStyle = new GUIStyle(basis) { wordWrap = false, clipping = TextClipping.Clip };
+                }
+                return _knobLabelStyle;
+            }
+        }
 
         protected int   DisplaySampleCount => Mathf.CeilToInt(SparklineDisplaySeconds * SparklineCaptureHz);
         // Just enough room for a meaningfully-sized sparkline plus the port column.
@@ -256,6 +274,18 @@ namespace SecretFire.TextureSynth
             GUILayout.Label("Sparkline");
             GUILayout.EndHorizontal();
 
+            // A uniform knob-label column keeps every sparkline texture the same width and stops
+            // longer output names from wrapping. Sized to the widest name (clamped), measured here
+            // because CalcSize needs the active GUI skin.
+            float knobColumnWidth = SparklineKnobColumnWidth;
+            foreach (var desc in descs)
+            {
+                if (desc.outputKnob == null) continue;
+                knobColumnWidth = Mathf.Max(knobColumnWidth,
+                    KnobLabelStyle.CalcSize(new GUIContent(desc.outputKnob.name)).x);
+            }
+            knobColumnWidth = Mathf.Min(knobColumnWidth, SparklineKnobColumnWidthMax);
+
             for (int i = 0; i < channelStates.Length && i < descs.Length; i++)
             {
                 var ch = channelStates[i];
@@ -281,7 +311,12 @@ namespace SecretFire.TextureSynth
                     GUILayout.Label(v.ToString("0.000"), GUILayout.Width(SparklineValueColumnWidth));
                 }
                 if (desc.outputKnob != null)
-                    desc.outputKnob.DisplayLayout();
+                {
+                    // Render the label in a fixed-width column, then let the knob place itself
+                    // against it (knob y-position comes from the label rect; width is uniform).
+                    GUILayout.Label(desc.outputKnob.name, KnobLabelStyle, GUILayout.Width(knobColumnWidth));
+                    desc.outputKnob.SetPosition();
+                }
                 GUILayout.EndHorizontal();
             }
         }

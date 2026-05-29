@@ -16,7 +16,7 @@ public class ColorPickerNode : TickingNode
     public override string GetID { get { return ID; } }
     public override string Title { get { return "ColorPicker"; } }
 
-    private Vector2 _DefaultSize = new Vector2(200, 320);
+    private Vector2 _DefaultSize = new Vector2(200, 270);
     public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("c0", Direction.In, typeof(float), NodeSide.Left)]
@@ -62,56 +62,68 @@ public class ColorPickerNode : TickingNode
         EnsureMode();
         GUILayout.BeginVertical();
 
-        RadioButtonsHorizontal(modeSelection);
+            RadioButtonsHorizontal(modeSelection);
 
-        if (RgbMode)
-        {
-            Color c = Color.HSVToRGB(hue, saturation, value);
-            float r = ChannelRow("R", c.r, ch0Knob);
-            float g = ChannelRow("G", c.g, ch1Knob);
-            float b = ChannelRow("B", c.b, ch2Knob);
-            Color nc = new Color(Mathf.Clamp01(r), Mathf.Clamp01(g), Mathf.Clamp01(b));
-            if (nc != c)
-                Color.RGBToHSV(nc, out hue, out saturation, out value);
-        }
-        else
-        {
-            hue = ChannelRow("H", hue, ch0Knob);
-            saturation = ChannelRow("S", saturation, ch1Knob);
-            value = ChannelRow("V", value, ch2Knob);
-        }
+            if (RgbMode)
+            {
+                Color c = Color.HSVToRGB(hue, saturation, value);
+                float r = ChannelRow("R", c.r, ch0Knob);
+                float g = ChannelRow("G", c.g, ch1Knob);
+                float b = ChannelRow("B", c.b, ch2Knob);
+                Color nc = new Color(Mathf.Clamp01(r), Mathf.Clamp01(g), Mathf.Clamp01(b));
+                if (nc != c)
+                    Color.RGBToHSV(nc, out hue, out saturation, out value);
+            }
+            else
+            {
+                hue = ChannelRow("H", hue, ch0Knob);
+                saturation = ChannelRow("S", saturation, ch1Knob);
+                value = ChannelRow("V", value, ch2Knob);
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
 
-        // Clickable saturation (x) / value (y) plane for the current hue.
-        EnsurePlaneTexture(hue);
-        Rect planeRect = GUILayoutUtility.GetRect(PlaneSize, PlaneSize,
-            GUILayout.Width(PlaneSize), GUILayout.Height(PlaneSize));
-        if (Event.current.type == EventType.Repaint && svTexture != null)
-            GUI.DrawTexture(planeRect, svTexture);
-        DrawMarker(planeRect, Mathf.Clamp01(saturation), 1f - Mathf.Clamp01(value), 8f);
-        if (HandlePlaneInput(planeRect))
-            GUI.changed = true;
+                // Horizontally-centered vertical group of plane tex, hue tex, and swatch/output port
+                GUILayout.BeginVertical();
+                    // Clickable saturation (x) / value (y) plane for the current hue.
+                    EnsurePlaneTexture(hue);
+                    Rect planeRect = GUILayoutUtility.GetRect(PlaneSize, PlaneSize,
+                        GUILayout.Width(PlaneSize), GUILayout.Height(PlaneSize));
+                    if (Event.current.type == EventType.Repaint && svTexture != null)
+                        GUI.DrawTexture(planeRect, svTexture);
+                    DrawMarker(planeRect, Mathf.Clamp01(saturation), 1f - Mathf.Clamp01(value), 8f);
+                    if (HandlePlaneInput(planeRect))
+                        GUI.changed = true;
 
-        // Clickable hue bar.
-        EnsureHueTexture();
-        Rect hueRect = GUILayoutUtility.GetRect(PlaneSize, HueBarHeight,
-            GUILayout.Width(PlaneSize), GUILayout.Height(HueBarHeight));
-        if (Event.current.type == EventType.Repaint && hueTexture != null)
-            GUI.DrawTexture(hueRect, hueTexture);
-        DrawHueMarker(hueRect, Mathf.Clamp01(hue));
-        if (HandleHueInput(hueRect))
-            GUI.changed = true;
+                    // Clickable hue bar.
+                    EnsureHueTexture();
+                    Rect hueRect = GUILayoutUtility.GetRect(PlaneSize, HueBarHeight,
+                        GUILayout.Width(PlaneSize), GUILayout.Height(HueBarHeight));
+                    if (Event.current.type == EventType.Repaint && hueTexture != null)
+                        GUI.DrawTexture(hueRect, hueTexture);
+                    DrawHueMarker(hueRect, Mathf.Clamp01(hue));
+                    if (HandleHueInput(hueRect))
+                        GUI.changed = true;
 
-        // Swatch + output knob.
-        GUILayout.BeginHorizontal();
-        Color outC = Color.HSVToRGB(hue, saturation, value);
-        var prevCol = GUI.color;
-        GUI.color = outC;
-        GUILayout.Box(Texture2D.whiteTexture, GUILayout.Width(44), GUILayout.Height(20));
-        GUI.color = prevCol;
+                    // Swatch + output knob.
+                    GUILayout.BeginHorizontal();
+                        Color outC = Color.HSVToRGB(hue, saturation, value);
+                        var prevCol = GUI.color;
+                        GUI.color = outC;
+                        GUILayout.Box(Texture2D.whiteTexture, GUILayout.Width(44), GUILayout.Height(20));
+                        GUI.color = prevCol;
+                        GUILayout.FlexibleSpace();
+                        colorOutputKnob.DisplayLayout();
+                    GUILayout.EndHorizontal();
+                    // End: swatch + output knob horizontal group
+
+                GUILayout.EndVertical();
+                // End: Horizontally centered vertical block
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        // End: Horizontal block centering color textures / output port 
         GUILayout.FlexibleSpace();
-        colorOutputKnob.DisplayLayout();
-        GUILayout.EndHorizontal();
-
         GUILayout.EndVertical();
 
         if (GUI.changed)

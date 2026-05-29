@@ -32,6 +32,7 @@ public class SpaceshipController : MonoBehaviour
     {
         velocity += new Vector3(input.x, 0, input.y)*SpaceshipGameConstants.Instance.velocityScalingFactor;
         velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameConstants.Instance.maxSpeed);
+        //transform.localRotation = Vector3.RotateTowards(transform.)
     }
 
     public void OnTouchInput(float r, float theta)
