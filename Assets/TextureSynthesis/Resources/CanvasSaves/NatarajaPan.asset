@@ -30,7 +30,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: -6863753454306697148}
   direction: 2
@@ -38,8 +38,8 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections:
   - {fileID: 6165390671561041633}
-  side: 2
-  sidePosition: 29
+  side: 1
+  sidePosition: 40
   sideOffset: 0
 --- !u!114 &-8326223775204745323
 MonoBehaviour:
@@ -101,7 +101,9 @@ MonoBehaviour:
   hueKnob: {fileID: -5129356286411033855}
   satKnob: {fileID: 5690858551971082930}
   valKnob: {fileID: -2196165212554298805}
-  outputTex: {fileID: 0}
+  hue: 0
+  saturation: 0
+  value: 0
 --- !u!114 &-6794699154919072011
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -119,6 +121,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: -3369803315021738662}
   textureOutputKnob: {fileID: 6759943630313667467}
+  seamless: 0
 --- !u!114 &-6776095663532108435
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -189,7 +192,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: -6863753454306697148}
   direction: 1
@@ -197,8 +200,8 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections:
   - {fileID: -1621299973670631616}
-  side: 4
-  sidePosition: 29
+  side: 3
+  sidePosition: 20
   sideOffset: 0
 --- !u!114 &-5129356286411033855
 MonoBehaviour:
@@ -258,8 +261,8 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections:
   - {fileID: 5267747149072013100}
-  side: 4
-  sidePosition: 29
+  side: 3
+  sidePosition: 20
   sideOffset: 0
 --- !u!114 &-3306821397791487891
 MonoBehaviour:
@@ -538,28 +541,46 @@ MonoBehaviour:
   - {fileID: -1310098771311527335}
   - {fileID: -6017405648902162579}
   - {fileID: 4587330737832076947}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textures:
-  - {fileID: 2800000, guid: fd4d50181c9d26d459f22347f799e93c, type: 3}
-  - {fileID: 2800000, guid: 031b53a44338603418723dacc6877a06, type: 3}
-  - {fileID: 2800000, guid: 9ec5f9d69c873e24dbf5f876518aaded, type: 3}
-  - {fileID: 2800000, guid: 52e4e565ea7a25f4a9fe23c4e0d14878, type: 3}
-  - {fileID: 2800000, guid: edd807d3fc7843d4cb6925ba232bf446, type: 3}
-  - {fileID: 2800000, guid: cd61af7da48c35942a490f4531c4a382, type: 3}
-  - {fileID: 2800000, guid: 44e92b82b4f281348bcd34c6953a5944, type: 3}
-  - {fileID: 2800000, guid: 82e64b2924583b7419106b878f887dba, type: 3}
-  - {fileID: 2800000, guid: 6216c46e75a1ab04089961ef40758686, type: 3}
-  - {fileID: 2800000, guid: 290d3c7bbc2aac34d925c56bab575d05, type: 3}
-  - {fileID: 2800000, guid: 9469754c7eda0034f866e173027e0eef, type: 3}
-  - {fileID: 2800000, guid: d1bbcbf7956598a459bf2e4b2e539aa7, type: 3}
-  - {fileID: 2800000, guid: 38d0734ee15766a40a3b385dbad50cbb, type: 3}
-  - {fileID: 2800000, guid: 403ba27ff9ff9ec4fba1610a0160187b, type: 3}
-  - {fileID: 2800000, guid: 2913602b004616f4194ab7a61bff473d, type: 3}
-  - {fileID: 2800000, guid: 34e63f3853da4164b9fc19f0ac722ac5, type: 3}
-  - {fileID: 2800000, guid: 37ffe2bf52ffa73408f9fe17b6f84c27, type: 3}
-  - {fileID: 2800000, guid: 9caf7767868bc1546bb186b0dbf985b3, type: 3}
-  - {fileID: 2800000, guid: f4a4aeca6a66c754ba1a0013d0c88b11, type: 3}
-  - {fileID: 2800000, guid: 71316b85e67194248964d02ba3b1ee32, type: 3}
+  texNames:
+  - AMLogo
+  - brc_red
+  - canvas_burgundy
+  - ConjurerIcon
+  - corona
+  - discodingo
+  - dna
+  - eye
+  - FireScales-scaled
+  - FractalBlueSpiral
+  - gameoflifeseed
+  - impression_figure_margaret_watts_hughes_2
+  - logo-simple-white-on-black-square
+  - logosimple
+  - man logo
+  - Nataraja
+  - OrangeSlice
+  - purplewaves
+  - redman
+  - redstripe
+  - stacked_wave_checkers
+  - straight-rings
+  - stripes
+  - swirlything
+  - test_velocity_input
+  - TextureTest
+  - TheCore
+  - weed
+  - xflash
 --- !u!114 &-199360884561505978
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -765,8 +786,8 @@ MonoBehaviour:
   maxConnectionCount: 1
   styleID: UnityEngine.Texture
   _connections: []
-  side: 2
-  sidePosition: 143
+  side: 1
+  sidePosition: 40
   sideOffset: 0
 --- !u!114 &3324771973332492061
 MonoBehaviour:
@@ -865,12 +886,25 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: 6165390671561041633}
   textureOutputKnob: {fileID: 5267747149072013100}
-  speedInputKnob: {fileID: -6776095663532108435}
-  angleInputKnob: {fileID: -1309259973279369628}
-  outputTex: {fileID: 0}
+  in1Knob: {fileID: 0}
+  in2Knob: {fileID: 0}
+  resetKnob: {fileID: 0}
   smoothTransitions: 0
-  speed: -0.04
-  angle: 0.7954421
+  mirror: 0
+  in1: 0
+  in2: 0
+  offsetMode:
+    values: 010000
+    names:
+    - X/Y position
+    - X/Y speed
+    - Speed/angle
+  sampleMode:
+    values: 010000
+    names:
+    - Mirror
+    - Repeat
+    - Clamp
 --- !u!114 &4318683289896396789
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -971,8 +1005,8 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections:
   - {fileID: -3369803315021738662}
-  side: 2
-  sidePosition: 29
+  side: 1
+  sidePosition: 100
   sideOffset: 0
 --- !u!114 &5529670435225650907
 MonoBehaviour:
@@ -1092,17 +1126,32 @@ MonoBehaviour:
   position: {x: -845.8, y: -169.00002}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -8326223775204745323}
   amplInputKnob: {fileID: -1938183189479889430}
   phaseInputKnob: {fileID: 3921932027219900590}
   outputKnob: {fileID: 4318683289896396789}
-  oscParams:
-    period: 40
-    amplitude: 3.1415
-    phase: 0
   period: 40
   amplitude: 3.1415
   phase: 0
+  max: 2
+  min: -2
+  signalType:
+    values: 01000000000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+    - expspike
+    - hemi
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
+  expSpikeLevel: 22
 --- !u!114 &6165390671561041633
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1121,8 +1170,8 @@ MonoBehaviour:
   styleID: UnityEngine.Texture
   _connections:
   - {fileID: -8554452346012478986}
-  side: 4
-  sidePosition: 29
+  side: 3
+  sidePosition: 20
   sideOffset: 0
 --- !u!114 &6759943630313667467
 MonoBehaviour:
@@ -1141,8 +1190,8 @@ MonoBehaviour:
   maxConnectionCount: 1
   styleID: UnityEngine.Texture
   _connections: []
-  side: 2
-  sidePosition: 29
+  side: 1
+  sidePosition: 40
   sideOffset: 0
 --- !u!114 &6996686364659757153
 MonoBehaviour:
@@ -1179,17 +1228,32 @@ MonoBehaviour:
   position: {x: -847.2, y: -678.2001}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: 8577773850963100997}
   amplInputKnob: {fileID: -3306821397791487891}
   phaseInputKnob: {fileID: 347957108767283700}
   outputKnob: {fileID: 2122438739543938053}
-  oscParams:
-    period: 20
-    amplitude: 0.5
-    phase: 0
   period: 20
   amplitude: 0.5
   phase: 0
+  max: 2
+  min: -2
+  signalType:
+    values: 01000000000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+    - expspike
+    - hemi
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
+  expSpikeLevel: 22
 --- !u!114 &7245069964304356817
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1206,7 +1270,6 @@ MonoBehaviour:
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureOutputKnob: {fileID: 3021576915682469827}
-  outputTex: {fileID: 0}
 --- !u!114 &7433996152135441526
 MonoBehaviour:
   m_ObjectHideFlags: 1

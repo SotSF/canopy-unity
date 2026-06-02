@@ -28,7 +28,7 @@ public class jptestNode : TickingNode
     private int fadeKernel;
     private int patternKernel;
     private Vector2Int outputSize = new Vector2Int(256,256);
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private int _count;
     private int Count {

@@ -27,7 +27,7 @@ public class AugustNodeNode : TickingNode
     private int patternKernel;
     private Vector2Int outputSize = Vector2Int.zero;
     private float controlSignal = 0;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/AugustNodeFilter");

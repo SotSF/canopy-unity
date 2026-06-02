@@ -27,7 +27,7 @@ public class DropsNode : TickingNode
     private int Interval = 5;
     private float Fade = 5;
     private bool Fill = false;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     private List<Drop> drops = new List<Drop>();
     private int tick = 0;

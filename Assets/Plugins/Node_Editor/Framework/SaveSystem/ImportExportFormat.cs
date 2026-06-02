@@ -45,6 +45,20 @@ namespace NodeEditorFramework.IO
 #if !UNITY_EDITOR
 		private string fileSelection = "";
 		private Rect fileSelectionMenuRect;
+
+		/// <summary>
+		/// Shortens a string with a middle ellipsis so a long file name can't blow out the fixed-width
+		/// selection control, while keeping the informative start and end (e.g. "SpaceshipG…0602.xml").
+		/// </summary>
+		private static string TruncateMiddle(string text, int maxLength)
+		{
+			if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
+				return text;
+			int keep = Mathf.Max(maxLength - 1, 1);
+			int front = (keep + 1) / 2;
+			int back = keep / 2;
+			return text.Substring(0, front) + "…" + text.Substring(text.Length - back);
+		}
 #endif
 
 		/// <summary>
@@ -60,8 +74,13 @@ namespace NodeEditorFramework.IO
 #else
 			GUILayout.Label("Import canvas from " + FormatIdentifier);
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(RuntimeIOPath, GUILayout.ExpandWidth(false));
-			if (GUILayout.Button(string.IsNullOrEmpty(fileSelection)? "Select..." : fileSelection + "." + FormatExtension, GUILayout.ExpandWidth(true)))
+			// Fixed-width, non-wrapping path label: a long file name on the button must not be able to
+			// squeeze this label into wrapping, which would grow the row tall enough to push the
+			// Cancel/Import buttons out of the bottom of the fixed-size modal panel.
+			GUIStyle pathLabelStyle = new GUIStyle(GUI.skin.label) { wordWrap = false };
+			GUILayout.Label(RuntimeIOPath, pathLabelStyle, GUILayout.Width(pathLabelStyle.CalcSize(new GUIContent(RuntimeIOPath)).x));
+			string fileButtonLabel = string.IsNullOrEmpty(fileSelection)? "Select..." : fileSelection + "." + FormatExtension;
+			if (GUILayout.Button(TruncateMiddle(fileButtonLabel, 18), GUILayout.ExpandWidth(true)))
 			{
 				// Find save files
 				DirectoryInfo dir = Directory.CreateDirectory(RuntimeIOPath);

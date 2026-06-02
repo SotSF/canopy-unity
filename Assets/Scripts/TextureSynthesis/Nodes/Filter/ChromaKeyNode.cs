@@ -27,7 +27,7 @@ public class ChromaKeyNode : TextureSynthNode
     private ComputeShader patternShader;
     private int patternKernel;
     private Vector2Int outputSize = Vector2Int.zero;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/ChromaKeyFilter");

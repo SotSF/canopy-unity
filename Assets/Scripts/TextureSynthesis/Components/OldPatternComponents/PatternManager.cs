@@ -66,7 +66,7 @@ public class PatternManager : MonoBehaviour
             var textures = canopyMaterial.GetTexturePropertyNames();
             foreach (string tex in textures)
             {
-                canopyMaterial.SetTexture(tex, pattern.patternTexture);
+                // canopyMaterial.SetTexture(tex, pattern.patternTexture);
             }
         }
         activePattern.presenting = true;

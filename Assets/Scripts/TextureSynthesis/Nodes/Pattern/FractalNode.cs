@@ -43,7 +43,7 @@ public class FractalNode : TickingNode
     private ComputeShader patternShader;
     private int patternKernel;
     private Vector2Int outputSize = new Vector2Int(2048,2048);
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     public override void DoInit()
     { 

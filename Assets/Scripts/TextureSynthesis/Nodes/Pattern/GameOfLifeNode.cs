@@ -21,7 +21,7 @@ public class GameOfLifeNode : TickingNode
     private ComputeShader patternShader;
     private int patternKernel;
     private Vector2Int outputSize = new Vector2Int(75, 96);
-    public RenderTexture outputState;
+    private RenderTexture outputState;
     private RenderTexture inputState;
 
     public override void DoInit()

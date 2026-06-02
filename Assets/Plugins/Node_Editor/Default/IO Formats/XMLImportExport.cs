@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.IO;
 using System.Text;
@@ -126,7 +127,8 @@ namespace NodeEditorFramework.IO
 				obj.SetAttribute("refID", objectData.refID.ToString());
 				obj.SetAttribute("type", objectData.data.GetType().FullName);
 				objects.AppendChild(obj);
-				SerializeObjectToXML(obj, objectData.data);
+				if (SerializeObjectToXML(obj, objectData.data) == null)
+					objects.RemoveChild(obj); // Non-serializable; leave no empty element behind (already logged)
 			}
 
 			// WRITE
@@ -169,8 +171,38 @@ namespace NodeEditorFramework.IO
 				{
 					int refID = GetIntegerAttribute(xmlObject, "refID");
 					string typeName = xmlObject.GetAttribute("type");
-					Type type = Type.GetType(typeName, true);
-					object obj = DeserializeObjectFromXML(xmlObject, type);
+					Type type = ResolveType(typeName);
+					if (type == null)
+					{ // Skip rather than abort the whole import; referencing variables stay at their defaults
+						Debug.LogWarning("[XMLImport] Could not resolve type '" + typeName + "' for object refID " + refID + "; skipping it.");
+						continue;
+					}
+					if (typeof(UnityEngine.Object).IsAssignableFrom(type))
+					{ // GPU/asset objects (RenderTexture, Texture, Material...) can't be reconstructed from XML
+					  // (the generated reader NREs in UnityEngine.Object.set_name). Skip; node rebuilds at runtime.
+						Debug.LogWarning("[XMLImport] Skipping UnityEngine.Object reference of type '" + typeName + "' (refID " + refID + "); these aren't supported by XML serialization.");
+						continue;
+					}
+					object obj;
+					try
+					{ // Defense in depth: a single malformed object must not abort the whole import
+						obj = DeserializeObjectFromXML(xmlObject, type);
+					}
+					catch (Exception e)
+					{
+						Debug.LogWarning("[XMLImport] Failed to deserialize object refID " + refID + " of type '" + typeName + "': " + e.Message + "; skipping it.");
+						continue;
+					}
+					if (obj == null)
+					{ // Serialization may have failed on export (logged then), leaving an empty Object element
+						Debug.LogWarning("[XMLImport] Could not deserialize object refID " + refID + " of type '" + typeName + "'; skipping it.");
+						continue;
+					}
+					if (canvasData.objects.ContainsKey(refID))
+					{ // Duplicate refID (corrupt/hand-edited or legacy file) -- keep the first
+						Debug.LogWarning("[XMLImport] Duplicate object refID " + refID + "; ignoring later occurrence.");
+						continue;
+					}
 					ObjectData objData = new ObjectData(refID, obj);
 					canvasData.objects.Add(refID, objData);
 				}
@@ -204,8 +236,8 @@ namespace NodeEditorFramework.IO
 						else
 						{ // Deserialize dynamic port
 							string typeName = xmlPort.GetAttribute("type");
-							Type portType = Type.GetType(typeName, true);
-							if (portType != typeof(ConnectionPort) && !portType.IsSubclassOf(typeof(ConnectionPort)))
+							Type portType = ResolveType(typeName);
+							if (portType == null || (portType != typeof(ConnectionPort) && !portType.IsSubclassOf(typeof(ConnectionPort))))
 								continue; // Invalid type stored
 							ConnectionPort port = (ConnectionPort)ScriptableObject.CreateInstance(portType);
 							port.name = portName;
@@ -246,8 +278,11 @@ namespace NodeEditorFramework.IO
 						else
 						{ // Read value-type variable (old save file only) TODO: Remove
 							string typeName = xmlVariable.GetAttribute("type");
-							Type type = Type.GetType(typeName, true);
-							varData.value = DeserializeObjectFromXML(xmlVariable, type);
+							Type type = ResolveType(typeName);
+							if (type != null)
+								varData.value = DeserializeObjectFromXML(xmlVariable, type);
+							else
+								Debug.LogWarning("[XMLImport] Could not resolve type '" + typeName + "' for variable '" + varName + "'.");
 						}
 						node.variables.Add(varData);
 					}
@@ -302,6 +337,29 @@ namespace NodeEditorFramework.IO
 
 		#region Utility
 
+		/// <summary>
+		/// Resolves a Type from a stored type name, searching every loaded assembly.
+		/// Type.GetType(name) only looks in mscorlib and the *calling* assembly (here the framework,
+		/// Assembly-CSharp-firstpass), so a bare FullName for a user type in Assembly-CSharp (e.g.
+		/// SecretFire.TextureSynth.RadioButtonSet) would fail to load. Returns null if not found.
+		/// Handles both plain FullNames (legacy exports) and assembly-qualified names.
+		/// </summary>
+		private static Type ResolveType(string typeName)
+		{
+			if (string.IsNullOrEmpty(typeName))
+				return null;
+			Type type = Type.GetType(typeName); // Fast path: AQNs and framework/mscorlib types
+			if (type != null)
+				return type;
+			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				type = assembly.GetType(typeName);
+				if (type != null)
+					return type;
+			}
+			return null;
+		}
+
 		private XmlElement SerializeFieldToXML(XmlElement parent, object obj, string fieldName)
 		{
 			Type type = obj.GetType();
@@ -347,6 +405,20 @@ namespace NodeEditorFramework.IO
 			// TODO: Need to handle asset references
 			// Because of runtime compability, always try to embed objects
 			// If that fails, try to find references to assets (e.g. for textures)
+			if (obj is UnityEngine.Object)
+			{ // GPU/asset objects (RenderTexture, Texture, Material...) cannot round-trip through
+			  // XmlSerializer -- it may appear to write one, but importing it NREs in set_name. Skip
+			  // it; the referencing field is left at its default and rebuilt by the node at runtime.
+				Debug.LogWarning("[XMLExport] Skipping UnityEngine.Object reference of type '" + obj.GetType().FullName + "' (asset/GPU references aren't supported by XML serialization).");
+				return null;
+			}
+			if (customConverters.TryGetValue(obj.GetType(), out ICustomXmlConverter converter))
+			{ // Types XmlSerializer mishandles (e.g. Gradient, AnimationCurve) get an explicit converter
+				XmlElement element = parent.OwnerDocument.CreateElement(obj.GetType().Name);
+				parent.AppendChild(element);
+				converter.Write(element, obj);
+				return element;
+			}
 			try
 			{ // Try to embed object
 				XmlSerializer serializer = new XmlSerializer(obj.GetType());
@@ -359,8 +431,10 @@ namespace NodeEditorFramework.IO
 				return (XmlElement)parent.LastChild;
 			}
 			catch (Exception e)
-			{
-				Debug.Log("Could not serialize <" + obj.ToString()+">:"+e.ToString());
+			{ // Most common cause: the type (or a type it contains) has no public parameterless
+			  // constructor, which XmlSerializer requires. Caller drops the reference; on import the
+			  // field is left at its default (and nodes that derive it rebuild it in DoInit).
+				Debug.LogWarning("[XMLExport] Could not serialize type '" + obj.GetType().FullName + "': " + e.Message);
 				return null;
 			}
 		}
@@ -369,8 +443,11 @@ namespace NodeEditorFramework.IO
 		{
 			if (isParent && !xmlElement.HasChildNodes)
 				return null;
+			XmlNode dataNode = isParent ? xmlElement.FirstChild : xmlElement;
+			if (dataNode is XmlElement dataElement && customConverters.TryGetValue(type, out ICustomXmlConverter converter))
+				return converter.Read(dataElement);
 			XmlSerializer serializer = new XmlSerializer(type);
-			XPathNavigator navigator = (isParent ? xmlElement.FirstChild : xmlElement).CreateNavigator();
+			XPathNavigator navigator = dataNode.CreateNavigator();
 			using (XmlReader reader = navigator.ReadSubtree())
 				return serializer.Deserialize(reader);
 		}
@@ -449,6 +526,119 @@ namespace NodeEditorFramework.IO
 			else if (throwIfInvalid)
 				throw new XmlException("Invalid Rect " + attribute + " for element " + element.Name + "!");
 			return rect;
+		}
+
+		// --- Custom type converters ---
+		// Some Unity types (e.g. Gradient, AnimationCurve) have a public parameterless ctor so
+		// XmlSerializer accepts them, yet it does not faithfully round-trip their data -- you get a
+		// default value back. Register an explicit converter for such types; it takes precedence over
+		// the generic XmlSerializer path in Serialize/DeserializeObjectFromXML. Add entries as needed.
+		private interface ICustomXmlConverter
+		{
+			void Write(XmlElement element, object obj);
+			object Read(XmlElement element);
+		}
+
+		private static readonly Dictionary<Type, ICustomXmlConverter> customConverters = new Dictionary<Type, ICustomXmlConverter>
+		{
+			{ typeof(Gradient), new GradientXmlConverter() },
+			{ typeof(AnimationCurve), new AnimationCurveXmlConverter() },
+		};
+
+		// Invariant-culture float round-trip ("R" = exact) so values survive comma-decimal locales.
+		private static string FloatToXml(float f) { return f.ToString("R", CultureInfo.InvariantCulture); }
+		private static float FloatFromXml(string s) { float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out float f); return f; }
+
+		private class GradientXmlConverter : ICustomXmlConverter
+		{
+			public void Write(XmlElement element, object obj)
+			{
+				Gradient gradient = (Gradient)obj;
+				XmlDocument doc = element.OwnerDocument;
+				element.SetAttribute("mode", gradient.mode.ToString());
+				foreach (GradientColorKey key in gradient.colorKeys)
+				{
+					XmlElement k = doc.CreateElement("ColorKey");
+					k.SetAttribute("time", FloatToXml(key.time));
+					k.SetAttribute("r", FloatToXml(key.color.r));
+					k.SetAttribute("g", FloatToXml(key.color.g));
+					k.SetAttribute("b", FloatToXml(key.color.b));
+					element.AppendChild(k);
+				}
+				foreach (GradientAlphaKey key in gradient.alphaKeys)
+				{
+					XmlElement k = doc.CreateElement("AlphaKey");
+					k.SetAttribute("time", FloatToXml(key.time));
+					k.SetAttribute("a", FloatToXml(key.alpha));
+					element.AppendChild(k);
+				}
+			}
+
+			public object Read(XmlElement element)
+			{
+				List<GradientColorKey> colorKeys = new List<GradientColorKey>();
+				List<GradientAlphaKey> alphaKeys = new List<GradientAlphaKey>();
+				foreach (XmlElement k in element.ChildNodes.OfType<XmlElement>())
+				{
+					if (k.Name == "ColorKey")
+						colorKeys.Add(new GradientColorKey(
+							new Color(FloatFromXml(k.GetAttribute("r")), FloatFromXml(k.GetAttribute("g")), FloatFromXml(k.GetAttribute("b"))),
+							FloatFromXml(k.GetAttribute("time"))));
+					else if (k.Name == "AlphaKey")
+						alphaKeys.Add(new GradientAlphaKey(FloatFromXml(k.GetAttribute("a")), FloatFromXml(k.GetAttribute("time"))));
+				}
+				Gradient gradient = new Gradient();
+				if (colorKeys.Count > 0 && alphaKeys.Count > 0)
+					gradient.SetKeys(colorKeys.ToArray(), alphaKeys.ToArray());
+				if (Enum.TryParse(element.GetAttribute("mode"), out GradientMode mode))
+					gradient.mode = mode;
+				return gradient;
+			}
+		}
+
+		private class AnimationCurveXmlConverter : ICustomXmlConverter
+		{
+			public void Write(XmlElement element, object obj)
+			{
+				AnimationCurve curve = (AnimationCurve)obj;
+				XmlDocument doc = element.OwnerDocument;
+				element.SetAttribute("preWrapMode", curve.preWrapMode.ToString());
+				element.SetAttribute("postWrapMode", curve.postWrapMode.ToString());
+				foreach (Keyframe kf in curve.keys)
+				{
+					XmlElement k = doc.CreateElement("Key");
+					k.SetAttribute("time", FloatToXml(kf.time));
+					k.SetAttribute("value", FloatToXml(kf.value));
+					k.SetAttribute("inTangent", FloatToXml(kf.inTangent));
+					k.SetAttribute("outTangent", FloatToXml(kf.outTangent));
+					k.SetAttribute("inWeight", FloatToXml(kf.inWeight));
+					k.SetAttribute("outWeight", FloatToXml(kf.outWeight));
+					k.SetAttribute("weightedMode", kf.weightedMode.ToString());
+					element.AppendChild(k);
+				}
+			}
+
+			public object Read(XmlElement element)
+			{
+				List<Keyframe> keys = new List<Keyframe>();
+				foreach (XmlElement k in element.ChildNodes.OfType<XmlElement>())
+				{
+					if (k.Name != "Key") continue;
+					Keyframe kf = new Keyframe(
+						FloatFromXml(k.GetAttribute("time")), FloatFromXml(k.GetAttribute("value")),
+						FloatFromXml(k.GetAttribute("inTangent")), FloatFromXml(k.GetAttribute("outTangent")),
+						FloatFromXml(k.GetAttribute("inWeight")), FloatFromXml(k.GetAttribute("outWeight")));
+					if (Enum.TryParse(k.GetAttribute("weightedMode"), out WeightedMode wm))
+						kf.weightedMode = wm;
+					keys.Add(kf);
+				}
+				AnimationCurve curve = new AnimationCurve(keys.ToArray());
+				if (Enum.TryParse(element.GetAttribute("preWrapMode"), out WrapMode pre))
+					curve.preWrapMode = pre;
+				if (Enum.TryParse(element.GetAttribute("postWrapMode"), out WrapMode post))
+					curve.postWrapMode = post;
+				return curve;
+			}
 		}
 
 		#endregion

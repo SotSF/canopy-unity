@@ -109,7 +109,7 @@ namespace sotsf.canopy.patterns
         protected Material patternMaterial;
 
         [HideInInspector]
-        public RenderTexture patternTexture;
+        protected RenderTexture patternTexture;
         [HideInInspector]
         public bool presenting;
 

@@ -114,7 +114,7 @@ public class NodeWizard : ScriptableWizard
         }
         foreach (var texOut in texOutputs)
         {
-            varDecls.AppendLine($"    public RenderTexture {texOut.name};");
+            varDecls.AppendLine($"    private RenderTexture {texOut.name};");
         }
         return CollapseMultilines(varDecls.ToString());
     }

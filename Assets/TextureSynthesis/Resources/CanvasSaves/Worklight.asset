@@ -210,7 +210,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: -2606974154175254006}
   direction: 2
@@ -994,7 +994,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: -3562761768279261345}
   textureOutputKnob: {fileID: 5567045944777928216}
-  polarize: 0
   seamless: 0
 --- !u!114 &3801644716605413947
 MonoBehaviour:
@@ -1033,8 +1032,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: -3995816100679176596}
   useDoubleDensity: 1
-  ip: 192.168.1.71
+  bakeAlpha: 1
+  ip: 192.168.1.138
   mirrorPort: 6
+  maxFrameRate: 60
   flipMirrorDirection: 1
   mirrorOffset: 27
 --- !u!114 &4420188228814304098
@@ -1047,7 +1048,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: -2606974154175254006}
   direction: 1

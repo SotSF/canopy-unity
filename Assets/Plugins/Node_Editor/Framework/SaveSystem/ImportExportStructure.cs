@@ -32,16 +32,24 @@ namespace NodeEditorFramework.IO
 			name = canvasName;
 		}
 
+		// refIDs are the keys of the 'objects' dictionary and so must be unique within the canvas.
+		// We deliberately do NOT key on obj.GetHashCode() (as the ObjectData(object) constructor does):
+		// that is not unique for objects that hash by content -- e.g. two equal strings, or two
+		// RadioButtonSets in the same state -- and the collision made objects.Add throw
+		// "An item with the same key has already been added" on export. Assign a running id instead.
+		private int nextObjectRefID = 1;
+
 		public ObjectData ReferenceObject(object obj)
 		{
 			if (obj == null)
 				return null;
 			foreach (ObjectData data in objects.Values)
-			{
+			{ // Same instance already referenced (reference equality) -> reuse it so shared references round-trip
 				if (data.data == obj)
 					return data;
 			}
 			ObjectData objData = new ObjectData(obj);
+			objData.refID = nextObjectRefID++;
 			objects.Add(objData.refID, objData);
 			return objData;
 		}

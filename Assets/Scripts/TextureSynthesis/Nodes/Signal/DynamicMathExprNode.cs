@@ -49,7 +49,10 @@ public class DynamicMathExprNode : SignalNode
 
     private string alpha = "abcdefghijklmnopqrstuvwxyz";
 
-    public List<Parameter> exprParams;
+    // Runtime-only: a fixed a..z float parameter list rebuilt in DoInit when null, never mutated.
+    // [NonSerialized] keeps it out of both .asset and XML serialization (DynamicExpresso.Parameter
+    // has no parameterless constructor, so XmlSerializer can't handle it anyway).
+    [NonSerialized] public List<Parameter> exprParams;
     private void SetSize()
     {
         _DefaultSize = new Vector2(160, (1 + targetPortCount) * 120);

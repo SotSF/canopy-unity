@@ -32,7 +32,7 @@ public class GradientFilterNode : TextureSynthNode
     private float startHue = 0;
     private float endHue = 1;
     private bool center = false;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     public override void DoInit(){
         patternShader = Resources.Load<ComputeShader>("NodeShaders/GradientFilter");

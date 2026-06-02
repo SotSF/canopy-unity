@@ -70,7 +70,7 @@ public class LogSpiralsNode : TickingNode
     private ComputeShader patternShader;
     private int patternKernel;
     private Vector2Int outputSize = Vector2Int.zero;
-    public RenderTexture outputTex;
+    private RenderTexture outputTex;
 
     public override void DoInit()
     {
