@@ -11,4 +11,10 @@ public class AnimationCurveSet : MonoBehaviour
     {
         instance = this;
     }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        instance = null;
+    }
 }

@@ -27,9 +27,9 @@ public class MinisControlArrayNode : TickingNode
     [Serializable]
     public class BoundMidiControl {
 
-        public static ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Value", Direction.Out, typeof(float), NodeSide.Right);
-        public static ValueConnectionKnobAttribute minKnobAttrib = new ValueConnectionKnobAttribute("rescaleMin", Direction.In, typeof(float), NodeSide.Left);
-        public static ValueConnectionKnobAttribute maxKnobAttrib = new ValueConnectionKnobAttribute("rescaleMax", Direction.In, typeof(float), NodeSide.Left);
+        public static readonly ValueConnectionKnobAttribute outKnobAttribs = new ValueConnectionKnobAttribute("Value", Direction.Out, typeof(float), NodeSide.Right);
+        public static readonly ValueConnectionKnobAttribute minKnobAttrib = new ValueConnectionKnobAttribute("rescaleMin", Direction.In, typeof(float), NodeSide.Left);
+        public static readonly ValueConnectionKnobAttribute maxKnobAttrib = new ValueConnectionKnobAttribute("rescaleMax", Direction.In, typeof(float), NodeSide.Left);
         public float rawMIDIValue;
         public float rescaleMin = 0;
         public float rescaleMax = 1;

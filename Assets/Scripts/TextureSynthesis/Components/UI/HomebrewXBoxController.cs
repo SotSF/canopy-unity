@@ -14,6 +14,12 @@ public class HomebrewXBoxController : MonoBehaviour {
         }
     }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        _instance = null;
+    }
+
     enum Axis:int
     {
         Joyaxis0 = 0, Joyaxis1, Joyaxis2, Joyaxis3, Joyaxis4, Joyaxis5, Joyaxis6, Joyaxis7, Joyaxis8, Joyaxis9, Joyaxis10,

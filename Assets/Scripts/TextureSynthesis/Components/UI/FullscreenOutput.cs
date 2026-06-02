@@ -8,6 +8,13 @@ public class FullscreenOutput : MonoBehaviour
     public static FullscreenOutput instance;
     public static bool isAttached;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        instance = null;
+        isAttached = false;
+    }
+
     public Canvas canvas;
     public RawImage image;
     public Texture imageSource;

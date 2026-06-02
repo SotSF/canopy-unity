@@ -14,12 +14,20 @@ namespace NodeEditorFramework.Utilities
 	public static class ResourceManager 
 	{
 		private static string _ResourcePath = "";
-		public static void SetDefaultResourcePath (string defaultResourcePath) 
+
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState ()
+		{
+			_ResourcePath = "";
+			loadedTextures = new List<MemoryTexture> ();
+		}
+
+		public static void SetDefaultResourcePath (string defaultResourcePath)
 		{
 			_ResourcePath = UnifyPathSeparators (defaultResourcePath);
 		}
 
-		private static Regex pathSeparators = new Regex("[\\\\|/]+");
+		private static readonly Regex pathSeparators = new Regex("[\\\\|/]+");
 		public static string UnifyPathSeparators(string path)
 		{
 			return pathSeparators.Replace(path, "" + Path.DirectorySeparatorChar);

@@ -15,6 +15,13 @@ namespace NodeEditorFramework
 		private static Dictionary<string, ConnectionPortStyle> connectionPortStyles;
 		private static Dictionary<string, ValueConnectionType> connectionValueTypes;
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			connectionPortStyles = null;
+			connectionValueTypes = null;
+		}
+
 		/// <summary>
 		/// Fetches every ConnectionPortStyle, ConnectionKnobStyle or ValueConnectionType declaration in the script assemblies to provide the framework with custom connection port styles
 		/// </summary>

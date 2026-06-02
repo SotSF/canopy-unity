@@ -28,6 +28,26 @@ namespace NodeEditorFramework
 		private static int receiverCount;
 		private static List<NodeEditorCallbackReceiver> callbackReceiver;
 
+		// Fast Enter Play Mode (Domain Reload disabled): reset all static runtime state and clear
+		// accumulated event subscriptions so they do not carry over between play-mode sessions.
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState ()
+		{
+			receiverCount = 0;
+			callbackReceiver = null;
+			OnEditorStartUp = null;
+			OnLoadCanvas = null;
+			OnLoadEditorState = null;
+			OnSaveCanvas = null;
+			OnSaveEditorState = null;
+			OnAddNode = null;
+			OnDeleteNode = null;
+			OnMoveNode = null;
+			OnAddConnectionPort = null;
+			OnAddConnection = null;
+			OnRemoveConnection = null;
+		}
+
 		public static void SetupReceivers () 
 		{
 			callbackReceiver = new List<NodeEditorCallbackReceiver> (MonoBehaviour.FindObjectsByType<NodeEditorCallbackReceiver>(FindObjectsSortMode.None));

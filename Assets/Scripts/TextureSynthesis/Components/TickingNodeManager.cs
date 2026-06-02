@@ -9,6 +9,13 @@ using SecretFire.TextureSynth;
 public class TickingNodeManager : MonoBehaviour
 {
     public static TickingNodeManager instance;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        instance = null;
+    }
+
     private RTCanvasCalculator canvasCalculator;
     private RTNodeEditor nodeEditor;
     private List<TickingNode> nodesToTick;

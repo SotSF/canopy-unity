@@ -68,6 +68,12 @@ public abstract class Singleton : MonoBehaviour
     #endregion
 
     #region  Methods
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        Quitting = false;
+    }
+
     private void OnApplicationQuit()
     {
         Quitting = true;

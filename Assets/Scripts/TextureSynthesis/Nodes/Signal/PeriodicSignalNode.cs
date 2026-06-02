@@ -57,6 +57,17 @@ namespace SecretFire.TextureSynth.Signals
         public delegate float SignalFunc(float x, float p, float a, float t);
         private static Dictionary<string, SignalFunc> signalGenerators = new Dictionary<string, SignalFunc>();
 
+        // Fast Enter Play Mode (Domain Reload disabled): this static dictionary accumulates
+        // SignalFunc delegates at runtime via DoInit, including the instance-bound CalcExpSpike
+        // delegate. Without this reset it would retain stale entries (and references to destroyed
+        // node instances) across play-mode sessions. SubsystemRegistration runs before scene load
+        // on every play entry, restoring the field to its original empty state.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticState()
+        {
+            signalGenerators = new Dictionary<string, SignalFunc>();
+        }
+
         public float expSpikeLevel = 22;
 
         public override void DoInit()
@@ -84,7 +95,10 @@ namespace SecretFire.TextureSynth.Signals
 
             GUILayout.EndHorizontal();
 
-            GUILayout.FlexibleSpace();
+            // No GUILayout.FlexibleSpace() here: a vertical flexible space expands to the body
+            // area's current height, which AutoLayout then measures as the content height, growing
+            // the node every frame without bound. (Horizontal FlexibleSpace inside a BeginHorizontal
+            // is fine -- see SignalDerivativeNode -- because it only expands sideways.)
 
             if (paramStyle.SelectedOption() == "amplitude")
             {

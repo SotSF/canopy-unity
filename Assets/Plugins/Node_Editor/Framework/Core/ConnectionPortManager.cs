@@ -14,6 +14,16 @@ namespace NodeEditorFramework
 		private static Dictionary<string, ConnectionPortDeclaration[]> nodePortDeclarations;
 
 		/// <summary>
+		/// Clears stale static state when Domain Reload is disabled (Fast Enter Play Mode).
+		/// The cache is rebuilt by FetchNodeConnectionDeclarations during framework setup.
+		/// </summary>
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			nodePortDeclarations = null;
+		}
+
+		/// <summary>
 		/// Fetches every node connection declaration for each node type for later use
 		/// </summary>
 		public static void FetchNodeConnectionDeclarations()

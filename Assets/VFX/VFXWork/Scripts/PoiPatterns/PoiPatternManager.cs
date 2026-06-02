@@ -12,6 +12,13 @@ namespace Lightsale.Products.Smartsticks
     public class PoiPatternManager : MonoBehaviour
     {
         public static PoiPatternManager instance;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticState()
+        {
+            instance = null;
+        }
+
         private LineRenderer rightLines;
         private LineRenderer leftLines;
         public const float POVTrailTime = 0.24f;

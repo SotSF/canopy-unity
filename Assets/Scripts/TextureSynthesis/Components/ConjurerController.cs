@@ -9,10 +9,16 @@ using WebSocketServer;
 
 public class ConjurerController : MonoBehaviour
 {
-    private static Vector2Int textureSize = new Vector2Int(96, 150);
-    private static Vector2 gameBoardCenter = new Vector2(255, 255);
+    private static readonly Vector2Int textureSize = new Vector2Int(96, 150);
+    private static readonly Vector2 gameBoardCenter = new Vector2(255, 255);
 
     public static ConjurerController instance;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        instance = null;
+    }
 
     public Texture2D inputTex;
 
@@ -49,7 +55,7 @@ public class ConjurerController : MonoBehaviour
         Cleanup();
     }
 
-    public static float dragFactor = 0.005f;
+    public static readonly float dragFactor = 0.005f;
     public float playerSize = 2;
 
     void Update()

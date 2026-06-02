@@ -15,6 +15,12 @@ public class Canopy: MonoBehaviour
     }
     public static Canopy instance;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        instance = null;
+    }
+
     public Mesh pixelBase;
     public int renderTextureSize = 128;
     public Material canopyMaterial;

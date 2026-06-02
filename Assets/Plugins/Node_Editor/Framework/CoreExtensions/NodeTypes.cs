@@ -16,6 +16,17 @@ namespace NodeEditorFramework
 		private static Dictionary<string, NodeTypeData> nodes;
 
 		/// <summary>
+		/// Resets static state on entering play mode. Required for Fast Enter Play Mode
+		/// (Domain Reload disabled), where statics otherwise retain stale values across
+		/// sessions. The cache is rebuilt by FetchNodeTypes during framework setup.
+		/// </summary>
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			nodes = null;
+		}
+
+		/// <summary>
 		/// Fetches every Node Declaration in the script assemblies to provide the framework with custom node types
 		/// </summary>
 		public static void FetchNodeTypes() 

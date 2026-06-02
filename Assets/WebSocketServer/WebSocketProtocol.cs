@@ -29,8 +29,8 @@ namespace WebSocketServer {
 
     class RequestHeader {
 
-        static Regex head = new Regex("^(GET|POST|PUT|DELETE|OPTIONS) (.+) HTTP/([0-9.]+)", RegexOptions.Compiled);
-        static Regex body = new Regex("([A-Za-z0-9-]+): ?([^\n^\r]+)", RegexOptions.Compiled);
+        static readonly Regex head = new Regex("^(GET|POST|PUT|DELETE|OPTIONS) (.+) HTTP/([0-9.]+)", RegexOptions.Compiled);
+        static readonly Regex body = new Regex("([A-Za-z0-9-]+): ?([^\n^\r]+)", RegexOptions.Compiled);
 
         public string method = "";
         public string uri = "";

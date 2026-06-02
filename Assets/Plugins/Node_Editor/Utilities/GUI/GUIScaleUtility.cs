@@ -35,6 +35,23 @@ namespace NodeEditorFramework.Utilities
 
 		private static bool isEditorWindow;
 
+		// Fast Enter Play Mode (Domain Reload disabled) safety: clear retained static state on each play entry
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStaticState ()
+		{
+			compabilityMode = false;
+			initiated = false;
+			currentGUILayoutCache = null;
+			currentTopLevelGroup = null;
+			GetTopRectDelegate = null;
+			topmostRectDelegate = null;
+			currentRectStack = null;
+			rectStackGroups = null;
+			GUIMatrices = null;
+			adjustedGUILayout = null;
+			isEditorWindow = false;
+		}
+
 		#region Init
 
 		public static void CheckInit () 

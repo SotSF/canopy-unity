@@ -6,6 +6,12 @@ namespace NodeEditorFramework.TextureComposer
 	{
 		private static Material texVizMat;
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			texVizMat = null;
+		}
+
 		#region GUI Layout
 
 		/// <summary> Draw colored texture. </summary>

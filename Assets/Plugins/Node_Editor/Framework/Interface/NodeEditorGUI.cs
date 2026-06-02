@@ -10,10 +10,10 @@ namespace NodeEditorFramework
 		internal static bool isEditorWindow;
 
 		// static GUI settings, textures and styles
-		public static int knobSize = 16;
+		public static readonly int knobSize = 16;
 
-		public static Color NE_LightColor = new Color (0.4f, 0.4f, 0.4f);
-		public static Color NE_TextColor = new Color(0.8f, 0.8f, 0.8f);
+		public static readonly Color NE_LightColor = new Color (0.4f, 0.4f, 0.4f);
+		public static readonly Color NE_TextColor = new Color(0.8f, 0.8f, 0.8f);
 
 		public static Texture2D Background;
 		public static Texture2D AALineTex;
@@ -41,6 +41,42 @@ namespace NodeEditorFramework
 		public static GUIStyle toolbarLabel;
 		public static GUIStyle toolbarDropdown;
 		public static GUIStyle toolbarButton;
+
+		// Reset mutable static state when Domain Reload is disabled (Fast Enter Play Mode).
+		// All of these are rebuilt by Init()/StartNodeGUI(); clearing them avoids carrying
+		// stale Editor-session textures/skins/styles into the next play session.
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState ()
+		{
+			isEditorWindow = false;
+
+			Background = null;
+			AALineTex = null;
+			GUIBox = null;
+			GUIButton = null;
+			GUIBoxSelection = null;
+			GUIToolbar = null;
+			GUIToolbarButton = null;
+
+			nodeSkin = null;
+			defaultSkin = null;
+
+			nodeLabel = null;
+			nodeLabelBold = null;
+			nodeLabelSelected = null;
+			nodeLabelCentered = null;
+			nodeLabelBoldCentered = null;
+			nodeLabelLeft = null;
+			nodeLabelRight = null;
+
+			nodeBox = null;
+			nodeBoxBold = null;
+
+			toolbar = null;
+			toolbarLabel = null;
+			toolbarDropdown = null;
+			toolbarButton = null;
+		}
 
 		public static bool Init ()
 		{
@@ -137,7 +173,7 @@ namespace NodeEditorFramework
 		#region Connection Drawing
 
 		// Curve parameters
-		public static float curveBaseDirection = 1.5f, curveBaseStart = 2f, curveDirectionScale = 0.004f;
+		public static readonly float curveBaseDirection = 1.5f, curveBaseStart = 2f, curveDirectionScale = 0.004f;
 
 		/// <summary>
 		/// Draws a node connection from start to end, horizontally

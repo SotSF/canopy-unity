@@ -22,6 +22,16 @@ namespace NodeEditorFramework.Utilities
 		public static string openedPopupUser = "NONE";
 		public static PopupMenu openedPopup;
 
+		// Fast Enter Play Mode (Domain Reload disabled) retains static state
+		// between play sessions; reset to original values on each play entry.
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStaticState ()
+		{
+			currentEditorUser = null;
+			openedPopupUser = "NONE";
+			openedPopup = null;
+		}
+
 		/// <summary>
 		/// Returns if any popup currently has control.
 		/// </summary>
@@ -127,7 +137,23 @@ namespace NodeEditorFramework.Utilities
 		private TextEditor textEditor;
 		private static GUIStyle searchFieldStyle;
 
-		public PopupMenu () 
+		// Fast Enter Play Mode (Domain Reload disabled) retains these runtime-built
+		// GUI styles/textures between play sessions; the references become stale.
+		// Reset to their initial (unbuilt) state on each play entry — SetupGUI
+		// rebuilds them whenever a PopupMenu is constructed.
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStaticState ()
+		{
+			backgroundStyle = null;
+			expandRight = null;
+			itemHeight = 0;
+			selectedLabel = null;
+			itemLabel = null;
+			itemLabelSelected = null;
+			searchFieldStyle = null;
+		}
+
+		public PopupMenu ()
 		{
 			SetupGUI ();
 		}
@@ -815,6 +841,15 @@ namespace NodeEditorFramework.Utilities
 		private UnityEditor.GenericMenu editorMenu;
 #endif
 		private static PopupMenu popup;
+
+		// Fast Enter Play Mode (Domain Reload disabled) retains this static
+		// reference between play sessions; reset on each play entry. The
+		// GenericMenu constructor rebuilds it when a non-editor menu is created.
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStaticState ()
+		{
+			popup = null;
+		}
 
 		public Vector2 Position { get { return popup.Position; } }
 

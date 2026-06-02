@@ -20,6 +20,12 @@ namespace NodeEditorFramework
 		private static GameObject sceneSaveHolder;
 		private const string sceneSaveHolderName = "NodeEditor_SceneSaveHolder";
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			sceneSaveHolder = null;
+		}
+
 		#region Utility
 
 		/// <summary>

@@ -117,7 +117,7 @@ namespace Chess
 
     public class BoardState
     {
-        private static PieceType[] backrowOrder = { 
+        private static readonly PieceType[] backrowOrder = {
             PieceType.Rook, 
             PieceType.Knight, 
             PieceType.Bishop, 

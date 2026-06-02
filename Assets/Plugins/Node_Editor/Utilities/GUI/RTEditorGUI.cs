@@ -8,8 +8,24 @@ using Object = UnityEngine.Object;
 
 namespace NodeEditorFramework.Utilities 
 {
-	public static class RTEditorGUI 
+	public static class RTEditorGUI
 	{
+
+		// Reset static state for Fast Enter Play Mode (Domain Reload disabled)
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStaticState ()
+		{
+			labelWidth = 150;
+			fieldWidth = 50;
+			indent = 0;
+			seperator = null;
+			changeStack = new Stack<bool> ();
+			activeFloatField = -1;
+			activeFloatFieldLastValue = 0;
+			activeFloatFieldString = "";
+			lineMaterial = null;
+			lineTexture = null;
+		}
 
 		#region GUI Proportioning Utilities
 

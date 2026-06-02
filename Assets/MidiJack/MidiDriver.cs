@@ -276,6 +276,15 @@ namespace MidiJack
 
         static MidiDriver _instance;
 
+        // Fast Enter Play Mode (Domain Reload disabled) retains static fields
+        // between play sessions. Reset the singleton so it (and its
+        // MidiStateUpdater GameObject) is rebuilt on the next access.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticState()
+        {
+            _instance = null;
+        }
+
         public static MidiDriver Instance {
             get {
                 if (_instance == null) {

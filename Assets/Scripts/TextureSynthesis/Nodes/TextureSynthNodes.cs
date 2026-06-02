@@ -116,6 +116,12 @@ namespace SecretFire.TextureSynth
             }
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticState()
+        {
+            _sliderStyle = null;
+        }
+
         protected void FloatKnobOrSlider(ref float val, float min, float max, ValueConnectionKnob knob, params GUILayoutOption[] layoutOpts)
         {
             if (knob == null)
@@ -277,7 +283,7 @@ namespace SecretFire.TextureSynth
         private int graphKernel;
 
         private ComputeShader graphShader;
-        public RenderTexture graphTexture;
+        private RenderTexture graphTexture;
 
         private Vector2Int outputSize;
         

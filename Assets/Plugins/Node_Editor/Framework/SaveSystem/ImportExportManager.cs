@@ -18,6 +18,17 @@ namespace NodeEditorFramework.IO
 		private static Action<string> _importMenuCallback;
 		private static Action<string> _exportMenuCallback;
 
+		// Fast Enter Play Mode (Domain Reload disabled) retains static state between play sessions.
+		// Reset the format cache and menu callbacks to their original initial values on every play
+		// entry so stale entries / leaked menu-selection delegates don't carry over.
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			IOFormats = null;
+			_importMenuCallback = null;
+			_exportMenuCallback = null;
+		}
+
 		/// <summary>
 		/// Fetches every IO Format in the script assemblies to provide the framework with custom import and export formats
 		/// </summary>
@@ -196,14 +207,26 @@ namespace NodeEditorFramework.IO
 			nodeCanvas.name = nodeCanvas.saveName = canvasData.name;
 			nodeCanvas.nodes.Clear();
 			NodeEditor.BeginEditingCanvas(nodeCanvas);
+			// Defer node DoInit() until after we've restored their serialized fields below. Awake()
+			// (fired by ScriptableObject.CreateInstance inside Node.Create) would otherwise run DoInit
+			// immediately with default field values, so a node that derives state from a field in
+			// DoInit -- e.g. SpectrumVisualizer building its gradient texture from barGradient -- would
+			// be built from the default and never refresh. With IsInitializing set, DoInit runs lazily
+			// at the node's first Calculate, by which point its fields are populated (this is how
+			// .asset canvases already behave: Unity deserializes fields before Awake).
+			bool wasInitializing = NodeEditor.IsInitializing;
+			NodeEditor.IsInitializing = true;
 
 			foreach (NodeData nodeData in canvasData.nodes.Values)
 			{ // Read all nodes
 				Node node = Node.Create (nodeData.typeID, nodeData.nodePos, null, true, false);
+				if (node == null)
+				{ // Unknown/unregistered node type -- skip it rather than NRE on node.name below
+					Debug.LogWarning("[Import] Could not create node of type '" + nodeData.typeID + "'; skipping it.");
+					continue;
+				}
 				if (!string.IsNullOrEmpty(nodeData.name))
 					node.name = nodeData.name;
-				if (node == null)
-					continue;
 
 				foreach (ConnectionPortDeclaration portDecl in ConnectionPortManager.GetPortDeclarationEnumerator(node))
 				{ // Find stored ports for each node port declaration
@@ -253,7 +276,7 @@ namespace NodeEditorFramework.IO
 			{ // Read all editorStates
 				EditorStateData stateData = canvasData.editorStates[i];
 				NodeEditorState state = ScriptableObject.CreateInstance<NodeEditorState>();
-				state.selectedNode = stateData.selectedNode == null ? null : canvasData.FindNode(stateData.selectedNode.nodeID).node;
+				state.selectedNode = stateData.selectedNode == null ? null : canvasData.FindNode(stateData.selectedNode.nodeID)?.node;
 				state.panOffset = stateData.panOffset;
 				state.zoom = stateData.zoom;
 				state.canvas = nodeCanvas;
@@ -261,6 +284,7 @@ namespace NodeEditorFramework.IO
 				nodeCanvas.editorStates[i] = state;
 			}
 
+			NodeEditor.IsInitializing = wasInitializing;
 			NodeEditor.EndEditingCanvas();
 			return nodeCanvas;
 		}

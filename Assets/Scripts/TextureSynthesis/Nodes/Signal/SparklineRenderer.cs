@@ -6,17 +6,17 @@ namespace SecretFire.TextureSynth
     {
         const string ShaderPath = "NodeShaders/Sparkline";
 
-        static int _SamplesId      = Shader.PropertyToID("_Samples");
-        static int _HeadId         = Shader.PropertyToID("_Head");
-        static int _CountId        = Shader.PropertyToID("_Count");
-        static int _CapacityId     = Shader.PropertyToID("_Capacity");
-        static int _YRangeId       = Shader.PropertyToID("_YRange");
-        static int _LineColorId    = Shader.PropertyToID("_LineColor");
-        static int _BgColorId      = Shader.PropertyToID("_BgColor");
-        static int _ZeroLineColor  = Shader.PropertyToID("_ZeroLineColor");
-        static int _LineThickness  = Shader.PropertyToID("_LineThickness");
-        static int _TargetSize     = Shader.PropertyToID("_TargetSize");
-        static int _PixelScale     = Shader.PropertyToID("_PixelScale");
+        static readonly int _SamplesId      = Shader.PropertyToID("_Samples");
+        static readonly int _HeadId         = Shader.PropertyToID("_Head");
+        static readonly int _CountId        = Shader.PropertyToID("_Count");
+        static readonly int _CapacityId     = Shader.PropertyToID("_Capacity");
+        static readonly int _YRangeId       = Shader.PropertyToID("_YRange");
+        static readonly int _LineColorId    = Shader.PropertyToID("_LineColor");
+        static readonly int _BgColorId      = Shader.PropertyToID("_BgColor");
+        static readonly int _ZeroLineColor  = Shader.PropertyToID("_ZeroLineColor");
+        static readonly int _LineThickness  = Shader.PropertyToID("_LineThickness");
+        static readonly int _TargetSize     = Shader.PropertyToID("_TargetSize");
+        static readonly int _PixelScale     = Shader.PropertyToID("_PixelScale");
 
         public static Material CreateMaterial()
         {

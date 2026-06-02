@@ -12,6 +12,13 @@ using System;
 public class NodeUIController : MonoBehaviour
 {
     public static NodeUIController instance;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        instance = null;
+    }
+
     public RTNodeEditor nodeCanvas;
     public float minimizeTime;
     public Color textureFlowColor;

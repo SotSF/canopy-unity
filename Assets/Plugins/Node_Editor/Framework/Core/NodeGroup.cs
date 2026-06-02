@@ -36,11 +36,18 @@ namespace NodeEditorFramework
 
 		// Resizing and dragging state for active node group
 		private static BorderSelection resizeDir;
+
+		// Reset mutable static state for Fast Enter Play Mode (Domain Reload disabled)
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			resizeDir = 0;
+		}
 		[NonSerialized] private List<Node> pinnedNodes = new List<Node> ();
 		[NonSerialized] private List<NodeGroup> pinnedGroups = new List<NodeGroup> ();
 
 		// Settings
-		private static bool headerFree = true;
+		private static readonly bool headerFree = true;
 		private const int borderWidth = 15;
 		private const int minGroupSize = 150;
 		private const int headerHeight = 30;

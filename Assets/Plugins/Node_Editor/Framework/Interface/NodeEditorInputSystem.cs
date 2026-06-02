@@ -32,6 +32,24 @@ namespace NodeEditorFramework
 		private static List<KeyValuePair<ContextFillerAttribute, Delegate>> contextFillers;
 
 		/// <summary>
+		/// Clears static runtime state so it does not carry across Editor play-mode sessions
+		/// when Domain Reload is disabled (Fast Enter Play Mode).
+		/// </summary>
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStaticState ()
+		{
+			// Drop stale handler lists (which may hold delegates bound to destroyed objects
+			// from a previous session, e.g. runtime additions to hotkeyHandlers). SetupInput
+			// rebuilds them on next init.
+			eventHandlers = null;
+			hotkeyHandlers = null;
+			contextEntries = null;
+			contextFillers = null;
+			// Drop stale reference to a NodeEditorState from a previous session.
+			unfocusControlsForState = null;
+		}
+
+		/// <summary>
 		/// Fetches all event handlers
 		/// </summary>
 		public static void SetupInput () 

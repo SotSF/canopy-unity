@@ -2,12 +2,20 @@
 using System.IO;
 using ArtNet.IO;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ArtNet.Packets
 {
     public class ArtNetPacket
     {
         private static Dictionary<int, byte[]> _BufferPool;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticState()
+        {
+            _BufferPool = null;
+        }
+
         public static Dictionary<int, byte[]> BufferPool
         {
             get

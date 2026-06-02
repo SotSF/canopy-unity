@@ -15,4 +15,12 @@ public class LASPAudioManager : MonoBehaviour
         spectrumTexture = GetComponent<SpectrumToTexture>();
     }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        spectrumAnalyzer = null;
+        audioLevelTracker = null;
+        spectrumTexture = null;
+    }
+
 }

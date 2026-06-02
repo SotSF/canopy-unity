@@ -38,6 +38,27 @@ namespace NodeEditorFramework
 		private static bool initiatedGUI;
 		public static bool InitiationError;
 
+		/// <summary>
+		/// Resets all static state to its initial values on entering play mode.
+		/// Required for Fast Enter Play Mode (Domain Reload disabled), where statics
+		/// otherwise retain stale values and delegates accumulate stale subscriptions.
+		/// </summary>
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			editorPath = "Assets/Plugins/Node_Editor/";
+			curNodeCanvas = null;
+			curEditorState = null;
+			IsInitializing = false;
+			NEUpdate = null;
+			ClientRepaints = null;
+			editCanvasStack = new Stack<NodeCanvas> (4);
+			editEditorStateStack = new Stack<NodeEditorState> (4);
+			initiatedBase = false;
+			initiatedGUI = false;
+			InitiationError = false;
+		}
+
 		#region Setup
 
 		/// <summary>

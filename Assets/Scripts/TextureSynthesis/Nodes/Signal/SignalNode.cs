@@ -54,6 +54,7 @@ namespace SecretFire.TextureSynth
             public float yMax =  0.5f;
             public bool dirty;
             public ComputeBuffer buffer;
+            [NonSerialized]
             public RenderTexture texture;
             public Material material;
         }
@@ -61,11 +62,11 @@ namespace SecretFire.TextureSynth
         const float SparklineToggleRowHeight    = 22f;
         const float SparklineCollapsedRowHeight = 20f;
         const float SparklineLabelColumnWidth   = 60f;
-        const float SparklineValueColumnWidth   = 50f;
+        const float SparklineValueColumnWidth   = 46f;
         const float SparklineKnobColumnWidth    = 60f;
         const float SparklineKnobColumnWidthMax = 130f;
         const float SparklineRowPadding         = 8f;
-        const float SparklineMinTexWidth        = 40f;
+        const float SparklineMinTexWidth        = 72f;
         protected virtual float SparklineExpandedRowHeight => SparklineTexHeight + 6f;
 
         // Right-aligned, non-wrapping style for the per-row knob label. Reusing the framework's
@@ -85,6 +86,14 @@ namespace SecretFire.TextureSynth
             }
         }
 
+        // Fast Enter Play Mode keeps statics alive across sessions; drop the cached GUIStyle so the
+        // lazy getter rebuilds it against the freshly-skinned NodeEditorGUI.nodeLabelRight basis.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStaticState()
+        {
+            _knobLabelStyle = null;
+        }
+
         protected int   DisplaySampleCount => Mathf.CeilToInt(SparklineDisplaySeconds * SparklineCaptureHz);
         // Just enough room for a meaningfully-sized sparkline plus the port column.
         // The texture itself flexes to fill whatever space is available beyond this.
@@ -93,6 +102,12 @@ namespace SecretFire.TextureSynth
 
         protected virtual Vector2 BaseDefaultSize => new Vector2(200, 100);
         protected virtual Vector2 BaseMinSize     => new Vector2(100, 50);
+
+        // Measure-and-fit the node to its actual laid-out content every repaint. DefaultSize is
+        // only an approximation (IMGUI inter-row spacing / style margins are hard to predict), so
+        // without this a many-channel node like OddballControl ends up a row short. AutoLayout also
+        // makes MinSize meaningful and shrinks the node when the sparkline is collapsed.
+        public override bool AutoLayout => true;
 
         public override Vector2 DefaultSize
         {
@@ -275,9 +290,10 @@ namespace SecretFire.TextureSynth
             GUILayout.EndHorizontal();
 
             // A uniform knob-label column keeps every sparkline texture the same width and stops
-            // longer output names from wrapping. Sized to the widest name (clamped), measured here
-            // because CalcSize needs the active GUI skin.
-            float knobColumnWidth = SparklineKnobColumnWidth;
+            // longer output names from wrapping. Sized to this node's widest name (clamped) and no
+            // wider, so single short-named outputs leave the maximum room for the trace. Measured
+            // here because CalcSize needs the active GUI skin.
+            float knobColumnWidth = 0f;
             foreach (var desc in descs)
             {
                 if (desc.outputKnob == null) continue;

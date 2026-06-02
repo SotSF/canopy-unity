@@ -20,6 +20,13 @@ public static class NodeUIElements
     private static Dictionary<float, GUILayoutOption> widths = new();
     private static Dictionary<float, GUILayoutOption> heights = new();
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        widths = new();
+        heights = new();
+    }
+
     public static void TexInfo(Texture tex, float width, float height)
     {
         GUILayout.BeginVertical();

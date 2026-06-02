@@ -41,14 +41,14 @@ namespace ArtNet.Rdm
 
         #region Predefined Values
 
-        private static UId broadcast = new UId(0xFFFF, 0xFFFFFFFF);
+        private static readonly UId broadcast = new UId(0xFFFF, 0xFFFFFFFF);
 
         public static UId Broadcast
         {
             get { return broadcast; }
         }
 
-        private static UId empty = new UId();
+        private static readonly UId empty = new UId();
 
         public static UId Empty
         {
@@ -60,7 +60,7 @@ namespace ArtNet.Rdm
             return new UId(manufacturerId, 0xFFFFFFFF);
         }
 
-        private static UId minValue = new UId(0x1, 0x0);
+        private static readonly UId minValue = new UId(0x1, 0x0);
 
         /// <summary>
         /// Gets the minimum possible UId value.
@@ -70,7 +70,7 @@ namespace ArtNet.Rdm
             get { return minValue; }
         }
 
-        private static UId maxValue = new UId(0x7FFF, 0xFFFFFFFF);
+        private static readonly UId maxValue = new UId(0x7FFF, 0xFFFFFFFF);
 
         /// <summary>
         /// Gets the maximum possible UId value.

@@ -13,6 +13,13 @@ namespace NodeEditorFramework
 
 		private static Action<Type> _menuCallback;
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void ResetStaticState()
+		{
+			CanvasTypes = null;
+			_menuCallback = null;
+		}
+
 		/// <summary>
 		/// Fetches every CanvasType Declaration in the script assemblies to provide the framework with custom canvas types
 		/// </summary>

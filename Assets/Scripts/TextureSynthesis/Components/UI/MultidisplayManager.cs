@@ -12,6 +12,12 @@ public class MultidisplayManager : MonoBehaviour
         instance = this;
     }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        instance = null;
+    }
+
     void Start()
     {
         var displayCount = Display.displays.Length;
