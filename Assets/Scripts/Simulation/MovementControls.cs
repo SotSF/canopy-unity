@@ -13,6 +13,12 @@ public class MovementControls: MonoBehaviour
     {
         instance = null;
     }
+
+    // Set by CanopySimulationNode each frame: is the cursor currently over the sim view.
+    public bool mouseOverView = false;
+    // Latched grab state: a middle-click that began over the view keeps rotating until release.
+    private bool rotating = false;
+
     public float speed = .01f;
     public float mouseSensitivity;
 
@@ -61,8 +67,16 @@ public class MovementControls: MonoBehaviour
             // transform.position += Quaternion.Euler(0,transform.localRotation.eulerAngles.y,0) * new Vector3(x, 0, z);
         }
         var mouse = UnityEngine.InputSystem.Mouse.current;
-        //If mouse mode?
-        if (mouse.middleButton.isPressed)
+        // Begin a rotation grab only when the middle button is first pressed while the cursor is
+        // over the sim view, then keep rotating until it's released - even if the cursor has since
+        // left the node's bounds. Clearing on !isPressed (rather than wasReleasedThisFrame) also
+        // ends the grab if the release is missed, e.g. on focus loss.
+        if (mouse.middleButton.wasPressedThisFrame && mouseOverView)
+            rotating = true;
+        else if (!mouse.middleButton.isPressed)
+            rotating = false;
+
+        if (rotating)
         {
             rotationX += mouse.delta.x.value * mouseSensitivity;
             rotationY += mouse.delta.y.value * mouseSensitivity;

@@ -5,9 +5,13 @@ using System.Collections;
 public abstract class Singleton<T> : Singleton where T : MonoBehaviour
 {
     #region  Fields
+#pragma warning disable UDR0001 // Domain Reload Analyzer
+    // This is confirmed safe, so we can ignore the Domain Reload analyzer warning
     private static T _instance;
+#pragma warning restore UDR0001 // Domain Reload Analyzer
 
     // ReSharper disable once StaticMemberInGenericType
+
     private static readonly object Lock = new object();
 
     [SerializeField]
