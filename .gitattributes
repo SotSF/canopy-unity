@@ -1,1 +1,28 @@
-* text=auto
+* text=auto eol=lf
+
+# Windows-only scripts that actually want CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Unity YAML — use Unity's smart merge driver 
+# Windows: C:\Program Files\Unity\6000.3.10f1\Editor\Data\Tools\UnityYAMLMerge.exe
+# MacOS: /Applications/Unity/Hub/Editor/6000.3.10f1/Unity.app/Contents/Helpers/UnityYAMLMerge
+# git config merge.unityyamlmerge.driver '"<path>" merge -p %O %B %A %A'
+*.unity      merge=unityyamlmerge
+*.prefab     merge=unityyamlmerge
+*.asset      merge=unityyamlmerge
+*.controller merge=unityyamlmerge
+*.anim       merge=unityyamlmerge
+*.mat        merge=unityyamlmerge
+*.meta       merge=unityyamlmerge
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.gif binary
+*.mp4 binary
+*.psd binary
+*.fbx binary
+*.wav binary
+*.mp3 binary
+*.unitypackage binary
