@@ -14,7 +14,7 @@ public class GamepadFullControllerNode : TickingNode
     public override string GetID => "GamepadFullControllerNode";
     public override string Title { get { return "GamepadFullController"; } }
 
-    private Vector2 _DefaultSize = new Vector2(220, 440);
+    private Vector2 _DefaultSize = new Vector2(250, 480);
     public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("LeftStick", Direction.Out, typeof(Vector2), NodeSide.Right)]
@@ -49,6 +49,11 @@ public class GamepadFullControllerNode : TickingNode
     [ValueConnectionKnob("rightBumper", Direction.Out, typeof(bool), NodeSide.Right)]
     public ValueConnectionKnob rightBumperKnob;
 
+    [ValueConnectionKnob("leftStickPress", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob leftStickPressKnob;
+    [ValueConnectionKnob("rightStickPress", Direction.Out, typeof(bool), NodeSide.Right)]
+    public ValueConnectionKnob rightStickPressKnob;
+
     [ValueConnectionKnob("start", Direction.Out, typeof(bool), NodeSide.Right)]
     public ValueConnectionKnob startKnob;
     [ValueConnectionKnob("back", Direction.Out, typeof(bool), NodeSide.Right)]
@@ -58,6 +63,31 @@ public class GamepadFullControllerNode : TickingNode
 
     [NonSerialized] private RadioButtonSet controllerChoice;
     [NonSerialized] private string[] lastDeviceNames;
+
+    // Live trigger traces, captured/rendered each tick (see DoCalc), drawn in NodeGUI.
+    [NonSerialized] private SparklineTrace leftTriggerTrace;
+    [NonSerialized] private SparklineTrace rightTriggerTrace;
+
+    private void EnsureTraces()
+    {
+        // Fixed 0..1 range so a resting trigger reads flat along the bottom instead of
+        // auto-scaling noise to fill the box.
+        leftTriggerTrace  ??= new SparklineTrace(new Color(0.40f, 0.85f, 1.00f), fixedRange: new Vector2(0f, 1f));
+        rightTriggerTrace ??= new SparklineTrace(new Color(1.00f, 0.55f, 0.30f), fixedRange: new Vector2(0f, 1f));
+    }
+
+    static GUIStyle _valueStyle, _boolOnStyle, _boolOffStyle;
+    static GUIStyle ValueStyle   => _valueStyle  ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleLeft, wordWrap = false };
+    static GUIStyle BoolOnStyle  => _boolOnStyle  ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleLeft, wordWrap = false, normal = { textColor = new Color(0.45f, 0.95f, 0.45f) } };
+    static GUIStyle BoolOffStyle => _boolOffStyle ??= new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleLeft, wordWrap = false, normal = { textColor = new Color(0.50f, 0.50f, 0.50f) } };
+
+    // Fast Enter Play Mode keeps statics alive across sessions; drop cached styles so they
+    // rebuild against the freshly-skinned GUI.skin on the next NodeGUI pass.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        _valueStyle = _boolOnStyle = _boolOffStyle = null;
+    }
 
     public override void NodeGUI()
     {
@@ -84,26 +114,65 @@ public class GamepadFullControllerNode : TickingNode
                 boundDeviceName = sel;
         }
 
-        LeftStickKnob.DisplayLayout();
-        RightStickKnob.DisplayLayout();
-        LeftTriggerKnob.DisplayLayout();
-        RightTriggerKnob.DisplayLayout();
-        dpadUpKnob.DisplayLayout();
-        dpadDownKnob.DisplayLayout();
-        dpadLeftKnob.DisplayLayout();
-        dpadRightKnob.DisplayLayout();
-        aKnob.DisplayLayout();
-        bKnob.DisplayLayout();
-        xKnob.DisplayLayout();
-        yKnob.DisplayLayout();
-        leftBumperKnob.DisplayLayout();
-        rightBumperKnob.DisplayLayout();
-        startKnob.DisplayLayout();
-        backKnob.DisplayLayout();
+        EnsureTraces();
+
+        StickRow(LeftStickKnob);
+        StickRow(RightStickKnob);
+        TriggerRow(LeftTriggerKnob, leftTriggerTrace);
+        TriggerRow(RightTriggerKnob, rightTriggerTrace);
+        BoolRow(dpadUpKnob);
+        BoolRow(dpadDownKnob);
+        BoolRow(dpadLeftKnob);
+        BoolRow(dpadRightKnob);
+        BoolRow(aKnob);
+        BoolRow(bKnob);
+        BoolRow(xKnob);
+        BoolRow(yKnob);
+        BoolRow(leftBumperKnob);
+        BoolRow(rightBumperKnob);
+        BoolRow(leftStickPressKnob);
+        BoolRow(rightStickPressKnob);
+        BoolRow(startKnob);
+        BoolRow(backKnob);
 
         GUILayout.EndVertical();
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
+    }
+
+    // Each row draws the live value on the left, then the knob's name + output port at the
+    // node's right edge (DisplayLayout positions the port from the label's row).
+    private void StickRow(ValueConnectionKnob knob)
+    {
+        var v = knob.GetValue<Vector2>();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label($"<{v.x,5:0.00}, {v.y,5:0.00}>", ValueStyle);
+        GUILayout.FlexibleSpace();
+        knob.DisplayLayout();
+        GUILayout.EndHorizontal();
+    }
+
+    private void TriggerRow(ValueConnectionKnob knob, SparklineTrace trace)
+    {
+        GUILayout.BeginHorizontal(GUILayout.Height(trace.TexHeight + 2));
+        if (trace.Texture != null)
+            GUILayout.Box(trace.Texture, GUILayout.ExpandWidth(true), GUILayout.MinWidth(40),
+                GUILayout.Height(trace.TexHeight));
+        else
+            GUILayout.FlexibleSpace();
+        GUILayout.Label(knob.GetValue<float>().ToString("0.00"), ValueStyle, GUILayout.Width(34));
+        knob.DisplayLayout();
+        GUILayout.EndHorizontal();
+    }
+
+    private void BoolRow(ValueConnectionKnob knob)
+    {
+        bool on = knob.GetValue<bool>();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(on ? "true" : "false", on ? BoolOnStyle : BoolOffStyle, GUILayout.Width(40));
+        GUILayout.FlexibleSpace();
+        knob.DisplayLayout();
+        GUILayout.EndHorizontal();
     }
 
     private void EnsureControllerChoice()
@@ -183,30 +252,53 @@ public class GamepadFullControllerNode : TickingNode
 
     public override bool DoCalc()
     {
+        EnsureTraces();
         var gp = GetBoundGamepad();
-        if (gp == null) return true;
+        float lt = 0f, rt = 0f;
 
-        LeftStickKnob.SetValue(gp.leftStick.ReadValue());
-        RightStickKnob.SetValue(gp.rightStick.ReadValue());
-        LeftTriggerKnob.SetValue(gp.leftTrigger.ReadValue());
-        RightTriggerKnob.SetValue(gp.rightTrigger.ReadValue());
+        if (gp != null)
+        {
+            LeftStickKnob.SetValue(gp.leftStick.ReadValue());
+            RightStickKnob.SetValue(gp.rightStick.ReadValue());
+            lt = gp.leftTrigger.ReadValue();
+            rt = gp.rightTrigger.ReadValue();
+            LeftTriggerKnob.SetValue(lt);
+            RightTriggerKnob.SetValue(rt);
 
-        dpadUpKnob.SetValue(gp.dpad.up.isPressed);
-        dpadDownKnob.SetValue(gp.dpad.down.isPressed);
-        dpadLeftKnob.SetValue(gp.dpad.left.isPressed);
-        dpadRightKnob.SetValue(gp.dpad.right.isPressed);
+            dpadUpKnob.SetValue(gp.dpad.up.isPressed);
+            dpadDownKnob.SetValue(gp.dpad.down.isPressed);
+            dpadLeftKnob.SetValue(gp.dpad.left.isPressed);
+            dpadRightKnob.SetValue(gp.dpad.right.isPressed);
 
-        aKnob.SetValue(gp.aButton.isPressed);
-        bKnob.SetValue(gp.bButton.isPressed);
-        xKnob.SetValue(gp.xButton.isPressed);
-        yKnob.SetValue(gp.yButton.isPressed);
+            aKnob.SetValue(gp.aButton.isPressed);
+            bKnob.SetValue(gp.bButton.isPressed);
+            xKnob.SetValue(gp.xButton.isPressed);
+            yKnob.SetValue(gp.yButton.isPressed);
 
-        leftBumperKnob.SetValue(gp.leftShoulder.isPressed);
-        rightBumperKnob.SetValue(gp.rightShoulder.isPressed);
+            leftBumperKnob.SetValue(gp.leftShoulder.isPressed);
+            rightBumperKnob.SetValue(gp.rightShoulder.isPressed);
 
-        startKnob.SetValue(gp.startButton.isPressed);
-        backKnob.SetValue(gp.selectButton.isPressed);
+            leftStickPressKnob.SetValue(gp.leftStickButton.isPressed);
+            rightStickPressKnob.SetValue(gp.rightStickButton.isPressed);
+
+            startKnob.SetValue(gp.startButton.isPressed);
+            backKnob.SetValue(gp.selectButton.isPressed);
+        }
+
+        // Capture even when disconnected so the trace shows a flat zero rather than freezing.
+        float zoom = (NodeEditor.curEditorState != null) ? NodeEditor.curEditorState.zoom : 1f;
+        leftTriggerTrace.Capture(lt);
+        rightTriggerTrace.Capture(rt);
+        leftTriggerTrace.Render(zoom);
+        rightTriggerTrace.Render(zoom);
 
         return true;
+    }
+
+    public void OnDestroy()
+    {
+        leftTriggerTrace?.Release();
+        rightTriggerTrace?.Release();
+        leftTriggerTrace = rightTriggerTrace = null;
     }
 }

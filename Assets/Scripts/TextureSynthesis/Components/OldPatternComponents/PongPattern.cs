@@ -63,10 +63,10 @@ namespace sotsf.canopy.patterns
             // update paddle state, ball state
             // set values on shader
             float xInput = 0;
-            if (HomebrewXBoxController.instance != null)
-            {
-                xInput = HomebrewXBoxController.instance.Get(HomebrewXBoxController.ControlInput.leftStickX);
-            }
+            //if (HomebrewXBoxController.instance != null)
+            //{
+            //    xInput = HomebrewXBoxController.instance.Get(HomebrewXBoxController.ControlInput.leftStickX);
+            //}
 
             paddleLocation += (xInput * paddleSpeed) % 360;
             CalculateBallPosition();
