@@ -1,25 +1,40 @@
 using UnityEngine;
 
-public class SpaceshipProjectile : MonoBehaviour
+public class SpaceshipProjectile : MonoBehaviour, IDamageSource
 {
 
     public Vector3 velocity;
     public LineRenderer line;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public SpaceshipController parent;
+
+
+    new public Collider collider;
+
+    public void OnTriggerEnter(Collider other)
     {
-        
+        var otherDamageable = other.GetComponent<IDamageable>();
+        var otherProjectile = other.GetComponent<SpaceshipProjectile>();
+        if (otherShip != null)
+        {
+            // Hit a ship
+        }
+        else if (otherProjectile != null)
+        {
+            // Hit a projectile
+
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.localPosition += velocity;
-        velocity *= SpaceshipGameConstants.Instance.projectileDragFactor;
-        line.SetPosition(0, transform.localPosition);
+        transform.localPosition += velocity * Time.deltaTime;
+        // projectileDragFactor is the fraction of speed retained per second
+        velocity *= Mathf.Pow(SpaceshipGameConstants.Instance.projectileDragFactor, Time.deltaTime);
+        // line.SetPosition(0, transform.localPosition);
         if (transform.localPosition.magnitude > SpaceshipGameConstants.Instance.boundaryRadius)
         {
-            Destroy(this);
+            Destroy(this.gameObject);
         }
     }
 }

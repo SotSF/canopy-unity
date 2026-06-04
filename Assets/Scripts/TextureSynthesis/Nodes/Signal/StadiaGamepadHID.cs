@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Utilities;
+using UnityEngine.InputSystem.HID;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -112,36 +113,13 @@ namespace SecretFire.TextureSynth.Input
     public class StadiaGamepadHID : Gamepad
     {
         // Editor: register so the device is recognized in edit mode too (the node enumerates
-        // Gamepad.all from NodeGUI outside play mode), AND keep the binding alive across recompiles.
-        //
-        // A recompile is a domain reload. InputSystem's InitializeInEditor does a Reset() (clearing
-        // layout registrations) and then defers restoring saved devices to the *first input update*.
-        // That restore can happen before OR after our [InitializeOnLoad] runs (static-ctor ordering
-        // across assemblies is undefined), so neither an immediate Register() nor a delayCall can
-        // reliably win the race: if our layout isn't registered at restore time, the Stadia comes
-        // back as the generic HID Joystick (keeping its old device name -- hence a device literally
-        // named "StadiaGamepadHID" but typed Joystick), and a Register() that ran while no device
-        // was live had nothing to promote.
-        //
-        // So instead of racing the restore, we re-run Register() whenever a device appears.
-        // RegisterLayout is idempotent and re-fires RecreateDevicesUsingLayoutWithInferiorMatch,
-        // which promotes any connected device that matches us better than its current layout --
-        // so the Stadia gets re-promoted on whichever input update finally restores it.
+        // Gamepad.all from NodeGUI outside play mode). delayCall is a safety net in case this
+        // static ctor runs before InputSystem has finished initializing on a domain reload.
 #if UNITY_EDITOR
         static StadiaGamepadHID()
         {
             Register();
             EditorApplication.delayCall += Register;
-            InputSystem.onDeviceChange += OnEditorDeviceChange;
-        }
-
-        static void OnEditorDeviceChange(InputDevice device, InputDeviceChange change)
-        {
-            // Ignore our own layout: RecreateDevice re-adds the device, which re-enters here, and
-            // re-registering during a device-add notification risks reentrancy -- so skip + defer.
-            if (device is StadiaGamepadHID) return;
-            if (change == InputDeviceChange.Added || change == InputDeviceChange.Reconnected)
-                EditorApplication.delayCall += Register;
         }
 #endif
 
@@ -153,19 +131,48 @@ namespace SecretFire.TextureSynth.Input
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Init() => Register();
 
-        // No local "already registered" guard on purpose: RegisterLayout is idempotent
-        // (re-registering the type overwrites; AddMatcher dedups identical matchers), and we
-        // *want* it to re-run each play-enter -- RegisterControlLayoutMatcher re-fires
-        // RecreateDevicesUsingLayoutWithInferiorMatch, which re-promotes an already-connected
-        // device from the generic Joystick layout to this one. A persistent static guard would
-        // survive a no-domain-reload play-enter and suppress exactly that re-match.
+        // No local "already registered" guard on purpose: everything here is idempotent and we
+        // *want* it to re-run on each entry point (domain load, play-enter, build startup).
+        //
+        // The onFindLayoutForDevice hook is the part that makes this survive a recompile. On a
+        // domain reload InputSystem restores the saved Stadia BEFORE this code runs (during its own
+        // init), so the generic HID fallback claims it and registers a "HID::18D1-9400" layout whose
+        // matcher is MORE specific than ours -- after which a plain matcher can never out-score it,
+        // so RecreateDevicesUsingLayoutWithInferiorMatch keeps resolving to the generic layout.
+        // onFindLayoutForDevice sidesteps scoring entirely: it OVERRIDES layout selection, and the
+        // HID fallback defers (returns null) whenever any layout already matched, so our override
+        // always wins. We add it BEFORE RegisterLayout so the device recreation that RegisterLayout
+        // triggers (via the matcher) re-resolves through the hook and promotes the live device.
         static void Register()
         {
+            InputSystem.onFindLayoutForDevice -= OnFindLayoutForDevice; // dedupe across re-entry
+            InputSystem.onFindLayoutForDevice += OnFindLayoutForDevice;
+
+            // The matcher matches on fresh discovery AND triggers re-resolution of an already-
+            // connected device (RecreateDevicesUsingLayoutWithInferiorMatch); with the hook in
+            // place that re-resolution promotes a restored generic Joystick to this layout.
             InputSystem.RegisterLayout<StadiaGamepadHID>(
                 matches: new InputDeviceMatcher()
                     .WithInterface("HID")
                     .WithCapability("vendorId", 0x18D1)
                     .WithCapability("productId", 0x9400));
+        }
+
+        // Force this layout for the Stadia regardless of matcher scoring. Returns null (defer) for
+        // anything else so we never interfere with other devices' resolution.
+        static string OnFindLayoutForDevice(ref InputDeviceDescription description, string matchedLayout,
+            InputDeviceExecuteCommandDelegate executeCommand)
+        {
+            if (description.interfaceName != "HID" || string.IsNullOrEmpty(description.capabilities))
+                return null;
+            try
+            {
+                var hid = HID.HIDDeviceDescriptor.FromJson(description.capabilities);
+                if (hid.vendorId == 0x18D1 && hid.productId == 0x9400)
+                    return nameof(StadiaGamepadHID);
+            }
+            catch { /* capabilities wasn't a parseable HID descriptor; let others handle it */ }
+            return null;
         }
     }
 }

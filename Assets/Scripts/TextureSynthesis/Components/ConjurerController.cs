@@ -56,7 +56,7 @@ public class ConjurerController : MonoBehaviour
     }
 
     public static readonly float dragFactor = 0.005f;
-    public float playerSize = 2;
+
 
     void Update()
     {

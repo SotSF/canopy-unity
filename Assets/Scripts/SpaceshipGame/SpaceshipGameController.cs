@@ -79,7 +79,7 @@ public class SpaceshipGameController : MonoBehaviour
     }
 
     public static readonly float dragFactor = 0.005f;
-    public float playerSize = 2;
+
     // 1 byte for event id, 4 bytes for two floats r & theta. Pre-initialize with the position event type representation
     private byte[] shipPositionEventBuffer = new byte[1 + 4 * 2] { (byte)SpaceshipGameEventType.ShipPosition,0,0,0,0,0,0,0,0 }; 
     void Update()
