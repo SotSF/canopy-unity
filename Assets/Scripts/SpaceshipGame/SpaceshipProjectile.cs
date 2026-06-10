@@ -6,23 +6,38 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
     public Vector3 velocity;
     public LineRenderer line;
     public SpaceshipController parent;
+    public float damageAmount = 1;
+
+    public GameObject VFXPrefab;
 
 
     new public Collider collider;
 
     public void OnTriggerEnter(Collider other)
     {
+        var otherShip = other.GetComponent<SpaceshipController>();
+        if (otherShip == parent)
+        {
+            // Owning ship, do nothing
+            return;
+        }
         var otherDamageable = other.GetComponent<IDamageable>();
-        var otherProjectile = other.GetComponent<SpaceshipProjectile>();
-        if (otherShip != null)
+        if (otherDamageable != null)
         {
-            // Hit a ship
+            // Hit a damageable target
+            Debug.Log($"Projectile hit {otherDamageable}, dealing {damageAmount} damage");
+            otherDamageable.TakeDamage(damageAmount, this);
+            DoVFX();
+            Destroy(this.gameObject);
         }
-        else if (otherProjectile != null)
-        {
-            // Hit a projectile
-
-        }
+    }
+    private void DoVFX()
+    {
+        var vfx = Instantiate(VFXPrefab, transform.position, Quaternion.Euler(90, 0, 0), transform.parent);
+        var particleMaterial = vfx.GetComponent<ParticleSystemRenderer>().material;
+        particleMaterial.color = parent.playerColor;
+        
+        //particle.renderer
     }
 
     // Update is called once per frame

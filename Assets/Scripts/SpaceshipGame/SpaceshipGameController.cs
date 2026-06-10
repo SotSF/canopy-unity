@@ -99,6 +99,27 @@ public class SpaceshipGameController : MonoBehaviour
         }
     }
 
+    private byte[] gameDataUpdateBuffer = new byte[1 + 2 + 2 + 12];
+    public void SendHitEvent(SpaceshipController ship)
+    {
+        var playerId = ships.Where(kvPair => kvPair.Value == ship).Select(kvPair => kvPair.Key).FirstOrDefault();
+
+        gameDataUpdateBuffer[0] = (byte)SpaceshipGameEventType.GameDataUpdate;
+        short msgIdx = 0; // "Hit!"
+        byte[] msgIdxBytes = BitConverter.GetBytes(msgIdx);
+        short gameIdx = 0; // "SpaceshipGame"
+        byte[] gameIdxBytes = BitConverter.GetBytes(gameIdx);
+        short health = (short)ship.health;
+        byte[] healthBytes= BitConverter.GetBytes(health);
+        short bufferOffset = 1;
+        Buffer.BlockCopy(msgIdxBytes, 0, gameDataUpdateBuffer, bufferOffset, 2);
+        bufferOffset += 2;
+        Buffer.BlockCopy(gameIdxBytes, 0, gameDataUpdateBuffer, bufferOffset, 2);
+        bufferOffset += 2;
+        Buffer.BlockCopy(healthBytes, 0, gameDataUpdateBuffer, bufferOffset, 2);
+        server.SendBinary(playerId, gameDataUpdateBuffer);
+    }
+
     // Gets (or lazily creates) the ship for a canvas player. Idempotent, so it's safe to
     // call every frame and after a Play restart (when canvasShips starts empty again).
     public SpaceshipController AddCanvasPlayer(string id)
@@ -107,8 +128,9 @@ public class SpaceshipGameController : MonoBehaviour
             return null;
         if (!canvasShips.TryGetValue(id, out var ship) || ship == null)
         {
-            ship = SpaceshipController.Create(spaceshipPrefab, gameObject);
+            ship = SpaceshipController.Create(spaceshipPrefab, gameObject, SpaceshipController.PlayerType.GenericCanvas);
             canvasShips[id] = ship;
+            ship.id = id;
             Debug.Log($"Added canvas player with id {id}");
         }
         return ship;
@@ -178,7 +200,8 @@ public class SpaceshipGameController : MonoBehaviour
         Rotate,
         CalibrationStatus,
         ShipPosition,
-        TouchPosition
+        TouchPosition,
+        GameDataUpdate
     }
 
     struct SpaceshipGameEvent
@@ -188,10 +211,16 @@ public class SpaceshipGameController : MonoBehaviour
         float[] data;
     }
 
+    public void AddWebPlayer(string id)
+    {
+        var playerShip = SpaceshipController.Create(spaceshipPrefab, gameObject, SpaceshipController.PlayerType.Web);
+        ships[id] = playerShip;
+        playerShip.id = id;
+    }
+
     public void OnOpen(WebSocketConnection connection)
     {
-        var playerShip = SpaceshipController.Create(spaceshipPrefab, gameObject);
-        ships[connection.id] = playerShip;
+        AddWebPlayer(connection.id);
         Debug.Log($"Received websocket connection with id {connection.id}");
     }
 
@@ -202,24 +231,30 @@ public class SpaceshipGameController : MonoBehaviour
         Destroy(leavingPlayer.gameObject);
     }
 
-/*
-      Binary format
+    /*
+    Binary format
 
-      EventType.ChangeColor:
-        0x00                < Event type
-        0x00 0x00 0x00      < Player hex color
+    EventType.ChangeColor:
+    0x00                < Event type
+    0x00 0x00 0x00      < Player hex color
 
-      EventType.Press:
-        0x00                < Event type
-        0x00                < Button id
+    EventType.Press:
+    0x00                < Event type
+    0x00                < Button id
 
-      EventType.Update:
-        0x00                < Event type
-        0x00 0x00 0x00 0x00 < float data 0 (lx)
-        0x00 0x00 0x00 0x00 < float data 1 (ly)
-        0x00 0x00 0x00 0x00 < float data 2 (rx)
-        0x00 0x00 0x00 0x00 < float data 3 (ry)
-*/
+    EventType.Update:
+    0x00                < Event type
+    0x00 0x00 0x00 0x00 < float data 0 (lx)
+    0x00 0x00 0x00 0x00 < float data 1 (ly)
+    0x00 0x00 0x00 0x00 < float data 2 (rx)
+    0x00 0x00 0x00 0x00 < float data 3 (ry)
+
+    EventType.GameDataUpdate
+    2 bytes (1 short): DisplayMessageId
+    2 bytes (1 short): GameID
+    12 bytes (unstructured): Game info (health, ammo count, shields, snake length, etc)
+
+    */
     public void OnMessage(WebSocketMessage message)
     {
         //message.connection;

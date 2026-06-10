@@ -2,14 +2,22 @@ using UnityEngine;
 
 public class SpaceshipController : MonoBehaviour, IDamageable
 {
+    public enum PlayerType
+    {
+        Web,
+        Controller,
+        Oddball,
+        GenericCanvas
+    }
     private Vector3 velocity;
     // Turn rate about the Y axis, in degrees/second. Built up by steering, decays when idle.
     private float angularVelocity;
     // Player's assigned color, mirrored onto fired projectiles.
-    private Color playerColor = Color.white;
+    public Color playerColor = Color.white;
     private Gradient playerGradient;
     public SpaceshipProjectile projectilePrefab;
-
+    public string id;
+    public bool isCanvasPlayer = false;
 
     // Velocity along polar axes, ie radial (in/out) speed and circumferential (around circle speed)
     private Vector2 polarVelocity;
@@ -17,16 +25,18 @@ public class SpaceshipController : MonoBehaviour, IDamageable
 
     new public Renderer renderer;
     new public Collider collider;
-    public float health = 10;
+    public float health = 3;
+    private PlayerType playerType;
 
-    public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard)
+    public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard, PlayerType playerType)
     {
         SpaceshipController ship = Instantiate(prefab, gameBoard.transform);
         ship.velocity = Vector3.zero;
         // Instantiate near edge of game board
         var rotation = Quaternion.Euler(0, 0, 0);
-        ship.transform.localPosition = rotation * Vector3.right * 0.75f * SpaceshipGameConstants.Instance.boundaryRadius;
+        ship.transform.localPosition = rotation * Vector3.left * 0.15f * SpaceshipGameConstants.Instance.boundaryRadius;
         ship.calibrated = false;
+        ship.playerType = playerType;
         return ship;
     }
 
@@ -127,6 +137,11 @@ public class SpaceshipController : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage, IDamageSource source)
     {
+        Debug.Log($"Take damage called with {damage} damage, health from {health} to {health-damage}");
+        if (playerType == PlayerType.Web)
+        {
+            SpaceshipGameController.instance.SendHitEvent(this);
+        }
         health -= damage;
         if (health <= 0)
         {
@@ -137,6 +152,7 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     public void OnDeath()
     {
         // Do death VFX, respawn?
+        Destroy(this.gameObject);
     }
 
     public void OnScoreHit(SpaceshipController other)
