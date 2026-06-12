@@ -27,17 +27,21 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
             // Hit a damageable target
             Debug.Log($"Projectile hit {otherDamageable}, dealing {damageAmount} damage");
             otherDamageable.TakeDamage(damageAmount, this);
-            DoVFX();
+            DoVFX(other.ClosestPoint(transform.position));
             Destroy(this.gameObject);
         }
     }
-    private void DoVFX()
+
+    public void OnScoreKill(IDamageable target)
     {
-        var vfx = Instantiate(VFXPrefab, transform.position, Quaternion.Euler(90, 0, 0), transform.parent);
-        var particleMaterial = vfx.GetComponent<ParticleSystemRenderer>().material;
-        particleMaterial.color = parent.playerColor;
-        
-        //particle.renderer
+        parent.score++;
+    }
+    private void DoVFX(Vector3 point)
+    {
+        var vfx = Instantiate(VFXPrefab, point, Quaternion.Euler(90, 0, 0), transform.parent);
+        var renderer = vfx.GetComponent<ParticleSystemRenderer>();
+        renderer.material.color = parent.playerColor;
+        renderer.trailMaterial.color = parent.playerColor;
     }
 
     // Update is called once per frame

@@ -16,6 +16,8 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     public Color playerColor = Color.white;
     private Gradient playerGradient;
     public SpaceshipProjectile projectilePrefab;
+    public GameObject deathVFXprefab;
+
     public string id;
     public bool isCanvasPlayer = false;
 
@@ -27,6 +29,10 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     new public Collider collider;
     public float health = 3;
     private PlayerType playerType;
+    private bool controllable = true;
+
+    public short score = 0;
+    public short deaths = 0;
 
     public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard, PlayerType playerType)
     {
@@ -43,8 +49,11 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     public void OnStickInput(Vector2 leftStick, Vector2 rightStick)
     {
         // Right stick steers the heading; left stick throttles thrust along it.
-        UpdateRotation(rightStick);
-        UpdateVelocity(leftStick);
+        if (controllable)
+        {
+            UpdateRotation(rightStick);
+            UpdateVelocity(leftStick);
+        }
     }
 
     // Right stick X sets the direction of angular thrust; holding it keeps turning. Its
@@ -72,16 +81,19 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     {
         // Convert polar input to canopy position and compute direction from ship to touch point
         // then use that direction to update velocity
-        var scaledRadius = r * SpaceshipGameConstants.Instance.boundaryRadius;
-        Vector3 targetPosition = new Vector3(scaledRadius * Mathf.Cos(theta), 0, scaledRadius * Mathf.Sin(theta));
-        Vector3 direction = targetPosition - transform.localPosition;
-        if (direction.sqrMagnitude < 1e-6f)
-            return;
-        velocity += direction.normalized * (SpaceshipGameConstants.Instance.shipAcceleration * Time.deltaTime);
-        velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameConstants.Instance.maxSpeed);
-        // Keep the nose pointed where we're accelerating, so touch feels like stick steering.
-        float desiredHeading = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-        SteerToward(desiredHeading, 1f);
+        if (controllable)
+        {
+            var scaledRadius = r * SpaceshipGameConstants.Instance.boundaryRadius;
+            Vector3 targetPosition = new Vector3(scaledRadius * Mathf.Cos(theta), 0, scaledRadius * Mathf.Sin(theta));
+            Vector3 direction = targetPosition - transform.localPosition;
+            if (direction.sqrMagnitude < 1e-6f)
+                return;
+            velocity += direction.normalized * (SpaceshipGameConstants.Instance.shipAcceleration * Time.deltaTime);
+            velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameConstants.Instance.maxSpeed);
+            // Keep the nose pointed where we're accelerating, so touch feels like stick steering.
+            float desiredHeading = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            SteerToward(desiredHeading, 1f);
+        }
     }
 
     // Accumulate angular velocity that turns the ship toward desiredHeading (degrees), scaled by
@@ -132,7 +144,10 @@ public class SpaceshipController : MonoBehaviour, IDamageable
 
     public void OnButtonPress(byte buttonId)
     {
-        FireProjectile();
+        if (controllable)
+        {
+            FireProjectile();
+        }
     }
 
     public void TakeDamage(float damage, IDamageSource source)
@@ -145,13 +160,29 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         health -= damage;
         if (health <= 0)
         {
+            source.OnScoreKill(this);
             OnDeath();
         }
+    }
+
+    private void DoDeathVFX()
+    {
+        var vfx = Instantiate(deathVFXprefab, transform.position, Quaternion.Euler(0, 0, 0), transform.parent);
+        var renderer = vfx.GetComponent<ParticleSystemRenderer>();
+        renderer.material.color = playerColor;
+    }
+
+    public void DisableControls()
+    {
+        controllable = false;
     }
 
     public void OnDeath()
     {
         // Do death VFX, respawn?
+        DoDeathVFX();
+        DisableControls();
+        deaths++;
         Destroy(this.gameObject);
     }
 
