@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5225614615289845265
 Transform:
   m_ObjectHideFlags: 0
@@ -121,9 +121,9 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8509415278881550924}
   serializedVersion: 8
-  lengthInSec: 3
+  lengthInSec: 2
   simulationSpeed: 1
-  stopAction: 0
+  stopAction: 2
   cullingMode: 0
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
@@ -1114,7 +1114,7 @@ ParticleSystem:
       repeatInterval: 0.01
       probability: 1
     - serializedVersion: 2
-      time: 1.3
+      time: 0.75
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -1172,7 +1172,7 @@ ParticleSystem:
       repeatInterval: 0.01
       probability: 1
     - serializedVersion: 2
-      time: 2.6
+      time: 1.5
       countCurve:
         serializedVersion: 2
         minMaxState: 0
@@ -1241,7 +1241,7 @@ ParticleSystem:
         m_Curve:
         - serializedVersion: 3
           time: 0
-          value: 1
+          value: 0.801527
           inSlope: -2.6208992
           outSlope: -2.6208992
           tangentMode: 0

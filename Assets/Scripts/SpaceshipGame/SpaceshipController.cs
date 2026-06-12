@@ -113,7 +113,7 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         playerColor = color;
         if (renderer != null)
         {
-            renderer.material.SetColor("_Color", color);
+            renderer.SetColor("_Color", color);
         }
         // Solid gradient: both ends are the player color, so the trail matches the ship.
         playerGradient = new Gradient();
@@ -128,12 +128,12 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         if (status == 0)
         {
             calibrated = false;
-            renderer.material.SetFloat("_Flashing", 1);
+            renderer.SetFloat("_Flashing", 1);
         }
         else
         {
             calibrated = true;
-            renderer.material.SetFloat("_Flashing", 0);
+            renderer.SetFloat("_Flashing", 0);
         }
     }
 
@@ -169,7 +169,7 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     {
         var vfx = Instantiate(deathVFXprefab, transform.position, Quaternion.Euler(0, 0, 0), transform.parent);
         var renderer = vfx.GetComponent<ParticleSystemRenderer>();
-        renderer.material.color = playerColor;
+        renderer.SetColor("_Color", playerColor);
     }
 
     public void DisableControls()
@@ -222,7 +222,7 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         );
 
         // projectile.line.colorGradient = playerGradient;
-        projectile.line.material.color = playerColor;
+        projectile.line.SetColor("_Color", playerColor);
         projectile.gameObject.SetActive(true);
         projectile.parent = this;
         projectile.velocity = transform.forward * SpaceshipGameConstants.Instance.projectileInitialSpeed;

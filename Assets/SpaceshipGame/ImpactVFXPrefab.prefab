@@ -11,14 +11,13 @@ GameObject:
   - component: {fileID: 8997521201042054049}
   - component: {fileID: 7340992639817711955}
   - component: {fileID: 8301475039447116548}
-  - component: {fileID: 5768314062896051551}
   m_Layer: 0
   m_Name: ImpactVFXPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8997521201042054049
 Transform:
   m_ObjectHideFlags: 0
@@ -44,7 +43,7 @@ ParticleSystem:
   serializedVersion: 8
   lengthInSec: 1
   simulationSpeed: 1
-  stopAction: 0
+  stopAction: 2
   cullingMode: 0
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
@@ -4905,16 +4904,3 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
---- !u!114 &5768314062896051551
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2157216240594670859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11e40b4edb5807b468d5502731abb23f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  duration: 1

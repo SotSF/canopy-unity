@@ -40,8 +40,7 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
     {
         var vfx = Instantiate(VFXPrefab, point, Quaternion.Euler(90, 0, 0), transform.parent);
         var renderer = vfx.GetComponent<ParticleSystemRenderer>();
-        renderer.material.color = parent.playerColor;
-        renderer.trailMaterial.color = parent.playerColor;
+        renderer.SetColor("_Color", parent.playerColor);
     }
 
     // Update is called once per frame

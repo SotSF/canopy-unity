@@ -2653,6 +2653,7 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: -5484762201076770663}
   useDoubleDensity: 1
+  bakeAlpha: 1
   ip: 192.168.1.138
   mirrorPort: 11
   maxFrameRate: 60
@@ -3337,6 +3338,8 @@ MonoBehaviour:
   yKnob: {fileID: -4958526895490334054}
   leftBumperKnob: {fileID: 3933313687826517980}
   rightBumperKnob: {fileID: -5347720130304585718}
+  leftStickPressKnob: {fileID: 0}
+  rightStickPressKnob: {fileID: 0}
   startKnob: {fileID: 2805000836380469895}
   backKnob: {fileID: 443209439249365473}
   boundDeviceName: Xbox Controller
@@ -5049,7 +5052,6 @@ MonoBehaviour:
     m_ColorSpace: 0
     m_NumColorKeys: 4
     m_NumAlphaKeys: 2
-  outputTex: {fileID: 0}
   width: 256
   height: 48
 --- !u!114 &183767088422706510
@@ -7123,7 +7125,6 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  outputTex: {fileID: 0}
   width: 256
   height: 256
 --- !u!114 &5146428740849707947

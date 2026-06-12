@@ -118,7 +118,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   gameOutputKnob: {fileID: -2239115284587918521}
   fluidVelocityOutputKnob: {fileID: -4160732036678300362}
-  check: 0
 --- !u!114 &-7054766518663602836
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -250,7 +249,6 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 4
     m_NumAlphaKeys: 2
-  outputTex: {fileID: 0}
   width: 256
   height: 48
 --- !u!114 &-5301482056581014784
@@ -425,6 +423,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   spectrumDataKnob: {fileID: 9148968383580804476}
   sampleRateKnob: {fileID: -3058057071507992535}
+  attackTauKnob: {fileID: 0}
+  releaseTauKnob: {fileID: 0}
+  attackTau: 0.04
+  releaseTau: 0.25
 --- !u!114 &-3113075710724942775
 MonoBehaviour:
   m_ObjectHideFlags: 1
