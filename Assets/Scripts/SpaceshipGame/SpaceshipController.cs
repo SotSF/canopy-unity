@@ -34,6 +34,9 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     public short score = 0;
     public short deaths = 0;
 
+    private Material deathVfxMaterial;
+    private Material shipMaterial;
+
     public static SpaceshipController Create(SpaceshipController prefab, GameObject gameBoard, PlayerType playerType)
     {
         SpaceshipController ship = Instantiate(prefab, gameBoard.transform);
@@ -43,7 +46,16 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         ship.transform.localPosition = rotation * Vector3.left * 0.15f * SpaceshipGameConstants.Instance.boundaryRadius;
         ship.calibrated = false;
         ship.playerType = playerType;
+        ship.renderer = ship.GetComponent<Renderer>();
+        ship.shipMaterial = ship.renderer.material;
+        ship.shipMaterial.color = ship.playerColor;
+        ship.controllable = true;
         return ship;
+    }
+
+    public void Respawn()
+    {
+
     }
 
     public void OnStickInput(Vector2 leftStick, Vector2 rightStick)
@@ -111,10 +123,7 @@ public class SpaceshipController : MonoBehaviour, IDamageable
     public void OnUpdateColor(Color color)
     {
         playerColor = color;
-        if (renderer != null)
-        {
-            renderer.SetColor("_Color", color);
-        }
+        shipMaterial.color = playerColor;
         // Solid gradient: both ends are the player color, so the trail matches the ship.
         playerGradient = new Gradient();
         playerGradient.SetKeys(
@@ -128,12 +137,12 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         if (status == 0)
         {
             calibrated = false;
-            renderer.SetFloat("_Flashing", 1);
+            shipMaterial.SetFloat("_Flashing", 1);
         }
         else
         {
             calibrated = true;
-            renderer.SetFloat("_Flashing", 0);
+            shipMaterial.SetFloat("_Flashing", 0);
         }
     }
 
@@ -167,9 +176,11 @@ public class SpaceshipController : MonoBehaviour, IDamageable
 
     private void DoDeathVFX()
     {
-        var vfx = Instantiate(deathVFXprefab, transform.position, Quaternion.Euler(0, 0, 0), transform.parent);
-        var renderer = vfx.GetComponent<ParticleSystemRenderer>();
-        renderer.SetColor("_Color", playerColor);
+        var deathVfx = Instantiate(deathVFXprefab, transform.position, Quaternion.Euler(0, 0, 0), transform.parent);
+        var renderer = deathVfx.GetComponent<ParticleSystemRenderer>();
+        var deathVfxMaterial = renderer.material;
+        deathVfx.gameObject.SetActive(true);
+        deathVfxMaterial.color = playerColor;
     }
 
     public void DisableControls()
@@ -186,6 +197,11 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         Destroy(this.gameObject);
     }
 
+    public void OnDestroy()
+    {
+        Destroy(deathVfxMaterial);
+        Destroy(shipMaterial);
+    }
     public void OnScoreHit(SpaceshipController other)
     {
         
@@ -222,7 +238,7 @@ public class SpaceshipController : MonoBehaviour, IDamageable
         );
 
         // projectile.line.colorGradient = playerGradient;
-        projectile.line.SetColor("_Color", playerColor);
+
         projectile.gameObject.SetActive(true);
         projectile.parent = this;
         projectile.velocity = transform.forward * SpaceshipGameConstants.Instance.projectileInitialSpeed;

@@ -41,26 +41,4 @@ public static class ExtensionMethods
         tex.Apply();
         return tex;
     }
-
-    /* Per-renderer shader property overrides. Assigning through renderer.material instances
-       a new Material that is NOT destroyed with the GameObject and leaks native memory;
-       property blocks override without instancing. The block applies to every material on
-       the renderer (e.g. a ParticleSystemRenderer's particle and trail materials at once). */
-    private static MaterialPropertyBlock propertyBlock;
-
-    public static void SetColor(this Renderer renderer, string property, Color color)
-    {
-        if (propertyBlock == null) propertyBlock = new MaterialPropertyBlock();
-        renderer.GetPropertyBlock(propertyBlock);
-        propertyBlock.SetColor(property, color);
-        renderer.SetPropertyBlock(propertyBlock);
-    }
-
-    public static void SetFloat(this Renderer renderer, string property, float value)
-    {
-        if (propertyBlock == null) propertyBlock = new MaterialPropertyBlock();
-        renderer.GetPropertyBlock(propertyBlock);
-        propertyBlock.SetFloat(property, value);
-        renderer.SetPropertyBlock(propertyBlock);
-    }
 }

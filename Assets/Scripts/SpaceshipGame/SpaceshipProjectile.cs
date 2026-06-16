@@ -12,6 +12,8 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
 
 
     new public Collider collider;
+    private Material[] impactVfxMaterials;
+    private Material projectileMaterial;
 
     public void OnTriggerEnter(Collider other)
     {
@@ -32,15 +34,26 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
         }
     }
 
+    void Start()
+    {
+        projectileMaterial = line.material;
+        projectileMaterial.color = parent.playerColor;
+    }
+
     public void OnScoreKill(IDamageable target)
     {
         parent.score++;
     }
     private void DoVFX(Vector3 point)
     {
-        var vfx = Instantiate(VFXPrefab, point, Quaternion.Euler(90, 0, 0), transform.parent);
-        var renderer = vfx.GetComponent<ParticleSystemRenderer>();
-        renderer.SetColor("_Color", parent.playerColor);
+        var impactVfx = Instantiate(VFXPrefab, point, Quaternion.Euler(90, 0, 0), transform.parent);
+        var renderer = impactVfx.GetComponent<ParticleSystemRenderer>();
+        impactVfx.gameObject.SetActive(true);
+        impactVfxMaterials = renderer.materials;
+        foreach (var impactMaterial in impactVfxMaterials)
+        {
+            impactMaterial.color = parent.playerColor;
+        }
     }
 
     // Update is called once per frame
@@ -54,5 +67,10 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
         {
             Destroy(this.gameObject);
         }
+    }
+
+    void OnDestroy()
+    {
+        Destroy(projectileMaterial);
     }
 }
