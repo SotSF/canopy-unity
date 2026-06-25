@@ -4,8 +4,9 @@ using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
 
 using System;
-
+using System.Collections.Generic;
 using UnityEngine;
+using SpaceshipGame;
 
 // Bundles loose canvas signals (gamepad/MIDI/oscillator floats + button events) into a
 // single SpaceshipGamePlayerData, so they can drive a "canvas player" ship in the game.
@@ -17,7 +18,7 @@ public class SpaceshipGamePlayerNode : TickingNode
     public override string GetID { get { return ID; } }
     public override string Title { get { return "SpaceshipGamePlayer"; } }
 
-    private Vector2 _DefaultSize = new Vector2(230, 250);
+    private Vector2 _DefaultSize = new Vector2(230, 350);
     public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("lx", Direction.In, typeof(float), NodeSide.Left)]
@@ -47,11 +48,23 @@ public class SpaceshipGamePlayerNode : TickingNode
 
     // Stable per-player identity, persisted with the canvas so the game tracks one ship per node.
     public string playerId;
+    public RadioButtonSet playerType;
+
+    private Dictionary<string, PlayerType> playerTypeMap = new Dictionary<string, PlayerType>()
+    {
+        {"Generic", PlayerType.GenericCanvas},
+        {"Controller", PlayerType.Controller},
+        {"Oddball", PlayerType.Oddball},
+    };
 
     public override void DoInit()
     {
         if (string.IsNullOrEmpty(playerId))
             playerId = Guid.NewGuid().ToString();
+        if (playerType == null || playerType.names.Count == 0)
+        {
+            playerType = new RadioButtonSet(1, "Generic", "Controller", "Oddball");
+        }
     }
 
     public override void NodeGUI()
@@ -83,12 +96,12 @@ public class SpaceshipGamePlayerNode : TickingNode
             GUI.color = prevColor;
         }
         GUILayout.EndHorizontal();
-
+        
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         playerDataKnob.DisplayLayout();
         GUILayout.EndHorizontal();
-
+        RadioButtons(playerType);
         GUILayout.EndVertical();
 
         // Buttons are level signals here; rising-edge detection happens in the controller.
@@ -103,6 +116,11 @@ public class SpaceshipGamePlayerNode : TickingNode
         bool fire = fireKnob.connected() && fireKnob.GetValue<bool>();
         bool altFire = altFireKnob.connected() && altFireKnob.GetValue<bool>();
         PushPlayerData(fire, altFire);
+        //var player = SpaceshipGameController.instance.GetPlayerById(playerId);
+        //if (player != null && playerTypeMap[playerType.Selected] != player?.playerType)
+        //{
+        //    player.playerType = playerTypeMap[playerType.Selected];
+        //}
         return true;
     }
 
@@ -122,6 +140,7 @@ public class SpaceshipGamePlayerNode : TickingNode
             altFire = altFire,
             hasColor = hasColor,
             color = hasColor ? (Color)colorKnob.GetValue<Vector4>() : Color.white,
+            playerType = playerTypeMap[playerType.Selected],
         };
         playerDataKnob.SetValue(data);
     }

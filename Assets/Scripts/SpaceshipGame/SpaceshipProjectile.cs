@@ -1,5 +1,7 @@
 using UnityEngine;
-
+namespace SpaceshipGame
+{
+    
 public class SpaceshipProjectile : MonoBehaviour, IDamageSource
 {
 
@@ -73,4 +75,6 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
     {
         Destroy(projectileMaterial);
     }
+}
+
 }

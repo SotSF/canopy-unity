@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using SpaceshipGame;
 
 [Node(false, "Pattern/SpaceshipGame")]
 public class SpaceshipGameNode : TickingNode

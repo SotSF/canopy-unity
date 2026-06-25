@@ -1,3 +1,4 @@
+using SpaceshipGame;
 using UnityEngine;
 
 // Input bundle for a single canvas-driven SpaceshipGame player. Produced by
@@ -18,4 +19,5 @@ public struct SpaceshipGamePlayerData
     public bool hasColor;       // true only when a color source is connected; leaves the
                                 // ship's default color alone otherwise
     public Color color;         // applied to the ship when it changes (see ApplyCanvasInput)
+    public PlayerType playerType;
 }
