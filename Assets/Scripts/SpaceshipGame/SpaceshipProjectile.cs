@@ -39,12 +39,12 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
     void Start()
     {
         projectileMaterial = line.material;
-        projectileMaterial.color = parent.playerColor;
+        projectileMaterial.color = parent.shipColor;
     }
 
     public void OnScoreKill(IDamageable target)
     {
-        parent.score++;
+        parent.player.score++;
     }
     private void DoVFX(Vector3 point)
     {
@@ -54,7 +54,7 @@ public class SpaceshipProjectile : MonoBehaviour, IDamageSource
         impactVfxMaterials = renderer.materials;
         foreach (var impactMaterial in impactVfxMaterials)
         {
-            impactMaterial.color = parent.playerColor;
+            impactMaterial.color = parent.shipColor;
         }
     }
 

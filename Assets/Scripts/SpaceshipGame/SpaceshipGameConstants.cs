@@ -36,7 +36,10 @@ namespace SpaceshipGame
         // Fraction of projectile speed retained after one second (drag); lower = more drag
         public float projectileDragFactor = 0.002f;
 
+        public float respawnStartPlayingVFXTime = 2.5f;
         public float respawnTime = 3f;
+
+        public Vector3 defaultShipScale = new Vector3(2.3f, 2.3f, 2.3f);
 
         public Dictionary<PlayerType, float> shipTypeStartingHealth = new Dictionary<PlayerType, float> {
             { PlayerType.Web, 5f },

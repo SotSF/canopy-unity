@@ -1,25 +1,20 @@
-using System;
-using System.Collections;
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System;
 
 using UnityEngine;
-
+using UnityEngine.VFX;
 using WebSocketServer;
+using LitMotion;
+
+using Random = UnityEngine.Random;
+using LitMotion.Extensions;
 
 namespace SpaceshipGame
 {
     public class SpaceshipGameController : MonoBehaviour
     {
-        public class SpaceshipGamePlayer
-        {
-            public string id;
-            public PlayerState state;
-            public PlayerType playerType;
-            public Color playerColor;
-            public SpaceshipController ship;
-        }
 
         public static SpaceshipGameController instance;
 
@@ -31,18 +26,13 @@ namespace SpaceshipGame
             instance = null;
         }
 
-        // No more than 32 players
-        private Dictionary<string, SpaceshipController> ships;
-
-        // Players driven from the node canvas rather than a websocket connection. Kept
-        // separate from `ships` so the Update() loop never tries to send ship-position
-        // packets to a non-existent socket. Keyed by the player id carried in the input bundle.
-        private Dictionary<string, SpaceshipController> canvasShips;
-        // Last-seen input state per canvas player: button states for rising-edge ("fire on
-        // press") detection, and the last applied color so we only push color changes.
-
+        // Single source of truth for every player. A player's live ship (if any) is
+        // player.ship; there is deliberately no separate ship dictionary to fall out of
+        // sync with it. No more than 32 players.
         private Dictionary<string, SpaceshipGamePlayer> players;
 
+        // Last-seen input state per canvas player: button states for rising-edge ("fire on
+        // press") detection, and the last applied color so we only push color changes.
         private Dictionary<string, CanvasPlayerInputState> canvasState;
 
         private struct CanvasPlayerInputState
@@ -61,7 +51,7 @@ namespace SpaceshipGame
 
         public WebSocketServer.WebSocketServer server;
 
-        int fluidVelocityKernel;
+        public VisualEffect absorptionVfx;
 
         public SpaceshipGamePlayer GetPlayerById(string id)
         {
@@ -75,8 +65,6 @@ namespace SpaceshipGame
                 Destroy(instance);
             }
             instance = this;
-            ships = new Dictionary<string, SpaceshipController>();
-            canvasShips = new Dictionary<string, SpaceshipController>();
             canvasState = new Dictionary<string, CanvasPlayerInputState>();
             players = new Dictionary<string, SpaceshipGamePlayer>();
             fluidVelocityTex = new RenderTexture(SpaceshipGameConstants.Instance.gameBoardSize.x, SpaceshipGameConstants.Instance.gameBoardSize.y, 0);
@@ -89,21 +77,17 @@ namespace SpaceshipGame
             fluidVelocityTex.Create();
         }
 
-        void Start()
-        {
-        
-        }
-
-        public static readonly float dragFactor = 0.005f;
-
         // 1 byte for event id, 4 bytes for two floats r & theta. Pre-initialize with the position event type representation
         private byte[] shipPositionEventBuffer = new byte[1 + 4 * 2] { (byte)SpaceshipGameEventType.ShipPosition,0,0,0,0,0,0,0,0 }; 
         void Update()
         {
-            foreach (var kvPair in ships)
+            foreach (var player in players.Values)
             {
-                var id = kvPair.Key;
-                var ship = kvPair.Value;
+                // Only web players have a remote client expecting position events.
+                if (!player.IsAlive || player.playerType != PlayerType.Web)
+                    continue;
+                var id = player.id;
+                var ship = player.ship;
 
                 float r = ship.transform.localPosition.magnitude / SpaceshipGameConstants.Instance.boundaryRadius;
                 float theta = Mathf.Atan2(ship.transform.localPosition.z, ship.transform.localPosition.x);
@@ -118,7 +102,7 @@ namespace SpaceshipGame
         private byte[] gameDataUpdateBuffer = new byte[1 + 2 + 2 + 12];
         public void SendHitEvent(SpaceshipController ship)
         {
-            var playerId = ships.Where(kvPair => kvPair.Value == ship).Select(kvPair => kvPair.Key).FirstOrDefault();
+            var playerId = ship.player.id;
 
             gameDataUpdateBuffer[0] = (byte)SpaceshipGameEventType.GameDataUpdate;
             short msgIdx = 0; // "Hit!"
@@ -138,18 +122,13 @@ namespace SpaceshipGame
 
         public void OnShipDestroyed(SpaceshipController ship)
         {
-            var player = players[ship.id];
+            var player = ship.player;
+            // Ignore a stale callback from a ship the player has already moved on from
+            // (e.g. an orphaned ship being torn down), so we don't clobber a fresh ship.
+            if (player.ship != ship)
+                return;
             player.state = PlayerState.Dead;
             player.ship = null;
-            if (ships.Values.Contains(ship))
-            {
-                var playerId = ships.Where(kvPair => kvPair.Value == ship).Select(kvPair => kvPair.Key).FirstOrDefault();
-                ships.Remove(playerId);
-            } else if ( canvasShips.Values.Contains(ship))
-            {
-                var playerId = canvasShips.Where(kvPair => kvPair.Value == ship).Select(kvPair => kvPair.Key).FirstOrDefault();
-                ships.Remove(playerId);
-            }
             Respawn(player);
         }
 
@@ -181,9 +160,7 @@ namespace SpaceshipGame
                 ship.OnUpdateColor(data.color);
                 next.colorApplied = true;
                 next.color = data.color;
-                SpaceshipGamePlayer player;
-                players.TryGetValue(data.playerId, out player);
-                player.playerColor = data.color;
+                ship.player.color = data.color;
             }
 
             canvasState[data.playerId] = next;
@@ -193,21 +170,16 @@ namespace SpaceshipGame
         // source node removed), so the active id set is the single source of truth each frame.
         public void ReconcileCanvasPlayers(HashSet<string> activeIds)
         {
-            if (canvasShips.Count == 0)
-                return;
-            var stale = new List<string>();
-            foreach (var id in canvasShips.Keys)
+            // Materialize first: we mutate `players` inside the loop.
+            var stale = players.Values
+                .Where(p => p.IsCanvas && !activeIds.Contains(p.id))
+                .ToList();
+            foreach (var player in stale)
             {
-                if (!activeIds.Contains(id))
-                    stale.Add(id);
-            }
-            foreach (var id in stale)
-            {
-                var ship = canvasShips[id];
-                canvasShips.Remove(id);
-                canvasState.Remove(id);
-                if (ship != null)
-                    Destroy(ship.gameObject);
+                if (player.ship != null)
+                    Destroy(player.ship.gameObject);
+                players.Remove(player.id);
+                canvasState.Remove(player.id);
             }
         }
 
@@ -218,7 +190,7 @@ namespace SpaceshipGame
             float[] data;
         }
 
-        public void Spawn(SpaceshipGamePlayer player)
+        public async void Spawn(SpaceshipGamePlayer player, Vector3 position)
         {
             if (player.state != PlayerState.Spawning)
             {
@@ -227,20 +199,21 @@ namespace SpaceshipGame
             }
             if (player.ship == null)
             {
-                // respawning
-                player.ship = SpaceshipController.Create(spaceshipPrefab, gameObject, player.playerType);
-                player.ship.OnUpdateColor(player.playerColor);
-                player.ship.id = player.id;
+                // First spawn or respawn: build the ship.
+                player.ship = SpaceshipController.Create(spaceshipPrefab, gameObject, player, position);
+                player.ship.OnUpdateColor(player.color);
+                player.ship.DisableControls();
+                await LMotion.Create(Vector3.zero, SpaceshipGameConstants.Instance.defaultShipScale, 1f).BindToLocalScale(player.ship.transform);
+                player.ship.EnableControls();
             }
             player.state = PlayerState.Alive;
-            if (player.ship.playerType == PlayerType.Web)
-            {
-                ships[player.id] = player.ship;
-            }
-            else
-            {
-                canvasShips[player.id] = player.ship;
-            }
+        }
+
+        public void Spawn(SpaceshipGamePlayer player)
+        {
+            var rotation = Quaternion.Euler(0, Random.Range(0,360), 0);
+            var localPos = rotation * Vector3.left * 0.25f * SpaceshipGameConstants.Instance.boundaryRadius;
+            Spawn(player, localPos);
         }
 
         public async void Respawn(SpaceshipGamePlayer player)
@@ -250,48 +223,55 @@ namespace SpaceshipGame
                 Debug.Log("Invalid player state for spawn: " + player.state);
                 return;
             }
-            await Awaitable.WaitForSecondsAsync(SpaceshipGameConstants.Instance.respawnTime);
+            // Wait to start playing absorb vfx
+            Debug.Log($"Started waiting at time {Time.time}, will wait {SpaceshipGameConstants.Instance.respawnStartPlayingVFXTime} seconds to do VFX");
+            await Awaitable.WaitForSecondsAsync(SpaceshipGameConstants.Instance.respawnStartPlayingVFXTime);
+            // Do absorption VFX
+            var rotation = Quaternion.Euler(0, Random.Range(0,360), 0);
+            var localPos = rotation * Vector3.left * 0.25f * SpaceshipGameConstants.Instance.boundaryRadius;
+            VisualEffect vfx = Instantiate(absorptionVfx, transform.position+localPos, Quaternion.Euler(0, 0, 0), transform);
+            vfx.SendEvent("OnPlay");
+            vfx.SetVector4("PrimaryColor", player.color);
+            var remaining = SpaceshipGameConstants.Instance.respawnTime - SpaceshipGameConstants.Instance.respawnStartPlayingVFXTime;
+            Debug.Log($"Created vfx at {Time.time}, will wait {remaining} to spawn");
+            await Awaitable.WaitForSecondsAsync(remaining);
+            vfx.SendEvent("OnStop");
+            // The player may have disconnected (OnClose) or been reconciled away during the
+            // delay; don't spawn a ship for someone who's no longer registered.
+            if (!players.TryGetValue(player.id, out var current) || current != player)
+                return;
             player.state = PlayerState.Spawning;
-            Spawn(player);
+            Spawn(player, localPos);
+            await Awaitable.WaitForSecondsAsync(2f);
+            Destroy(vfx);
         }
 
         // Gets (or lazily creates) the ship for a canvas player. Idempotent, so it's safe to
-        // call every frame and after a Play restart (when canvasShips starts empty again).
+        // call every frame and after a Play restart (when players starts empty again).
+        // Returns null while the player has no controllable ship (dead/respawning).
         public SpaceshipController AddCanvasPlayer(string id, PlayerType playerType)
         {
             if (string.IsNullOrEmpty(id))
                 return null;
-            SpaceshipGamePlayer player;
-            players.TryGetValue(id, out player);
-            // Check if they're respawning
+            players.TryGetValue(id, out var player);
+            // Mid-respawn (or awaiting first spawn): no controllable ship yet.
             if (player?.state == PlayerState.Dead || player?.state == PlayerState.Spawning)
-            {
                 return null;
-            }
-            if (!canvasShips.TryGetValue(id, out var ship) || ship == null)
+            if (player == null)
             {
-                ship = SpaceshipController.Create(spaceshipPrefab, gameObject, playerType);
-                canvasShips[id] = ship;
-                ship.id = id;
-                player = new SpaceshipGamePlayer { id = id, state = PlayerState.Spawning, ship = ship, playerType = playerType};
+                player = new SpaceshipGamePlayer { id = id, state = PlayerState.Spawning, ship = null, playerType = playerType };
                 players[id] = player;
                 Spawn(player);
                 Debug.Log($"Added canvas player with id {id}");
             }
-            if (ship.playerType != playerType)
-            {
-                ship.playerType = playerType;
-                player.playerType = playerType;
-            }
-            return ship;
+            player.playerType = playerType;
+            return player.ship;
         }
 
         public void AddWebPlayer(string id)
         {
-            var playerShip = SpaceshipController.Create(spaceshipPrefab, gameObject, PlayerType.Web);
             var state = PlayerState.Spawning;
-            var player = new SpaceshipGamePlayer { id = id, state = state, ship = playerShip, playerType = PlayerType.Web };
-            playerShip.id = id;
+            var player = new SpaceshipGamePlayer { id = id, state = state, ship = null, playerType = PlayerType.Web };
             players[id] = player;
             Spawn(player);
         }
@@ -304,9 +284,13 @@ namespace SpaceshipGame
 
         public void OnClose(WebSocketConnection connection)
         {
-            var leavingPlayer = ships[connection.id];
-            ships.Remove(connection.id);
-            Destroy(leavingPlayer.gameObject);
+            if (!players.TryGetValue(connection.id, out var leavingPlayer))
+                return;
+            // May be null if they disconnected mid-respawn; that's fine.
+            if (leavingPlayer.ship != null)
+                Destroy(leavingPlayer.ship.gameObject);
+            players.Remove(connection.id);
+            canvasState.Remove(connection.id);
         }
 
         /*
@@ -344,9 +328,11 @@ namespace SpaceshipGame
                 SpaceshipGameEventType evt = (SpaceshipGameEventType)message.rawdata[0];
                 var data = message.rawdata;
                 var conn = message.connection.id;
-                var ship = ships[conn];
-                SpaceshipGamePlayer player;
-                players.TryGetValue(conn, out player);
+                // Player may be mid-respawn (no ship) or already gone; drop input that
+                // can't be applied rather than throwing.
+                if (!players.TryGetValue(conn, out var player) || player.ship == null)
+                    return;
+                var ship = player.ship;
                 switch (evt)
                 {
                     case SpaceshipGameEventType.ChangeColor:
@@ -355,7 +341,7 @@ namespace SpaceshipGame
                         var b = data[3];
                         Color32 color = new Color32(r, g, b, 255);
                         ship.OnUpdateColor(color);
-                        player.playerColor = color;
+                        player.color = color;
                         Debug.Log($"Received ColorChange event for conn {conn} to {color}");
                         break;
                     case SpaceshipGameEventType.Update:
@@ -373,7 +359,7 @@ namespace SpaceshipGame
                         break;
                     case SpaceshipGameEventType.Rotate:
                         float radians = System.BitConverter.ToSingle(data, 1);
-                        ship.OnCalibrateRotation(radians);
+                        // ship.OnCalibrateRotation(radians);
                         break;
                     case SpaceshipGameEventType.CalibrationStatus:
                         byte status = data[1];
@@ -385,7 +371,6 @@ namespace SpaceshipGame
                         ship.OnTouchInput(touchR, touchTheta);
                         break;
                 }
-                ships[conn] = ship;
             }
         }
     }
