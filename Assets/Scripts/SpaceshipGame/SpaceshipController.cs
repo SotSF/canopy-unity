@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using LitMotion;
 using LitMotion.Extensions;
 using UnityEngine;
@@ -23,9 +24,20 @@ namespace SpaceshipGame
         private float angularVelocity;
         public float health = 3;
 
-        public SpaceshipProjectile projectilePrefab;
         public GameObject deathVFXprefab;
         public VisualEffect absorbVFXprefab;
+
+        [Header("Abilities")]
+        // Registry mapping each ship type to its starting health + ability loadout.
+        // Slot index maps to button id in OnButtonPress (0 = primary fire, 1 = alt fire, ...).
+        [Tooltip("Maps each ship type to its health and ability loadout.")]
+        public ShipDefinitionRegistry shipDefinitions;
+
+        private readonly List<AbilitySlot> abilitySlots = new List<AbilitySlot>();
+
+        // Muzzle offset above the ship origin; projectiles spawn from here.
+        private readonly Vector3 verticalOffset = new Vector3(0, 0.15f, 0);
+        public Vector3 ProjectileSpawnPosition => transform.position + verticalOffset;
         
         private Material deathVfxMaterial;
         private Material shipMaterial;
@@ -48,7 +60,8 @@ namespace SpaceshipGame
             ship.shipMaterial.color = ship.shipColor;
             ship.controllable = true;
             ship.player = player;
-            ship.health = SpaceshipGameConstants.Instance.shipTypeStartingHealth[player.playerType];
+            // Applies starting health + ability loadout for the player's type.
+            ship.OnShipTypeChange(player.playerType);
             return ship;
         }
 
@@ -64,9 +77,23 @@ namespace SpaceshipGame
             return ship;
         }
 
+        // Apply the health + ability loadout for a ship type, from the registry.
+        // Called at spawn and whenever a live ship's type changes.
         public void OnShipTypeChange(PlayerType playerType)
         {
-            health = SpaceshipGameConstants.Instance.shipTypeStartingHealth[playerType];
+            abilitySlots.Clear();
+            ShipDefinition definition = shipDefinitions != null ? shipDefinitions.Get(playerType) : null;
+            if (definition == null)
+            {
+                Debug.LogWarning($"No ShipDefinition registered for {playerType}; ship spawns with no abilities.");
+                return;
+            }
+            health = definition.startingHealth;
+            foreach (Ability ability in definition.abilities)
+            {
+                if (ability != null)
+                    abilitySlots.Add(new AbilitySlot(ability));
+            }
         }
 
         public void OnStickInput(Vector2 leftStick, Vector2 rightStick)
@@ -151,10 +178,11 @@ namespace SpaceshipGame
 
         public void OnButtonPress(byte buttonId)
         {
-            if (controllable)
-            {
-                FireProjectile();
-            }
+            if (!controllable)
+                return;
+            // Button id selects the ability slot (0 = primary fire, 1 = alt fire, ...).
+            if (buttonId < abilitySlots.Count)
+                abilitySlots[buttonId].TryActivate(new AbilityContext(this, player));
         }
 
         public async void DoDamageFlash()
@@ -239,41 +267,12 @@ namespace SpaceshipGame
             }
         }
 
-        Vector3 verticalOffset = new Vector3(0,0.15f, 0);
-        public void FireProjectile()
-        {
-            SpaceshipProjectile projectile = Instantiate(projectilePrefab, 
-                transform.position + verticalOffset,
-                transform.rotation,
-                transform.parent
-            );
-            if (player.playerType == PlayerType.Oddball)
-            {
-                // Fire another 4 projectiles for 5 total evenly spaced around circle
-                for (int i = 1; i < 5; i++)
-                {
-                    float angle = i * 72f; // 360 / 5 = 72 degrees
-                    Quaternion rotation = Quaternion.Euler(0, angle, 0);
-                    SpaceshipProjectile extraProjectile = Instantiate(projectilePrefab,
-                        transform.position + verticalOffset,
-                        transform.rotation * rotation,
-                        transform.parent
-                    );
-                    extraProjectile.gameObject.SetActive(true);
-                    extraProjectile.parent = this;
-                    extraProjectile.velocity = (rotation * transform.forward) * SpaceshipGameConstants.Instance.projectileInitialSpeed;
-                }
-            }
-
-            // projectile.line.colorGradient = playerGradient;
-
-            projectile.gameObject.SetActive(true);
-            projectile.parent = this;
-            projectile.velocity = transform.forward * SpaceshipGameConstants.Instance.projectileInitialSpeed;
-        }
-
         void Update()
         {
+            // Advance ability cooldowns.
+            for (int i = 0; i < abilitySlots.Count; i++)
+                abilitySlots[i].Tick(Time.deltaTime);
+
             Vector3 positionUpdate = velocity * Time.deltaTime;
             // Continue moving in velocity direction
             transform.localPosition += positionUpdate;

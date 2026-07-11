@@ -40,12 +40,5 @@ namespace SpaceshipGame
         public float respawnTime = 3f;
 
         public Vector3 defaultShipScale = new Vector3(2.3f, 2.3f, 2.3f);
-
-        public Dictionary<PlayerType, float> shipTypeStartingHealth = new Dictionary<PlayerType, float> {
-            { PlayerType.Web, 5f },
-            { PlayerType.Controller, 3f },
-            { PlayerType.Oddball, 10f },
-            { PlayerType.GenericCanvas, 5f }
-        };
     }
 }

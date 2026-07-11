@@ -264,6 +264,11 @@ namespace SpaceshipGame
                 Spawn(player);
                 Debug.Log($"Added canvas player with id {id}");
             }
+            // Canvas players can change type after their ship exists (the input node's
+            // type radio, or a first frame that arrived before the type was set). Push
+            // the change to the live ship so its loadout/health re-apply.
+            if (player.ship != null && player.playerType != playerType)
+                player.ship.OnShipTypeChange(playerType);
             player.playerType = playerType;
             return player.ship;
         }
@@ -353,7 +358,7 @@ namespace SpaceshipGame
                         //Debug.Log($"Received Update event for conn {conn} with data <{data1:0.00}, {data2:0.00}>, <{data3:0.00}, {data4:0.00}");
                         break;
                     case SpaceshipGameEventType.Press:
-                        var buttonId = data[1];
+                        byte buttonId = (byte) (data[1]-1 >= 0 ? data[1]-1 : 0);
                         ship.OnButtonPress(buttonId);
                         Debug.Log($"Received Press event for conn {conn} for button {buttonId}");
                         break;
