@@ -17,12 +17,24 @@ namespace SpaceshipGame
         
         new public Renderer renderer;
         new public Collider collider;
+
+        [Tooltip("Model child spun for the visual roll on rolling ships; defaults to the renderer's transform.")]
+        public Transform modelTransform;
         
         private bool controllable = true;
 
         private Vector3 velocity;
         private float angularVelocity;
+        // Oddball ships are rolling polyhedra: no heading, so thrust maps straight to
+        // board space (no strafe penalty) and the body tumbles along the axis of motion
+        // instead of yawing. Latched in OnShipTypeChange.
+        private bool rollsWhenMoving;
         public float health = 3;
+        public float energy = 10;
+        // Maxes mirror the ShipDefinition at spawn/type-change; the phone UI renders
+        // current/max bars from these.
+        public float maxHealth = 3;
+        public float maxEnergy = 10;
 
         public GameObject deathVFXprefab;
         public VisualEffect absorbVFXprefab;
@@ -32,6 +44,7 @@ namespace SpaceshipGame
         // Slot index maps to button id in OnButtonPress (0 = primary fire, 1 = alt fire, ...).
         [Tooltip("Maps each ship type to its health and ability loadout.")]
         public ShipDefinitionRegistry shipDefinitions;
+        private ShipDefinition shipDefinition;
 
         private readonly List<AbilitySlot> abilitySlots = new List<AbilitySlot>();
 
@@ -43,18 +56,22 @@ namespace SpaceshipGame
         private Material shipMaterial;
 
         private float lastHitTime = -1000;
+        public float rollScale = 1;
 
         public static SpaceshipController Create(
-            SpaceshipController prefab,
+            ShipDefinition shipDef,
             GameObject gameBoard,
             SpaceshipGamePlayer player,
             Vector3 localPos)
         {
-            SpaceshipController ship = Instantiate(prefab, gameBoard.transform);
+            SpaceshipController ship = Instantiate(shipDef.shipPrefab, gameBoard.transform);
+            ship.shipDefinition = shipDef;
             ship.velocity = Vector3.zero;
             ship.transform.localPosition = localPos;
             ship.transform.rotation = Quaternion.Euler(0, Mathf.Atan2(ship.transform.localPosition.y,ship.transform.localPosition.x), 0);
             ship.renderer = ship.GetComponentInChildren<MeshRenderer>();
+            if (ship.modelTransform == null)
+                ship.modelTransform = ship.renderer.transform;
             ship.shipMaterial = ship.renderer.material;
             ship.shipColor = player.color;
             ship.shipMaterial.color = ship.shipColor;
@@ -66,14 +83,14 @@ namespace SpaceshipGame
         }
 
         public static SpaceshipController Create(
-            SpaceshipController prefab,
+            ShipDefinition shipDef,
             GameObject gameBoard,
             SpaceshipGamePlayer player)
         {
             // Instantiate near edge of game board
             var rotation = Quaternion.Euler(0, Random.Range(0,360), 0);
             var localPos = rotation * Vector3.left * 0.25f * SpaceshipGameConstants.Instance.boundaryRadius;
-            var ship = Create(prefab, gameBoard, player, localPos);
+            var ship = Create(shipDef, gameBoard, player, localPos);
             return ship;
         }
 
@@ -81,6 +98,11 @@ namespace SpaceshipGame
         // Called at spawn and whenever a live ship's type changes.
         public void OnShipTypeChange(PlayerType playerType)
         {
+            rollsWhenMoving = playerType == PlayerType.Oddball;
+            // A ship that doesn't roll should sit level; clear any tumble left over from
+            // a previous rolling type. Only the model child rolls, so root yaw is untouched.
+            if (!rollsWhenMoving && modelTransform != null)
+                modelTransform.localRotation = Quaternion.identity;
             abilitySlots.Clear();
             ShipDefinition definition = shipDefinitions != null ? shipDefinitions.Get(playerType) : null;
             if (definition == null)
@@ -89,6 +111,9 @@ namespace SpaceshipGame
                 return;
             }
             health = definition.startingHealth;
+            maxHealth = definition.startingHealth;
+            energy = definition.startingEnergy;
+            maxEnergy = definition.startingEnergy;
             foreach (Ability ability in definition.abilities)
             {
                 if (ability != null)
@@ -111,6 +136,9 @@ namespace SpaceshipGame
         // (in Update) for a momentum feel, clamped to maxRotationSpeed.
         public void UpdateRotation(Vector2 input)
         {
+            // Rolling ships have no heading to steer.
+            if (rollsWhenMoving)
+                return;
             angularVelocity += input.x * SpaceshipGameConstants.Instance.rotationAcceleration * Time.deltaTime;
             angularVelocity = Mathf.Clamp(angularVelocity,
                 -SpaceshipGameConstants.Instance.maxRotationSpeed,
@@ -119,12 +147,22 @@ namespace SpaceshipGame
 
         public void UpdateVelocity(Vector2 input)
         {
-            // Thrust in ship-local space: Y drives forward/reverse along the heading, X strafes
-            // sideways (powerful cold-gas thrusters), scaled down so off-axis travel is less jarring.
-            Vector3 localThrust = new Vector3(input.x * SpaceshipGameConstants.Instance.strafeFactor, 0f, input.y);
-            Vector3 thrust = transform.localRotation * localThrust;
+            Vector3 thrust;
+            if (rollsWhenMoving)
+            {
+                // A rolling ball has no heading: the stick maps straight to board-space
+                // thrust, with no off-axis (strafe) penalty.
+                thrust = new Vector3(input.x, 0f, input.y);
+            }
+            else
+            {
+                // Thrust in ship-local space: Y drives forward/reverse along the heading, X strafes
+                // sideways (powerful cold-gas thrusters), scaled down so off-axis travel is less jarring.
+                Vector3 localThrust = new Vector3(input.x * SpaceshipGameConstants.Instance.strafeFactor, 0f, input.y);
+                thrust = transform.localRotation * localThrust;
+            }
             velocity += thrust * (SpaceshipGameConstants.Instance.shipAcceleration * Time.deltaTime);
-            velocity = Vector3.ClampMagnitude(velocity, SpaceshipGameConstants.Instance.maxSpeed);
+            velocity = Vector3.ClampMagnitude(velocity, shipDefinition.topSpeed);
         }
 
         public void OnTouchInput(float r, float theta)
@@ -150,6 +188,9 @@ namespace SpaceshipGame
         // steering strength (0..1) and clamped to maxRotationSpeed. Integration and decay run in Update().
         private void SteerToward(float desiredHeading, float strength)
         {
+            // Rolling ships have no heading to steer.
+            if (rollsWhenMoving)
+                return;
             float error = Mathf.DeltaAngle(transform.localEulerAngles.y, desiredHeading);
             angularVelocity += Mathf.Sign(error) * strength
                 * SpaceshipGameConstants.Instance.rotationAcceleration * Time.deltaTime;
@@ -195,10 +236,7 @@ namespace SpaceshipGame
         public void TakeDamage(float damage, IDamageSource source)
         {
             lastHitTime = Time.time;
-            if (player.playerType == PlayerType.Web)
-            {
-                SpaceshipGameController.instance.SendHitEvent(this);
-            }
+            SpaceshipGameController.instance.SendDisplayMessage(player, "Hit!");
             health -= damage;
             if (health <= 0)
             {
@@ -230,7 +268,8 @@ namespace SpaceshipGame
             // Do death VFX, respawn?
             DoDeathVFX();
             DisableControls();
-            await LMotion.Create(SpaceshipGameConstants.Instance.defaultShipScale, Vector3.zero, 0.75f).BindToLocalScale(transform);
+            var shipDef = shipDefinitions.Get(player.playerType);
+            await LMotion.Create(shipDef.defaultScale, Vector3.zero, 0.75f).BindToLocalScale(transform);
             SpaceshipGameController.instance.OnShipDestroyed(this);
             player.deaths++;
             Destroy(gameObject);
@@ -280,9 +319,16 @@ namespace SpaceshipGame
             // Decay velocity (frictionFactor is the fraction of speed retained per second)
             velocity *= Mathf.Pow(SpaceshipGameConstants.Instance.frictionFactor, Time.deltaTime);
 
-            // Spin toward the steered heading, then bleed the turn rate off quickly when steering stops.
-            transform.Rotate(0f, angularVelocity * Time.deltaTime, 0f, Space.Self);
-            angularVelocity *= Mathf.Pow(SpaceshipGameConstants.Instance.rotationFrictionFactor, Time.deltaTime);
+            if (rollsWhenMoving)
+            {
+                RollModel(positionUpdate);
+            }
+            else
+            {
+                // Spin toward the steered heading, then bleed the turn rate off quickly when steering stops.
+                transform.Rotate(0f, angularVelocity * Time.deltaTime, 0f, Space.Self);
+                angularVelocity *= Mathf.Pow(SpaceshipGameConstants.Instance.rotationFrictionFactor, Time.deltaTime);
+            }
 
             // Check bounds, bounce off circular boundary at edge
             float distanceFromCenter = transform.localPosition.magnitude;
@@ -297,6 +343,26 @@ namespace SpaceshipGame
             var timeSinceLastHit = Time.time - lastHitTime;
             if ( timeSinceLastHit < 1)
             shipMaterial.SetFloat("_TimeSinceLastHit", timeSinceLastHit);
+        }
+
+        // Tumble the model child like a ball rolling without slipping: rotate about the
+        // board-space axis perpendicular to travel by (distance / radius) radians. Only
+        // the model rolls; the controller root keeps its orientation for gameplay logic.
+        private void RollModel(Vector3 boardDisplacement)
+        {
+            if (modelTransform == null)
+                return;
+            float distance = boardDisplacement.magnitude;
+            if (distance < 1e-6f)
+                return;
+            // Radius from the rendered size, so the roll rate tracks the spawn scale-in
+            // and any future model swaps. Floor guards the scale-up from zero.
+            float radius = Mathf.Max(renderer.bounds.extents.y, 0.01f);
+            Vector3 axis = Vector3.Cross(Vector3.up, boardDisplacement / distance);
+            Vector3 worldAxis = transform.parent != null
+                ? transform.parent.TransformDirection(axis)
+                : axis;
+            modelTransform.Rotate(worldAxis, distance / radius * Mathf.Rad2Deg * rollScale, Space.World);
         }
     }
 }

@@ -228,6 +228,10 @@ namespace WebSocketServer {
             return EncodeFrame((byte)WebSocketOpCode.Binary, payload);
         }
 
+        public static byte[] EncodeTextFrame(string payload) {
+            return EncodeFrame((byte)WebSocketOpCode.Text, Encoding.UTF8.GetBytes(payload ?? string.Empty));
+        }
+
         public static byte[] EncodePingFrame(byte[] payload = null) {
             return EncodeFrame((byte)WebSocketOpCode.Ping, payload);
         }

@@ -196,6 +196,12 @@ namespace WebSocketServer {
             return SendRawFrame(WebSocketProtocol.EncodeBinaryFrame(data));
         }
 
+        // Sends a text WebSocket frame (UTF-8) to this client. Same threading guarantees as SendBinary.
+        public bool SendText(string text) {
+            if (isClosed) return false;
+            return SendRawFrame(WebSocketProtocol.EncodeTextFrame(text));
+        }
+
         public bool SendPing(byte[] payload = null) {
             if (isClosed) return false;
             return SendRawFrame(WebSocketProtocol.EncodePingFrame(payload));

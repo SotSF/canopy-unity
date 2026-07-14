@@ -14,5 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpaceshipGame.ShipDefinition
   playerType: 2
   startingHealth: 8
+  startingEnergy: 10
+  topSpeed: 1
+  defaultScale: {x: 2, y: 2, z: 2}
+  shipPrefab: {fileID: 3367271796327275460, guid: bd696b8b220457348bbbb401ab6eb31f,
+    type: 3}
   abilities:
   - {fileID: 11400000, guid: c769ff3d871634fbba3a2423b1bf4748, type: 2}

@@ -10,6 +10,7 @@ namespace SpaceshipGame
         CalibrationStatus,
         ShipPosition,
         TouchPosition,
+        // Deprecated: replaced by JSON text frames (see SpaceshipGameController.GameStateMessage).
         GameDataUpdate
     }
     public enum PlayerType

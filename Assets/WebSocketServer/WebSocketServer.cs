@@ -200,6 +200,14 @@ namespace WebSocketServer {
             return connection.SendBinary(data);
         }
 
+        public bool SendText(string connectionId, string text) {
+            if (!TryGetConnection(connectionId, out WebSocketConnection connection)) {
+                Debug.LogWarning($"WebSocket: no active connection with id {connectionId}");
+                return false;
+            }
+            return connection.SendText(text);
+        }
+
         public void Shutdown() {
             if (isShuttingDown) return;
             isShuttingDown = true;

@@ -46,6 +46,8 @@ namespace SpaceshipGame
         public RenderTexture gameBoardTex;
         public RenderTexture fluidVelocityTex;
 
+        public ShipDefinitionRegistry shipDefinitions;
+
         public SpaceshipController spaceshipPrefab;
         public GameObject gameBoard;
 
@@ -78,16 +80,18 @@ namespace SpaceshipGame
         }
 
         // 1 byte for event id, 4 bytes for two floats r & theta. Pre-initialize with the position event type representation
-        private byte[] shipPositionEventBuffer = new byte[1 + 4 * 2] { (byte)SpaceshipGameEventType.ShipPosition,0,0,0,0,0,0,0,0 }; 
+        private byte[] shipPositionEventBuffer = new byte[1 + 4 * 2] { (byte)SpaceshipGameEventType.ShipPosition,0,0,0,0,0,0,0,0 };
         void Update()
         {
             foreach (var player in players.Values)
             {
                 // Only web players have a remote client expecting position events.
-                if (!player.IsAlive || player.playerType != PlayerType.Web)
+                if (player.playerType != PlayerType.Web)
                     continue;
-                var id = player.id;
                 var ship = player.ship;
+                // Dead / mid-respawn players have no ship to report on.
+                if (ship == null)
+                    continue;
 
                 float r = ship.transform.localPosition.magnitude / SpaceshipGameConstants.Instance.boundaryRadius;
                 float theta = Mathf.Atan2(ship.transform.localPosition.z, ship.transform.localPosition.x);
@@ -95,29 +99,86 @@ namespace SpaceshipGame
                 byte[] thetaBytes = BitConverter.GetBytes(theta);
                 Buffer.BlockCopy(rBytes, 0, shipPositionEventBuffer, 1, 4);
                 Buffer.BlockCopy(thetaBytes, 0, shipPositionEventBuffer, 5, 4);
-                server.SendBinary(id, shipPositionEventBuffer);
+                server.SendBinary(player.id, shipPositionEventBuffer);
+
+                SyncGameState(player);
             }
         }
 
-        private byte[] gameDataUpdateBuffer = new byte[1 + 2 + 2 + 12];
-        public void SendHitEvent(SpaceshipController ship)
+        // Low-rate game state and display messages go to phones as JSON text frames
+        // (self-describing, no hand-synced byte offsets between the two repos); only the
+        // high-rate streams (ShipPosition out, stick Update in) stay binary.
+        [Serializable]
+        private struct GameStateMessage
         {
-            var playerId = ship.player.id;
+            public string t;
+            public int gameId;
+            public float health;
+            public float maxHealth;
+            public float energy;
+            public float maxEnergy;
+        }
 
-            gameDataUpdateBuffer[0] = (byte)SpaceshipGameEventType.GameDataUpdate;
-            short msgIdx = 0; // "Hit!"
-            byte[] msgIdxBytes = BitConverter.GetBytes(msgIdx);
-            short gameIdx = 0; // "SpaceshipGame"
-            byte[] gameIdxBytes = BitConverter.GetBytes(gameIdx);
-            short health = (short)ship.health;
-            byte[] healthBytes= BitConverter.GetBytes(health);
-            short bufferOffset = 1;
-            Buffer.BlockCopy(msgIdxBytes, 0, gameDataUpdateBuffer, bufferOffset, 2);
-            bufferOffset += 2;
-            Buffer.BlockCopy(gameIdxBytes, 0, gameDataUpdateBuffer, bufferOffset, 2);
-            bufferOffset += 2;
-            Buffer.BlockCopy(healthBytes, 0, gameDataUpdateBuffer, bufferOffset, 2);
-            server.SendBinary(playerId, gameDataUpdateBuffer);
+        [Serializable]
+        private struct DisplayMessage
+        {
+            public string t;
+            public string text;
+        }
+
+        private const int SpaceshipGameId = 0;
+        // Floor between sends per player, so continuously-varying fields (e.g. future
+        // energy regen) can't turn the state sync into a per-frame JSON stream.
+        private const float minGameStateSendInterval = 0.1f;
+
+        private struct SentGameState
+        {
+            public float health, maxHealth, energy, maxEnergy, time;
+        }
+
+        // Last values actually sent per web player; SyncGameState only sends on change.
+        private readonly Dictionary<string, SentGameState> sentGameState = new Dictionary<string, SentGameState>();
+
+        private void SyncGameState(SpaceshipGamePlayer player)
+        {
+            var ship = player.ship;
+            bool hasPrev = sentGameState.TryGetValue(player.id, out var prev);
+            if (hasPrev
+                && prev.health == ship.health && prev.maxHealth == ship.maxHealth
+                && prev.energy == ship.energy && prev.maxEnergy == ship.maxEnergy)
+                return;
+            // Still dirty, just throttled — we'll retry next frame against the same prev.
+            if (hasPrev && Time.time - prev.time < minGameStateSendInterval)
+                return;
+            var msg = new GameStateMessage
+            {
+                t = "gameState",
+                gameId = SpaceshipGameId,
+                health = ship.health,
+                maxHealth = ship.maxHealth,
+                energy = ship.energy,
+                maxEnergy = ship.maxEnergy,
+            };
+            if (server.SendText(player.id, JsonUtility.ToJson(msg)))
+            {
+                sentGameState[player.id] = new SentGameState
+                {
+                    health = msg.health,
+                    maxHealth = msg.maxHealth,
+                    energy = msg.energy,
+                    maxEnergy = msg.maxEnergy,
+                    time = Time.time,
+                };
+            }
+        }
+
+        // Shows a transient toast on the player's phone. Free text; no message-id registry.
+        public void SendDisplayMessage(SpaceshipGamePlayer player, string text)
+        {
+            if (player.playerType != PlayerType.Web)
+                return;
+            var msg = new DisplayMessage { t = "message", text = text };
+            server.SendText(player.id, JsonUtility.ToJson(msg));
         }
 
         public void OnShipDestroyed(SpaceshipController ship)
@@ -200,10 +261,11 @@ namespace SpaceshipGame
             if (player.ship == null)
             {
                 // First spawn or respawn: build the ship.
-                player.ship = SpaceshipController.Create(spaceshipPrefab, gameObject, player, position);
+                var shipDef = shipDefinitions.Get(player.playerType);
+                player.ship = SpaceshipController.Create(shipDef, gameObject, player, position);
                 player.ship.OnUpdateColor(player.color);
                 player.ship.DisableControls();
-                await LMotion.Create(Vector3.zero, SpaceshipGameConstants.Instance.defaultShipScale, 1f).BindToLocalScale(player.ship.transform);
+                await LMotion.Create(Vector3.zero, shipDef.defaultScale, 1f).BindToLocalScale(player.ship.transform);
                 player.ship.EnableControls();
             }
             player.state = PlayerState.Alive;
@@ -296,6 +358,7 @@ namespace SpaceshipGame
                 Destroy(leavingPlayer.ship.gameObject);
             players.Remove(connection.id);
             canvasState.Remove(connection.id);
+            sentGameState.Remove(connection.id);
         }
 
         /*
@@ -316,10 +379,10 @@ namespace SpaceshipGame
         0x00 0x00 0x00 0x00 < float data 2 (rx)
         0x00 0x00 0x00 0x00 < float data 3 (ry)
 
-        EventType.GameDataUpdate
-        2 bytes (1 short): DisplayMessageId
-        2 bytes (1 short): GameID
-        12 bytes (unstructured): Game info (health, ammo count, shields, snake length, etc)
+        EventType.GameDataUpdate (deprecated)
+        Replaced by JSON text frames — see GameStateMessage / DisplayMessage above:
+        {"t":"gameState","gameId":0,"health":2,"maxHealth":3,"energy":7.5,"maxEnergy":10}
+        {"t":"message","text":"Hit!"}
 
         */
         public void OnMessage(WebSocketMessage message)

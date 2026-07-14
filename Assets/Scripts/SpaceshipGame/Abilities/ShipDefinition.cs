@@ -18,6 +18,16 @@ namespace SpaceshipGame
         [Tooltip("Health a freshly spawned ship of this type starts with.")]
         public float startingHealth = 3f;
 
+        [Tooltip("Energy a freshly spawned ship of this type starts with.")]
+        public float startingEnergy = 10f;
+
+        public float topSpeed = 5f;
+
+        public Vector3 defaultScale = new Vector3(2.3f, 2.3f, 2.3f);
+
+        [Tooltip("Prefab with ship model etc")]
+        public SpaceshipController shipPrefab;
+
         [Tooltip("Abilities equipped, in slot order. Slot 0 = primary fire, 1 = alt fire, ...")]
         public List<Ability> abilities = new List<Ability>();
     }

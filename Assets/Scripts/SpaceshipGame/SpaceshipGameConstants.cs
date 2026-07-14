@@ -38,7 +38,5 @@ namespace SpaceshipGame
 
         public float respawnStartPlayingVFXTime = 2.5f;
         public float respawnTime = 3f;
-
-        public Vector3 defaultShipScale = new Vector3(2.3f, 2.3f, 2.3f);
     }
 }
