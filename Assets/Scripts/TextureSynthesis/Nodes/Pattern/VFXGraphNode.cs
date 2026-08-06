@@ -25,7 +25,7 @@ public class VFXGraphNode: DynamicPatternNode
     private Dictionary<string, Texture> lastTexInputs;
 
     public bool vfxBound = false;
-    public string[] visualEffectNames = new string[] { "VFXCam", "TrailCam", "TorusCam" };
+    public string[] visualEffectNames = new string[] { "VFXCam", "TrailCam", "TorusCam", "GoldenSpiralCam" };
 
     public void InitBuffers()
     {
