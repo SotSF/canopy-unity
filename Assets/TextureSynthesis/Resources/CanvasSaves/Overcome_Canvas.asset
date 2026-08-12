@@ -1,618 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8856386941233898283
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 40d9030a2b5654840863bdf18241cc86, type: 3}
-  m_Name: CanopySimulationView
-  m_EditorClassIdentifier: Assembly-CSharp::CanopySimulationNode
-  position: {x: 151.7, y: -159.59999}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &-8344393671217036142
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
-  position: {x: -624.0999, y: -672.80005}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  sparklineCollapsed: 0
-  bound: 1
-  valueKnob: {fileID: -1841805407420496543}
-  rawMIDIValue: 0.7637795
-  rescaleMin: 0
-  rescaleMax: 1
-  rescale: 0
-  controlID: 17
-  channel: 0
---- !u!114 &-8334418010528267043
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: SpawnRate
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 100.145004
-  sideOffset: 0
---- !u!114 &-8235668286839584585
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 9188802096273240452}
-  side: 1
-  sidePosition: 100
-  sideOffset: 0
---- !u!114 &-7918453172152147823
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
-  position: {x: -567.4998, y: -275.00006}
-  dynamicConnectionPorts:
-  - {fileID: 2082902603861226478}
-  - {fileID: -677164214143467413}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  sparklineCollapsed: 0
-  bound: 1
-  valueKnob: {fileID: 5021839602499724359}
-  rawMIDIValue: 1
-  rescaleMin: 0
-  rescaleMax: 137.5
-  rescale: 1
-  controlID: 20
-  channel: 0
---- !u!114 &-7015641061082661897
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 1725361724410879884}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 4189565523287691523}
-  side: 1
-  sidePosition: 40
-  sideOffset: 0
---- !u!114 &-6129873764066574615
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Gravity
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 55.145
-  sideOffset: 0
---- !u!114 &-6101787367847078504
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3dd50b389073b148b5ec10e419dc073, type: 3}
-  m_Name: Input Node
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.Standard.InputNode
-  position: {x: -536.0998, y: -346.00006}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  outputKnob: {fileID: -1151762251956574470}
-  value: 137.5
---- !u!114 &-5933712847270311918
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMax
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 6007412713837933433}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 117.145004
-  sideOffset: 0
---- !u!114 &-5865026217940742647
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
-  position: {x: -587.49976, y: -514.2}
-  dynamicConnectionPorts:
-  - {fileID: 193975785060605623}
-  - {fileID: -1456944676342859394}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  sparklineCollapsed: 0
-  bound: 1
-  valueKnob: {fileID: 4295268964244465944}
-  rawMIDIValue: 0.33070865
-  rescaleMin: 0
-  rescaleMax: 0.2
-  rescale: 1
-  controlID: 21
-  channel: 0
---- !u!114 &-3798507847925603805
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
-  m_Name: MainEditorState
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.NodeEditorState
-  canvas: {fileID: 0}
-  parentEditor: {fileID: 0}
-  selectedNode: {fileID: 0}
-  panOffset: {x: 70.49977, y: 33.599983}
-  zoom: 1.25
---- !u!114 &-3088043054060500254
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Angle
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2223443737629664696}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 176.145
-  sideOffset: 0
---- !u!114 &-1841805407420496543
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -8344393671217036142}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: 3184259942818703677}
-  side: 2
-  sidePosition: 117.5
-  sideOffset: 0
---- !u!114 &-1662706135494473345
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: SpawnRate
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections:
-  - {fileID: 4295268964244465944}
-  side: 4
-  sidePosition: 144.145
-  sideOffset: 0
---- !u!114 &-1456944676342859394
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMax
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -5865026217940742647}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 117.145004
-  sideOffset: 0
---- !u!114 &-1289260627726731487
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 408695381075812849}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections: []
-  side: 2
-  sidePosition: 117.5
-  sideOffset: 0
---- !u!114 &-1232871733165815421
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2223443737629664696}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections:
-  - {fileID: 7874471939181718416}
-  side: 1
-  sidePosition: 100
-  sideOffset: 0
---- !u!114 &-1151762251956574470
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Value
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -6101787367847078504}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: Float
-  _connections:
-  - {fileID: 5028468324906947985}
-  side: 2
-  sidePosition: 29
-  sideOffset: 0
---- !u!114 &-677164214143467413
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMax
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -7918453172152147823}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 117.145004
-  sideOffset: 0
---- !u!114 &-214399928238868033
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3469be317986434faaea3445fa2db15, type: 3}
-  m_Name: Canopy
-  m_EditorClassIdentifier: Assembly-CSharp::CanopyNode
-  position: {x: -372.90002, y: 519}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 7874471939181718416}
-  textureOutputKnob: {fileID: 1895147290945434622}
-  seamless: 0
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26a89c36c30b2e940804d7efcccaf0bd, type: 3}
-  m_Name: New Calculation Canvas
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.Standard.CalculationCanvasType
-  editorStates:
-  - {fileID: -3798507847925603805}
-  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\Overcome_Canvas
-  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\Overcome_Canvas.asset
-  livesInScene: 0
-  nodes:
-  - {fileID: -8856386941233898283}
-  - {fileID: 1725361724410879884}
-  - {fileID: 2223443737629664696}
-  - {fileID: -6101787367847078504}
-  - {fileID: 408695381075812849}
-  - {fileID: 6007412713837933433}
-  - {fileID: -7918453172152147823}
-  - {fileID: -8344393671217036142}
-  - {fileID: 2039223279597962714}
-  - {fileID: -5865026217940742647}
-  - {fileID: -214399928238868033}
-  groups: []
---- !u!114 &193975785060605623
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMin
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -5865026217940742647}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 98.145004
-  sideOffset: 0
---- !u!114 &408695381075812849
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
-  m_Name: MinisControl
-  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
-  position: {x: -566.4999, y: -73.60007}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  sparklineCollapsed: 0
-  bound: 1
-  valueKnob: {fileID: -1289260627726731487}
-  rawMIDIValue: 0.26771653
-  rescaleMin: 0
-  rescaleMax: 1
-  rescale: 0
-  controlID: 18
-  channel: 0
---- !u!114 &990191549137808985
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 6007412713837933433}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections:
-  - {fileID: 8026900849426376948}
-  side: 2
-  sidePosition: 158.5
-  sideOffset: 0
---- !u!114 &1725361724410879884
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab40e26661164554fb9522a5eb479add, type: 3}
-  m_Name: Polarize
-  m_EditorClassIdentifier: Assembly-CSharp::PolarizeNode
-  position: {x: -197.7, y: 47.999992}
-  dynamicConnectionPorts: []
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 9188802096273240452}
-  textureOutputKnob: {fileID: -7015641061082661897}
---- !u!114 &1895147290945434622
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Out
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -214399928238868033}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: UnityEngine.Texture
-  _connections: []
-  side: 1
-  sidePosition: 40
-  sideOffset: 0
---- !u!114 &2039223279597962714
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3d9d06db17939645a18e6566c8f2129, type: 3}
-  m_Name: VFXGraph
-  m_EditorClassIdentifier: Assembly-CSharp::VFXGraphNode
-  position: {x: -188.5, y: -451}
-  dynamicConnectionPorts:
-  - {fileID: 2179837711477514750}
-  - {fileID: -6129873764066574615}
-  - {fileID: 8640128561763220210}
-  - {fileID: -8334418010528267043}
-  - {fileID: 3184259942818703677}
-  - {fileID: -1662706135494473345}
-  - {fileID: 5028468324906947985}
-  - {fileID: 8026900849426376948}
-  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureOutputKnob: {fileID: -8235668286839584585}
-  gameObjectName: GoldenSpiralCam
-  vfxBound: 1
-  visualEffectNames:
-  - VFXCam
-  - TrailCam
-  - TorusCam
-  - GoldenSpiralCam
---- !u!114 &2082902603861226478
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMin
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -7918453172152147823}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 98.145004
-  sideOffset: 0
---- !u!114 &2179837711477514750
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: BurstDelay
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 33.145
-  sideOffset: 0
---- !u!114 &2223443737629664696
+--- !u!114 &-8882457531993355994
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -627,11 +15,11 @@ MonoBehaviour:
   position: {x: -148.49982, y: 194.79999}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
-  textureInputKnob: {fileID: 4189565523287691523}
-  textureOutputKnob: {fileID: -1232871733165815421}
-  in1Knob: {fileID: 5567824346849432056}
-  in2Knob: {fileID: -3088043054060500254}
-  resetKnob: {fileID: 4364792284844197593}
+  textureInputKnob: {fileID: -3782236351596616340}
+  textureOutputKnob: {fileID: -3223577578635091085}
+  in1Knob: {fileID: 7432049879562993487}
+  in2Knob: {fileID: -8095277802368553524}
+  resetKnob: {fileID: 4608356794212908943}
   smoothTransitions: 1
   mirror: 0
   in1: 0
@@ -648,7 +36,7 @@ MonoBehaviour:
     - Mirror
     - Repeat
     - Clamp
---- !u!114 &3184259942818703677
+--- !u!114 &-8418377624279434156
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -658,18 +46,96 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: SpawnAngle
+  m_Name: value
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
+  body: {fileID: 6053068370884464078}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -5353063039474011739}
+  side: 2
+  sidePosition: 158.5
+  sideOffset: 0
+--- !u!114 &-8231150923495969090
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8111001172275990636}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 1
+  sidePosition: 40
+  sideOffset: 0
+--- !u!114 &-8111001172275990636
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3469be317986434faaea3445fa2db15, type: 3}
+  m_Name: Canopy
+  m_EditorClassIdentifier: Assembly-CSharp::CanopyNode
+  position: {x: -372.90002, y: 519}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureInputKnob: {fileID: 5240577104559436442}
+  textureOutputKnob: {fileID: -8231150923495969090}
+  seamless: 0
+--- !u!114 &-8095277802368553524
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Angle
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8882457531993355994}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
-  _connections:
-  - {fileID: -1841805407420496543}
+  _connections: []
   side: 4
-  sidePosition: 122.145004
+  sidePosition: 176.145
   sideOffset: 0
---- !u!114 &4189565523287691523
+--- !u!114 &-7459087394474183886
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: BurstDelay
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 8923354649725999024}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 33.145
+  sideOffset: 0
+--- !u!114 &-6897656086943028528
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -681,16 +147,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: In
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2223443737629664696}
+  body: {fileID: -2042958033443633304}
   direction: 1
   maxConnectionCount: 0
   styleID: UnityEngine.Texture
   _connections:
-  - {fileID: -7015641061082661897}
+  - {fileID: -3952693424841833141}
   side: 3
   sidePosition: 20
   sideOffset: 0
---- !u!114 &4295268964244465944
+--- !u!114 &-6413839326063608585
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: inputTex
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -2506933043598037200}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: -3223577578635091085}
+  side: 3
+  sidePosition: 20
+  sideOffset: 0
+--- !u!114 &-5952263799390632878
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Value
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -259550028366327100}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: Float
+  _connections:
+  - {fileID: 3931050483592476881}
+  side: 2
+  sidePosition: 29
+  sideOffset: 0
+--- !u!114 &-5668983642431797160
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -702,16 +210,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -5865026217940742647}
+  body: {fileID: 4963067476516590968}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
   _connections:
-  - {fileID: -1662706135494473345}
+  - {fileID: 1016509433314188870}
   side: 2
   sidePosition: 158.5
   sideOffset: 0
---- !u!114 &4364792284844197593
+--- !u!114 &-5459805302673998374
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -720,38 +228,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Reset
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2223443737629664696}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Boolean
-  _connections: []
-  side: 4
-  sidePosition: 236.145
-  sideOffset: 0
---- !u!114 &5021839602499724359
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: value
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -7918453172152147823}
-  direction: 2
-  maxConnectionCount: 1
-  styleID: System.Single
-  _connections: []
-  side: 2
-  sidePosition: 158.5
-  sideOffset: 0
---- !u!114 &5028468324906947985
+  m_Script: {fileID: 11500000, guid: f3dd50b389073b148b5ec10e419dc073, type: 3}
+  m_Name: Input Node
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.Standard.InputNode
+  position: {x: -503.14978, y: -299.25003}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: -3207833640906739703}
+  value: 137.5
+--- !u!114 &-5353063039474011739
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -763,16 +248,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: SpawnRate
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
+  body: {fileID: 8923354649725999024}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
   _connections:
-  - {fileID: -1151762251956574470}
+  - {fileID: -8418377624279434156}
   side: 4
-  sidePosition: 167.145
+  sidePosition: 144.145
   sideOffset: 0
---- !u!114 &5567824346849432056
+--- !u!114 &-4416703634420375963
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -782,17 +267,39 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Speed
+  m_Name: SpawnRate
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2223443737629664696}
+  body: {fileID: 8923354649725999024}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
-  _connections: []
+  _connections:
+  - {fileID: -2656858597998638163}
   side: 4
-  sidePosition: 158.145
+  sidePosition: 211.145
   sideOffset: 0
---- !u!114 &6007412713837933433
+--- !u!114 &-3952693424841833141
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 8923354649725999024}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: -6897656086943028528}
+  side: 1
+  sidePosition: 100
+  sideOffset: 0
+--- !u!114 &-3815445856965487852
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -806,39 +313,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
   position: {x: -561.89996, y: 103.20001}
   dynamicConnectionPorts:
-  - {fileID: 7187102870693293864}
-  - {fileID: -5933712847270311918}
+  - {fileID: 1903329528857997888}
+  - {fileID: 3952037101009621875}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   sparklineCollapsed: 0
   bound: 1
-  valueKnob: {fileID: 990191549137808985}
+  valueKnob: {fileID: -2656858597998638163}
   rawMIDIValue: 1
   rescaleMin: 0
-  rescaleMax: 50
+  rescaleMax: 20
   rescale: 1
   controlID: 16
   channel: 0
---- !u!114 &7187102870693293864
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: rescaleMin
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 6007412713837933433}
-  direction: 1
-  maxConnectionCount: 0
-  styleID: System.Single
-  _connections: []
-  side: 4
-  sidePosition: 98.145004
-  sideOffset: 0
---- !u!114 &7874471939181718416
+--- !u!114 &-3782236351596616340
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -850,16 +337,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: In
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: -214399928238868033}
+  body: {fileID: -8882457531993355994}
   direction: 1
   maxConnectionCount: 0
   styleID: UnityEngine.Texture
   _connections:
-  - {fileID: -1232871733165815421}
+  - {fileID: 5953371055066352474}
   side: 3
   sidePosition: 20
   sideOffset: 0
---- !u!114 &8026900849426376948
+--- !u!114 &-3731494135938119372
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -871,16 +358,310 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: SpawnRate
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
+  body: {fileID: 8923354649725999024}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
   _connections:
-  - {fileID: 990191549137808985}
+  - {fileID: -3207833640906739703}
   side: 4
   sidePosition: 189.145
   sideOffset: 0
---- !u!114 &8640128561763220210
+--- !u!114 &-3223577578635091085
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8882457531993355994}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: 5240577104559436442}
+  - {fileID: -6413839326063608585}
+  side: 1
+  sidePosition: 100
+  sideOffset: 0
+--- !u!114 &-3207833640906739703
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Value
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -5459805302673998374}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: Float
+  _connections:
+  - {fileID: -3731494135938119372}
+  side: 2
+  sidePosition: 29
+  sideOffset: 0
+--- !u!114 &-2770508648524474051
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMin
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 1104631937969553298}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 98.145004
+  sideOffset: 0
+--- !u!114 &-2656858597998638163
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -3815445856965487852}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: -4416703634420375963}
+  side: 2
+  sidePosition: 158.5
+  sideOffset: 0
+--- !u!114 &-2600979805126583921
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 1104631937969553298}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections: []
+  side: 2
+  sidePosition: 158.5
+  sideOffset: 0
+--- !u!114 &-2506933043598037200
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e27d8fb3c56e0794193c01e38e893346, type: 3}
+  m_Name: CanopyArtNet
+  m_EditorClassIdentifier: Assembly-CSharp::CanopyArtnetNode
+  position: {x: -99.19956, y: 520.6003}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  inputTexKnob: {fileID: -6413839326063608585}
+  useDoubleDensity: 1
+  bakeAlpha: 1
+  ip: 192.168.1.138
+  mirrorPort: 4
+  maxFrameRate: 60
+  flipMirrorDirection: 0
+  mirrorOffset: 70
+--- !u!114 &-2042958033443633304
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab40e26661164554fb9522a5eb479add, type: 3}
+  m_Name: Polarize
+  m_EditorClassIdentifier: Assembly-CSharp::PolarizeNode
+  position: {x: -197.7, y: 47.999992}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureInputKnob: {fileID: -6897656086943028528}
+  textureOutputKnob: {fileID: 5953371055066352474}
+--- !u!114 &-1903421381171854548
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMin
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 4963067476516590968}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 98.145004
+  sideOffset: 0
+--- !u!114 &-1862012486739137944
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMax
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 1104631937969553298}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 117.145004
+  sideOffset: 0
+--- !u!114 &-1101098528030919142
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
+  m_Name: MainEditorState
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.NodeEditorState
+  canvas: {fileID: 0}
+  parentEditor: {fileID: 0}
+  selectedNode: {fileID: 0}
+  panOffset: {x: 224.89981, y: 96.44988}
+  zoom: 0.65
+--- !u!114 &-287432152803295880
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
+  position: {x: -566.4999, y: -73.60007}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
+  bound: 1
+  valueKnob: {fileID: 7066849928782912675}
+  rawMIDIValue: 0.26771653
+  rescaleMin: 0
+  rescaleMax: 1
+  rescale: 0
+  controlID: 18
+  channel: 0
+--- !u!114 &-259550028366327100
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3dd50b389073b148b5ec10e419dc073, type: 3}
+  m_Name: Input Node
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.Standard.InputNode
+  position: {x: -506.54984, y: -360.7998}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  outputKnob: {fileID: -5952263799390632878}
+  value: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26a89c36c30b2e940804d7efcccaf0bd, type: 3}
+  m_Name: New Calculation Canvas
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.Standard.CalculationCanvasType
+  editorStates:
+  - {fileID: -1101098528030919142}
+  saveName: Assets\TextureSynthesis\Resources\CanvasSaves\Overcome_Canvas
+  savePath: Assets\TextureSynthesis\Resources\CanvasSaves\Overcome_Canvas.asset
+  livesInScene: 0
+  nodes:
+  - {fileID: 5526669887471484668}
+  - {fileID: -2042958033443633304}
+  - {fileID: -287432152803295880}
+  - {fileID: -8111001172275990636}
+  - {fileID: 8923354649725999024}
+  - {fileID: -2506933043598037200}
+  - {fileID: -8882457531993355994}
+  - {fileID: 1104631937969553298}
+  - {fileID: -5459805302673998374}
+  - {fileID: 6053068370884464078}
+  - {fileID: 4963067476516590968}
+  - {fileID: -3815445856965487852}
+  - {fileID: -259550028366327100}
+  groups: []
+--- !u!114 &211571714445317681
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMin
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 6053068370884464078}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 98.145004
+  sideOffset: 0
+--- !u!114 &1016509433314188870
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -892,7 +673,94 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: SpawnAngle
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 2039223279597962714}
+  body: {fileID: 8923354649725999024}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -5668983642431797160}
+  side: 4
+  sidePosition: 122.145004
+  sideOffset: 0
+--- !u!114 &1104631937969553298
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
+  position: {x: -559.7498, y: -240.50006}
+  dynamicConnectionPorts:
+  - {fileID: -2770508648524474051}
+  - {fileID: -1862012486739137944}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
+  bound: 1
+  valueKnob: {fileID: -2600979805126583921}
+  rawMIDIValue: 1
+  rescaleMin: 0
+  rescaleMax: 137.5
+  rescale: 1
+  controlID: 20
+  channel: 0
+--- !u!114 &1662065450967923952
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMax
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 6053068370884464078}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 117.145004
+  sideOffset: 0
+--- !u!114 &1903329528857997888
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMin
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -3815445856965487852}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 98.145004
+  sideOffset: 0
+--- !u!114 &3483030360517204039
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: SpawnAngle
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 8923354649725999024}
   direction: 1
   maxConnectionCount: 0
   styleID: System.Single
@@ -900,7 +768,94 @@ MonoBehaviour:
   side: 4
   sidePosition: 78.145004
   sideOffset: 0
---- !u!114 &9188802096273240452
+--- !u!114 &3931050483592476881
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: SpawnRate
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 8923354649725999024}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: -5952263799390632878}
+  side: 4
+  sidePosition: 167.145
+  sideOffset: 0
+--- !u!114 &3952037101009621875
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMax
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -3815445856965487852}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 117.145004
+  sideOffset: 0
+--- !u!114 &4608356794212908943
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Reset
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8882457531993355994}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Boolean
+  _connections: []
+  side: 4
+  sidePosition: 236.145
+  sideOffset: 0
+--- !u!114 &4963067476516590968
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
+  position: {x: -603.2999, y: -756.05005}
+  dynamicConnectionPorts:
+  - {fileID: -1903421381171854548}
+  - {fileID: 7778748891762235034}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
+  bound: 1
+  valueKnob: {fileID: -5668983642431797160}
+  rawMIDIValue: 0.7637795
+  rescaleMin: 0
+  rescaleMax: 0.75
+  rescale: 1
+  controlID: 17
+  channel: 0
+--- !u!114 &5240577104559436442
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -912,12 +867,206 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: In
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
-  body: {fileID: 1725361724410879884}
+  body: {fileID: -8111001172275990636}
   direction: 1
   maxConnectionCount: 0
   styleID: UnityEngine.Texture
   _connections:
-  - {fileID: -8235668286839584585}
+  - {fileID: -3223577578635091085}
   side: 3
   sidePosition: 20
   sideOffset: 0
+--- !u!114 &5526669887471484668
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40d9030a2b5654840863bdf18241cc86, type: 3}
+  m_Name: CanopySimulationView
+  m_EditorClassIdentifier: Assembly-CSharp::CanopySimulationNode
+  position: {x: 151.7, y: -159.59999}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &5953371055066352474
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Out
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -2042958033443633304}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections:
+  - {fileID: -3782236351596616340}
+  side: 1
+  sidePosition: 40
+  sideOffset: 0
+--- !u!114 &6053068370884464078
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab268ca957b74aa98f416fb5419676b, type: 3}
+  m_Name: MinisControl
+  m_EditorClassIdentifier: Assembly-CSharp::MinisControlNode
+  position: {x: -599.19977, y: -559.2}
+  dynamicConnectionPorts:
+  - {fileID: 211571714445317681}
+  - {fileID: 1662065450967923952}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
+  bound: 1
+  valueKnob: {fileID: -8418377624279434156}
+  rawMIDIValue: 0.33070865
+  rescaleMin: 0
+  rescaleMax: 0.32
+  rescale: 1
+  controlID: 21
+  channel: 0
+--- !u!114 &6769280218234102027
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Gravity
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 8923354649725999024}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 55.145
+  sideOffset: 0
+--- !u!114 &7066849928782912675
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: value
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -287432152803295880}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections: []
+  side: 2
+  sidePosition: 117.5
+  sideOffset: 0
+--- !u!114 &7367316223502250556
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: SpawnRate
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 8923354649725999024}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 100.145004
+  sideOffset: 0
+--- !u!114 &7432049879562993487
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: Speed
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8882457531993355994}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 158.145
+  sideOffset: 0
+--- !u!114 &7778748891762235034
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: rescaleMax
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 4963067476516590968}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 117.145004
+  sideOffset: 0
+--- !u!114 &8923354649725999024
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3d9d06db17939645a18e6566c8f2129, type: 3}
+  m_Name: VFXGraph
+  m_EditorClassIdentifier: Assembly-CSharp::VFXGraphNode
+  position: {x: -188.5, y: -451}
+  dynamicConnectionPorts:
+  - {fileID: -7459087394474183886}
+  - {fileID: 6769280218234102027}
+  - {fileID: 3483030360517204039}
+  - {fileID: 7367316223502250556}
+  - {fileID: 1016509433314188870}
+  - {fileID: -5353063039474011739}
+  - {fileID: 3931050483592476881}
+  - {fileID: -3731494135938119372}
+  - {fileID: -4416703634420375963}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  textureOutputKnob: {fileID: -3952693424841833141}
+  gameObjectName: GoldenSpiralCam
+  vfxBound: 1
+  visualEffectNames:
+  - VFXCam
+  - TrailCam
+  - TorusCam
+  - GoldenSpiralCam
