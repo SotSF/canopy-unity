@@ -65,6 +65,14 @@ namespace SpaceshipGame
             Vector3 localPos)
         {
             SpaceshipController ship = Instantiate(shipDef.shipPrefab, gameBoard.transform);
+            // The shared ship prefab carries a BeaconShipController too. Force both to a known
+            // state — self enabled, sibling disabled — regardless of what the prefab's default
+            // was, so spawning always yields a working ship for this mode. (Setting only the
+            // sibling would leave a ship dead if the prefab had this component disabled.)
+            ship.enabled = true;
+            var beaconMode = ship.GetComponent<BeaconGame.BeaconShipController>();
+            if (beaconMode != null)
+                beaconMode.enabled = false;
             ship.shipDefinition = shipDef;
             ship.velocity = Vector3.zero;
             ship.transform.localPosition = localPos;

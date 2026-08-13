@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3367271796327275460}
   - component: {fileID: 588103628426307016}
   - component: {fileID: -8067521041596250997}
+  - component: {fileID: 4040020467923016871}
   m_Layer: 0
   m_Name: SpaceshipPrefab
   m_TagString: Untagged
@@ -120,6 +121,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 2
+--- !u!114 &4040020467923016871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736685441916662446}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0d19eb202bee41bd855456fc30188f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BeaconGame.BeaconShipController
+  shipColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &7688651073606796567
 GameObject:
   m_ObjectHideFlags: 0
