@@ -1,7 +1,6 @@
 ﻿using NodeEditorFramework;
 using NodeEditorFramework.TextureComposer;
 using NodeEditorFramework.Utilities;
-using NUnit.Framework;
 using SecretFire.TextureSynth;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using UnityEngine;
 
 abstract public class DynamicPatternNode : TickingNode
 {
-    private Vector2 _DefaultSize = new Vector2(250, 100);
+    protected Vector2 _DefaultSize = new Vector2(250, 100);
 
     public override Vector2 DefaultSize => _DefaultSize;
 
@@ -43,13 +42,33 @@ abstract public class DynamicPatternNode : TickingNode
 
     int signalPorts => dynamicConnectionPorts.Where(p => ((ValueConnectionKnob)p).side == NodeSide.Left).Count();
     int texPorts => dynamicConnectionPorts.Where(p => ((ValueConnectionKnob)p).side == NodeSide.Top).Count();
-    protected void SetSize()
+    protected virtual void SetSize()
     {
-
         _DefaultSize = new Vector2(
             (1 + texPorts) * 32 + 168,
-            (1 + signalPorts) * 25 + 150
+            // Texture input ports render a label + preview row that needs vertical room too
+            (1 + signalPorts) * 25 + 150 + (texPorts > 0 ? 55 : 0)
         );
+    }
+
+    static GUIStyle _leftAlignedButton;
+    protected static GUIStyle LeftAlignedButton
+    {
+        get
+        {
+            if (_leftAlignedButton == null)
+            {
+                _leftAlignedButton = new GUIStyle(GUI.skin.button);
+                _leftAlignedButton.alignment = TextAnchor.MiddleLeft;
+            }
+            return _leftAlignedButton;
+        }
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStaticState()
+    {
+        _leftAlignedButton = null;
     }
 
     protected void InitializeRenderTexture()
