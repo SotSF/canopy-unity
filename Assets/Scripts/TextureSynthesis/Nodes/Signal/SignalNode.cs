@@ -171,22 +171,44 @@ namespace SecretFire.TextureSynth
 
         void EnsureChannels()
         {
-            if (channelsInitialized) return;
             var descs = BuildChannelDescs();
+            // Reconcile on count changes too, not just first call: nodes with dynamic channel
+            // lists (e.g. MinisControlArray) add/remove channels at runtime. Existing states
+            // keep their sample history by index; dropped channels release their GPU resources.
+            if (channelsInitialized && channelStates != null && channelStates.Length == descs.Length) return;
             int ringSize = Mathf.Max(2, Mathf.CeilToInt(SparklineBoundsWindowSeconds * SparklineCaptureHz));
             int displaySamples = Mathf.Clamp(
                 Mathf.CeilToInt(SparklineDisplaySeconds * SparklineCaptureHz),
                 2, ringSize);
-            channelStates = new ChannelState[descs.Length];
+            var newStates = new ChannelState[descs.Length];
             for (int i = 0; i < descs.Length; i++)
             {
-                channelStates[i] = new ChannelState
+                if (channelStates != null && i < channelStates.Length && channelStates[i] != null)
                 {
-                    ringSize       = ringSize,
-                    displaySamples = displaySamples,
-                    ring           = new float[ringSize],
-                };
+                    newStates[i] = channelStates[i];
+                }
+                else
+                {
+                    newStates[i] = new ChannelState
+                    {
+                        ringSize       = ringSize,
+                        displaySamples = displaySamples,
+                        ring           = new float[ringSize],
+                    };
+                }
             }
+            if (channelStates != null)
+            {
+                for (int i = descs.Length; i < channelStates.Length; i++)
+                {
+                    var ch = channelStates[i];
+                    if (ch == null) continue;
+                    if (ch.buffer != null) ch.buffer.Release();
+                    if (ch.texture != null) ch.texture.Release();
+                    if (ch.material != null) UnityEngine.Object.DestroyImmediate(ch.material);
+                }
+            }
+            channelStates = newStates;
             channelsInitialized = true;
         }
 
@@ -283,11 +305,7 @@ namespace SecretFire.TextureSynth
             EnsureChannels();
             var descs = BuildChannelDescs();
 
-            GUILayout.BeginHorizontal();
-            string toggleLabel = sparklineCollapsed ? "▶" : "▼";
-            if (GUILayout.Button(toggleLabel, GUILayout.Width(22))) sparklineCollapsed = !sparklineCollapsed;
-            GUILayout.Label("Sparkline");
-            GUILayout.EndHorizontal();
+            DrawSparklineToggle();
 
             // A uniform knob-label column keeps every sparkline texture the same width and stops
             // longer output names from wrapping. Sized to this node's widest name (clamped) and no
@@ -304,37 +322,69 @@ namespace SecretFire.TextureSynth
 
             for (int i = 0; i < channelStates.Length && i < descs.Length; i++)
             {
-                var ch = channelStates[i];
-                var desc = descs[i];
-                EnsureGpuResources(ch);
-                GUILayout.BeginHorizontal(GUILayout.MinHeight(RowHeightFor(desc)));
-                // Leading label is only useful for sparkline-only channels (no knob to
-                // identify the trace via its own label).
-                if (desc.outputKnob == null && !string.IsNullOrEmpty(desc.label))
-                    GUILayout.Label(desc.label, GUILayout.Width(SparklineLabelColumnWidth));
-                if (!sparklineCollapsed && desc.getValue != null)
-                    GUILayout.Box(ch.texture,
-                        GUILayout.ExpandWidth(true),
-                        GUILayout.MinWidth(SparklineMinTexWidth),
-                        GUILayout.Height(ch.texture.height));
-                else
-                    GUILayout.FlexibleSpace();
-                if (desc.getValue != null)
-                {
-                    float v;
-                    try { v = desc.getValue(); }
-                    catch { v = 0f; }
-                    GUILayout.Label(v.ToString("0.000"), GUILayout.Width(SparklineValueColumnWidth));
-                }
-                if (desc.outputKnob != null)
-                {
-                    // Render the label in a fixed-width column, then let the knob place itself
-                    // against it (knob y-position comes from the label rect; width is uniform).
-                    GUILayout.Label(desc.outputKnob.name, KnobLabelStyle, GUILayout.Width(knobColumnWidth));
-                    desc.outputKnob.SetPosition();
-                }
-                GUILayout.EndHorizontal();
+                DrawChannelRow(descs[i], channelStates[i], knobColumnWidth);
             }
+        }
+
+        /// <summary>The ▶/▼ collapse toggle row, separately callable so nodes that place
+        /// channel rows inline (DrawSparklineChannel) can put the toggle wherever fits.</summary>
+        protected void DrawSparklineToggle()
+        {
+            GUILayout.BeginHorizontal();
+            string toggleLabel = sparklineCollapsed ? "▶" : "▼";
+            if (GUILayout.Button(toggleLabel, GUILayout.Width(22))) sparklineCollapsed = !sparklineCollapsed;
+            GUILayout.Label("Sparkline");
+            GUILayout.EndHorizontal();
+        }
+
+        /// <summary>
+        /// Draws a single channel's sparkline row, for nodes that interleave rows with other
+        /// per-channel GUI (e.g. MinisControlArray puts each trace beside its own control).
+        /// Index corresponds to GetSignalChannels enumeration order.
+        /// </summary>
+        protected void DrawSparklineChannel(int index)
+        {
+            if (!ShowSparkline) return;
+            EnsureChannels();
+            var descs = BuildChannelDescs();
+            if (index < 0 || index >= descs.Length || index >= channelStates.Length) return;
+            var desc = descs[index];
+            float knobColumnWidth = desc.outputKnob != null
+                ? Mathf.Min(KnobLabelStyle.CalcSize(new GUIContent(desc.outputKnob.name)).x, SparklineKnobColumnWidthMax)
+                : 0f;
+            DrawChannelRow(desc, channelStates[index], knobColumnWidth);
+        }
+
+        void DrawChannelRow(SignalChannel desc, ChannelState ch, float knobColumnWidth)
+        {
+            EnsureGpuResources(ch);
+            GUILayout.BeginHorizontal(GUILayout.MinHeight(RowHeightFor(desc)));
+            // Leading label is only useful for sparkline-only channels (no knob to
+            // identify the trace via its own label).
+            if (desc.outputKnob == null && !string.IsNullOrEmpty(desc.label))
+                GUILayout.Label(desc.label, GUILayout.Width(SparklineLabelColumnWidth));
+            if (!sparklineCollapsed && desc.getValue != null)
+                GUILayout.Box(ch.texture,
+                    GUILayout.ExpandWidth(true),
+                    GUILayout.MinWidth(SparklineMinTexWidth),
+                    GUILayout.Height(ch.texture.height));
+            else
+                GUILayout.FlexibleSpace();
+            if (desc.getValue != null)
+            {
+                float v;
+                try { v = desc.getValue(); }
+                catch { v = 0f; }
+                GUILayout.Label(v.ToString("0.000"), GUILayout.Width(SparklineValueColumnWidth));
+            }
+            if (desc.outputKnob != null)
+            {
+                // Render the label in a fixed-width column, then let the knob place itself
+                // against it (knob y-position comes from the label rect; width is uniform).
+                GUILayout.Label(desc.outputKnob.name, KnobLabelStyle, GUILayout.Width(knobColumnWidth));
+                desc.outputKnob.SetPosition();
+            }
+            GUILayout.EndHorizontal();
         }
 
         public virtual void OnDestroy()

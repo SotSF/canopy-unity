@@ -1,0 +1,31 @@
+#pragma kernel WaveformShader
+
+// Draws an audio waveform from per-column (min, max) peak pairs, precomputed on the CPU
+// from block summaries. Earlier revision re-aggregated raw samples per PIXEL (the per-
+// column sum ran outHeight times redundantly — ~1e9 reads when zoomed out); feeding
+// ready-made column ranges makes the kernel O(pixels) with one buffer read each.
+// Min/max peaks (vs averaged |x|) also keep transients visible at any zoom.
+
+RWTexture2D<float4> waveform;
+StructuredBuffer<float2> columnRange; // x = min, y = max, in [-1, 1], one entry per column
+float4 bgColor;
+float4 activeColor;
+
+uint outWidth;
+uint outHeight;
+
+[numthreads(16, 16, 1)]
+void WaveformShader(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= outWidth || id.y >= outHeight)
+        return;
+
+    float2 range = columnRange[id.x];
+    // pixel row -> sample-space value in [-1, 1], row 0 at the bottom
+    float y = ((id.y + 0.5) / outHeight) * 2.0 - 1.0;
+    // small floor so silence still draws a center line
+    float lo = min(range.x, -0.02);
+    float hi = max(range.y, 0.02);
+    bool isLit = y >= lo && y <= hi;
+    waveform[id.xy] = isLit ? activeColor : bgColor;
+}

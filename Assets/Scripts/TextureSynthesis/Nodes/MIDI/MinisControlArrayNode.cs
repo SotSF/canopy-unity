@@ -11,7 +11,7 @@ using UnityEngine;
 
 
 [Node(false, "MIDI/MIDIControlArrayMinis")]
-public class MinisControlArrayNode : TickingNode
+public class MinisControlArrayNode : SignalNode
 {
     public override string GetID => "MinisControlArrayNode";
     public override string Title { get { return "MinisControlArray"; } }
@@ -19,10 +19,29 @@ public class MinisControlArrayNode : TickingNode
     private const int nodeBaseHeight = 20;
     private const int controlBaseHeight = 60;
 
-    private Vector2 _DefaultSize = new Vector2(160,
+    private Vector2 _DefaultSize = new Vector2(200,
         nodeBaseHeight
         + 1 * controlBaseHeight);
-    public override Vector2 DefaultSize => _DefaultSize;
+    protected override Vector2 BaseDefaultSize => _DefaultSize;
+
+    // One sparkline per bound control; knobs stay beside their control rows, so these
+    // channels are texture+label only (no outputKnob)
+    protected override IEnumerable<SignalChannel> GetSignalChannels()
+    {
+        if (controls == null) yield break;
+        foreach (var control in controls)
+        {
+            if (!control.bound) continue;
+            var captured = control;
+            yield return new SignalChannel
+            {
+                getValue = () => captured.outputKnob != null
+                    ? captured.outputKnob.GetValue<float>()
+                    : captured.rawMIDIValue,
+                label    = $"cc{captured.controlID}",
+            };
+        }
+    }
 
     [Serializable]
     public class BoundMidiControl
@@ -48,6 +67,7 @@ public class MinisControlArrayNode : TickingNode
         [NonSerialized] public ValueConnectionKnob minKnob;
         [NonSerialized] public ValueConnectionKnob maxKnob;
         [NonSerialized] public ValueConnectionKnob outputKnob;
+        [NonSerialized] public Rect labelRect; // bind-label rect, for the hover device popup
 
         public string OutPortName => $"val{uid}";
         public string MinPortName => $"min{uid}";
@@ -118,11 +138,17 @@ public class MinisControlArrayNode : TickingNode
     public int channel;
     public List<BoundMidiControl> controls;
     public int nextControlUid = 0;
+    // Captured at bind time so the physical-device layout resolves exactly (see MinisControlNode)
+    public string deviceProduct = "";
 
     public int numControls => controls.Count;
 
     private string nodeInstanceId;
     private int bindingIndex = 0;
+
+    [NonSerialized] private RenderTexture layoutTex;
+    [NonSerialized] private BoundMidiControl hoveredControl;
+    [NonSerialized] private int lastLayoutRenderFrame = -1;
 
     public override void DoInit()
     {
@@ -241,13 +267,19 @@ public class MinisControlArrayNode : TickingNode
             (cc, value) => ReceiveMIDIMessageForControl(control, cc, value));
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
         // Unregister all controls from MidiDeviceManager
         if (MidiDeviceManager.Instance != null)
         {
             MidiDeviceManager.Instance.UnregisterNode(nodeInstanceId);
         }
+        if (layoutTex != null)
+        {
+            layoutTex.Release();
+            layoutTex = null;
+        }
+        base.OnDestroy(); // releases sparkline GPU resources
     }
 
     private void OnDisable()
@@ -266,6 +298,7 @@ public class MinisControlArrayNode : TickingNode
         if (bindingIndex < 0 || bindingIndex >= controls.Count) return;
         var control = controls[bindingIndex];
         channel = deviceChannel;
+        deviceProduct = device != null ? (device.description.product ?? "") : "";
         control.controlID = deviceControlID;
         control.binding = false;
         control.bound = true;
@@ -302,9 +335,11 @@ public class MinisControlArrayNode : TickingNode
         // flickers the rest of the canvas.
         BoundMidiControl unbindRequested = null;
         BoundMidiControl rescaleToggled = null;
+        int channelIdx = 0; // sparkline channel index, tracking GetSignalChannels order
 
         GUILayout.BeginHorizontal();
         GUILayout.BeginVertical();
+        DrawSparklineToggle();
         foreach (var control in controls)
         {
             if (!control.bound && !control.binding)
@@ -330,6 +365,12 @@ public class MinisControlArrayNode : TickingNode
                     {
                         GUILayout.Label(content);
                     }
+                    // capture the label rect for the hover device popup (rect valid on Repaint;
+                    // hover itself is resolved during Layout to keep GUI structure consistent)
+                    if (Event.current.type == EventType.Repaint)
+                    {
+                        control.labelRect = GUILayoutUtility.GetLastRect();
+                    }
                     if (GUILayout.Button("Unbind"))
                     {
                         unbindRequested = control;
@@ -347,6 +388,9 @@ public class MinisControlArrayNode : TickingNode
                         FloatKnobOrField(GUIContent.none, ref control.rescaleMin, control.minKnob);
                         FloatKnobOrField(GUIContent.none, ref control.rescaleMax, control.maxKnob);
                     }
+                    // this control's sparkline, inline so the trace sits beside its CC
+                    DrawSparklineChannel(channelIdx);
+                    channelIdx++;
                 }
                 else
                 {
@@ -360,9 +404,25 @@ public class MinisControlArrayNode : TickingNode
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
-        GUILayout.FlexibleSpace();
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
+
+        // Hover state drives the popup's GUI structure, so it only mutates during Layout
+        // (mid-Repaint flips desync the layout cursor and flicker the canvas)
+        if (Event.current.type == EventType.Layout)
+        {
+            hoveredControl = null;
+            foreach (var control in controls)
+            {
+                if (control.bound && control.labelRect.Contains(Event.current.mousePosition))
+                {
+                    hoveredControl = control;
+                    break;
+                }
+            }
+        }
+
+        DrawDeviceView();
 
         if (unbindRequested != null)
         {
@@ -385,8 +445,67 @@ public class MinisControlArrayNode : TickingNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
+    // Device picture with the hovered control's CC bulls-eyed. Same conventions as
+    // MinisControlNode: hint is always present (structure never changes with hover),
+    // popup appears while a bound control's label is hovered.
+    private void DrawDeviceView()
+    {
+        if (!Application.isPlaying || MidiDeviceManager.Instance == null) return;
+        var layout = MidiDeviceManager.Instance.GetLayoutFor(deviceProduct, channel);
+        if (layout == null) return;
+        bool anyBound = false;
+        foreach (var control in controls)
+        {
+            if (control.bound) { anyBound = true; break; }
+        }
+        if (!anyBound) return;
+        GUILayout.Label("Hover a binding label for physical location", HintStyle);
+        if (hoveredControl != null && layout.ContainsCcId(hoveredControl.controlID) && layoutTex != null)
+        {
+            GUILayout.Box(layoutTex, GUILayout.Width(MidiLayoutRenderer.TexWidth), GUILayout.Height(MidiLayoutRenderer.TexHeight));
+        }
+    }
+
+    static GUIStyle _hintStyle;
+    static GUIStyle HintStyle
+    {
+        get
+        {
+            if (_hintStyle == null)
+            {
+                _hintStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 9,
+                    normal = { textColor = new Color(1f, 1f, 1f, 0.45f) },
+                };
+            }
+            return _hintStyle;
+        }
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetHintStyle()
+    {
+        _hintStyle = null;
+    }
+
     public override bool DoCalc()
     {
+        // Re-render the device picture while a control is hovered (bulls-eye pulse animates);
+        // frame-guarded so GPU work happens once per frame, in the Update phase
+        if (hoveredControl != null && hoveredControl.bound && Application.isPlaying
+            && Time.frameCount != lastLayoutRenderFrame)
+        {
+            var layout = MidiDeviceManager.Instance != null
+                ? MidiDeviceManager.Instance.GetLayoutFor(deviceProduct, channel)
+                : null;
+            if (layout != null && layout.ContainsCcId(hoveredControl.controlID))
+            {
+                if (layoutTex == null) layoutTex = MidiLayoutRenderer.CreateTexture();
+                MidiLayoutRenderer.Render(layout, hoveredControl.controlID, layoutTex, Time.time);
+                lastLayoutRenderFrame = Time.frameCount;
+            }
+        }
         foreach (var control in controls)
         {
             if (!control.bound || control.outputKnob == null) continue;

@@ -61,7 +61,9 @@ public class TimelineNode : TickingNode
     const float RulerHeight = 20f;
     const float EventTrackHeight = 20f;
     const float BottomPad = 10f;
-    const float MinNodeWidth = 430f;   // transport buttons + time readout at minimum width
+    const float MinNodeWidth = 460f;   // transport buttons + time readout at minimum width
+    const float RightLabelWidth = 56f; // reserved column labeling the right-edge output ports
+    const float FollowMarginFrac = 0.10f; // playhead keeps this fraction of the view from the edge
     const float MaxDuration = 86400f;  // 24h; also bounds ruler/grid tick loops
     const float ResizeStripWidth = 9f;
     const float MarkerStackSpacing = 20f;  // knob hit size is 16 canvas units
@@ -99,6 +101,62 @@ public class TimelineNode : TickingNode
     [NonSerialized] float markersWidth = float.NaN;
     [NonSerialized] bool markersDirty = true;
 
+    // ---- bound audio track (optional): transport-synced playback, waveform underlay,
+    // ---- and AudioTrack-compatible spectrum outputs so one player serves both uses
+    public string audioClipName = "";
+    public bool audioBound = false;
+    public float audioVolume = 1f;
+    public float audioAttackTau = 0.04f;
+    public float audioReleaseTau = 0.25f;
+
+    const int SpectrumSize = 2048;
+    const float AudioDriftThreshold = 0.15f; // seconds of drift before a corrective seek
+    const int PeakBlockSize = 256;           // samples per precomputed waveform peak block
+    const int WaveformTexHeight = 64;
+    static readonly Color WaveformColor = new Color(0.42f, 0.60f, 0.80f, 0.38f);
+
+    [NonSerialized] AudioSource audioSource;
+    [NonSerialized] float[] peakMin;   // per-block min/max over the whole clip (mono mix)
+    [NonSerialized] float[] peakMax;
+    [NonSerialized] float[] rawSpectrum;
+    [NonSerialized] float[] smoothedSpectrum;
+    [NonSerialized] RenderTexture waveformTex;
+    [NonSerialized] bool peaksPending = false;       // clip data still loading async
+    [NonSerialized] float waveViewStart = float.NaN; // waveform cache validity
+    [NonSerialized] float waveViewEnd = float.NaN;
+    [NonSerialized] int waveWidth = -1;
+    [NonSerialized] bool audioPickerOpen = false;
+    [NonSerialized] Rect audioPickerRect;
+
+    static ComputeShader waveShader;
+    static int waveKernel;
+
+    static GUIStyle _portLabelStyle;
+    static GUIStyle PortLabelStyle
+    {
+        get
+        {
+            if (_portLabelStyle == null)
+            {
+                _portLabelStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 9,
+                    alignment = TextAnchor.MiddleRight,
+                    normal = { textColor = new Color(1f, 1f, 1f, 0.55f) },
+                };
+            }
+            return _portLabelStyle;
+        }
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetWaveShader()
+    {
+        waveShader = null;
+        waveKernel = 0;
+        _portLabelStyle = null;
+    }
+
     // Node-local GUI rects, deterministic from nodeWidth/channel count (valid for every event type)
     [NonSerialized] Rect[] channelRects = new Rect[0];
     [NonSerialized] Rect curveAreaRect;      // shared x-range of curve rows / ruler / event track
@@ -129,6 +187,10 @@ public class TimelineNode : TickingNode
         if (view.Span <= 0f) view.Reset(duration);
         view.ClampTo(EffectiveViewMax());
         playhead = Mathf.Clamp(playhead, 0f, duration);
+        if (audioBound && Application.isPlaying)
+        {
+            BindAudio(); // calls EnsurePorts itself (or unbinds on failure)
+        }
         EnsurePorts();
         ComputeRects();
     }
@@ -150,7 +212,8 @@ public class TimelineNode : TickingNode
     bool KnobCacheStale()
     {
         if (knobsByName == null) return true;
-        if (knobsByName.Count != channels.Count * 2 + events.Count + 1) return true; // +1: time port
+        int expected = channels.Count * 2 + events.Count + 1 + (audioBound ? 2 : 0); // time (+spectrum/sampleRate)
+        if (knobsByName.Count != expected) return true;
         foreach (var knob in knobsByName.Values)
             return knob == null || !dynamicConnectionPorts.Contains(knob);
         return false;
@@ -162,6 +225,11 @@ public class TimelineNode : TickingNode
         knobsByName.Clear();
         var required = new Dictionary<string, ValueConnectionKnobAttribute>();
         required["time"] = new ValueConnectionKnobAttribute("time", Direction.Out, typeof(float), NodeSide.Right);
+        if (audioBound)
+        {
+            required["spectrum"] = new ValueConnectionKnobAttribute("spectrum", Direction.Out, typeof(float[]), NodeSide.Right);
+            required["sampleRate"] = new ValueConnectionKnobAttribute("sampleRate", Direction.Out, typeof(float), NodeSide.Right);
+        }
         foreach (var ch in channels)
         {
             required[InKnobName(ch)] = new ValueConnectionKnobAttribute(InKnobName(ch), Direction.In, typeof(float), NodeSide.Left);
@@ -197,10 +265,19 @@ public class TimelineNode : TickingNode
 
     // ---------------------------------------------------------------- layout
 
+    float AudioPickerHeight()
+    {
+        if (!audioPickerOpen) return 0f;
+        if (!Application.isPlaying) return 26f;
+        if (audioBound) return 46f; // clip label + volume slider + unbind
+        int clipCount = AudioTrackManager.Instance != null ? AudioTrackManager.Instance.ClipNames.Length : 0;
+        return 28f + Mathf.Max(clipCount, 1) * 22f;
+    }
+
     float ComputeHeight()
     {
         int chCount = channels != null ? channels.Count : 0;
-        return HeaderOffsetY + TransportHeight + RowSpacing
+        return HeaderOffsetY + TransportHeight + RowSpacing + AudioPickerHeight()
              + chCount * (ChannelRowHeight + RowSpacing)
              + RulerHeight + 2f + EventTrackHeight + BottomPad;
     }
@@ -211,8 +288,10 @@ public class TimelineNode : TickingNode
         if (channelRects.Length != chCount) channelRects = new Rect[chCount];
         float width = Mathf.Max(nodeWidth, MinNodeWidth);
         float curveX = GutterWidth;
-        float curveW = Mathf.Max(width - GutterWidth - 12f, 20f);
-        float y = TransportHeight + RowSpacing;
+        float curveW = Mathf.Max(width - GutterWidth - RightLabelWidth, 20f);
+        float pickerH = AudioPickerHeight();
+        audioPickerRect = new Rect(6f, TransportHeight + 2f, width - 24f, pickerH);
+        float y = TransportHeight + RowSpacing + pickerH;
         for (int i = 0; i < chCount; i++)
         {
             channelRects[i] = new Rect(curveX, y, curveW, ChannelRowHeight);
@@ -243,6 +322,246 @@ public class TimelineNode : TickingNode
         markersViewEnd = view.viewEnd;
         markersWidth = eventTrackRect.width;
         markersDirty = false;
+    }
+
+    // While playing, the view scrolls to keep the playhead in frame with a margin off the
+    // edge. Backwards jumps (loop wrap, back-to-start) snap the window to the left margin.
+    void FollowPlayhead()
+    {
+        float margin = view.Span * FollowMarginFrac;
+        float shift = 0f;
+        if (playhead > view.viewEnd - margin)
+        {
+            shift = playhead - (view.viewEnd - margin);
+        }
+        else if (playhead < view.viewStart)
+        {
+            shift = playhead - (view.viewStart + margin);
+        }
+        if (shift != 0f)
+        {
+            view.viewStart += shift;
+            view.viewEnd += shift;
+            view.ClampTo(EffectiveViewMax());
+        }
+    }
+
+    // ---------------------------------------------------------------- audio track
+
+    void BindAudio()
+    {
+        audioSource = AudioTrackManager.Instance.CreateSource(this, audioClipName);
+        if (audioSource == null || audioSource.clip == null)
+        {
+            Debug.LogError($"Timeline: failed to bind audio '{audioClipName}', unbinding.");
+            UnbindAudio();
+            return;
+        }
+        audioSource.volume = audioVolume;
+        if (rawSpectrum == null) rawSpectrum = new float[SpectrumSize];
+        if (smoothedSpectrum == null) smoothedSpectrum = new float[SpectrumSize];
+        ExtractPeaks(audioSource.clip);
+        // An audio timeline is 1:1 with its clip: re-anchor the duration WITHOUT rescaling
+        // existing keys/events (this is a re-anchoring, not a stretch). On reload the saved
+        // duration already matches, so nothing moves.
+        float len = audioSource.clip.length;
+        if (Mathf.Abs(duration - len) > 0.01f)
+        {
+            Debug.Log($"Timeline: duration set to bound clip length {len:0.##}s (was {duration:0.##}s).");
+            duration = Mathf.Min(len, MaxDuration);
+            playhead = Mathf.Clamp(playhead, 0f, duration);
+            view.Reset(duration);
+            markersDirty = true;
+        }
+        waveViewStart = float.NaN; // force waveform rebuild
+        EnsurePorts();
+    }
+
+    void UnbindAudio()
+    {
+        audioBound = false;
+        audioClipName = "";
+        if (Application.isPlaying && AudioTrackManager.Instance != null)
+        {
+            AudioTrackManager.Instance.ReleaseSource(this);
+        }
+        audioSource = null;
+        peakMin = null;
+        peakMax = null;
+        if (waveformTex != null)
+        {
+            waveformTex.Release();
+            waveformTex = null;
+        }
+        EnsurePorts(); // drops the spectrum/sampleRate ports
+    }
+
+    // One-shot scan at bind: per-block min/max of the mono mix, so waveform columns for any
+    // zoom aggregate a few blocks instead of rescanning millions of raw samples.
+    void ExtractPeaks(AudioClip clip)
+    {
+        peakMin = null;
+        peakMax = null;
+        peaksPending = false;
+        if (clip.loadType != AudioClipLoadType.DecompressOnLoad)
+        {
+            Debug.LogWarning($"Timeline: waveform display needs a Decompress-On-Load clip " +
+                             $"('{clip.name}' is {clip.loadType}); playback still works.");
+            return;
+        }
+        if (clip.loadState != AudioDataLoadState.Loaded)
+        {
+            // 'Preload Audio Data' unchecked: sample data loads asynchronously on demand.
+            // Kick the load and let SyncAudioPlayback retry once it's ready.
+            clip.LoadAudioData();
+            peaksPending = true;
+            return;
+        }
+        int channelCount = clip.channels;
+        var data = new float[clip.samples * channelCount];
+        if (!clip.GetData(data, 0)) return;
+        int blocks = Mathf.CeilToInt((float)clip.samples / PeakBlockSize);
+        peakMin = new float[blocks];
+        peakMax = new float[blocks];
+        for (int b = 0; b < blocks; b++)
+        {
+            float lo = 0f, hi = 0f;
+            int s0 = b * PeakBlockSize;
+            int s1 = Mathf.Min(s0 + PeakBlockSize, clip.samples);
+            for (int s = s0; s < s1; s++)
+            {
+                float mono = 0f;
+                int baseIdx = s * channelCount;
+                for (int c = 0; c < channelCount; c++) mono += data[baseIdx + c];
+                mono /= channelCount;
+                if (mono < lo) lo = mono;
+                if (mono > hi) hi = mono;
+            }
+            peakMin[b] = lo;
+            peakMax[b] = hi;
+        }
+    }
+
+    // Keeps the audio locked to the transport: play/pause follows `playing`, position
+    // drift-corrects to the playhead (scrubs, loops and jumps all just look like drift).
+    void SyncAudioPlayback()
+    {
+        if (audioSource == null || audioSource.clip == null) return;
+        if (peaksPending)
+        {
+            var loadState = audioSource.clip.loadState;
+            if (loadState == AudioDataLoadState.Loaded)
+            {
+                ExtractPeaks(audioSource.clip);
+                waveViewStart = float.NaN; // force waveform rebuild with real data
+            }
+            else if (loadState == AudioDataLoadState.Failed)
+            {
+                peaksPending = false;
+                Debug.LogWarning($"Timeline: audio data failed to load for '{audioSource.clip.name}'; waveform unavailable.");
+            }
+        }
+        audioSource.volume = audioVolume;
+        float len = audioSource.clip.length;
+        bool shouldPlay = playing && playhead < len;
+        if (shouldPlay && !audioSource.isPlaying)
+        {
+            audioSource.time = Mathf.Min(playhead, Mathf.Max(len - 0.05f, 0f));
+            audioSource.Play();
+        }
+        else if (!shouldPlay && audioSource.isPlaying)
+        {
+            audioSource.Pause();
+        }
+        if (audioSource.isPlaying && playhead < len &&
+            Mathf.Abs(audioSource.time - playhead) > AudioDriftThreshold)
+        {
+            audioSource.time = playhead;
+        }
+
+        if (rawSpectrum != null && smoothedSpectrum != null)
+        {
+            // dB-normalized to [0,1] over -60..0 dBFS + per-bin attack/release, matching
+            // AudioTrackNode/SystemAudioSpectrum so downstream chains are interchangeable
+            audioSource.GetSpectrumData(rawSpectrum, 0, FFTWindow.BlackmanHarris);
+            float dt = Mathf.Max(Time.deltaTime, 1e-4f);
+            float attackAlpha = audioAttackTau > 1e-4f ? 1f - Mathf.Exp(-dt / audioAttackTau) : 1f;
+            float releaseAlpha = audioReleaseTau > 1e-4f ? 1f - Mathf.Exp(-dt / audioReleaseTau) : 1f;
+            for (int i = 0; i < SpectrumSize; i++)
+            {
+                float db = 20f * Mathf.Log10(rawSpectrum[i] / 0.7071f + 1.5849e-13f);
+                float target = (db + 60f) / 60f;
+                float current = smoothedSpectrum[i];
+                smoothedSpectrum[i] = current + (target - current) * (target > current ? attackAlpha : releaseAlpha);
+            }
+        }
+
+        UpdateWaveformTexture();
+    }
+
+    // Renders per-column (min,max) peaks for the visible window into waveformTex.
+    // Only recomputes when the view window or width changed.
+    void UpdateWaveformTexture()
+    {
+        if (peakMin == null || audioSource == null || audioSource.clip == null) return;
+        int width = Mathf.Max(Mathf.RoundToInt(curveAreaRect.width), 8);
+        if (waveformTex != null && width == waveWidth &&
+            view.viewStart == waveViewStart && view.viewEnd == waveViewEnd) return;
+
+        if (waveShader == null)
+        {
+            waveShader = Resources.Load<ComputeShader>("NodeShaders/Waveform");
+            if (waveShader == null) return;
+            waveKernel = waveShader.FindKernel("WaveformShader");
+        }
+        if (waveformTex == null || waveformTex.width != width)
+        {
+            if (waveformTex != null) waveformTex.Release();
+            waveformTex = new RenderTexture(width, WaveformTexHeight, 0)
+            {
+                enableRandomWrite = true,
+                hideFlags = HideFlags.HideAndDontSave,
+            };
+            waveformTex.Create();
+        }
+
+        var clip = audioSource.clip;
+        float blockDuration = (float)PeakBlockSize / clip.frequency;
+        var columns = new Vector2[width];
+        for (int x = 0; x < width; x++)
+        {
+            float t0 = view.PixelToTime(x, width);
+            float t1 = view.PixelToTime(x + 1, width);
+            int b0 = Mathf.FloorToInt(t0 / blockDuration);
+            int b1 = Mathf.FloorToInt(t1 / blockDuration);
+            float lo = 0f, hi = 0f;
+            if (b1 >= 0 && b0 < peakMin.Length && t0 <= clip.length)
+            {
+                b0 = Mathf.Max(b0, 0);
+                b1 = Mathf.Min(b1, peakMin.Length - 1);
+                for (int b = b0; b <= b1; b++)
+                {
+                    if (peakMin[b] < lo) lo = peakMin[b];
+                    if (peakMax[b] > hi) hi = peakMax[b];
+                }
+            }
+            columns[x] = new Vector2(lo, hi);
+        }
+
+        var buffer = new ComputeBuffer(width, 8);
+        buffer.SetData(columns);
+        waveShader.SetBuffer(waveKernel, "columnRange", buffer);
+        waveShader.SetVector("bgColor", Color.clear);
+        waveShader.SetVector("activeColor", WaveformColor);
+        waveShader.SetInt("outWidth", width);
+        waveShader.SetInt("outHeight", WaveformTexHeight);
+        waveShader.SetTexture(waveKernel, "waveform", waveformTex);
+        waveShader.Dispatch(waveKernel, Mathf.CeilToInt(width / 16f), Mathf.CeilToInt(WaveformTexHeight / 16f), 1);
+        buffer.Release();
+
+        waveWidth = width;
+        waveViewStart = view.viewStart;
+        waveViewEnd = view.viewEnd;
     }
 
     float TimeToX(float t) => curveAreaRect.x + view.TimeToPixel(t, curveAreaRect.width);
@@ -286,6 +605,11 @@ public class TimelineNode : TickingNode
                     eventTimesScratch, firedScratch, out bool wrapped, out bool reachedEnd);
                 for (int i = 0; i < firedScratch.Count; i++) firedIds.Add(events[firedScratch[i]].id);
                 if (reachedEnd) playing = false;
+                FollowPlayhead();
+            }
+            if (audioBound)
+            {
+                SyncAudioPlayback(); // once per frame: transport coupling, spectrum, waveform
             }
         }
         foreach (var ch in channels)
@@ -301,6 +625,11 @@ public class TimelineNode : TickingNode
             Knob(EventKnobName(ev))?.SetValue<bool>(firedIds.Contains(ev.id));
         }
         Knob("time")?.SetValue<float>(playhead);
+        if (audioBound && smoothedSpectrum != null)
+        {
+            Knob("spectrum")?.SetValue(smoothedSpectrum);
+            Knob("sampleRate")?.SetValue((float)AudioSettings.outputSampleRate);
+        }
         // Keep rects/knob positions current even when the canvas GUI isn't being drawn,
         // so connection wires track zoom/pan without a one-repaint lag.
         ComputeRects();
@@ -311,6 +640,11 @@ public class TimelineNode : TickingNode
     void PositionKnobs()
     {
         Knob("time")?.SetPosition(HeaderOffsetY + TransportHeight * 0.5f);
+        if (audioBound)
+        {
+            Knob("spectrum")?.SetPosition(rulerRect.center.y + HeaderOffsetY);
+            Knob("sampleRate")?.SetPosition(eventTrackRect.center.y + HeaderOffsetY);
+        }
         for (int i = 0; i < channels.Count && i < channelRects.Length; i++)
         {
             float y = channelRects[i].center.y + HeaderOffsetY;
@@ -336,10 +670,12 @@ public class TimelineNode : TickingNode
             ComputeRects();
             HandleInput();
             DrawTransport();
+            DrawAudioPicker();
             DrawChannels();
             DrawRuler();
             DrawEventTrack();
             DrawPlayhead();
+            DrawPortLabels();
             DrawResizeGrip();
             PositionKnobs();
         }
@@ -369,6 +705,10 @@ public class TimelineNode : TickingNode
         loop = GUI.Toggle(Next(44f), loop, "Loop", GUI.skin.button);
         if (GUI.Button(Next(44f), "Zoom⟲")) view.Reset(duration);
         if (GUI.Button(Next(56f), "+ Signal")) AddChannel();
+        if (GUI.Toggle(Next(26f), audioPickerOpen, "♪", GUI.skin.button) != audioPickerOpen)
+        {
+            audioPickerOpen = !audioPickerOpen;
+        }
 
         float newDur = MiniFloatField(Next(52f), "dur", duration);
         if (newDur != duration && newDur >= 0.1f)
@@ -440,6 +780,52 @@ public class TimelineNode : TickingNode
         return $"{mins}:{(tenths % 600) / 10f:00.0}";
     }
 
+    // Audio panel under the transport (♪ button toggles): clip picker when unbound,
+    // clip info + volume + unbind when bound. Fixed rects — no GUILayout entries.
+    void DrawAudioPicker()
+    {
+        if (!audioPickerOpen) return;
+        var r = audioPickerRect;
+        FillRect(r, new Color(0.16f, 0.16f, 0.17f, 1f));
+        if (!Application.isPlaying)
+        {
+            GUI.Label(new Rect(r.x + 6f, r.y + 4f, r.width - 12f, 18f), "Enter play mode to bind audio");
+            return;
+        }
+        if (audioBound)
+        {
+            GUI.Label(new Rect(r.x + 6f, r.y + 2f, r.width - 120f, 16f), $"♪ {audioClipName}");
+            if (GUI.Button(new Rect(r.xMax - 96f, r.y + 2f, 92f, 18f), "Unbind audio"))
+            {
+                UnbindAudio();
+                return;
+            }
+            GUI.Label(new Rect(r.x + 6f, r.y + 24f, 28f, 16f), "Vol");
+            audioVolume = GUI.HorizontalSlider(new Rect(r.x + 38f, r.y + 28f, r.width - 50f, 12f), audioVolume, 0f, 1f);
+        }
+        else
+        {
+            GUI.Label(new Rect(r.x + 6f, r.y + 2f, r.width - 12f, 16f), "Bind audio track:");
+            var names = AudioTrackManager.Instance.ClipNames;
+            if (names.Length == 0)
+            {
+                GUI.Label(new Rect(r.x + 6f, r.y + 26f, r.width - 12f, 18f), "No clips found (Resources/AudioTracks)");
+                return;
+            }
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (GUI.Button(new Rect(r.x + 6f, r.y + 26f + i * 22f, r.width - 12f, 20f), names[i]))
+                {
+                    audioClipName = names[i];
+                    audioBound = true;
+                    audioPickerOpen = false;
+                    BindAudio();
+                    return;
+                }
+            }
+        }
+    }
+
     // Keys/events beyond a shrunk duration stay editable: the view may extend to reach them
     float EffectiveViewMax()
     {
@@ -474,8 +860,12 @@ public class TimelineNode : TickingNode
             ch.yMax = MiniFloatField(new Rect(64f, gy + 22f, 46f, 16f), $"ch{ch.id}max", ch.yMax);
             if (ch.yMax <= ch.yMin) ch.yMax = ch.yMin + 0.001f;
 
-            // row background + grid + curve (GL calls draw on Repaint only)
+            // row background + waveform underlay + grid + curve (GL calls draw on Repaint only)
             FillRect(row, RowBg);
+            if (audioBound && waveformTex != null)
+            {
+                GUI.DrawTexture(row, waveformTex, ScaleMode.StretchToFill);
+            }
             DrawGrid(row);
             DrawCurve(i, ch, row);
         }
@@ -597,6 +987,24 @@ public class TimelineNode : TickingNode
         float px = TimeToX(playhead);
         FillRect(new Rect(px, curveAreaRect.y, 1f, curveAreaRect.height), PlayheadCol);
         FillRect(new Rect(px - 3f, rulerRect.y, 7f, 4f), PlayheadCol);
+    }
+
+    // Small right-aligned labels in the reserved right column identifying the output ports
+    void DrawPortLabels()
+    {
+        float x = curveAreaRect.xMax + 4f;
+        float w = Mathf.Max(nodeWidth, MinNodeWidth) - curveAreaRect.xMax - 16f;
+        if (w < 20f) return;
+        GUI.Label(new Rect(x, TransportHeight * 0.5f - 8f, w, 16f), "time", PortLabelStyle);
+        for (int i = 0; i < channelRects.Length && i < channels.Count; i++)
+        {
+            GUI.Label(new Rect(x, channelRects[i].center.y - 8f, w, 16f), "out", PortLabelStyle);
+        }
+        if (audioBound)
+        {
+            GUI.Label(new Rect(x, rulerRect.center.y - 8f, w, 16f), "spectrum", PortLabelStyle);
+            GUI.Label(new Rect(x, eventTrackRect.center.y - 8f, w, 16f), "rate", PortLabelStyle);
+        }
     }
 
     void DrawResizeGrip()
@@ -929,6 +1337,19 @@ public class TimelineNode : TickingNode
         else if (dragChannel > index) dragChannel--;
         EnsurePorts();
         ComputeRects();
+    }
+
+    protected override void OnDelete()
+    {
+        if (audioBound && Application.isPlaying && AudioTrackManager.Instance != null)
+        {
+            AudioTrackManager.Instance.ReleaseSource(this);
+        }
+        if (waveformTex != null)
+        {
+            waveformTex.Release();
+            waveformTex = null;
+        }
     }
 
     void RemoveEvent(int index)
