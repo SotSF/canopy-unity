@@ -3,20 +3,25 @@ using UnityEngine;
 
 
 /// <summary>
-/// Simple data class containing configuration and physical layout information for the Akai MIDIMix
+/// Simple data class containing configuration and physical layout information for the Akai MIDIMix.
+/// Grid positions: knobs are rows 0-2 (top to bottom), faders are row 3; columns 0-8 left to right
+/// (column 8 is the master fader). MidiLayoutRenderer maps these to a device picture.
 /// </summary>
-public class AkaiMidiMixLayout 
+public class AkaiMidiMixLayout
 {
-    public enum CcType {knob, skinnyknob, fader};
-    public enum CcColor {gold, silver, black, blackred, red, green, blue, white, purple, orange};
-    public struct CcDesc {
-        public int id; 
-        public CcType ccType; 
-        public CcColor color; 
+    public enum CcType { knob, skinnyknob, fader };
+    public enum CcColor { gold, silver, black, blackred, red, green, blue, white, purple, orange };
+    public struct CcDesc
+    {
+        public int id;
+        public CcType ccType;
+        public CcColor color;
         public Vector2Int position;
     };
-    
-    private Dictionary<int, CcDesc> idMap = new Dictionary<int, CcDesc>();
+
+    private readonly Dictionary<int, CcDesc> idMap = new Dictionary<int, CcDesc>();
+
+    public IReadOnlyCollection<CcDesc> AllControls => idMap.Values;
 
     public AkaiMidiMixLayout()
     {
@@ -24,7 +29,6 @@ public class AkaiMidiMixLayout
             [ 8x3 knob grid   ][1x4 button column ]
             [ 8x2 button grid ][                  ]
             [ 9x1 fader array                     ]
-
         */
 
         int[][] ccIds = new int[][]
@@ -51,22 +55,31 @@ public class AkaiMidiMixLayout
             new CcType[] {CcType.fader,CcType.fader,CcType.fader,CcType.fader,CcType.fader,CcType.fader,CcType.fader,CcType.fader,CcType.fader}
         };
 
-        CcDesc[][] ccDescs = new CcDesc[4][];
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < ccIds.Length; i++)
         {
             var idRow = ccIds[i];
             var colorRow = ccColors[i];
             var typeRow = ccTypes[i];
             for (int j = 0; j < idRow.Length; j++)
             {
-                ccDescs[i][j] = new CcDesc(){id= idRow[j],ccType = typeRow[j],color= colorRow[j], position= new Vector2Int(j,i) };
-                idMap[idRow[j]] = ccDescs[i][j];
+                idMap[idRow[j]] = new CcDesc()
+                {
+                    id = idRow[j],
+                    ccType = typeRow[j],
+                    color = colorRow[j],
+                    position = new Vector2Int(j, i)
+                };
             }
         }
     }
 
-    public CcDesc GetByCcId(string ccId)
+    public bool TryGetByCcId(int ccId, out CcDesc desc)
     {
-        return new CcDesc(){};
+        return idMap.TryGetValue(ccId, out desc);
+    }
+
+    public bool ContainsCcId(int ccId)
+    {
+        return idMap.ContainsKey(ccId);
     }
 }

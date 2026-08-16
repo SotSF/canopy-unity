@@ -98,7 +98,18 @@ namespace SecretFire.TextureSynth
         public override bool Calculate()
         {
             if (!initialized) return TryInit();
-            return DoCalc();
+            try
+            {
+                return DoCalc();
+            }
+            catch (Exception err)
+            {
+                // A throwing node must never abort canvas traversal (RTNodeEditor/SetCanvas
+                // would discard the whole canvas). Log, skip this node's outputs this pass,
+                // and report success so downstream calculation continues.
+                Debug.LogException(err);
+                return true;
+            }
         }
         public virtual bool DoCalc() { return true; }
         public virtual void DoInit() { }

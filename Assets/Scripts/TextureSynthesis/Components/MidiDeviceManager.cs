@@ -553,6 +553,61 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
         return new List<MidiDevice>(midiDevices);
     }
 
+    #region Device layouts
+
+    // Physical-layout descriptions per known controller, matched the same way as the
+    // Oddball: case-insensitive substring test against description.product, which Minis
+    // fills as "{portName} Channel {N}".
+    public static readonly string[] MidiMixIdentifiers = { "MIDI Mix", "MIDIMIX" };
+
+    private AkaiMidiMixLayout midiMixLayout;
+
+    public bool IsMidiMixDevice(MidiDevice device)
+    {
+        return device != null && ProductMatches(device.description.product, MidiMixIdentifiers);
+    }
+
+    /// <summary>
+    /// Layout for a bound control. Prefers the product string captured at bind time
+    /// (exact even with multiple devices per channel); falls back to whatever device
+    /// currently claims the channel (pre-existing binds that didn't save a product).
+    /// Returns null when the device has no known layout (Oddball, synthetic ports...).
+    /// </summary>
+    public AkaiMidiMixLayout GetLayoutFor(string deviceProduct, int channel)
+    {
+        if (!string.IsNullOrEmpty(deviceProduct))
+        {
+            return ProductMatches(deviceProduct, MidiMixIdentifiers) ? MidiMixLayout : null;
+        }
+        var device = GetDeviceByChannel(channel);
+        return IsMidiMixDevice(device) ? MidiMixLayout : null;
+    }
+
+    private AkaiMidiMixLayout MidiMixLayout
+    {
+        get
+        {
+            if (midiMixLayout == null) midiMixLayout = new AkaiMidiMixLayout();
+            return midiMixLayout;
+        }
+    }
+
+    private static bool ProductMatches(string product, string[] identifiers)
+    {
+        if (string.IsNullOrEmpty(product)) return false;
+        foreach (var id in identifiers)
+        {
+            if (!string.IsNullOrEmpty(id) &&
+                product.IndexOf(id, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    #endregion
+
     #region Oddball support
 
     /// <summary>

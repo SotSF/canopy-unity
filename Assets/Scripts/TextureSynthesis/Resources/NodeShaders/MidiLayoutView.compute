@@ -1,0 +1,117 @@
+#pragma kernel DrawLayout
+
+// Renders a stylized picture of a MIDI controller (knobs / faders / ghost buttons)
+// with the bound control highlighted. Driven by MidiLayoutRenderer.
+
+struct ControlDesc
+{
+    float2 pos;    // pixel center
+    float2 size;   // knob: (radius, _) | fader: (capHalfW, capHalfH) | button: half extents
+    int shape;     // 0 = knob, 1 = skinny knob, 2 = fader, 3 = button
+    int colorIdx;  // index into Palette
+    int state;     // 0 = normal, 1 = highlighted, 2 = ghost
+    int pad;
+};
+
+StructuredBuffer<ControlDesc> Controls;
+int controlCount;
+uint oWidth;
+uint oHeight;
+float timeSeconds;
+float4 Palette[10];
+
+RWTexture2D<float4> OutputTex;
+
+static const float4 Background = float4(0.13, 0.13, 0.14, 1);
+static const float4 PanelWhite = float4(0.80, 0.80, 0.82, 1);
+static const float4 PanelDark  = float4(0.10, 0.10, 0.10, 1);
+static const float4 Accent     = float4(0.12, 0.38, 1.00, 1);
+#define TAU 6.28318530718
+
+float BoxSd(float2 p, float2 center, float2 halfSize)
+{
+    float2 d = abs(p - center) - halfSize;
+    return max(d.x, d.y);
+}
+
+[numthreads(16, 16, 1)]
+void DrawLayout(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= oWidth || id.y >= oHeight)
+        return;
+
+    float2 p = float2(id.xy) + 0.5;
+
+    // Body: white face plate over dark bottom strip (fader section)
+    float3 col = Background.rgb;
+    float2 bodyHalf = float2(oWidth, oHeight) * 0.5 - 2.0;
+    float bodySd = BoxSd(p, float2(oWidth, oHeight) * 0.5, bodyHalf);
+    if (bodySd < 0)
+    {
+        col = (p.y < oHeight * 0.34) ? PanelDark.rgb : PanelWhite.rgb;
+    }
+
+    for (int i = 0; i < controlCount; i++)
+    {
+        ControlDesc c = Controls[i];
+        float sd = 1e6;
+        float3 ctrlCol = Palette[c.colorIdx].rgb;
+
+        if (c.shape <= 1) // knob
+        {
+            sd = length(p - c.pos) - c.size.x;
+            // darker rim so light knobs read as circular caps
+            if (sd < 0 && sd > -1.5)
+                ctrlCol *= 0.55;
+        }
+        else if (c.shape == 2) // fader: dark track + colored cap
+        {
+            float trackSd = BoxSd(p, c.pos, float2(1.5, 17));
+            float capSd = BoxSd(p, c.pos, c.size);
+            if (capSd < 0)
+            {
+                sd = capSd;
+            }
+            else if (trackSd < 0)
+            {
+                sd = trackSd;
+                ctrlCol = float3(0.30, 0.30, 0.32);
+            }
+            else
+            {
+                sd = min(capSd, trackSd);
+            }
+        }
+        else // button
+        {
+            sd = BoxSd(p, c.pos, c.size);
+        }
+
+        if (c.state == 2)
+            ctrlCol = lerp(col, ctrlCol, 0.35); // ghost
+        if (c.state == 1)
+            ctrlCol = saturate(ctrlCol * 1.35 + 0.08);
+
+        float coverage = saturate(0.5 - sd); // ~1px AA edge
+        col = lerp(col, ctrlCol, coverage);
+
+        // highlight: bold ring at the control's edge + contracting bulls-eye pulse
+        if (c.state == 1 && sd > 0)
+        {
+            // solid marker ring hugging the control
+            float edgeRing = saturate(1.0 - abs(sd - 1.5) / 1.5);
+            col = lerp(col, Accent.rgb, edgeRing);
+
+            // rings marching inward: crests sit where sd/spacing + t*speed hits integers,
+            // so increasing time pulls each crest toward the control
+            const float maxGlow = 20.0;
+            const float spacing = 7.0;
+            const float speed = 1.4;
+            float envelope = saturate(1.0 - sd / maxGlow);
+            float rings = pow(0.5 + 0.5 * cos(TAU * (sd / spacing + timeSeconds * speed)), 3.0);
+            col = lerp(col, Accent.rgb, envelope * envelope * rings * 0.9);
+        }
+    }
+
+    OutputTex[id.xy] = float4(col, 1);
+}

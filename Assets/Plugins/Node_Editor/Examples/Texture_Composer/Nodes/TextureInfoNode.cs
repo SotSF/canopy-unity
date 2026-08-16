@@ -9,7 +9,7 @@ namespace NodeEditorFramework.TextureComposer
 		public override string GetID { get { return ID; } }
 
 		public override string Title { get { return "Texture Info"; } }
-		public override Vector2 MinSize { get { return new Vector2(150, 50); } }
+		public override Vector2 MinSize { get { return new Vector2(256, 256); } }
 		public override bool AutoLayout { get { return true; } }
 
 		[ValueConnectionKnob("Texture", Direction.In, typeof(Texture), NodeSide.Top, 20)]

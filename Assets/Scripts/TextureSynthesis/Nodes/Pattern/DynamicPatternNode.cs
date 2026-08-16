@@ -40,6 +40,60 @@ abstract public class DynamicPatternNode : TickingNode
         SetSize();
     }
 
+    /// <summary>
+    /// Heals serialized dynamic ports against the freshly-built inputPortNames/inputPortTypes:
+    /// ports whose name+type still exist are KEPT (connections preserved) even if the source's
+    /// property order changed; orphans are deleted; missing ports are created. Afterwards
+    /// dynamicConnectionPorts is ordered exactly like inputPortNames, so the index-parallel
+    /// GUI/calc code stays valid. Call after repopulating the name/type buffers on bind/load —
+    /// without this, adding/removing exposed properties on a bound source desyncs the lists
+    /// and index accesses kill the whole canvas.
+    /// </summary>
+    protected void ReconcileDynamicPorts()
+    {
+        // Collect keepers by name (first match wins), delete everything else
+        var keepers = new Dictionary<string, ValueConnectionKnob>();
+        for (int i = dynamicConnectionPorts.Count - 1; i >= 0; i--)
+        {
+            var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
+            bool wanted = false;
+            for (int j = 0; j < inputPortNames.Count; j++)
+            {
+                if (inputPortNames[j] == port.name && inputPortTypes[j] == port.valueType)
+                {
+                    wanted = true;
+                    break;
+                }
+            }
+            if (wanted && !keepers.ContainsKey(port.name))
+            {
+                keepers[port.name] = port;
+                dynamicConnectionPorts.RemoveAt(i); // re-added below in canonical order
+            }
+            else
+            {
+                port.ClearConnections();
+                DeleteConnectionPort(port);
+            }
+        }
+        // Rebuild in inputPortNames order: keepers slot back in, missing ports get created
+        // (CreateValueConnectionKnob appends, so creation order = list order)
+        for (int j = 0; j < inputPortNames.Count; j++)
+        {
+            if (keepers.TryGetValue(inputPortNames[j], out var keep))
+            {
+                dynamicConnectionPorts.Add(keep);
+            }
+            else
+            {
+                var portSide = (typeof(Texture)).IsAssignableFrom(inputPortTypes[j]) ? NodeSide.Top : NodeSide.Left;
+                CreateValueConnectionKnob(new ValueConnectionKnobAttribute(inputPortNames[j], Direction.In, inputPortTypes[j], portSide));
+            }
+        }
+        ConnectionPortManager.UpdateRepresentativePortLists(this);
+        SetSize();
+    }
+
     int signalPorts => dynamicConnectionPorts.Where(p => ((ValueConnectionKnob)p).side == NodeSide.Left).Count();
     int texPorts => dynamicConnectionPorts.Where(p => ((ValueConnectionKnob)p).side == NodeSide.Top).Count();
     protected virtual void SetSize()
@@ -116,7 +170,10 @@ abstract public class DynamicPatternNode : TickingNode
             if (port.side == NodeSide.Top)
             {
                 GUILayout.BeginVertical();
-                var portName = inputPortNames[i];
+                // port.name, never inputPortNames[i]: serialized ports can outnumber the
+                // rebuilt name buffers when a bound source gained/lost exposed properties,
+                // and an index crash here kills the entire canvas (RTNodeEditor discards it)
+                var portName = port.name;
                 if (portName.StartsWith("_LW_"))
                 {
                     portName = portName.Substring("_LW_".Length);
@@ -141,7 +198,7 @@ abstract public class DynamicPatternNode : TickingNode
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(2);
-                var portName = inputPortNames[i];
+                var portName = port.name; // see tex-port loop: index-independent on purpose
                 if (portName.StartsWith("_LW_"))
                 {
                     portName = portName.Substring("_LW_".Length);
