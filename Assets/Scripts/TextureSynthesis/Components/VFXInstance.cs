@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -12,14 +11,6 @@ public class VFXInstance : CameraEffectInstance
 {
     [Tooltip("Visual effect driven by this instance. Auto-discovered in children if left unset.")]
     public VisualEffect effect;
-
-    public struct CanvasPort
-    {
-        public string name;
-        public Type type;
-    }
-
-    [NonSerialized] private Dictionary<string, CanvasPortBinder> binderPorts;
 
     protected override void OnInitialized()
     {
@@ -46,44 +37,12 @@ public class VFXInstance : CameraEffectInstance
         return props;
     }
 
-    /// <summary>
-    /// All canvas-facing ports: the VFX's exposed properties plus every CanvasPortBinder's
-    /// declared ports (prefixed). Also rebuilds the binder routing table used by
-    /// TrySetBinderPort, so call this when binding a node to the instance.
-    /// </summary>
-    public void GetCanvasPorts(List<CanvasPort> ports)
+    /// <summary>The VFX's exposed properties, surfaced as canvas ports.</summary>
+    protected override void CollectInstancePorts(List<CanvasPort> ports)
     {
-        ports.Clear();
-        if (binderPorts == null) binderPorts = new Dictionary<string, CanvasPortBinder>();
-        binderPorts.Clear();
-
         foreach (var prop in GetExposedProperties())
         {
             ports.Add(new CanvasPort { name = prop.name, type = prop.type });
         }
-
-        var defs = new List<CanvasPortBinder.PortDef>();
-        foreach (var binder in GetComponentsInChildren<CanvasPortBinder>(true))
-        {
-            defs.Clear();
-            binder.GetPorts(defs);
-            foreach (var def in defs)
-            {
-                string fullName = binder.EffectivePrefix + def.name;
-                binderPorts[fullName] = binder;
-                ports.Add(new CanvasPort { name = fullName, type = def.type });
-            }
-        }
-    }
-
-    /// <summary>Routes a canvas value to the binder owning the port. False if no binder claims it.</summary>
-    public bool TrySetBinderPort(string portName, object value)
-    {
-        if (binderPorts == null || !binderPorts.TryGetValue(portName, out var binder) || binder == null)
-        {
-            return false;
-        }
-        binder.SetPortValue(portName.Substring(binder.EffectivePrefix.Length), value);
-        return true;
     }
 }

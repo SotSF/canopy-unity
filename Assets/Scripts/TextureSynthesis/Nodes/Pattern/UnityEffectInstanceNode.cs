@@ -5,23 +5,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Registry-backed successor to VFXGraphNode: binds a VFX prefab from VFXRegistry
-/// instead of a hand-configured scene object. Each node gets its own instance with
-/// its own render texture, so multiple nodes can run the same base VFX with
-/// independent parameters.
+/// GameObject counterpart to VFXInstanceNode: binds a UnityEffectInstance prefab from
+/// VFXRegistry and exposes its renderers' material properties and CanvasPortBinder
+/// ports as input ports. Each node gets its own instance with its own render texture,
+/// so multiple nodes can run the same rig with independent parameters.
 /// </summary>
-[Node(false, "Pattern/VFXInstance")]
-public class VFXInstanceNode : DynamicPatternNode
+[Node(false, "Pattern/UnityEffectInstance")]
+public class UnityEffectInstanceNode : DynamicPatternNode
 {
-    public override string GetID => "VFXInstance";
-    public override string Title { get { return "VFXInstance"; } }
+    public override string GetID => "UnityEffectInstance";
+    public override string Title { get { return "UnityEffectInstance"; } }
 
     public string effectName = "";
-    public bool vfxBound = false;
+    public bool effectBound = false;
 
-    private VFXInstance instance;
+    private UnityEffectInstance instance;
     private Dictionary<string, Texture> lastTexInputs;
-    private int selectedVfxIdx = 0;
+    private int selectedEffectIdx = 0;
 
     public void InitBuffers()
     {
@@ -33,7 +33,7 @@ public class VFXInstanceNode : DynamicPatternNode
     public override void DoInit()
     {
         InitBuffers();
-        if (!vfxBound)
+        if (!effectBound)
         {
             CleanExistingConnections();
             return;
@@ -53,28 +53,28 @@ public class VFXInstanceNode : DynamicPatternNode
 
     protected override void TopGUI()
     {
-        if (vfxBound) return;
+        if (effectBound) return;
         if (!Application.isPlaying)
         {
-            GUILayout.Label("Enter play mode to bind a VFX");
+            GUILayout.Label("Enter play mode to bind an effect");
             return;
         }
-        var names = VFXRegistry.Instance.GetEffectNames<VFXInstance>();
+        var names = VFXRegistry.Instance.GetEffectNames<UnityEffectInstance>();
         if (names.Length == 0)
         {
-            GUILayout.Label("No effect prefabs registered");
+            GUILayout.Label("No UnityEffect prefabs registered");
             return;
         }
         GUILayout.BeginVertical();
-        GUILayout.Label("VFX:");
-        selectedVfxIdx = Mathf.Clamp(selectedVfxIdx, 0, names.Length - 1);
-        selectedVfxIdx = GUILayout.SelectionGrid(selectedVfxIdx, names, 1, LeftAlignedButton);
+        GUILayout.Label("Effect:");
+        selectedEffectIdx = Mathf.Clamp(selectedEffectIdx, 0, names.Length - 1);
+        selectedEffectIdx = GUILayout.SelectionGrid(selectedEffectIdx, names, 1, LeftAlignedButton);
         GUILayout.Space(8);
-        if (GUILayout.Button("Load VFX"))
+        if (GUILayout.Button("Load Effect"))
         {
-            effectName = names[selectedVfxIdx];
+            effectName = names[selectedEffectIdx];
             CleanExistingConnections();
-            vfxBound = true;
+            effectBound = true;
             DoInit();
         }
         GUILayout.Space(4);
@@ -83,10 +83,10 @@ public class VFXInstanceNode : DynamicPatternNode
 
     protected override void SetSize()
     {
-        if (!vfxBound && Application.isPlaying)
+        if (!effectBound && Application.isPlaying)
         {
-            // Unbound: label + one row per VFX choice + load button + output image box
-            int optionCount = VFXRegistry.Instance.GetEffectNames<VFXInstance>().Length;
+            // Unbound: label + one row per effect choice + load button + output image box
+            int optionCount = VFXRegistry.Instance.GetEffectNames<UnityEffectInstance>().Length;
             _DefaultSize = new Vector2(220, 230 + optionCount * 30);
         }
         else
@@ -97,16 +97,16 @@ public class VFXInstanceNode : DynamicPatternNode
 
     private void EnableFx()
     {
-        instance = VFXRegistry.Instance.CreateInstance(this, effectName) as VFXInstance;
-        if (instance == null || instance.effect == null)
+        instance = VFXRegistry.Instance.CreateInstance(this, effectName) as UnityEffectInstance;
+        if (instance == null)
         {
-            Debug.LogError($"VFXInstanceNode: failed to bind '{effectName}', unbinding.");
+            Debug.LogError($"UnityEffectInstanceNode: failed to bind '{effectName}', unbinding.");
             DisableFx();
             return;
         }
         outputTex = instance.OutputTexture;
-        var ports = new List<VFXInstance.CanvasPort>();
-        instance.GetCanvasPorts(ports); // VFX exposed properties + CanvasPortBinder ports
+        var ports = new List<UnityEffectInstance.CanvasPort>();
+        instance.GetCanvasPorts(ports); // renderer material properties + CanvasPortBinder ports
         foreach (var p in ports)
         {
             inputPortNames.Add(p.name);
@@ -117,13 +117,13 @@ public class VFXInstanceNode : DynamicPatternNode
             }
         }
         // Heal serialized ports against the current property set: same-name ports keep their
-        // connections even if the VFX gained/lost/reordered exposed properties since the save
+        // connections even if the rig gained/lost/reordered exposed properties since the save
         ReconcileDynamicPorts();
     }
 
     private void DisableFx()
     {
-        vfxBound = false;
+        effectBound = false;
         effectName = "";
         VFXRegistry.Instance?.ReleaseInstance(this);
         instance = null;
@@ -134,8 +134,8 @@ public class VFXInstanceNode : DynamicPatternNode
 
     protected override void BottomGUI()
     {
-        if (!vfxBound) return;
-        if (GUILayout.Button("Unbind VFX"))
+        if (!effectBound) return;
+        if (GUILayout.Button("Unbind Effect"))
         {
             DisableFx();
         }
@@ -143,7 +143,7 @@ public class VFXInstanceNode : DynamicPatternNode
 
     protected override void OnDelete()
     {
-        if (vfxBound && Application.isPlaying)
+        if (effectBound && Application.isPlaying)
         {
             VFXRegistry.Instance?.ReleaseInstance(this);
         }
@@ -151,9 +151,9 @@ public class VFXInstanceNode : DynamicPatternNode
 
     public override float GetPortPropValue(string portName)
     {
-        if (instance != null && instance.effect != null && instance.effect.HasFloat(portName))
+        if (instance != null && instance.TryGetMaterialFloat(portName, out float val))
         {
-            return instance.effect.GetFloat(portName);
+            return val;
         }
         // DynamicPatternNode.NodeGUI catches this and falls back to the port's own value
         throw new NotImplementedException();
@@ -161,48 +161,52 @@ public class VFXInstanceNode : DynamicPatternNode
 
     public override bool DoCalc()
     {
-        if (!vfxBound || instance == null || instance.effect == null)
+        if (!effectBound || instance == null)
         {
             textureOutputKnob.SetValue<Texture>(outputTex);
             return true;
         }
-        var effect = instance.effect;
         for (int i = 0; i < dynamicConnectionPorts.Count; i++)
         {
             var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
             if (port.connections.Count == 0) continue;
             var portType = port.valueType;
             var propName = port.name; // index-independent: survives port/property drift
-            // Binder ports (transforms etc.) take priority over same-named VFX properties
+            // Binder ports (transforms etc.) take priority over same-named material properties
             if (portType == typeof(float))
             {
                 float val = port.GetValue<float>();
-                if (!instance.TrySetBinderPort(propName, val)) effect.SetFloat(propName, val);
+                if (!instance.TrySetBinderPort(propName, val)) instance.TrySetMaterialPort(propName, val);
             }
             else if (portType == typeof(int))
             {
                 int val = port.GetValue<int>();
-                if (!instance.TrySetBinderPort(propName, val)) effect.SetInt(propName, val);
+                if (!instance.TrySetBinderPort(propName, val)) instance.TrySetMaterialPort(propName, val);
             }
             else if (portType == typeof(bool))
             {
-                bool val = port.GetValue<bool>();
-                if (!instance.TrySetBinderPort(propName, val)) effect.SetBool(propName, val);
+                // Materials have no bool properties; bool ports only come from binders
+                instance.TrySetBinderPort(propName, port.GetValue<bool>());
+            }
+            else if (portType == typeof(Color))
+            {
+                Color val = port.GetValue<Color>();
+                if (!instance.TrySetBinderPort(propName, val)) instance.TrySetMaterialPort(propName, val);
             }
             else if (portType == typeof(Vector2))
             {
                 Vector2 val = port.GetValue<Vector2>();
-                if (!instance.TrySetBinderPort(propName, val)) effect.SetVector2(propName, val);
+                if (!instance.TrySetBinderPort(propName, val)) instance.TrySetMaterialPort(propName, val);
             }
             else if (portType == typeof(Vector3))
             {
                 Vector3 val = port.GetValue<Vector3>();
-                if (!instance.TrySetBinderPort(propName, val)) effect.SetVector3(propName, val);
+                if (!instance.TrySetBinderPort(propName, val)) instance.TrySetMaterialPort(propName, val);
             }
             else if (portType == typeof(Vector4))
             {
                 Vector4 val = port.GetValue<Vector4>();
-                if (!instance.TrySetBinderPort(propName, val)) effect.SetVector4(propName, val);
+                if (!instance.TrySetBinderPort(propName, val)) instance.TrySetMaterialPort(propName, val);
             }
             else if (typeof(Texture).IsAssignableFrom(portType))
             {
@@ -210,13 +214,13 @@ public class VFXInstanceNode : DynamicPatternNode
                 lastTexInputs.TryGetValue(propName, out var last);
                 if (val != null && val != last)
                 {
-                    effect.SetTexture(propName, val);
+                    if (!instance.TrySetBinderPort(propName, val)) instance.TrySetMaterialPort(propName, val);
                     lastTexInputs[propName] = val;
                 }
             }
             else
             {
-                Debug.LogWarning($"Unsupported type {portType} for VFX input {propName}.");
+                Debug.LogWarning($"Unsupported type {portType} for UnityEffect input {propName}.");
             }
         }
         textureOutputKnob.SetValue(outputTex);

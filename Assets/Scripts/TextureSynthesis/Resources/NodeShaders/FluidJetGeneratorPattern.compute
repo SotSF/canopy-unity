@@ -1,0 +1,154 @@
+#include "HSV.compute"
+
+#pragma kernel PatternKernel
+#pragma kernel DyeKernel
+
+// Generates a velocity field texture for the Euler fluid sim, composed of up to
+// MAX_JETS directional "jets" of fluid force. Encoding matches the sim's
+// applyForce decode (see EulerFluidSimPattern.compute):
+//   hue        = force angle, normalized [0,1] over [0, 2pi]
+//   saturation = 1
+//   value      = force magnitude [0,1]
+// Overlapping jets sum their velocity *vectors* in cartesian space; the sum is
+// converted to HSV once at the end, so collisions blend physically rather than
+// blending hues.
+
+#define MAX_JETS 128
+
+static const float TWO_PI = 6.28318530718f;
+
+RWTexture2D<float4> OutputTex;
+
+uint width;
+uint height;
+
+uint jetCount;
+
+// Per-jet parameters, packed two float4s per jet. All spatial quantities are
+// resolution-independent: positions are normalized UV over the output texture,
+// sizes are fractions of min(width, height).
+//   jetPosDir[i] - xy: nozzle position (normalized UV, [0,1])
+//                   z: direction angle (radians, 0 = +x, CCW)
+//                   w: intensity (force magnitude at the nozzle, in HSV value units)
+//   jetShape[i]  -  x: nozzle half-width (fraction of min dimension)
+//                   y: reach, distance the jet penetrates (fraction of min dimension)
+//                   z: spread, cone half-angle (radians)
+//                   w: reserved
+//   jetColor[i]  - rgb: dye color emitted at the nozzle, a: unused
+float4 jetPosDir[MAX_JETS];
+float4 jetShape[MAX_JETS];
+float4 jetColor[MAX_JETS];
+
+float2 JetVelocity(uint i, float2 p)
+{
+    float2 dims = float2(width, height);
+    float sizeScale = min(width, height);
+
+    float2 pos = jetPosDir[i].xy * dims;
+    float angle = jetPosDir[i].z;
+    float intensity = jetPosDir[i].w;
+    float halfWidth = max(jetShape[i].x * sizeScale, 1e-3);
+    float reach = max(jetShape[i].y * sizeScale, 1e-3);
+    // Clamp spread short of pi/2 so tan() stays sane
+    float spread = clamp(jetShape[i].z, 0, 1.4);
+
+    float2 dir = float2(cos(angle), sin(angle));
+    float2 perp = float2(-dir.y, dir.x);
+
+    // Decompose into jet-local coordinates
+    float2 rel = p - pos;
+    float along = dot(rel, dir);
+    float lateral = dot(rel, perp);
+
+    // Cone: effective width grows with distance downstream
+    float coneWidth = halfWidth + tan(spread) * max(along, 0);
+
+    // Axial envelope: soft rounded cap behind the nozzle, decays to zero at full reach
+    float axial = smoothstep(-halfWidth, 0, along) * (1 - smoothstep(0, reach, along));
+
+    // Lateral envelope: gaussian profile across the cone
+    float t = lateral / coneWidth;
+    float envelope = axial * exp(-t * t);
+
+    // Flow diverges toward the cone edges when spread > 0
+    float deflection = spread * clamp(t, -1, 1);
+    float2 flowDir = float2(cos(angle + deflection), sin(angle + deflection));
+
+    return flowDir * (intensity * envelope);
+}
+
+[numthreads(16, 16, 1)]
+void PatternKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 p = id.xy + 0.5;
+    float2 velocity = float2(0, 0);
+    for (uint i = 0; i < jetCount; i++)
+    {
+        velocity += JetVelocity(i, p);
+    }
+
+    float magnitude = length(velocity);
+    if (magnitude < 1e-5)
+    {
+        // Black = zero force under the sim's HSV decode
+        OutputTex[id.xy] = float4(0, 0, 0, 1);
+        return;
+    }
+
+    float hue = frac(atan2(velocity.y, velocity.x) / TWO_PI + 1);
+    float3 color = HSVtoRGB(float3(hue, 1, saturate(magnitude)));
+    OutputTex[id.xy] = float4(color, 1);
+}
+
+// Companion dye pass: emits a soft spot of each jet's color at its nozzle so
+// the velocity and dye textures can be piped into the fluid sim together for
+// continuous colored jets. Matches the sim's applyDye compositing: black =
+// no dye, spots sum additively. Emission scales with jet intensity, and the
+// spot radius is slightly plumper than the nozzle so the jet fully entrains it.
+// When useDyeTexture is set, DyeSourceTex is sampled at the pixel's own UV
+// and multiplied with the (density-weighted) jet colors - so white jets stamp
+// the source texture's local content through their spots, and colored jets
+// tint it.
+
+RWTexture2D<float4> DyeTex;
+Texture2D<float4> DyeSourceTex;
+SamplerState SmpLinearClamp;
+uint useDyeTexture;
+
+[numthreads(16, 16, 1)]
+void DyeKernel(uint3 id : SV_DispatchThreadID)
+{
+    float2 dims = float2(width, height);
+    float sizeScale = min(width, height);
+    float2 p = id.xy + 0.5;
+
+    float density = 0;
+    float3 colorSum = float3(0, 0, 0);
+    for (uint i = 0; i < jetCount; i++)
+    {
+        float2 pos = jetPosDir[i].xy * dims;
+        float intensity = jetPosDir[i].w;
+        float radius = max(jetShape[i].x * sizeScale, 1e-3) * 1.5;
+
+        float2 rel = p - pos;
+        float w = intensity * exp(-dot(rel, rel) / (radius * radius));
+        density += w;
+        colorSum += w * jetColor[i].rgb;
+    }
+
+    if (density < 1e-4)
+    {
+        DyeTex[id.xy] = float4(0, 0, 0, 0);
+        return;
+    }
+
+    // Density-weighted average of the contributing jets' colors
+    float3 color = colorSum / density;
+    if (useDyeTexture)
+    {
+        float2 uv = p / dims;
+        color *= DyeSourceTex.SampleLevel(SmpLinearClamp, uv, 0).rgb;
+    }
+    density = saturate(density);
+    DyeTex[id.xy] = float4(color * density, density);
+}

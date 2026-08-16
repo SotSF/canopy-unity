@@ -84,6 +84,16 @@ public class VFXRegistry : Singleton<VFXRegistry>
     }
 
     /// <summary>
+    /// Names of registered prefabs whose root component is (or derives from) T, so each
+    /// instance-node type lists only the prefabs it can actually bind.
+    /// </summary>
+    public string[] GetEffectNames<T>() where T : CameraEffectInstance
+    {
+        if (prefabsByName == null) RefreshPrefabs();
+        return prefabsByName.Where(kv => kv.Value is T).Select(kv => kv.Key).OrderBy(n => n).ToArray();
+    }
+
+    /// <summary>
     /// Instantiates the named effect prefab in the next free grid cell and initializes it.
     /// If an owner node is given, the instance is tracked so it can be released when the
     /// node is deleted or its canvas is unloaded; a node re-binding replaces its old instance.
