@@ -41,7 +41,15 @@ public class MinisControlNode : SignalNode
     public int controlID;
 
     public int channel;
+    // Captured at bind time so the physical-device layout resolves exactly, even with
+    // multiple MIDI devices connected or after a canvas reload. Empty on legacy saves.
+    public string deviceProduct = "";
     private string nodeInstanceId;
+
+    [System.NonSerialized] private RenderTexture layoutTex;
+    [System.NonSerialized] private bool labelHovered = false;
+    [System.NonSerialized] private Rect labelRect;
+    [System.NonSerialized] private int lastLayoutRenderFrame = -1;
 
     private void SetSize()
     {
@@ -66,6 +74,11 @@ public class MinisControlNode : SignalNode
         if (MidiDeviceManager.Instance != null)
         {
             MidiDeviceManager.Instance.UnregisterNode(nodeInstanceId);
+        }
+        if (layoutTex != null)
+        {
+            layoutTex.Release();
+            layoutTex = null;
         }
         base.OnDestroy();
     }
@@ -102,6 +115,7 @@ public class MinisControlNode : SignalNode
     {
         channel = deviceChannel;
         controlID = deviceControlID;
+        deviceProduct = device != null ? (device.description.product ?? "") : "";
         binding = false;
         bound = true;
 
@@ -134,12 +148,28 @@ public class MinisControlNode : SignalNode
             if (bound)
             {
                 string label = string.Format("{0} ctrl {1}: {2:0.00}", channel.ToString(), controlID, rawMIDIValue);
-                GUILayout.Label(label);
+                // Fixed width so the hover region doesn't jitter as the value's digits change
+                GUILayout.Label(label, GUILayout.Width(150));
+                // Hovering the binding label pops up the device picture. The rect is only
+                // valid during Repaint, but hover state drives GUI STRUCTURE (the popup box),
+                // so it must only change during Layout — flipping it mid-Repaint draws
+                // elements the Layout pass never allocated, which desyncs the GUILayout
+                // cursor and makes later GUI (menu bar, other nodes) flicker black.
+                if (Event.current.type == EventType.Repaint)
+                {
+                    labelRect = GUILayoutUtility.GetLastRect();
+                }
+                else if (Event.current.type == EventType.Layout)
+                {
+                    labelHovered = labelRect.Contains(Event.current.mousePosition);
+                }
                 if (GUILayout.Button("Unbind"))
                 {
                     MidiDeviceManager.Instance.UnregisterControlHandler(nodeInstanceId, channel, controlID);
                     controlID = 0;
                     bound = false;
+                    deviceProduct = "";
+                    labelHovered = false;
                 }
             }
             else
@@ -165,14 +195,70 @@ public class MinisControlNode : SignalNode
         GUILayout.EndHorizontal();
 
         DrawSparkline();
+        DrawDeviceView();
         GUILayout.EndVertical();
 
         if (GUI.changed)
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
-    
+
+    static GUIStyle _hintStyle;
+    static GUIStyle HintStyle
+    {
+        get
+        {
+            if (_hintStyle == null)
+            {
+                _hintStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 9,
+                    normal = { textColor = new Color(1f, 1f, 1f, 0.45f) },
+                };
+            }
+            return _hintStyle;
+        }
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetHintStyle()
+    {
+        _hintStyle = null;
+    }
+
+    // Pops up the device picture (bound control bulls-eyed) while the binding label is
+    // hovered. Only shown when the bound device has a known layout (currently the MIDIMix).
+    private void DrawDeviceView()
+    {
+        if (!bound || !Application.isPlaying || MidiDeviceManager.Instance == null) return;
+        var layout = MidiDeviceManager.Instance.GetLayoutFor(deviceProduct, channel);
+        if (layout == null || !layout.ContainsCcId(controlID)) return;
+        // Always-present hint keeps the feature discoverable; its structure never changes
+        // with hover, so it can't desync the GUILayout passes
+        GUILayout.Label("Hover binding label for physical location", HintStyle);
+        if (labelHovered && layoutTex != null)
+        {
+            GUILayout.Box(layoutTex, GUILayout.Width(MidiLayoutRenderer.TexWidth), GUILayout.Height(MidiLayoutRenderer.TexHeight));
+        }
+    }
+
     public override bool DoCalc()
     {
+        // The bulls-eye pulse animates, so re-render each frame while the popup is visible —
+        // but ONLY on the first DoCalc of the frame. Calculate can be re-invoked mid-OnGUI
+        // (OnNodeChange recalcs), and dispatching into the texture while the GUI is drawing
+        // it makes the popup image flicker; the frame guard keeps all GPU work in Update.
+        if (bound && labelHovered && Application.isPlaying && Time.frameCount != lastLayoutRenderFrame)
+        {
+            var layout = MidiDeviceManager.Instance != null
+                ? MidiDeviceManager.Instance.GetLayoutFor(deviceProduct, channel)
+                : null;
+            if (layout != null && layout.ContainsCcId(controlID))
+            {
+                if (layoutTex == null) layoutTex = MidiLayoutRenderer.CreateTexture();
+                MidiLayoutRenderer.Render(layout, controlID, layoutTex, Time.time);
+                lastLayoutRenderFrame = Time.frameCount;
+            }
+        }
         if (rescale && dynamicConnectionPorts.Count >= 2)
         {
             if (((ValueConnectionKnob)dynamicConnectionPorts[0]).connected())

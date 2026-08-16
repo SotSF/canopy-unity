@@ -105,15 +105,20 @@ public class VFXInstanceNode : DynamicPatternNode
             return;
         }
         outputTex = instance.OutputTexture;
-        foreach (var prop in instance.GetExposedProperties())
+        var ports = new List<VFXInstance.CanvasPort>();
+        instance.GetCanvasPorts(ports); // VFX exposed properties + CanvasPortBinder ports
+        foreach (var p in ports)
         {
-            inputPortNames.Add(prop.name);
-            inputPortTypes.Add(prop.type);
-            if (typeof(Texture).IsAssignableFrom(prop.type))
+            inputPortNames.Add(p.name);
+            inputPortTypes.Add(p.type);
+            if (typeof(Texture).IsAssignableFrom(p.type))
             {
-                lastTexInputs[prop.name] = null;
+                lastTexInputs[p.name] = null;
             }
         }
+        // Heal serialized ports against the current property set: same-name ports keep their
+        // connections even if the VFX gained/lost/reordered exposed properties since the save
+        ReconcileDynamicPorts();
     }
 
     private void DisableFx()
@@ -167,18 +172,37 @@ public class VFXInstanceNode : DynamicPatternNode
             var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
             if (port.connections.Count == 0) continue;
             var portType = port.valueType;
-            var propName = inputPortNames[i];
+            var propName = port.name; // index-independent: survives port/property drift
+            // Binder ports (transforms etc.) take priority over same-named VFX properties
             if (portType == typeof(float))
             {
-                effect.SetFloat(propName, port.GetValue<float>());
+                float val = port.GetValue<float>();
+                if (!instance.TrySetBinderPort(propName, val)) effect.SetFloat(propName, val);
             }
             else if (portType == typeof(int))
             {
-                effect.SetInt(propName, port.GetValue<int>());
+                int val = port.GetValue<int>();
+                if (!instance.TrySetBinderPort(propName, val)) effect.SetInt(propName, val);
             }
             else if (portType == typeof(bool))
             {
-                effect.SetBool(propName, port.GetValue<bool>());
+                bool val = port.GetValue<bool>();
+                if (!instance.TrySetBinderPort(propName, val)) effect.SetBool(propName, val);
+            }
+            else if (portType == typeof(Vector2))
+            {
+                Vector2 val = port.GetValue<Vector2>();
+                if (!instance.TrySetBinderPort(propName, val)) effect.SetVector2(propName, val);
+            }
+            else if (portType == typeof(Vector3))
+            {
+                Vector3 val = port.GetValue<Vector3>();
+                if (!instance.TrySetBinderPort(propName, val)) effect.SetVector3(propName, val);
+            }
+            else if (portType == typeof(Vector4))
+            {
+                Vector4 val = port.GetValue<Vector4>();
+                if (!instance.TrySetBinderPort(propName, val)) effect.SetVector4(propName, val);
             }
             else if (typeof(Texture).IsAssignableFrom(portType))
             {

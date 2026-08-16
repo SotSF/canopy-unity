@@ -114,6 +114,9 @@ public class ShaderGraphInstanceNode : DynamicPatternNode
                 lastTexInputs[propName] = null;
             }
         }
+        // Heal serialized ports against the current property set: same-name ports keep their
+        // connections even if the graph gained/lost/reordered exposed properties since the save
+        ReconcileDynamicPorts();
     }
 
     private void DisableFx()
@@ -171,7 +174,7 @@ public class ShaderGraphInstanceNode : DynamicPatternNode
             var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
             if (port.connections.Count == 0) continue;
             var portType = port.valueType;
-            var propName = inputPortNames[i];
+            var propName = port.name; // index-independent: survives port/property drift
             if (portType == typeof(float))
             {
                 mat.SetFloat(propName, port.GetValue<float>());

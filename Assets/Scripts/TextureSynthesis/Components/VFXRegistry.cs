@@ -27,6 +27,9 @@ public class VFXRegistry : Singleton<VFXRegistry>
     [Tooltip("On canvas load, release instances whose owning node is not part of the new canvas.")]
     public bool releaseOrphansOnCanvasLoad = true;
 
+    [Tooltip("Rig cloned by the editor 'Create New VFX Rig' button (e.g. the GoldenSpiralCam rig).")]
+    public CameraEffectInstance rigTemplate;
+
     private Dictionary<string, CameraEffectInstance> prefabsByName;
     private readonly Dictionary<Node, CameraEffectInstance> instancesByOwner = new Dictionary<Node, CameraEffectInstance>();
     private readonly Dictionary<CameraEffectInstance, int> slotsByInstance = new Dictionary<CameraEffectInstance, int>();
@@ -36,6 +39,9 @@ public class VFXRegistry : Singleton<VFXRegistry>
     protected override void OnAwake()
     {
         RefreshPrefabs();
+        // Scene-authored rigs parented under the registry occupy the leading grid slots
+        // (the editor layout tools use child order); runtime instances start after them.
+        nextSlot = transform.childCount;
         NodeEditorCallbacks.OnLoadCanvas += HandleCanvasLoaded;
     }
 
@@ -96,10 +102,10 @@ public class VFXRegistry : Singleton<VFXRegistry>
             ReleaseInstance(owner);
         }
         int slot = freeSlots.Count > 0 ? freeSlots.Pop() : nextSlot++;
-        var cell = SlotCoordinates(slot);
-        var position = gridOrigin + new Vector3(cell.x, cell.y, 0) * cellSize;
-        var instance = Instantiate(prefab, position, Quaternion.identity, transform);
+        var instance = Instantiate(prefab, GetSlotWorldPosition(slot), Quaternion.identity, transform);
         instance.name = $"{effectName} [slot {slot}]";
+        // Scene rigs (and prefabs made from them) may be authored disabled; instances always run
+        instance.gameObject.SetActive(true);
         instance.Initialize(textureSize);
         slotsByInstance[instance] = slot;
         if (owner != null)
@@ -145,10 +151,16 @@ public class VFXRegistry : Singleton<VFXRegistry>
     // Maps a slot index to 2D grid coordinates in expanding square shells
     // ((0,0), (1,0), (1,1), (0,1), (2,0), ...) so the occupied area grows
     // uniformly in X and Y rather than marching off along one axis.
-    private static Vector2Int SlotCoordinates(int index)
+    public static Vector2Int SlotCoordinates(int index)
     {
         int shell = Mathf.FloorToInt(Mathf.Sqrt(index));
         int rem = index - shell * shell;
         return rem <= shell ? new Vector2Int(shell, rem) : new Vector2Int(2 * shell - rem, shell);
+    }
+
+    public Vector3 GetSlotWorldPosition(int slot)
+    {
+        var cell = SlotCoordinates(Mathf.Max(slot, 0));
+        return gridOrigin + new Vector3(cell.x, cell.y, 0f) * cellSize;
     }
 }

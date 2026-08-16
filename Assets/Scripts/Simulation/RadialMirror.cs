@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.VFX;
 
 /// <summary>
 /// Spawns radially symmetric copies of <see cref="rootObject"/> around this
@@ -24,9 +25,19 @@ public class RadialMirror : MonoBehaviour
     [Tooltip("Axis, in this object's local space, that copies are rotated around.")]
     public Vector3 axis = Vector3.forward;
 
+    [Tooltip("Mirror the root's VisualEffect exposed-property values onto each copy's effect " +
+             "every frame, so canvas-driven parameter changes reach all symmetric copies.")]
+    public bool syncVfxProperties = true;
+
     // Not serialized: rebuilt from the managed children in OnEnable so nothing
     // is persisted into the saved scene.
     private readonly List<GameObject> mirroredCopies = new List<GameObject>();
+
+    // VFX property sync caches, rebuilt when the copy pool or the VFX asset changes
+    private VisualEffect rootEffect;
+    private readonly List<VisualEffect> copyEffects = new List<VisualEffect>();
+    private readonly List<VFXExposedProperty> exposedProps = new List<VFXExposedProperty>();
+    private VisualEffectAsset cachedAsset;
 
     void OnEnable()
     {
@@ -54,6 +65,81 @@ public class RadialMirror : MonoBehaviour
 
         ReconcileCopyCount();
         SyncCopies();
+        if (syncVfxProperties)
+            SyncVfxProperties();
+    }
+
+    /// <summary>
+    /// Copies every exposed property value from the root's VisualEffect to each copy's,
+    /// so parameter changes (e.g. from canvas node inputs) affect all symmetric copies.
+    /// </summary>
+    void SyncVfxProperties()
+    {
+        if (rootEffect == null)
+        {
+            rootEffect = rootObject.GetComponentInChildren<VisualEffect>(true);
+            if (rootEffect == null)
+                return;
+        }
+        var asset = rootEffect.visualEffectAsset;
+        if (asset == null)
+            return;
+        if (cachedAsset != asset)
+        {
+            cachedAsset = asset;
+            exposedProps.Clear();
+            asset.GetExposedProperties(exposedProps);
+        }
+        if (copyEffects.Count != mirroredCopies.Count)
+        {
+            copyEffects.Clear();
+            foreach (var copy in mirroredCopies)
+                copyEffects.Add(copy != null ? copy.GetComponentInChildren<VisualEffect>(true) : null);
+        }
+
+        foreach (var target in copyEffects)
+        {
+            if (target == null)
+                continue;
+            foreach (var prop in exposedProps)
+            {
+                var type = prop.type;
+                string name = prop.name;
+                if (type == typeof(float))
+                {
+                    if (rootEffect.HasFloat(name)) target.SetFloat(name, rootEffect.GetFloat(name));
+                }
+                else if (type == typeof(int))
+                {
+                    if (rootEffect.HasInt(name)) target.SetInt(name, rootEffect.GetInt(name));
+                }
+                else if (type == typeof(uint))
+                {
+                    if (rootEffect.HasUInt(name)) target.SetUInt(name, rootEffect.GetUInt(name));
+                }
+                else if (type == typeof(bool))
+                {
+                    if (rootEffect.HasBool(name)) target.SetBool(name, rootEffect.GetBool(name));
+                }
+                else if (type == typeof(Vector2))
+                {
+                    if (rootEffect.HasVector2(name)) target.SetVector2(name, rootEffect.GetVector2(name));
+                }
+                else if (type == typeof(Vector3))
+                {
+                    if (rootEffect.HasVector3(name)) target.SetVector3(name, rootEffect.GetVector3(name));
+                }
+                else if (type == typeof(Vector4))
+                {
+                    if (rootEffect.HasVector4(name)) target.SetVector4(name, rootEffect.GetVector4(name));
+                }
+                else if (typeof(Texture).IsAssignableFrom(type))
+                {
+                    if (rootEffect.HasTexture(name)) target.SetTexture(name, rootEffect.GetTexture(name));
+                }
+                // Gradients/curves/meshes are left alone: rarely canvas-driven, expensive to compare
+            }
+        }
     }
 
     /// <summary>Re-collects previously generated copies after a reload so we reuse them.</summary>

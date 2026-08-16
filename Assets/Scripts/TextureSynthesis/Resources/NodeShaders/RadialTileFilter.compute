@@ -1,0 +1,50 @@
+#pragma kernel RadialTile
+
+// Polar counterpart to CropScaleTile: samples the input texture around the circle.
+// Output pixel -> (radius, angle) -> input UV, with standard wrap semantics.
+
+Texture2D<float4> InputTex;
+RWTexture2D<float4> OutputTex;
+
+uint oWidth;
+uint oHeight;
+
+float angularRepeats;  // times the texture tiles around the full circle
+float radialScale;     // times the texture tiles from center to edge
+float rotation;        // angular offset in turns [0..1]
+float innerRadius;     // fraction of the radius mapped to v=0 (creates a hole)
+int wrapMode;          // 0 = Tile, 1 = Mirror, 2 = Clamp
+
+SamplerState SmpLinearRepeat;
+SamplerState SmpLinearMirror;
+SamplerState SmpLinearClamp;
+
+#define TAU 6.28318530718
+
+[numthreads(16, 16, 1)]
+void RadialTile(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= oWidth || id.y >= oHeight)
+        return;
+
+    float2 center = float2(oWidth, oHeight) * 0.5;
+    float2 d = (float2(id.xy) + 0.5) - center;
+    float maxR = min(oWidth, oHeight) * 0.5;
+
+    float r = length(d) / maxR;                    // 0 at center, 1 at the inscribed circle
+    float theta = atan2(d.y, d.x) / TAU + 0.5;     // [0..1) around the circle
+
+    float u = theta * angularRepeats + rotation;
+    float v = (r - innerRadius) / max(1.0 - innerRadius, 1e-4) * radialScale;
+    float2 uv = float2(u, v);
+
+    float4 c;
+    if (wrapMode == 0)
+        c = InputTex.SampleLevel(SmpLinearRepeat, uv, 0);
+    else if (wrapMode == 1)
+        c = InputTex.SampleLevel(SmpLinearMirror, uv, 0);
+    else
+        c = InputTex.SampleLevel(SmpLinearClamp, uv, 0);
+
+    OutputTex[id.xy] = c;
+}

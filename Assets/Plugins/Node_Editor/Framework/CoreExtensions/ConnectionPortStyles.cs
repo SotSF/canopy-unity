@@ -69,7 +69,7 @@ namespace NodeEditorFramework
 			{ // No port style with the exact name exists
 				if (typeof(ValueConnectionType).IsAssignableFrom (baseStyleClass))
 				{ // A ValueConnectionType is searched, try by type name
-					Type type = Type.GetType (styleName);
+					Type type = ResolveTypeName (styleName);
 					if (type == null) // No type matching the name found either
 					{
 						Debug.LogError ("No ValueConnectionType could be found or created with name '" + styleName + "'!");
@@ -90,6 +90,25 @@ namespace NodeEditorFramework
 			if (!portStyle.isValid())
 				Debug.LogError("Fetched style " + portStyle.Identifier + " is invalid!");
 			return portStyle;
+		}
+
+		/// <summary>
+		/// Resolves a type from its serialized name. Type.GetType only searches mscorlib and the
+		/// calling assembly for bare FullNames (e.g. 'UnityEngine.Vector3' from a deserialized
+		/// dynamic knob), so fall back to searching every loaded assembly.
+		/// </summary>
+		private static Type ResolveTypeName (string typeName)
+		{
+			Type type = Type.GetType (typeName);
+			if (type != null)
+				return type;
+			foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies ())
+			{
+				type = assembly.GetType (typeName);
+				if (type != null)
+					return type;
+			}
+			return null;
 		}
 
 		/// <summary>
