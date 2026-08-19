@@ -18,8 +18,10 @@ void PatternKernel(uint3 id : SV_DispatchThreadID)
 {
     float turbulence = noiseFactor * ((noiseTex[id.xy].x -.5)/3);
     float2 centerPoint = float2(width / 2.0f, height / 2.0f);
-    // Get angle based on position around circle
-    float2 towardCenterVector = normalize(centerPoint - id.xy);
+    // Get angle based on position around circle. The exact center pixel would
+    // normalize a zero vector (NaN); give it an arbitrary fixed direction instead.
+    float2 delta = centerPoint - id.xy;
+    float2 towardCenterVector = dot(delta, delta) > 0 ? normalize(delta) : float2(1, 0);
     // atan2 return is in [-pi, +pi], shift to [0,2pi] and normalize
     float theta = (atan2(towardCenterVector.y, towardCenterVector.x) + PI) / (2 * PI);
     float offsetAngle = (theta + normalAngleOffset + turbulence) % 1;

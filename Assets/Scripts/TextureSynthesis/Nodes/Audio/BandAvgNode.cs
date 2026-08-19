@@ -59,11 +59,15 @@ public class BandAvgNode : SignalNode
         {
             float sum = 0;
             spectrumSize = spectrum.Length;
-            for (int i = filterLowEnd; i < filterHighEnd; i++)
+            // Bounds-clamped (upstream band count can shrink below a saved range) and
+            // guarded against low == high, which used to emit 0/0 = NaN
+            int lo = Mathf.Clamp(filterLowEnd, 0, spectrum.Length);
+            int hi = Mathf.Clamp(filterHighEnd, lo, spectrum.Length);
+            for (int i = lo; i < hi; i++)
             {
                 sum += spectrum[i];
             }
-            outputSignal = sum / (filterHighEnd - filterLowEnd);
+            outputSignal = hi > lo ? sum / (hi - lo) : 0f;
         }
         outputSignalKnob.SetValue(outputSignal);
         return true;

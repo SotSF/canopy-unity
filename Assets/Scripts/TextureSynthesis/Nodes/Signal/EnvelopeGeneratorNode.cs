@@ -2,53 +2,43 @@ using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 
 using SecretFire.TextureSynth;
+using SecretFire.TextureSynth.Timeline;
 
 using System.Collections.Generic;
 
 using UnityEngine;
 
-// One-shot ADSR + hold envelope driven by rising-edge triggers. Designed to convert a one-tick
-// pulse (e.g. BeaconGame's levelUp / collect) into a shaped float curve that can drive continuous
-// parameters (FluidSim's dyeLevel, HSV brightness, Pan speed, ...).
+// Gated envelope with a freely editable curve (Timeline's curve machinery: drag keys,
+// double-click to add, right-click to delete, tangent handles on the selected key).
 //
-// Three outputs, three semantics:
-//   value: 0..1 shaped curve — for continuous float consumers (dyeLevel, brightness, ...)
-//   gate : bool level, true while value > threshold — for level-semantics bool consumers (Run, ...)
-//   onset: bool, high for exactly one tick when a trigger fires — for event-semantics bool
-//          consumers (ApplyDye, ApplyForce, Reset, ...). Wiring `gate` to these would fire
-//          them every tick and quickly saturate whatever they feed.
+// Trigger semantics: bool input. A rising edge starts the curve from t=0 (blending from the
+// current output over a few ms so retriggers don't click). If the gate is STILL HELD when
+// playback reaches the sustain marker (orange line, draggable), the envelope parks at the
+// curve's value there until the gate releases, then plays the remainder of the curve as the
+// release tail. One-tick pulses (Timeline events, onset chains) sail straight through the
+// marker — both gate-held and pulse usage work with no mode switch.
 //
-// Trigger semantics: input is a float, sampled tick-to-tick; a low→high transition across
-// TriggerHighThreshold restarts the envelope from its current value (smooth retrigger, no click).
-// Sustain is a *level*, not a duration; the "hold" parameter is how long we sit at that level
-// before releasing. This lets a one-shot trigger drive a full ADSR-shaped curve — classic ADSR
-// would need a separate gate-off signal for that, which our pulse triggers don't provide.
+// The envelope's total length is an explicit duration (KnobOrField, so it can be driven by
+// a signal). Changing duration rescales keys, sustain marker, and a running playhead
+// proportionally — the shape stretches, TimelineNode-style. Idle output is the curve's
+// final value (usually 0).
+//
+// Outputs: value (the shaped float), gate (bool, value > threshold), onset (bool, one tick
+// per trigger — wire THIS to event-semantics consumers, not `gate`).
 [Node(false, "Signal/EnvelopeGenerator")]
 public class EnvelopeGeneratorNode : SignalNode
 {
     public override string GetID => "EnvelopeGeneratorNode";
     public override string Title { get { return "EnvelopeGenerator"; } }
 
-    private Vector2 _DefaultSize = new Vector2(260, 280);
+    private Vector2 _DefaultSize = new Vector2(260, 300);
     protected override Vector2 BaseDefaultSize => _DefaultSize;
 
-    [ValueConnectionKnob("trigger", Direction.In, typeof(float), NodeSide.Left)]
+    [ValueConnectionKnob("trigger", Direction.In, typeof(bool), NodeSide.Left)]
     public ValueConnectionKnob triggerKnob;
 
-    [ValueConnectionKnob("attack", Direction.In, typeof(float), NodeSide.Left)]
-    public ValueConnectionKnob attackKnob;
-
-    [ValueConnectionKnob("decay", Direction.In, typeof(float), NodeSide.Left)]
-    public ValueConnectionKnob decayKnob;
-
-    [ValueConnectionKnob("sustain", Direction.In, typeof(float), NodeSide.Left)]
-    public ValueConnectionKnob sustainKnob;
-
-    [ValueConnectionKnob("hold", Direction.In, typeof(float), NodeSide.Left)]
-    public ValueConnectionKnob holdKnob;
-
-    [ValueConnectionKnob("release", Direction.In, typeof(float), NodeSide.Left)]
-    public ValueConnectionKnob releaseKnob;
+    [ValueConnectionKnob("duration", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob durationKnob;
 
     [ValueConnectionKnob("value", Direction.Out, typeof(float), NodeSide.Right)]
     public ValueConnectionKnob valueKnob;
@@ -59,49 +49,77 @@ public class EnvelopeGeneratorNode : SignalNode
     [ValueConnectionKnob("onset", Direction.Out, typeof(bool), NodeSide.Right)]
     public ValueConnectionKnob onsetKnob;
 
-    // Time parameters in milliseconds so short attacks (5..500ms) type as friendly integers
-    // rather than 0.005..0.5. Converted to seconds via *Sec helpers at the point of use.
-    // Inspector fallbacks used when the matching input knob is unconnected.
-    public float attackMs = 100f;
-    public float decayMs = 200f;
-    public float sustain = 0.6f;
-    public float holdMs = 500f;
-    public float releaseMs = 800f;
+    public TimelineCurve curve = new TimelineCurve();
+    public float sustainTime = 0.4f;
     public float gateThreshold = 0.05f;
+    public float duration = 2f;
 
-    private float AttackSec  => attackMs  * 0.001f;
-    private float DecaySec   => decayMs   * 0.001f;
-    private float HoldSec    => holdMs    * 0.001f;
-    private float ReleaseSec => releaseMs * 0.001f;
+    const float MinDuration = 0.05f;
+    const float RetriggerBlendSec = 0.03f;
+    const float CurveEditorHeight = 90f;
+    const float KeyHitRadius = 8f;
+    const float TangentHandleLength = 28f;
 
-    // Any incoming trigger value at or above this counts as "high"; a low→high crossing fires.
-    // 0.5 rather than 0.0 so noisy near-zero float traffic can't spuriously retrigger.
-    private const float TriggerHighThreshold = 0.5f;
+    static readonly Color EditorBg = new Color(0.10f, 0.10f, 0.10f, 1f);
+    static readonly Color GridColor = new Color(1f, 1f, 1f, 0.08f);
+    static readonly Color CurveColor = new Color(0.40f, 0.85f, 1.00f, 1f);
+    static readonly Color KeyColor = new Color(1.00f, 0.95f, 0.40f, 1f);
+    static readonly Color KeySelected = new Color(1.00f, 0.55f, 0.30f, 1f);
+    static readonly Color SustainColor = new Color(1.00f, 0.60f, 0.20f, 0.9f);
+    static readonly Color PlayheadColor = new Color(1.00f, 0.30f, 0.25f, 0.9f);
 
-    private enum Phase { Idle, Attack, Decay, Hold, Release }
-    private Phase phase = Phase.Idle;
-    private float phaseTime;         // seconds elapsed in the current phase
-    private float phaseStartValue;   // envelope value when this phase began (so retriggers don't click)
-    private float outValue;
-    private float prevTriggerValue;
-    private float lastTickTime;
-    private bool haveLastTick;
-
-    // Set by the "Trigger" button in NodeGUI; consumed once by DoCalc and cleared, so a single
-    // click fires exactly one envelope regardless of how many repaints happen in between.
+    // ---- runtime state ----
+    enum DragKind { None, Key, TangentIn, TangentOut, Sustain }
+    [System.NonSerialized] private bool active;
+    [System.NonSerialized] private bool holdingAtSustain;
+    [System.NonSerialized] private float t;
+    [System.NonSerialized] private float outValue;
+    [System.NonSerialized] private bool prevGate;
+    [System.NonSerialized] private float blendFrom;
+    [System.NonSerialized] private float blendTime = 1f;
+    [System.NonSerialized] private float lastTickTime;
+    [System.NonSerialized] private bool haveLastTick;
     [System.NonSerialized] private bool manualTriggerRequested;
+    [System.NonSerialized] private bool lastOnsetForSparkline;
+    [System.NonSerialized] private Rect curveRect;
+    [System.NonSerialized] private int selKey = -1;
+    [System.NonSerialized] private DragKind drag = DragKind.None;
+    [System.NonSerialized] private int dragKey = -1;
+    [System.NonSerialized] private Vector2[] sampleBuf;
 
-    // Static preview graph: rebuilt only when parameters actually change so we're not thrashing
-    // GPU uploads every repaint. Cache prev values with sentinels so first call always redraws.
-    [System.NonSerialized] private Texture2D previewTex;
-    [System.NonSerialized] private float prevPreviewAttackMs = float.NaN;
-    [System.NonSerialized] private float prevPreviewDecayMs;
-    [System.NonSerialized] private float prevPreviewSustain;
-    [System.NonSerialized] private float prevPreviewHoldMs;
-    [System.NonSerialized] private float prevPreviewReleaseMs;
+    float EnvEnd => Mathf.Max(duration, MinDuration);
 
-    private const int PreviewWidth = 200;
-    private const int PreviewHeight = 56;
+    public override void DoInit()
+    {
+        if (curve == null) curve = new TimelineCurve();
+        curve.EnsureValid();
+        if (curve.KeyCount < 2)
+        {
+            // ADSR-flavored starter shape; entirely user-editable from here
+            curve.keys.Clear();
+            curve.AddKey(0f, 0f);
+            curve.AddKey(0.12f, 1f);
+            curve.AddKey(0.4f, 0.6f);
+            curve.AddKey(2f, 0f);
+        }
+        // Saves that predate the explicit duration field derived length from the last key
+        float lastKeyTime = curve.KeyCount > 0 ? curve.GetKey(curve.KeyCount - 1).time : 2f;
+        duration = Mathf.Max(duration, lastKeyTime, MinDuration);
+        sustainTime = Mathf.Clamp(sustainTime, 0f, EnvEnd);
+    }
+
+    // Duration changes stretch the whole envelope proportionally: keys, sustain marker,
+    // and a running playhead all keep their relative positions (TimelineNode precedent).
+    void SetDuration(float newDur)
+    {
+        newDur = Mathf.Max(newDur, MinDuration);
+        if (Mathf.Abs(newDur - duration) < 1e-4f) return;
+        float factor = newDur / EnvEnd;
+        curve.ScaleTimes(factor);
+        sustainTime *= factor;
+        if (active) t *= factor;
+        duration = newDur;
+    }
 
     protected override IEnumerable<SignalChannel> GetSignalChannels()
     {
@@ -117,9 +135,6 @@ public class EnvelopeGeneratorNode : SignalNode
             getValue = () => outValue > gateThreshold ? 1f : 0f,
             label = "gate",
         };
-        // Onset shows as a sparkline too so you can see the one-tick pulses land visually.
-        // getValue polls the *last-computed* onset flag rather than a live consumable event, so
-        // capturing on the sparkline schedule doesn't interfere with the actual pulse output.
         yield return new SignalChannel
         {
             outputKnob = onsetKnob,
@@ -128,32 +143,32 @@ public class EnvelopeGeneratorNode : SignalNode
         };
     }
 
-    // Mirror of the onset pulse from the most recent DoCalc, so the sparkline getter (which can
-    // fire at any time) reflects "did onset just fire" without racing DoCalc's per-tick reset.
-    [System.NonSerialized] private bool lastOnsetForSparkline;
-
     public override void NodeGUI()
     {
         GUILayout.BeginVertical();
 
-        // Trigger row: port + manual-fire button + current-phase readout. The button feels like
-        // a keyboard-style momentary trigger, useful for testing envelope shape without wiring
-        // up a source.
         GUILayout.BeginHorizontal();
         triggerKnob.DisplayLayout();
         if (GUILayout.Button("Trigger", GUILayout.Width(70)))
             manualTriggerRequested = true;
         GUILayout.FlexibleSpace();
-        GUILayout.Label(string.Format("{0}", phase), GUILayout.Width(80));
+        GUILayout.Label(active ? (holdingAtSustain ? "Sustain" : "Playing") : "Idle", GUILayout.Width(60));
         GUILayout.EndHorizontal();
 
-        FloatKnobOrField("Attack (ms)",  ref attackMs,  attackKnob);
-        FloatKnobOrField("Decay (ms)",   ref decayMs,   decayKnob);
-        FloatKnobOrField("Sustain",      ref sustain,   sustainKnob);
-        FloatKnobOrField("Hold (ms)",    ref holdMs,    holdKnob);
-        FloatKnobOrField("Release (ms)", ref releaseMs, releaseKnob);
+        // Curve editor: reserve layout space, then draw/interact in fixed rects within it
+        Rect r = GUILayoutUtility.GetRect(10f, CurveEditorHeight, GUILayout.ExpandWidth(true));
+        if (Event.current.type == EventType.Repaint)
+            curveRect = r;
+        HandleCurveInput();
+        if (Event.current.type == EventType.Repaint)
+            DrawCurveEditor(r);
 
-        DrawEnvelopePreview();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label($"sustain @ {sustainTime:0.00}s", GUILayout.Width(100));
+        float newDur = duration;
+        FloatKnobOrField("duration", ref newDur, durationKnob);
+        GUILayout.EndHorizontal();
+        if (newDur != duration) SetDuration(newDur);
 
         DrawSparkline();
         GUILayout.EndVertical();
@@ -162,285 +177,294 @@ public class EnvelopeGeneratorNode : SignalNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
-    public override bool DoCalc()
+    // ---------------------------------------------------------------- curve editor
+
+    float TimeToX(float time) => curveRect.x + (time / EnvEnd) * curveRect.width;
+    float XToTime(float x) => Mathf.Clamp((x - curveRect.x) / Mathf.Max(curveRect.width, 1f), 0f, 1f) * EnvEnd;
+    float ValueToY(float v) => curveRect.yMax - Mathf.Clamp01(v) * curveRect.height;
+    float YToValue(float y) => Mathf.Clamp01((curveRect.yMax - y) / Mathf.Max(curveRect.height, 1f));
+
+    void DrawCurveEditor(Rect r)
     {
-        // Connected knobs override their inspector fallbacks each tick, so upstream envelopes
-        // / MIDI can modulate the shape live. Time-knob values are interpreted as ms to match
-        // the field's unit — a chained envelope feeding attackKnob should send ms.
-        if (attackKnob.connected())  attackMs  = attackKnob.GetValue<float>();
-        if (decayKnob.connected())   decayMs   = decayKnob.GetValue<float>();
-        if (sustainKnob.connected()) sustain   = sustainKnob.GetValue<float>();
-        if (holdKnob.connected())    holdMs    = holdKnob.GetValue<float>();
-        if (releaseKnob.connected()) releaseMs = releaseKnob.GetValue<float>();
-
-        // Guard against pathological inputs that would divide-by-zero or reverse-time the phase.
-        sustain   = Mathf.Clamp01(sustain);
-        attackMs  = Mathf.Max(0f, attackMs);
-        decayMs   = Mathf.Max(0f, decayMs);
-        holdMs    = Mathf.Max(0f, holdMs);
-        releaseMs = Mathf.Max(0f, releaseMs);
-
-        // Rising-edge detection on the wired trigger: previous tick sub-threshold, this tick
-        // supra-threshold.
-        float trigVal = triggerKnob.connected() ? triggerKnob.GetValue<float>() : 0f;
-        bool wasHigh = prevTriggerValue >= TriggerHighThreshold;
-        bool nowHigh = trigVal >= TriggerHighThreshold;
-        bool inputRisingEdge = nowHigh && !wasHigh;
-        prevTriggerValue = trigVal;
-
-        // The manual-fire button drops a one-shot flag; consume it here so a single click fires
-        // exactly one envelope even if DoCalc runs many times before/after the button press.
-        bool manualFired = manualTriggerRequested;
-        manualTriggerRequested = false;
-
-        bool fireThisTick = inputRisingEdge || manualFired;
-
-        if (fireThisTick)
+        FillRect(r, EditorBg);
+        for (int i = 1; i < 4; i++)
         {
-            // Restart from wherever we currently are, so a retrigger mid-release ramps smoothly
-            // to 1 over `attack` rather than snapping to 0 first.
-            phase = Phase.Attack;
-            phaseTime = 0f;
-            phaseStartValue = outValue;
+            FillRect(new Rect(r.x + r.width * i / 4f, r.y, 1f, r.height), GridColor);
+            FillRect(new Rect(r.x, r.y + r.height * i / 4f, r.width, 1f), GridColor);
         }
 
-        // Time.deltaTime is per-frame; if the tick manager ever runs slower than one-tick-per-frame
-        // this stays honest by measuring wall-clock delta between our own DoCalc calls.
+        // sustain marker
+        float sx = TimeToX(sustainTime);
+        FillRect(new Rect(sx - 1f, r.y, 2f, r.height), SustainColor);
+        FillRect(new Rect(sx - 4f, r.y, 9f, 5f), SustainColor);
+
+        // curve polyline
+        int samples = Mathf.Max(2, (int)(r.width / 2f) + 1);
+        if (sampleBuf == null || sampleBuf.Length != samples)
+            sampleBuf = new Vector2[samples];
+        for (int s = 0; s < samples; s++)
+        {
+            float time = (s / (float)(samples - 1)) * EnvEnd;
+            sampleBuf[s] = new Vector2(r.x + (r.width * s) / (samples - 1), ValueToY(curve.Evaluate(time)));
+        }
+        RTEditorGUI.DrawPolygonLine(sampleBuf, CurveColor, Texture2D.whiteTexture, 2f);
+
+        // keys + selected tangents
+        for (int k = 0; k < curve.KeyCount; k++)
+        {
+            var key = curve.GetKey(k);
+            var p = new Vector2(TimeToX(key.time), ValueToY(key.value));
+            bool isSel = k == selKey;
+            if (isSel)
+            {
+                DrawTangentHandle(key, p, true);
+                DrawTangentHandle(key, p, false);
+            }
+            FillRect(new Rect(p.x - 3f, p.y - 3f, 7f, 7f), isSel ? KeySelected : KeyColor);
+        }
+
+        // playhead while the envelope runs
+        if (active)
+        {
+            float px = TimeToX(holdingAtSustain ? sustainTime : t);
+            FillRect(new Rect(px, r.y, 1f, r.height), PlayheadColor);
+        }
+    }
+
+    Vector2 TangentHandlePos(CurveKey key, Vector2 keyPx, bool inHandle)
+    {
+        float pxPerSec = curveRect.width / EnvEnd;
+        float pxPerVal = curveRect.height;
+        float slope = inHandle ? key.inTangent : key.outTangent;
+        var dir = new Vector2(1f, -slope * pxPerVal / pxPerSec).normalized * TangentHandleLength;
+        return inHandle ? keyPx - dir : keyPx + dir;
+    }
+
+    void DrawTangentHandle(CurveKey key, Vector2 keyPx, bool inHandle)
+    {
+        Vector2 hp = TangentHandlePos(key, keyPx, inHandle);
+        RTEditorGUI.DrawLine(keyPx, hp, new Color(1f, 1f, 1f, 0.5f), Texture2D.whiteTexture, 1f);
+        FillRect(new Rect(hp.x - 2f, hp.y - 2f, 5f, 5f), Color.white);
+    }
+
+    int KeyAt(Vector2 guiPos)
+    {
+        for (int k = 0; k < curve.KeyCount; k++)
+        {
+            var key = curve.GetKey(k);
+            var p = new Vector2(TimeToX(key.time), ValueToY(key.value));
+            if ((p - guiPos).magnitude <= KeyHitRadius) return k;
+        }
+        return -1;
+    }
+
+    void HandleCurveInput()
+    {
+        Event e = Event.current;
+        if (e == null || curveRect.width <= 0f) return;
+        Vector2 m = e.mousePosition;
+
+        // A MouseUp consumed by another handler (type == Used) or released outside the
+        // window (type == Ignore) never matches the MouseUp case below; rawType still
+        // says MouseUp. Without this, the drag pseudo-capture sticks across clicks.
+        if (drag != DragKind.None && e.rawType == EventType.MouseUp && e.type != EventType.MouseUp)
+        {
+            drag = DragKind.None;
+        }
+
+        switch (e.type)
+        {
+            case EventType.MouseDown:
+                if (e.button != 0 || !curveRect.Contains(m)) break;
+                // selected key's tangent handles first
+                if (selKey >= 0 && selKey < curve.KeyCount)
+                {
+                    var sel = curve.GetKey(selKey);
+                    var keyPx = new Vector2(TimeToX(sel.time), ValueToY(sel.value));
+                    if ((TangentHandlePos(sel, keyPx, true) - m).magnitude <= KeyHitRadius)
+                    {
+                        drag = DragKind.TangentIn;
+                        dragKey = selKey;
+                        e.Use();
+                        break;
+                    }
+                    if ((TangentHandlePos(sel, keyPx, false) - m).magnitude <= KeyHitRadius)
+                    {
+                        drag = DragKind.TangentOut;
+                        dragKey = selKey;
+                        e.Use();
+                        break;
+                    }
+                }
+                int hit = KeyAt(m);
+                if (hit >= 0)
+                {
+                    selKey = hit;
+                    drag = DragKind.Key;
+                    dragKey = hit;
+                }
+                else if (Mathf.Abs(TimeToX(sustainTime) - m.x) <= 5f)
+                {
+                    drag = DragKind.Sustain;
+                }
+                else if (e.clickCount >= 2)
+                {
+                    selKey = curve.AddKey(XToTime(m.x), YToValue(m.y));
+                    drag = DragKind.Key;
+                    dragKey = selKey;
+                }
+                else
+                {
+                    selKey = -1;
+                }
+                e.Use();
+                break;
+
+            case EventType.MouseDrag:
+                if (drag == DragKind.None) break;
+                switch (drag)
+                {
+                    case DragKind.Sustain:
+                        sustainTime = Mathf.Clamp(XToTime(m.x), 0f, EnvEnd);
+                        break;
+                    case DragKind.Key:
+                        if (dragKey >= 0 && dragKey < curve.KeyCount)
+                        {
+                            // XToTime clamps to [0, duration]: keys live inside the fixed axis
+                            dragKey = curve.MoveKey(dragKey, XToTime(m.x), YToValue(m.y));
+                            selKey = dragKey;
+                        }
+                        break;
+                    case DragKind.TangentIn:
+                    case DragKind.TangentOut:
+                        if (dragKey >= 0 && dragKey < curve.KeyCount)
+                        {
+                            var key = curve.GetKey(dragKey);
+                            var keyPx = new Vector2(TimeToX(key.time), ValueToY(key.value));
+                            float dxp = m.x - keyPx.x;
+                            dxp = drag == DragKind.TangentIn ? Mathf.Min(dxp, -1f) : Mathf.Max(dxp, 1f);
+                            float dyp = m.y - keyPx.y;
+                            float pxPerSec = curveRect.width / EnvEnd;
+                            float pxPerVal = curveRect.height;
+                            curve.SetLinkedTangent(dragKey, -(dyp / dxp) * pxPerSec / pxPerVal);
+                        }
+                        break;
+                }
+                e.Use();
+                break;
+
+            case EventType.MouseUp:
+                if (drag != DragKind.None)
+                {
+                    drag = DragKind.None;
+                    e.Use();
+                }
+                break;
+        }
+    }
+
+    // Right-click key delete must pre-empt the framework's context menu (MouseDown @0 consumes
+    // button 1 before NodeGUI) — same pattern as TimelineNode's handler; self-scoped, so both
+    // handlers coexist at this priority.
+    [EventHandlerAttribute(EventType.MouseDown, -1)]
+    static void HandleEnvelopeRightClick(NodeEditorInputInfo info)
+    {
+        if (info.inputEvent.button != 1) return;
+        var state = info.editorState;
+        if (state == null || !(state.focusedNode is EnvelopeGeneratorNode env)) return;
+        Vector2 local = NodeEditor.ScreenToCanvasSpace(state, info.inputPos)
+                      - env.rect.position - new Vector2(0f, 20f); // header offset
+        if (!env.curveRect.Contains(local)) return;
+        int k = env.KeyAt(local);
+        if (k >= 0 && env.curve.KeyCount > 2)
+        {
+            env.curve.RemoveKey(k);
+            env.selKey = -1;
+            info.inputEvent.Use();
+            NodeEditor.RepaintClients();
+        }
+    }
+
+    static void FillRect(Rect r, Color c)
+    {
+        var old = GUI.color;
+        GUI.color = c;
+        GUI.DrawTexture(r, Texture2D.whiteTexture);
+        GUI.color = old;
+    }
+
+    // ---------------------------------------------------------------- calc
+
+    public override bool DoCalc()
+    {
+        // Knob-driven duration must apply even when the canvas GUI isn't drawing
+        if (durationKnob != null && durationKnob.connected())
+            SetDuration(durationKnob.GetValue<float>());
+
+        bool gateHeld = triggerKnob != null && triggerKnob.connected() && triggerKnob.GetValue<bool>();
+        bool rising = gateHeld && !prevGate;
+        prevGate = gateHeld;
+
+        bool manualFired = manualTriggerRequested;
+        manualTriggerRequested = false;
+        bool fireThisTick = rising || manualFired;
+
+        // Wall-clock delta between our own ticks, honest even if the tick manager skips frames
         float now = Time.time;
         float dt = haveLastTick ? Mathf.Max(0f, now - lastTickTime) : 0f;
         lastTickTime = now;
         haveLastTick = true;
-        phaseTime += dt;
 
-        switch (phase)
+        if (fireThisTick)
         {
-            case Phase.Idle:
-                outValue = 0f;
-                break;
-
-            case Phase.Attack:
-                if (AttackSec <= 0f)
-                {
-                    outValue = 1f;
-                    EnterPhase(Phase.Decay, 1f);
-                }
-                else
-                {
-                    float t = Mathf.Clamp01(phaseTime / AttackSec);
-                    outValue = Mathf.Lerp(phaseStartValue, 1f, t);
-                    if (phaseTime >= AttackSec)
-                    {
-                        outValue = 1f;
-                        EnterPhase(Phase.Decay, 1f);
-                    }
-                }
-                break;
-
-            case Phase.Decay:
-                if (DecaySec <= 0f)
-                {
-                    outValue = sustain;
-                    EnterPhase(Phase.Hold, sustain);
-                }
-                else
-                {
-                    float t = Mathf.Clamp01(phaseTime / DecaySec);
-                    outValue = Mathf.Lerp(1f, sustain, t);
-                    if (phaseTime >= DecaySec)
-                    {
-                        outValue = sustain;
-                        EnterPhase(Phase.Hold, sustain);
-                    }
-                }
-                break;
-
-            case Phase.Hold:
-                outValue = sustain;
-                if (phaseTime >= HoldSec)
-                    EnterPhase(Phase.Release, sustain);
-                break;
-
-            case Phase.Release:
-                if (ReleaseSec <= 0f)
-                {
-                    outValue = 0f;
-                    EnterPhase(Phase.Idle, 0f);
-                }
-                else
-                {
-                    float t = Mathf.Clamp01(phaseTime / ReleaseSec);
-                    outValue = Mathf.Lerp(phaseStartValue, 0f, t);
-                    if (phaseTime >= ReleaseSec)
-                    {
-                        outValue = 0f;
-                        EnterPhase(Phase.Idle, 0f);
-                    }
-                }
-                break;
+            active = true;
+            holdingAtSustain = false;
+            blendFrom = outValue;
+            blendTime = 0f;
+            t = 0f;
         }
+
+        float end = EnvEnd;
+        if (active)
+        {
+            if (holdingAtSustain)
+            {
+                if (!gateHeld) holdingAtSustain = false; // released: fall through to the tail next tick
+                outValue = curve.Evaluate(sustainTime);
+            }
+            else
+            {
+                float prevT = t;
+                t += dt;
+                if (gateHeld && prevT < sustainTime && t >= sustainTime)
+                {
+                    // gate still held when we reach the marker: park here until release
+                    t = sustainTime;
+                    holdingAtSustain = true;
+                }
+                if (t >= end)
+                {
+                    t = end;
+                    active = false;
+                }
+                outValue = curve.Evaluate(t);
+            }
+            // short blend from the pre-trigger value so retriggers don't click
+            blendTime += dt;
+            float blend = Mathf.Clamp01(blendTime / RetriggerBlendSec);
+            outValue = Mathf.Lerp(blendFrom, outValue, blend);
+        }
+        else
+        {
+            outValue = curve.Evaluate(end);
+        }
+        // Same clamp the editor renders with: hermite overshoot between keys can leave [0,1]
+        outValue = Mathf.Clamp01(outValue);
 
         valueKnob.SetValue<float>(outValue);
         gateKnob.SetValue<bool>(outValue > gateThreshold);
         onsetKnob.SetValue<bool>(fireThisTick);
         lastOnsetForSparkline = fireThisTick;
         return true;
-    }
-
-    private void EnterPhase(Phase next, float startValue)
-    {
-        phase = next;
-        phaseTime = 0f;
-        phaseStartValue = startValue;
-    }
-
-    // Renders the shape a single trigger would produce with the current parameters — a static
-    // preview, distinct from the sparkline (which is a live trace of past values). Redraws only
-    // on parameter change so we don't upload a fresh texture every repaint.
-    private void DrawEnvelopePreview()
-    {
-        GUILayout.Space(4);
-        GUILayout.Label("Shape");
-
-        if (previewTex == null)
-        {
-            previewTex = new Texture2D(PreviewWidth, PreviewHeight, TextureFormat.RGBA32, false)
-            {
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp,
-                hideFlags = HideFlags.HideAndDontSave,
-            };
-            prevPreviewAttackMs = float.NaN; // force a first draw
-        }
-
-        if (float.IsNaN(prevPreviewAttackMs)
-            || !Mathf.Approximately(prevPreviewAttackMs, attackMs)
-            || !Mathf.Approximately(prevPreviewDecayMs, decayMs)
-            || !Mathf.Approximately(prevPreviewSustain, sustain)
-            || !Mathf.Approximately(prevPreviewHoldMs, holdMs)
-            || !Mathf.Approximately(prevPreviewReleaseMs, releaseMs))
-        {
-            RepaintPreview(previewTex);
-            prevPreviewAttackMs = attackMs;
-            prevPreviewDecayMs = decayMs;
-            prevPreviewSustain = sustain;
-            prevPreviewHoldMs = holdMs;
-            prevPreviewReleaseMs = releaseMs;
-        }
-
-        GUILayout.Box(previewTex,
-            GUILayout.Height(PreviewHeight),
-            GUILayout.ExpandWidth(true));
-    }
-
-    // Paints the ADSR curve into `tex` as a solid connected line over dim reference lines.
-    // Uses SampleEnvelopeShape so the visual is guaranteed to match what DoCalc produces.
-    private void RepaintPreview(Texture2D tex)
-    {
-        int w = tex.width, h = tex.height;
-        Color bg          = new Color(0.10f, 0.10f, 0.10f, 1f);
-        Color zeroLine    = new Color(0.35f, 0.35f, 0.35f, 1f);
-        Color sustainLine = new Color(0.28f, 0.28f, 0.28f, 1f);
-        Color curveColor  = new Color(0.40f, 0.85f, 1.00f, 1f);
-        Color compressedLine = new Color(0.55f, 0.45f, 0.20f, 1f); // marker on the sustain
-                                                                    // line when hold is truncated
-
-        var pixels = new Color[w * h];
-        for (int i = 0; i < pixels.Length; i++) pixels[i] = bg;
-
-        // Baseline (y=0) so an all-zero release still reads as sitting on the floor.
-        for (int x = 0; x < w; x++) pixels[x] = zeroLine;
-
-        // Cap the displayed hold so a very long hold doesn't squish attack/decay/release into
-        // invisible slivers. The cap floats with the surrounding phases so ADR-dominated
-        // envelopes still get proportional hold, but a 10-second hold with 100ms phases isn't
-        // allowed to steal 99% of the graph.
-        float adrTotal = AttackSec + DecaySec + ReleaseSec;
-        float displayHoldCap = Mathf.Max(2f, 3f * adrTotal);
-        float displayHoldSec = Mathf.Min(HoldSec, displayHoldCap);
-        bool holdCompressed = HoldSec > displayHoldSec + 0.001f;
-
-        // Sustain-level reference line.
-        int sustainY = Mathf.Clamp(Mathf.RoundToInt(sustain * (h - 1)), 0, h - 1);
-        for (int x = 0; x < w; x++) pixels[sustainY * w + x] = sustainLine;
-
-        // Total displayed duration in seconds; small floor so the shape renders as a spike
-        // rather than collapsing to a single column when everything is zero.
-        float totalDur = AttackSec + DecaySec + displayHoldSec + ReleaseSec;
-        if (totalDur < 0.001f) totalDur = 0.001f;
-
-        // Pixel span of the (visually-truncated) hold segment, for the compressed marker below.
-        float holdStartT = AttackSec + DecaySec;
-        float holdEndT   = holdStartT + displayHoldSec;
-        int holdStartX = Mathf.Clamp(Mathf.RoundToInt(holdStartT / totalDur * (w - 1)), 0, w - 1);
-        int holdEndX   = Mathf.Clamp(Mathf.RoundToInt(holdEndT   / totalDur * (w - 1)), 0, w - 1);
-
-        int prevY = 0;
-        for (int x = 0; x < w; x++)
-        {
-            float t = (x / (float)(w - 1)) * totalDur;
-            float v = SampleEnvelopeShape(t, AttackSec, DecaySec, sustain, displayHoldSec, ReleaseSec);
-            int y = Mathf.Clamp(Mathf.RoundToInt(v * (h - 1)), 0, h - 1);
-
-            // Fill the vertical gap between adjacent samples so steep slopes read as a solid
-            // line instead of a scatter of disconnected dots.
-            if (x > 0)
-            {
-                int lo = Mathf.Min(prevY, y);
-                int hi = Mathf.Max(prevY, y);
-                for (int yy = lo; yy <= hi; yy++)
-                    pixels[yy * w + x] = curveColor;
-            }
-            else
-            {
-                pixels[y * w + x] = curveColor;
-            }
-            prevY = y;
-        }
-
-        // Dashed-marker overlay on the sustain plateau when hold is compressed: makes it
-        // visually obvious the on-screen span doesn't match the actual hold time.
-        if (holdCompressed)
-        {
-            for (int x = holdStartX; x <= holdEndX; x++)
-            {
-                if ((x / 4) % 2 == 0) continue; // 4-pixel dashes
-                int idx = sustainY * w + x;
-                if (idx >= 0 && idx < pixels.Length)
-                    pixels[idx] = compressedLine;
-            }
-        }
-
-        tex.SetPixels(pixels);
-        tex.Apply(false);
-    }
-
-    // Pure function of the ADSR parameters. Used by the preview so the rendered curve is
-    // definitionally the same shape a trigger would play. Time argument and phase durations
-    // are all in seconds; separated as parameters so the preview can substitute a visually-
-    // compressed hold without touching the runtime envelope math.
-    private float SampleEnvelopeShape(float t, float a, float d, float s, float ho, float r)
-    {
-        if (t < a)
-            return a > 0f ? t / a : 1f;
-        t -= a;
-        if (t < d)
-            return d > 0f ? Mathf.Lerp(1f, s, t / d) : s;
-        t -= d;
-        if (t < ho)
-            return s;
-        t -= ho;
-        if (t < r)
-            return r > 0f ? Mathf.Lerp(s, 0f, t / r) : 0f;
-        return 0f;
-    }
-
-    public override void OnDestroy()
-    {
-        base.OnDestroy();
-        if (previewTex != null)
-        {
-            Object.DestroyImmediate(previewTex);
-            previewTex = null;
-        }
     }
 }

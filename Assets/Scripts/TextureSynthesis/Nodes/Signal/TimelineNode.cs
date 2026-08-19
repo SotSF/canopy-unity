@@ -212,7 +212,7 @@ public class TimelineNode : TickingNode
     bool KnobCacheStale()
     {
         if (knobsByName == null) return true;
-        int expected = channels.Count * 2 + events.Count + 1 + (audioBound ? 2 : 0); // time (+spectrum/sampleRate)
+        int expected = channels.Count * 2 + events.Count + 4 + (audioBound ? 2 : 0); // time + 3 transport ins (+spectrum/sampleRate)
         if (knobsByName.Count != expected) return true;
         foreach (var knob in knobsByName.Values)
             return knob == null || !dynamicConnectionPorts.Contains(knob);
@@ -225,6 +225,11 @@ public class TimelineNode : TickingNode
         knobsByName.Clear();
         var required = new Dictionary<string, ValueConnectionKnobAttribute>();
         required["time"] = new ValueConnectionKnobAttribute("time", Direction.Out, typeof(float), NodeSide.Right);
+        // Transport event pulses (KeySignal pressed / MIDINote etc.) on the top edge,
+        // aligned above their matching buttons
+        required["playPause"] = new ValueConnectionKnobAttribute("playPause", Direction.In, typeof(bool), NodeSide.Top);
+        required["restart"] = new ValueConnectionKnobAttribute("restart", Direction.In, typeof(bool), NodeSide.Top);
+        required["back5s"] = new ValueConnectionKnobAttribute("back5s", Direction.In, typeof(bool), NodeSide.Top);
         if (audioBound)
         {
             required["spectrum"] = new ValueConnectionKnobAttribute("spectrum", Direction.Out, typeof(float[]), NodeSide.Right);
@@ -490,7 +495,8 @@ public class TimelineNode : TickingNode
             for (int i = 0; i < SpectrumSize; i++)
             {
                 float db = 20f * Mathf.Log10(rawSpectrum[i] / 0.7071f + 1.5849e-13f);
-                float target = (db + 60f) / 60f;
+                // Clamped so silence floors at 0 instead of ≈ -3.3 (unclamped dB mapping)
+                float target = Mathf.Clamp01((db + 60f) / 60f);
                 float current = smoothedSpectrum[i];
                 smoothedSpectrum[i] = current + (target - current) * (target > current ? attackAlpha : releaseAlpha);
             }
@@ -590,6 +596,21 @@ public class TimelineNode : TickingNode
         {
             lastCalcFrame = Time.frameCount;
             firedIds.Clear();
+            // Bound transport pulses, mirroring the buttons (one-tick bools expected)
+            if (KnobPulse("playPause"))
+            {
+                playing = !playing;
+                if (playing) fireEventsAtPlayhead = true;
+            }
+            if (KnobPulse("restart"))
+            {
+                playhead = 0f;
+                playing = false;
+            }
+            if (KnobPulse("back5s"))
+            {
+                playhead = Mathf.Max(playhead - 5f, 0f);
+            }
             if (playing && duration > 0f)
             {
                 eventTimesScratch.Clear();
@@ -618,7 +639,11 @@ public class TimelineNode : TickingNode
             if (outKnob == null) continue;
             var inKnob = Knob(InKnobName(ch));
             float input = (inKnob != null && inKnob.connected()) ? inKnob.GetValue<float>() : 1f;
-            outKnob.SetValue<float>(input * ch.curve.Evaluate(playhead));
+            // Clamped to the channel range: hermite overshoot between keys can exceed
+            // [yMin, yMax], and the editor already RENDERS the curve clamped — the
+            // emitted value should match what's drawn
+            float curveValue = Mathf.Clamp(ch.curve.Evaluate(playhead), ch.yMin, ch.yMax);
+            outKnob.SetValue<float>(input * curveValue);
         }
         foreach (var ev in events)
         {
@@ -637,8 +662,18 @@ public class TimelineNode : TickingNode
         return true;
     }
 
+    bool KnobPulse(string name)
+    {
+        var knob = Knob(name);
+        return knob != null && knob.connected() && knob.GetValue<bool>();
+    }
+
     void PositionKnobs()
     {
+        // Transport inputs sit above their matching buttons (▶ ⏮ ↶5)
+        Knob("playPause")?.SetPosition(21f);
+        Knob("restart")?.SetPosition(55f);
+        Knob("back5s")?.SetPosition(89f);
         Knob("time")?.SetPosition(HeaderOffsetY + TransportHeight * 0.5f);
         if (audioBound)
         {
@@ -701,6 +736,10 @@ public class TimelineNode : TickingNode
         {
             playhead = 0f;
             playing = false;
+        }
+        if (GUI.Button(Next(30f), "↶5"))
+        {
+            playhead = Mathf.Max(playhead - 5f, 0f);
         }
         loop = GUI.Toggle(Next(44f), loop, "Loop", GUI.skin.button);
         if (GUI.Button(Next(44f), "Zoom⟲")) view.Reset(duration);
@@ -1032,6 +1071,14 @@ public class TimelineNode : TickingNode
             NodeEditor.curEditorState != null && NodeEditor.curEditorState.focusedNode != this)
             return;
         Vector2 m = e.mousePosition;
+
+        // A MouseUp consumed by another handler (type == Used) or released outside the
+        // window (type == Ignore) never matches the MouseUp case below; rawType still
+        // says MouseUp. Without this, the drag pseudo-capture sticks across clicks.
+        if (drag != DragKind.None && e.rawType == EventType.MouseUp && e.type != EventType.MouseUp)
+        {
+            drag = DragKind.None;
+        }
 
         switch (e.type)
         {

@@ -18,7 +18,7 @@ public class AudioTrackNode : TickingNode
     public override string GetID => "AudioTrackNode";
     public override string Title { get { return "AudioTrack"; } }
 
-    private Vector2 _DefaultSize = new Vector2(250, 260);
+    private Vector2 _DefaultSize = new Vector2(280, 240);
     public override Vector2 DefaultSize => _DefaultSize;
 
     [ValueConnectionKnob("spectrumData", Direction.Out, typeof(float[]), NodeSide.Right)]
@@ -33,8 +33,15 @@ public class AudioTrackNode : TickingNode
     [ValueConnectionKnob("syncTime", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob syncTimeKnob;
 
-    [ValueConnectionKnob("playPause", Direction.In, typeof(bool), NodeSide.Left)]
+    // Transport event pulses live on the top edge so bound key signals stay organized
+    [ValueConnectionKnob("playPause", Direction.In, typeof(bool), NodeSide.Top, 20)]
     public ValueConnectionKnob playPauseKnob;
+
+    [ValueConnectionKnob("back5s", Direction.In, typeof(bool), NodeSide.Top, 60)]
+    public ValueConnectionKnob back5sKnob;
+
+    [ValueConnectionKnob("restart", Direction.In, typeof(bool), NodeSide.Top, 100)]
+    public ValueConnectionKnob restartKnob;
 
     const int SpectrumSize = 2048;
     const float SyncDriftThreshold = 0.15f; // seconds of drift before a corrective seek
@@ -118,10 +125,6 @@ public class AudioTrackNode : TickingNode
         }
 
         GUILayout.BeginHorizontal();
-        playPauseKnob.DisplayLayout();
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
         syncTimeKnob.DisplayLayout();
         GUILayout.FlexibleSpace();
         spectrumDataKnob.DisplayLayout();
@@ -179,6 +182,10 @@ public class AudioTrackNode : TickingNode
         {
             source.time = 0f;
         }
+        if (GUILayout.Button("↶5", GUILayout.Width(30)) && sourceAlive)
+        {
+            StepBack5();
+        }
         loop = GUILayout.Toggle(loop, "Loop", GUI.skin.button, GUILayout.Width(44));
         if (GUILayout.Button("Unbind", GUILayout.Width(52)))
         {
@@ -202,7 +209,15 @@ public class AudioTrackNode : TickingNode
                 new Color(0.40f, 0.85f, 1.00f, 0.55f));
         }
         var e = Event.current;
-        if (sourceAlive && e.type == EventType.MouseDown && e.button == 0 && bar.Contains(e.mousePosition))
+        // Release via rawType: a MouseUp consumed by another handler (type == Used) or
+        // released outside the window (type == Ignore) never matches type == MouseUp,
+        // which left the scrub pseudo-capture stuck — later clicks anywhere kept seeking
+        if (scrubbing && e.rawType == EventType.MouseUp)
+        {
+            scrubbing = false;
+            if (e.type == EventType.MouseUp) e.Use();
+        }
+        else if (sourceAlive && e.type == EventType.MouseDown && e.button == 0 && bar.Contains(e.mousePosition))
         {
             scrubbing = true;
             Seek(bar, e.mousePosition.x);
@@ -211,11 +226,6 @@ public class AudioTrackNode : TickingNode
         else if (scrubbing && e.type == EventType.MouseDrag)
         {
             if (sourceAlive) Seek(bar, e.mousePosition.x);
-            e.Use();
-        }
-        else if (scrubbing && e.type == EventType.MouseUp)
-        {
-            scrubbing = false;
             e.Use();
         }
 
@@ -243,6 +253,11 @@ public class AudioTrackNode : TickingNode
         if (source == null) return;
         if (playing) source.Play();
         else source.Pause();
+    }
+
+    void StepBack5()
+    {
+        source.time = Mathf.Max(source.time - 5f, 0f);
     }
 
     void Seek(Rect bar, float mouseX)
@@ -282,10 +297,18 @@ public class AudioTrackNode : TickingNode
         source.loop = loop;
         source.volume = volume;
 
-        // one-frame event pulse toggles play/pause (wire a Timeline event port here)
+        // one-frame event pulses drive the transport (wire KeySignal pressed / Timeline events)
         if (playPauseKnob != null && playPauseKnob.connected() && playPauseKnob.GetValue<bool>())
         {
             TogglePlay();
+        }
+        if (back5sKnob != null && back5sKnob.connected() && back5sKnob.GetValue<bool>())
+        {
+            StepBack5();
+        }
+        if (restartKnob != null && restartKnob.connected() && restartKnob.GetValue<bool>())
+        {
+            source.time = 0f;
         }
 
         // a non-looping track that reached its end stops itself
@@ -318,7 +341,8 @@ public class AudioTrackNode : TickingNode
         for (int i = 0; i < SpectrumSize; i++)
         {
             float db = 20f * Mathf.Log10(rawSpectrum[i] / 0.7071f + 1.5849e-13f);
-            float target = (db - floorDb) / dbRange;
+            // Clamped so silence floors at 0 instead of ≈ -3.3 (unclamped dB mapping)
+            float target = Mathf.Clamp01((db - floorDb) / dbRange);
             float current = smoothedSpectrum[i];
             float alpha = target > current ? attackAlpha : releaseAlpha;
             smoothedSpectrum[i] = current + (target - current) * alpha;

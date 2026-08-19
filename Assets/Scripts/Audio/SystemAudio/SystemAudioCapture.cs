@@ -143,7 +143,11 @@ namespace Lasp
 
             var src = _fft.Spectrum;
             int n = Mathf.Min(_fftRaw.Length, src.Length);
-            for (int i = 0; i < n; i++) _fftRaw[i] = src[i];
+            // LASP's FftBuffer maps dBFS over [floorDb, headDb] WITHOUT clamping, so bins
+            // quieter than the floor go negative (digital silence ≈ -3.3). Clamp to the
+            // advertised [0,1] contract so downstream math (mel bands, band averages)
+            // never sees sub-floor values.
+            for (int i = 0; i < n; i++) _fftRaw[i] = Mathf.Clamp01(src[i]);
 
             // Per-bin asymmetric exponential smoothing. Fast attack, slow
             // release — behaves like a peak-follower so transients punch

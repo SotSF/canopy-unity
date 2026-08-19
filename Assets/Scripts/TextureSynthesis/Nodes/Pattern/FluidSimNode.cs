@@ -172,11 +172,37 @@ public class FluidSimNode : TickingNode
         ClearRenderTextures();
     }
     
-    bool clicked = false;
+    // GUI buttons and bound event knobs only LATCH intent here; the actions (blits,
+    // dispatches, GL.Clear) run in DoCalc's once-per-frame Update tick. Running them
+    // during OnGUI — which EventKnobOrButton's live knob read did, on every GUI event
+    // pass while a bound signal was held — clobbers the active render target mid-GUI:
+    // black screen while held, and Graphics.Blit sampling the screen itself into the sim.
+    [System.NonSerialized] bool pendingToggleRun;
+    [System.NonSerialized] bool pendingApplyDye;
+    [System.NonSerialized] bool pendingApplyForce;
+    [System.NonSerialized] bool pendingReset;
+    [System.NonSerialized] int lastPulseFrame = -1;
+
     //float viscosity = 1;
     GUIContent boundaryLabel = new GUIContent("Bounded", "Bound at the borders");
     GUIContent continuousVelocityLabel = new GUIContent("Continuous Velocity", "Add velocity texture every frame");
     GUIContent continuousDyeLabel = new GUIContent("Continuous dye", "Add dye every frame");
+
+    /// <summary>Knob display + button; returns true only on an actual button CLICK.
+    /// Bound knob pulses are read separately in DoCalc, never during GUI.</summary>
+    bool SimButton(string label, ValueConnectionKnob knob)
+    {
+        GUILayout.BeginHorizontal();
+        knob.DisplayLayout();
+        bool buttonClicked = GUILayout.Button(label);
+        GUILayout.EndHorizontal();
+        return buttonClicked;
+    }
+
+    static bool KnobPulse(ValueConnectionKnob knob)
+    {
+        return knob != null && knob.connected() && knob.GetValue<bool>();
+    }
     public override void NodeGUI()
     {
         GUILayout.BeginHorizontal();
@@ -190,23 +216,21 @@ public class FluidSimNode : TickingNode
         FloatKnobOrSlider(ref forceMultiplier, 0, 4, forceMultiplierKnob);
         FloatKnobOrSlider(ref vorticityEpsilon, 0, 20, vorticityEpsilonKnob);
         string cmd = running ? "Stop" : "Run";
-        clicked = EventKnobOrButton(cmd, runKnob);
-        if (clicked)
+        if (SimButton(cmd, runKnob))
         {
-            running = !running;
+            pendingToggleRun = true;
         }
-        if (EventKnobOrButton("Apply dye", applyDyeKnob)) 
-        { 
-            AddDye();
-        }
-        if (EventKnobOrButton("Apply velocity", applyForceKnob))
+        if (SimButton("Apply dye", applyDyeKnob))
         {
-            ApplyVelocity();
+            pendingApplyDye = true;
         }
-        if (EventKnobOrButton("Reset", resetKnob))
+        if (SimButton("Apply velocity", applyForceKnob))
         {
-            ClearRenderTextures();
-            running = false;
+            pendingApplyForce = true;
+        }
+        if (SimButton("Reset", resetKnob))
+        {
+            pendingReset = true;
         }
         GUILayout.EndVertical();
 
@@ -237,8 +261,12 @@ public class FluidSimNode : TickingNode
 
     private void AddDye()
     {
+        // Blit with a null source samples the current render target — i.e. the game
+        // window itself ends up injected as dye. Skip until an input is actually wired.
+        Texture input = dyeInputKnob.GetValue<Texture>();
+        if (input == null || input.width == 0) return;
         fluidSimShader.SetFloat("dyeMultiplier", dyeInputLevel);
-        Graphics.Blit(dyeInputKnob.GetValue<Texture>(), scaledBuffer);
+        Graphics.Blit(input, scaledBuffer);
         fluidSimShader.SetTexture(dyeKernel, "uField", dyeField);
         fluidSimShader.SetTexture(dyeKernel, "vField", scaledBuffer);
         ExecuteFullTexShader(dyeKernel);
@@ -435,29 +463,51 @@ public class FluidSimNode : TickingNode
         {
             vorticityEpsilon = vorticityEpsilonKnob.GetValue<float>();
         }
-        if (applyForceKnob.GetValue<bool>())
+        // Transport pulses and all GPU work run once per frame, on the FIRST DoCalc —
+        // which is the TickingNodeManager Update tick. OnNodeChange re-runs Calculate
+        // mid-OnGUI, and blits/dispatches during GUI rendering clobber the active
+        // render target (black screen, screen contents leaking into the sim fields).
+        if (Time.frameCount != lastPulseFrame)
         {
-            ApplyVelocity(forceMultiplier);
-        }
-        if (running && Time.time - lastStep > 1/60f)
-        {
-            if (continuousDye)
+            lastPulseFrame = Time.frameCount;
+
+            bool toggledRun = pendingToggleRun || KnobPulse(runKnob);
+            bool applyDye = pendingApplyDye || KnobPulse(applyDyeKnob);
+            bool applyForce = pendingApplyForce || KnobPulse(applyForceKnob);
+            bool reset = pendingReset || KnobPulse(resetKnob);
+            pendingToggleRun = pendingApplyDye = pendingApplyForce = pendingReset = false;
+
+            if (toggledRun)
+            {
+                running = !running;
+            }
+            if (reset)
+            {
+                ClearRenderTextures();
+                running = false;
+            }
+            if (applyDye)
             {
                 AddDye();
             }
-            if (clicked)
+            if (applyForce)
             {
-                timestep = Time.deltaTime;
-            } else
-            {
-                timestep = Time.time - lastStep;
+                ApplyVelocity(forceMultiplier);
             }
-            lastStep = Time.time;
-            SimulateFluid();
-        }
-        if (clicked)
-        {
-            clicked = false;
+
+            if (running && Time.time - lastStep > 1/60f)
+            {
+                if (continuousDye)
+                {
+                    AddDye();
+                }
+                timestep = toggledRun ? Time.deltaTime : Time.time - lastStep;
+                // A frame hitch (GC, editor stall, domain reload) otherwise lands as one huge
+                // advection + confinement step — a visible one-frame "kick" to the whole field
+                timestep = Mathf.Min(timestep, 1f / 30f);
+                lastStep = Time.time;
+                SimulateFluid();
+            }
         }
         textureOutputKnob.SetValue<Texture>(dyeField);
         return true;

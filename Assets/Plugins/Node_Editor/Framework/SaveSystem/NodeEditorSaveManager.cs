@@ -400,10 +400,22 @@ namespace NodeEditorFramework
 		/// Creates a working copy of the specified nodeCanvas, and optionally also of it's associated editorStates.
 		/// This breaks the link of this object to any stored assets and references. That means, that all changes to this object will have to be explicitly saved.
 		/// </summary>
-		public static NodeCanvas CreateWorkingCopy (NodeCanvas nodeCanvas, bool editorStates = true) 
+		public static NodeCanvas CreateWorkingCopy (NodeCanvas nodeCanvas, bool editorStates = true)
 		{
 			if (nodeCanvas == null)
 				return null;
+
+			// Cloning instantiates every node ScriptableObject, which fires Awake on the clones.
+			// Awake-time node init must not run here: on the save path the clones are dead data
+			// (init side effects — e.g. a node that instantiates scene objects — would leak one
+			// copy per save), and on the load path the clones' ports aren't rewired yet, so any
+			// port references cached during init would be stale. With IsInitializing set, Awake
+			// no-ops and nodes init lazily on their first Calculate instead (the same contract
+			// ImportExportManager relies on).
+			bool wasInitializing = NodeEditor.IsInitializing;
+			NodeEditor.IsInitializing = true;
+			try
+			{
 
 			// Lists holding initial and cloned version of each ScriptableObject for later replacement of references
 			List<ScriptableObject> allSOs = new List<ScriptableObject> ();
@@ -415,7 +427,7 @@ namespace NodeEditorFramework
 			AddClonedSOs (allSOs, clonedSOs, nodeCanvas.GetScriptableObjects ());
 
 			// Iterate over the core ScriptableObjects in the canvas and clone them
-			for (int nodeCnt = 0; nodeCnt < nodeCanvas.nodes.Count; nodeCnt++) 
+			for (int nodeCnt = 0; nodeCnt < nodeCanvas.nodes.Count; nodeCnt++)
 			{
 				Node node = nodeCanvas.nodes[nodeCnt];
 
@@ -431,7 +443,7 @@ namespace NodeEditorFramework
 			// Replace every reference to any of the initial SOs of the first list with the respective clones of the second list
 			nodeCanvas.CopyScriptableObjects (copySOs);
 
-			for (int nodeCnt = 0; nodeCnt < nodeCanvas.nodes.Count; nodeCnt++) 
+			for (int nodeCnt = 0; nodeCnt < nodeCanvas.nodes.Count; nodeCnt++)
 			{ // Replace SOs in all Nodes
 				Node node = nodeCanvas.nodes[nodeCnt];
 
@@ -467,6 +479,12 @@ namespace NodeEditorFramework
 				state.selectedNode = ReplaceSO (allSOs, clonedSOs, state.selectedNode);
 
 			return nodeCanvas;
+
+			}
+			finally
+			{
+				NodeEditor.IsInitializing = wasInitializing;
+			}
 		}
 
 		/// <summary>

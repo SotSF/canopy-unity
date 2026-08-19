@@ -113,15 +113,32 @@ public class CanopyNode : TextureSynthNode
             NodeEditor.curNodeCanvas.OnNodeChange(this);
     }
 
+    // Prefer the Canopy's runtime material instance; the NodeUIController reference is the
+    // shared .mat asset (kept as fallback for scenes without a Canopy). Writing into the
+    // asset dirties it and canvas saves (AssetDatabase.SaveAssets) null the binding.
+    private static Material CanopySimMaterial =>
+        Canopy.instance != null ? Canopy.instance.canopyMaterial
+        : NodeUIController.instance != null ? NodeUIController.instance.canopyMaterial
+        : null;
+
     public void RenderToCanopySimulation(Texture texture)
     {
-        var canopyMaterial = NodeUIController.instance.canopyMaterial;
+        var canopyMaterial = CanopySimMaterial;
+        if (canopyMaterial == null) return;
         canopyMaterial.SetTexture("_Frame", texture);
         canopyMaterial.SetTexture("Frame", texture);
     }
 
     public override bool DoCalc()
     {
+        // Self-heal: anything that wipes the material's frame binding (asset reserialization,
+        // material reload) gets repaired next calc — this replaces the manual Reinitialize fix
+        var simMat = CanopySimMaterial;
+        if (simMat != null && outputTex != null && simMat.GetTexture("_Frame") != outputTex)
+        {
+            RenderToCanopySimulation(outputTex);
+        }
+
         Texture tex = textureInputKnob.GetValue<Texture>();
         if (tex != null)
         {

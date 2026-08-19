@@ -28,6 +28,12 @@ public class PoiPathNode : TickingNode
     [ValueConnectionKnob("period", Direction.In, typeof(float), NodeSide.Left)]
     public ValueConnectionKnob periodKnob;
 
+    [ValueConnectionKnob("armLen", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob armLengthKnob;
+
+    [ValueConnectionKnob("poiLen", Direction.In, typeof(float), NodeSide.Left)]
+    public ValueConnectionKnob poiLengthKnob;
+
     [ValueConnectionKnob("position", Direction.Out, typeof(Vector3), NodeSide.Right)]
     public ValueConnectionKnob positionKnob;
 
@@ -74,15 +80,8 @@ public class PoiPathNode : TickingNode
 
         FloatKnobOrField("period", ref period, periodKnob);
 
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("arm len", GUILayout.Width(60));
-        armLength = RTEditorGUI.Slider(armLength, 0f, 4f);
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("poi len", GUILayout.Width(60));
-        poiLength = RTEditorGUI.Slider(poiLength, 0f, 4f);
-        GUILayout.EndHorizontal();
+        FloatKnobOrSlider(ref armLength, 0f, 4f, armLengthKnob);
+        FloatKnobOrSlider(ref poiLength, 0f, 4f, poiLengthKnob);
 
         GUILayout.BeginHorizontal();
         GUILayout.Label("arm phase", GUILayout.Width(60));
@@ -94,16 +93,18 @@ public class PoiPathNode : TickingNode
         poiPhase = RTEditorGUI.Slider(poiPhase, 0f, 1f);
         GUILayout.EndHorizontal();
 
+        // Knob fields can be null when drawn via the Node Inspector on a node whose ports
+        // haven't been rebuilt yet (e.g. a canvas saved before positionR existed)
         GUILayout.BeginHorizontal();
-        tKnob.DisplayLayout();
+        if (tKnob != null) tKnob.DisplayLayout();
         GUILayout.FlexibleSpace();
         GUILayout.Label($"L({lastPosition.x:0.00}, {lastPosition.y:0.00})");
         GUILayout.FlexibleSpace();
-        positionKnob.DisplayLayout();
+        if (positionKnob != null) positionKnob.DisplayLayout();
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        positionRKnob.DisplayLayout();
+        if (positionRKnob != null) positionRKnob.DisplayLayout();
         GUILayout.EndHorizontal();
         GUILayout.EndVertical();
 
@@ -117,6 +118,14 @@ public class PoiPathNode : TickingNode
         if (periodKnob != null && periodKnob.connected())
         {
             period = periodKnob.GetValue<float>();
+        }
+        if (armLengthKnob != null && armLengthKnob.connected())
+        {
+            armLength = armLengthKnob.GetValue<float>();
+        }
+        if (poiLengthKnob != null && poiLengthKnob.connected())
+        {
+            poiLength = poiLengthKnob.GetValue<float>();
         }
         if (tKnob != null && tKnob.connected())
         {
@@ -138,8 +147,8 @@ public class PoiPathNode : TickingNode
         // Right hand runs the same path offset by the timing fraction in parametric t,
         // so arm and poi shift together (split-time even-count patterns land correctly)
         lastPosition = path.PositionAtTime(t, armLength, poiLength);
-        positionKnob.SetValue(lastPosition);
-        positionRKnob.SetValue(path.PositionAtTime(t + TimingPhase(timing), armLength, poiLength));
+        if (positionKnob != null) positionKnob.SetValue(lastPosition);
+        if (positionRKnob != null) positionRKnob.SetValue(path.PositionAtTime(t + TimingPhase(timing), armLength, poiLength));
         return true;
     }
 }

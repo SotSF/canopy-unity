@@ -66,6 +66,26 @@ public class Canopy: MonoBehaviour
         originalRotation = Quaternion.identity;
         instance = this;
         InitializeCatenaryBuffer();
+        InstanceCanopyMaterial();
+    }
+
+    /** CanopyNode streams its RenderTexture into _Frame at runtime. Writing that into the
+     *  .mat ASSET dirties it, and any AssetDatabase.SaveAssets() — e.g. saving a node
+     *  canvas — then reserializes it; a runtime RT reference can't persist, so the binding
+     *  nulls out and the simulation renders the shader's default white. Swap everything
+     *  onto a runtime instance so the asset is never touched. */
+    private void InstanceCanopyMaterial()
+    {
+        if (canopyMaterial == null) return;
+        var original = canopyMaterial;
+        canopyMaterial = new Material(original) { name = original.name + " (runtime instance)" };
+        foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>(true))
+        {
+            if (meshRenderer.sharedMaterial == original)
+            {
+                meshRenderer.sharedMaterial = canopyMaterial;
+            }
+        }
     }
 
     private void OnDestroy()
