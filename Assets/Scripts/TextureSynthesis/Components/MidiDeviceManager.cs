@@ -17,11 +17,18 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
     public delegate void MidiNoteOffHandler(MidiNoteControl note);
     public delegate void MidiBindCompleteHandler(MidiDevice device, int channel, int controlID);
     public delegate void MidiNoteBindCompleteHandler(MidiDevice device, int channel, int noteNumber);
+    // portTime: accumulated per-port timestamp (seconds) with driver-side precision;
+    // tick-to-tick deltas are BPM-grade, the absolute value is meaningless.
+    public delegate void MidiClockTickHandler(string portName, double portTime);
+    public delegate void MidiClockTransportHandler(string portName);
+    // Clock messages carry no channel, so a clock bind resolves to a port, not a device.
+    public delegate void MidiClockBindCompleteHandler(string portName);
 
     public enum BindingType
     {
         ControlChange,
-        Note
+        Note,
+        Clock
     }
 
     private List<MidiDevice> midiDevices = new List<MidiDevice>();
@@ -32,6 +39,14 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
     // Registered note handlers: key = nodeInstanceId_channel_note{noteNumber}
     private Dictionary<string, MidiNoteOnHandler> noteOnHandlers = new Dictionary<string, MidiNoteOnHandler>();
     private Dictionary<string, MidiNoteOffHandler> noteOffHandlers = new Dictionary<string, MidiNoteOffHandler>();
+
+    // Registered clock handlers: key = nodeInstanceId_clockport{portName}. Clock/transport
+    // messages are port-wide (no channel), so routing is keyed on the RtMidi port name
+    // rather than a device channel.
+    private Dictionary<string, MidiClockTickHandler> clockTickHandlers = new Dictionary<string, MidiClockTickHandler>();
+    private Dictionary<string, MidiClockTransportHandler> clockStartHandlers = new Dictionary<string, MidiClockTransportHandler>();
+    private Dictionary<string, MidiClockTransportHandler> clockContinueHandlers = new Dictionary<string, MidiClockTransportHandler>();
+    private Dictionary<string, MidiClockTransportHandler> clockStopHandlers = new Dictionary<string, MidiClockTransportHandler>();
 
     // --- Oddball support ---
     // The Oddball (https://playoddball.com) is a BLE-MIDI motion controller that streams
@@ -60,6 +75,7 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
     private string bindingNodeId = null;
     private MidiBindCompleteHandler controlBindingCompleteCallback = null;
     private MidiNoteBindCompleteHandler noteBindingCompleteCallback = null;
+    private MidiClockBindCompleteHandler clockBindingCompleteCallback = null;
 
     protected override void OnAwake()
     {
@@ -84,6 +100,12 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
 
         // Register for device changes
         InputSystem.onDeviceChange += OnDeviceChange;
+
+        // Clock/transport events are port-level static events (no per-device attach).
+        MidiSystemRealtime.onClock += OnClockMessage;
+        MidiSystemRealtime.onStart += OnClockStart;
+        MidiSystemRealtime.onContinue += OnClockContinue;
+        MidiSystemRealtime.onStop += OnClockStop;
     }
 
     /// <summary>
@@ -116,9 +138,19 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
         }
 
         InputSystem.onDeviceChange -= OnDeviceChange;
+
+        MidiSystemRealtime.onClock -= OnClockMessage;
+        MidiSystemRealtime.onStart -= OnClockStart;
+        MidiSystemRealtime.onContinue -= OnClockContinue;
+        MidiSystemRealtime.onStop -= OnClockStop;
+
         controlChangeHandlers.Clear();
         noteOnHandlers.Clear();
         noteOffHandlers.Clear();
+        clockTickHandlers.Clear();
+        clockStartHandlers.Clear();
+        clockContinueHandlers.Clear();
+        clockStopHandlers.Clear();
         oddballControlHandlers.Clear();
         oddballNoteOnHandlers.Clear();
         oddballNoteOffHandlers.Clear();
@@ -285,6 +317,67 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
         }
     }
 
+    private void OnClockMessage(string portName, double portTime)
+    {
+        // Clock binding completes on the first tick heard from any port.
+        if (isBinding && currentBindingType == BindingType.Clock && clockBindingCompleteCallback != null)
+        {
+            isBinding = false;
+            var callback = clockBindingCompleteCallback;
+            clockBindingCompleteCallback = null;
+            bindingNodeId = null;
+
+            try
+            {
+                callback.Invoke(portName);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[MidiDeviceManager] Error in clock binding callback: {e.Message}");
+            }
+            return;
+        }
+
+        var handlersToNotify = clockTickHandlers
+            .Where(kvp => kvp.Key.EndsWith($"_clockport{portName}"))
+            .ToList();
+
+        foreach (var kvp in handlersToNotify)
+        {
+            try
+            {
+                kvp.Value?.Invoke(portName, portTime);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[MidiDeviceManager] Error invoking clock tick handler: {e.Message}");
+            }
+        }
+    }
+
+    private void OnClockStart(string portName) => RouteTransport(clockStartHandlers, portName, "start");
+    private void OnClockContinue(string portName) => RouteTransport(clockContinueHandlers, portName, "continue");
+    private void OnClockStop(string portName) => RouteTransport(clockStopHandlers, portName, "stop");
+
+    private void RouteTransport(Dictionary<string, MidiClockTransportHandler> handlers, string portName, string kind)
+    {
+        var handlersToNotify = handlers
+            .Where(kvp => kvp.Key.EndsWith($"_clockport{portName}"))
+            .ToList();
+
+        foreach (var kvp in handlersToNotify)
+        {
+            try
+            {
+                kvp.Value?.Invoke(portName);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[MidiDeviceManager] Error invoking clock {kind} handler: {e.Message}");
+            }
+        }
+    }
+
     private void OnBindControlChange(MidiValueControl cc, float value)
     {
         if (!isBinding || currentBindingType != BindingType.ControlChange || controlBindingCompleteCallback == null) return;
@@ -398,6 +491,51 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
     }
 
     /// <summary>
+    /// Register handlers for MIDI clock/transport events from a specific port.
+    /// Clock is port-wide (no channel), so the key is the RtMidi port name captured
+    /// at bind time.
+    /// </summary>
+    public void RegisterClockHandlers(string nodeInstanceId, string portName,
+        MidiClockTickHandler onTick = null,
+        MidiClockTransportHandler onStart = null,
+        MidiClockTransportHandler onContinue = null,
+        MidiClockTransportHandler onStop = null)
+    {
+        string key = $"{nodeInstanceId}_clockport{portName}";
+
+        if (onTick != null)
+        {
+            if (clockTickHandlers.ContainsKey(key))
+            {
+                Debug.LogWarning($"[MidiDeviceManager] Clock tick handler already registered for {key}, replacing");
+            }
+            clockTickHandlers[key] = onTick;
+        }
+        if (onStart != null) clockStartHandlers[key] = onStart;
+        if (onContinue != null) clockContinueHandlers[key] = onContinue;
+        if (onStop != null) clockStopHandlers[key] = onStop;
+
+        Debug.Log($"[MidiDeviceManager] Registered clock handlers for {key}");
+    }
+
+    /// <summary>
+    /// Unregister clock/transport handlers
+    /// </summary>
+    public void UnregisterClockHandlers(string nodeInstanceId, string portName)
+    {
+        string key = $"{nodeInstanceId}_clockport{portName}";
+
+        // Non-short-circuiting so every dictionary is swept
+        if (clockTickHandlers.Remove(key)
+            | clockStartHandlers.Remove(key)
+            | clockContinueHandlers.Remove(key)
+            | clockStopHandlers.Remove(key))
+        {
+            Debug.Log($"[MidiDeviceManager] Unregistered clock handlers for {key}");
+        }
+    }
+
+    /// <summary>
     /// Unregister all handlers for a specific node
     /// </summary>
     public void UnregisterNode(string nodeInstanceId)
@@ -435,6 +573,23 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
         {
             noteOffHandlers.Remove(key);
             Debug.Log($"[MidiDeviceManager] Unregistered note off handler for {key}");
+        }
+
+        var clockKeysToRemove = clockTickHandlers.Keys
+            .Concat(clockStartHandlers.Keys)
+            .Concat(clockContinueHandlers.Keys)
+            .Concat(clockStopHandlers.Keys)
+            .Where(k => k.StartsWith(nodeInstanceId + "_"))
+            .Distinct()
+            .ToList();
+
+        foreach (var key in clockKeysToRemove)
+        {
+            clockTickHandlers.Remove(key);
+            clockStartHandlers.Remove(key);
+            clockContinueHandlers.Remove(key);
+            clockStopHandlers.Remove(key);
+            Debug.Log($"[MidiDeviceManager] Unregistered clock handlers for {key}");
         }
 
         // Oddball subscribers are keyed directly by nodeInstanceId.
@@ -525,6 +680,27 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
     }
 
     /// <summary>
+    /// Begin binding mode for MIDI clock - completes on the first clock tick heard
+    /// from any port. No per-device attach needed: clock events arrive through the
+    /// always-subscribed MidiSystemRealtime static events.
+    /// </summary>
+    public void BeginClockBinding(string nodeInstanceId, MidiClockBindCompleteHandler onComplete)
+    {
+        if (isBinding)
+        {
+            Debug.LogWarning("[MidiDeviceManager] Already in binding mode");
+            return;
+        }
+
+        isBinding = true;
+        currentBindingType = BindingType.Clock;
+        bindingNodeId = nodeInstanceId;
+        clockBindingCompleteCallback = onComplete;
+
+        Debug.Log("[MidiDeviceManager] Clock binding mode started");
+    }
+
+    /// <summary>
     /// Cancel binding mode
     /// </summary>
     public void CancelBinding()
@@ -541,6 +717,7 @@ public class MidiDeviceManager : Singleton<MidiDeviceManager>
         bindingNodeId = null;
         controlBindingCompleteCallback = null;
         noteBindingCompleteCallback = null;
+        clockBindingCompleteCallback = null;
 
         Debug.Log("[MidiDeviceManager] Binding mode cancelled");
     }

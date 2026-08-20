@@ -1,395 +1,202 @@
-
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 using SecretFire.TextureSynth;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TexSynth.Audio.BeatDetection
 {
-
+    /// <summary>
+    /// Spectral-flux onset ("beat") detector. Consumes any float[] spectrum stream
+    /// (LaspAudioSpectrum, SystemAudioSpectrum, MelFilterbank...); bins just need a
+    /// stable per-bin scale frame to frame, which the project's sources provide.
+    ///
+    /// Each frame: half-wave-rectified spectral flux (per-bin energy increase since the
+    /// previous frame, averaged over a selectable bin range) is scored against an
+    /// exponentially-tracked mean/deviation of itself. `confidence` continuously outputs
+    /// that z-score squashed to 0-1; `beat` fires a one-frame pulse when the z-score
+    /// crosses the sensitivity threshold outside a refractory interval. Restricting the
+    /// bin range to the low end makes it a kick detector. Follows KeySignal/MIDINote
+    /// pulse semantics, so `beat` can drive EnvelopeGenerator directly.
+    /// </summary>
     [Node(false, "Signal/BeatDetector")]
-    public class BeatDetectorNode : TextureSynthNode
+    public class BeatDetectorNode : SignalNode
     {
         public override string GetID => "BeatDetectorNode";
         public override string Title { get { return "BeatDetector"; } }
-        private Vector2 _DefaultSize = new Vector2(150, 100);
 
-    public override Vector2 DefaultSize => _DefaultSize;
+        private Vector2 _DefaultSize = new Vector2(200, 160);
+        protected override Vector2 BaseDefaultSize => _DefaultSize;
 
-        [ValueConnectionKnob("spectrum", Direction.In, typeof(float), NodeSide.Left)]
-        public ValueConnectionKnob spectrumKnob;
-        [ValueConnectionKnob("beatDetected", Direction.Out, typeof(bool), NodeSide.Right)]
-        public ValueConnectionKnob beatDetectedKnob;
-        public bool beatDetected;
+        [ValueConnectionKnob("spectrumData", Direction.In, typeof(float[]), NodeSide.Left)]
+        public ValueConnectionKnob spectrumDataKnob;
+
+        [ValueConnectionKnob("beat", Direction.Out, typeof(bool), NodeSide.Right)]
+        public ValueConnectionKnob beatKnob;
+
+        [ValueConnectionKnob("confidence", Direction.Out, typeof(float), NodeSide.Right)]
+        public ValueConnectionKnob confidenceKnob;
+
+        protected override IEnumerable<SignalChannel> GetSignalChannels()
+        {
+            yield return new SignalChannel
+            {
+                outputKnob = confidenceKnob,
+                getValue   = () => confidence,
+                label      = "confidence",
+            };
+        }
+
+        // Beat threshold in standard deviations of recent flux
+        public float sensitivity = 2.0f;
+        // Refractory period: no two beats closer than this (seconds). 0.15s caps at 400 BPM.
+        public float minBeatInterval = 0.15f;
+        // Bin range to watch, BandAvg-style. highEnd <= 0 means "full range" until a
+        // spectrum arrives (also what legacy saves deserialize to).
+        public int filterLowEnd = 0;
+        public int filterHighEnd = 0;
+
+        private int spectrumSize;
+
+        // Detection state. Flux statistics are tracked as exponential moving mean/variance
+        // so the threshold adapts to material loudness and spectrum-source scale.
+        [System.NonSerialized] private float[] prevSpectrum;
+        [System.NonSerialized] private float fluxMean;
+        [System.NonSerialized] private float fluxVar;
+        [System.NonSerialized] private bool statsInitialized;
+        [System.NonSerialized] private float confidence;
+        [System.NonSerialized] private float zScore;
+        [System.NonSerialized] private double lastBeatTime = double.NegativeInfinity;
+        [System.NonSerialized] private float bpmEstimate;
+        // One-tick pulse stays true for every Calculate within its frame: OnNodeChange can
+        // re-run Calculate in-frame, and consuming on the first call would hide the pulse
+        // from the re-runs downstream nodes actually read.
+        [System.NonSerialized] private int beatFrame = -1;
+        // Detection state must advance once per rendered frame even though Calculate can
+        // re-run within a frame (re-running would compare a spectrum against itself and
+        // double-advance the statistics).
+        [System.NonSerialized] private int lastProcessedFrame = -1;
+
+        // Statistics adaptation horizon (seconds). Long enough that a whole beat cycle
+        // fits without the mean chasing individual onsets.
+        const float StatsTau = 2.0f;
+        // Deviation floor in flux units so silence (variance ~ 0) can't turn noise into
+        // huge z-scores. Spectrum sources here are normalized roughly 0-1 per bin.
+        const float DeviationFloor = 1e-3f;
+        // z-score that maps to confidence 1.0
+        const float ConfidenceFullScaleZ = 4f;
+
+        void ProcessFrame(float[] spectrum)
+        {
+            spectrumSize = spectrum.Length;
+            if (filterHighEnd <= 0) filterHighEnd = spectrum.Length;
+            int lo = Mathf.Clamp(filterLowEnd, 0, spectrum.Length);
+            int hi = Mathf.Clamp(filterHighEnd, lo, spectrum.Length);
+
+            if (prevSpectrum == null || prevSpectrum.Length != spectrum.Length)
+            {
+                // First frame or source resolution change: no valid delta, restart stats
+                prevSpectrum = (float[])spectrum.Clone();
+                statsInitialized = false;
+                return;
+            }
+
+            // Half-wave rectified spectral flux: energy increases only, so decays don't
+            // cancel attacks. Mean over the bin range keeps the scale independent of
+            // range width and source resolution.
+            float flux = 0;
+            for (int i = lo; i < hi; i++)
+            {
+                float d = spectrum[i] - prevSpectrum[i];
+                if (d > 0) flux += d;
+            }
+            flux = hi > lo ? flux / (hi - lo) : 0f;
+
+            System.Array.Copy(spectrum, prevSpectrum, spectrum.Length);
+
+            if (!statsInitialized)
+            {
+                fluxMean = flux;
+                fluxVar = 0;
+                statsInitialized = true;
+                return;
+            }
+
+            // Score against stats from *before* this frame, then fold the frame in
+            float deviation = Mathf.Sqrt(fluxVar) + DeviationFloor;
+            zScore = (flux - fluxMean) / deviation;
+            confidence = Mathf.Clamp01(zScore / ConfidenceFullScaleZ);
+
+            float alpha = 1f - Mathf.Exp(-Time.deltaTime / StatsTau);
+            float delta = flux - fluxMean;
+            fluxMean += alpha * delta;
+            fluxVar = (1f - alpha) * (fluxVar + alpha * delta * delta);
+
+            double now = Time.realtimeSinceStartupAsDouble;
+            if (zScore >= sensitivity && now - lastBeatTime >= minBeatInterval)
+            {
+                beatFrame = Time.frameCount;
+                double interval = now - lastBeatTime;
+                // Inter-beat intervals in musical range feed a smoothed BPM readout
+                if (interval > 0.2 && interval < 2.0)
+                {
+                    float instBpm = (float)(60.0 / interval);
+                    bpmEstimate = bpmEstimate <= 0 ? instBpm : Mathf.Lerp(bpmEstimate, instBpm, 0.2f);
+                }
+                lastBeatTime = now;
+            }
+        }
 
         public override void NodeGUI()
         {
             GUILayout.BeginVertical();
+            GUILayout.BeginHorizontal();
+            spectrumDataKnob.DisplayLayout();
+            GUILayout.FlexibleSpace();
+            // Beat lamp + rough BPM readout (from raw inter-beat intervals, so it
+            // wanders more than a MIDI clock; informational only)
+            bool beatRecent = Time.realtimeSinceStartupAsDouble - lastBeatTime < 0.1;
+            GUILayout.Label(beatRecent ? "●" : "○", GUILayout.Width(18));
+            GUILayout.Label(bpmEstimate > 0 ? $"~{bpmEstimate:0} BPM" : "--- BPM", GUILayout.Width(70));
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Sensitivity", GUILayout.Width(70));
+            sensitivity = RTEditorGUI.Slider(sensitivity, 0.5f, 5f);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Min gap (s)", GUILayout.Width(70));
+            minBeatInterval = RTEditorGUI.Slider(minBeatInterval, 0.05f, 1f);
+            GUILayout.EndHorizontal();
+
+            // Watched bin range, BandAvg-style (narrow to the low bins for kick detection)
+            filterLowEnd = RTEditorGUI.IntSlider(filterLowEnd, 0, Mathf.Max(filterHighEnd, 1));
+            filterHighEnd = RTEditorGUI.IntSlider(filterHighEnd, filterLowEnd, Mathf.Max(spectrumSize, 1));
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            beatKnob.DisplayLayout();
+            GUILayout.EndHorizontal();
+
+            DrawSparkline();
             GUILayout.EndVertical();
+
             if (GUI.changed)
                 NodeEditor.curNodeCanvas.OnNodeChange(this);
         }
 
         public override bool DoCalc()
         {
-            beatDetectedKnob.SetValue(beatDetected);
+            var spectrum = spectrumDataKnob.connected() ? spectrumDataKnob.GetValue<float[]>() : null;
+            if (spectrum != null && spectrum.Length > 0 && Time.frameCount != lastProcessedFrame)
+            {
+                ProcessFrame(spectrum);
+                lastProcessedFrame = Time.frameCount;
+            }
+
+            beatKnob.SetValue(Time.frameCount == beatFrame);
+            confidenceKnob.SetValue(confidence);
             return true;
-        }
-    }
-
-    public class AudioProcessor
-    {
-        public AudioSource audioSource;
-
-        private long lastT, nowT, diff, entries, sum;
-
-        public int bufferSize = 1024;
-        // fft size
-        private int samplingRate = 44100;
-        // fft sampling frequency
-
-        /* log-frequency averaging controls */
-        private int nBand = 12;
-        // number of bands
-
-        public float gThresh = 0.1f;
-        // sensitivity
-
-        int blipDelayLen = 16;
-        int[] blipDelay;
-
-        private int sinceLast = 0;
-        // counter to suppress double-beats
-
-        private float framePeriod;
-
-        /* storage space */
-        private int colmax = 120;
-        float[] spectrum;
-        float[] averages;
-        float[] acVals;
-        float[] onsets;
-        float[] scorefun;
-        float[] dobeat;
-        int now = 0;
-        // time index for circular buffer within above
-
-        float[] spec;
-        // the spectrum of the previous step
-
-        /* Autocorrelation structure */
-        int maxlag = 100;
-        // (in frames) largest lag to track
-        float decay = 0.997f;
-        // smoothing constant for running average
-        Autoco auco;
-
-        private float alph;
-        // trade-off constant between tempo deviation penalty and onset strength
-
-        //////////////////////////////////
-        private long getCurrentTimeMillis()
-        {
-            long milliseconds = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
-            return milliseconds;
-        }
-
-        private void initArrays()
-        {
-            blipDelay = new int[blipDelayLen];
-            onsets = new float[colmax];
-            scorefun = new float[colmax];
-            dobeat = new float[colmax];
-            spectrum = new float[bufferSize];
-            averages = new float[12];
-            acVals = new float[maxlag];
-            alph = 100 * gThresh;
-        }
-
-        // Use this for initialization
-        void Start()
-        {
-            initArrays();
-
-            //audioSource = GetComponent<AudioSource>();
-            samplingRate = audioSource.clip.frequency;
-
-            framePeriod = (float)bufferSize / (float)samplingRate;
-
-            //initialize record of previous spectrum
-            spec = new float[nBand];
-            for (int i = 0; i < nBand; ++i)
-                spec[i] = 100.0f;
-
-            auco = new Autoco(maxlag, decay, framePeriod, getBandWidth());
-
-            lastT = getCurrentTimeMillis();
-        }
-
-        public void tapTempo()
-        {
-            nowT = getCurrentTimeMillis();
-            diff = nowT - lastT;
-            lastT = nowT;
-            sum = sum + diff;
-            entries++;
-
-            int average = (int)(sum / entries);
-
-            Debug.Log("average = " + average);
-        }
-
-        double[] toDoubleArray(float[] arr)
-        {
-            if (arr == null)
-                return null;
-            int n = arr.Length;
-            double[] ret = new double[n];
-            for (int i = 0; i < n; i++)
-            {
-                ret[i] = (float)arr[i];
-            }
-            return ret;
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-            if (audioSource.isPlaying)
-            {
-                audioSource.GetSpectrumData(spectrum, 0, FFTWindow.BlackmanHarris);
-                computeAverages(spectrum);
-                //onSpectrum.Invoke(averages);
-
-                /* calculate the value of the onset function in this frame */
-                float onset = 0;
-                for (int i = 0; i < nBand; i++)
-                {
-                    float specVal = (float)System.Math.Max(-100.0f, 20.0f * (float)System.Math.Log10(averages[i]) + 160); // dB value of this band
-                    specVal *= 0.025f;
-                    float dbInc = specVal - spec[i]; // dB increment since last frame
-                    spec[i] = specVal; // record this frome to use next time around
-                    onset += dbInc; // onset function is the sum of dB increments
-                }
-
-                onsets[now] = onset;
-
-                /* update autocorrelator and find peak lag = current tempo */
-                auco.newVal(onset);
-                // record largest value in (weighted) autocorrelation as it will be the tempo
-                float aMax = 0.0f;
-                int tempopd = 0;
-                //float[] acVals = new float[maxlag];
-                for (int i = 0; i < maxlag; ++i)
-                {
-                    float acVal = (float)System.Math.Sqrt(auco.autoco(i));
-                    if (acVal > aMax)
-                    {
-                        aMax = acVal;
-                        tempopd = i;
-                    }
-                    // store in array backwards, so it displays right-to-left, in line with traces
-                    acVals[maxlag - 1 - i] = acVal;
-                }
-
-                /* calculate DP-ish function to update the best-score function */
-                float smax = -999999;
-                int smaxix = 0;
-                // weight can be varied dynamically with the mouse
-                alph = 100 * gThresh;
-                // consider all possible preceding beat times from 0.5 to 2.0 x current tempo period
-                for (int i = tempopd / 2; i < System.Math.Min(colmax, 2 * tempopd); ++i)
-                {
-                    // objective function - this beat's cost + score to last beat + transition penalty
-                    float score = onset + scorefun[(now - i + colmax) % colmax] - alph * (float)System.Math.Pow(System.Math.Log((float)i / (float)tempopd), 2);
-                    // keep track of the best-scoring predecesor
-                    if (score > smax)
-                    {
-                        smax = score;
-                        smaxix = i;
-                    }
-                }
-
-                scorefun[now] = smax;
-                // keep the smallest value in the score fn window as zero, by subtracing the min val
-                float smin = scorefun[0];
-                for (int i = 0; i < colmax; ++i)
-                    if (scorefun[i] < smin)
-                        smin = scorefun[i];
-                for (int i = 0; i < colmax; ++i)
-                    scorefun[i] -= smin;
-
-                /* find the largest value in the score fn window, to decide if we emit a blip */
-                smax = scorefun[0];
-                smaxix = 0;
-                for (int i = 0; i < colmax; ++i)
-                {
-                    if (scorefun[i] > smax)
-                    {
-                        smax = scorefun[i];
-                        smaxix = i;
-                    }
-                }
-
-                // dobeat array records where we actally place beats
-                dobeat[now] = 0;  // default is no beat this frame
-                ++sinceLast;
-                // if current value is largest in the array, probably means we're on a beat
-                if (smaxix == now)
-                {
-                    //tapTempo();
-                    // make sure the most recent beat wasn't too recently
-                    if (sinceLast > tempopd / 4)
-                    {
-                        //onBeat.Invoke();
-                        blipDelay[0] = 1;
-                        // record that we did actually mark a beat this frame
-                        dobeat[now] = 1;
-                        // reset counter of frames since last beat
-                        sinceLast = 0;
-                    }
-                }
-
-                /* update column index (for ring buffer) */
-                if (++now == colmax)
-                    now = 0;
-
-                //Debug.Log(System.Math.Round(60 / (tempopd * framePeriod)) + " bpm");
-                //Debug.Log(System.Math.Round(auco.avgBpm()) + " bpm");
-            }
-        }
-
-        public float getBandWidth()
-        {
-            return (2f / (float)bufferSize) * (samplingRate / 2f);
-        }
-
-        public int freqToIndex(int freq)
-        {
-            // special case: freq is lower than the bandwidth of spectrum[0]
-            if (freq < getBandWidth() / 2)
-                return 0;
-            // special case: freq is within the bandwidth of spectrum[512]
-            if (freq > samplingRate / 2 - getBandWidth() / 2)
-                return (bufferSize / 2);
-            // all other cases
-            float fraction = (float)freq / (float)samplingRate;
-            int i = (int)System.Math.Round(bufferSize * fraction);
-            //Debug.Log("frequency: " + freq + ", index: " + i);
-            return i;
-        }
-
-        public void computeAverages(float[] data)
-        {
-            for (int i = 0; i < 12; i++)
-            {
-                float avg = 0;
-                int lowFreq;
-                if (i == 0)
-                    lowFreq = 0;
-                else
-                    lowFreq = (int)((samplingRate / 2) / (float)System.Math.Pow(2, 12 - i));
-                int hiFreq = (int)((samplingRate / 2) / (float)System.Math.Pow(2, 11 - i));
-                int lowBound = freqToIndex(lowFreq);
-                int hiBound = freqToIndex(hiFreq);
-                for (int j = lowBound; j <= hiBound; j++)
-                {
-                    //Debug.Log("lowbound: " + lowBound + ", highbound: " + hiBound);
-                    avg += data[j];
-                }
-                // line has been changed since discussion in the comments
-                // avg /= (hiBound - lowBound);
-                avg /= (hiBound - lowBound + 1);
-                averages[i] = avg;
-            }
-        }
-
-        float map(float s, float a1, float a2, float b1, float b2)
-        {
-            return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
-        }
-
-        public float constrain(float value, float inclusiveMinimum, float inlusiveMaximum)
-        {
-            if (value >= inclusiveMinimum)
-            {
-                if (value <= inlusiveMaximum)
-                {
-                    return value;
-                }
-
-                return inlusiveMaximum;
-            }
-
-            return inclusiveMinimum;
-        }
-
-        // class to compute an array of online autocorrelators
-        private class Autoco
-        {
-            private int del_length;
-            private float decay;
-            private float[] delays;
-            private float[] outputs;
-            private int indx;
-
-            private float[] bpms;
-            private float[] rweight;
-            private float wmidbpm = 120f;
-            private float woctavewidth;
-
-            public Autoco(int len, float alpha, float framePeriod, float bandwidth)
-            {
-                woctavewidth = bandwidth;
-                decay = alpha;
-                del_length = len;
-                delays = new float[del_length];
-                outputs = new float[del_length];
-                indx = 0;
-
-                // calculate a log-lag gaussian weighting function, to prefer tempi around 120 bpm
-                bpms = new float[del_length];
-                rweight = new float[del_length];
-                for (int i = 0; i < del_length; ++i)
-                {
-                    bpms[i] = 60.0f / (framePeriod * (float)i);
-                    //Debug.Log(bpms[i]);
-                    // weighting is Gaussian on log-BPM axis, centered at wmidbpm, SD = woctavewidth octaves
-                    rweight[i] = (float)System.Math.Exp(-0.5f * System.Math.Pow(System.Math.Log(bpms[i] / wmidbpm) / System.Math.Log(2.0f) / woctavewidth, 2.0f));
-                }
-            }
-
-            public void newVal(float val)
-            {
-
-                delays[indx] = val;
-
-                // update running autocorrelator values
-                for (int i = 0; i < del_length; ++i)
-                {
-                    int delix = (indx - i + del_length) % del_length;
-                    outputs[i] += (1 - decay) * (delays[indx] * delays[delix] - outputs[i]);
-                }
-
-                if (++indx == del_length)
-                    indx = 0;
-            }
-
-            // read back the current autocorrelator value at a particular lag
-            public float autoco(int del)
-            {
-                return rweight[del] * outputs[del];
-            }
-
-            public float avgBpm()
-            {
-                float sum = 0;
-                for (int i = 0; i < bpms.Length; ++i)
-                {
-                    sum += bpms[i];
-                }
-                return sum / del_length;
-            }
         }
     }
 }

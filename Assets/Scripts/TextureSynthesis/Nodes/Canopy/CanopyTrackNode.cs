@@ -104,15 +104,39 @@ public class CanopyTrackNode : TickingNode
     void BindExisting()
     {
         CloseFile();
-        file = RecordingManager.Instance != null ? RecordingManager.Instance.Open(recordingName, writable: true) : null;
+        // Read-only for playback. Writable opens are mutually exclusive, and in the
+        // built player the canvas ASSET and its working copy both deserialize with
+        // isPlaying true, so two instances of this node bind the same file — the second
+        // writable open died with a sharing violation. (The editor never hits this: the
+        // asset deserializes in edit mode, where node Awake skips DoInit.) Read handles
+        // coexist; the deck upgrades to writable only when record actually arms.
+        file = RecordingManager.Instance != null ? RecordingManager.Instance.Open(recordingName, writable: false) : null;
         if (file == null)
         {
-            Unbind();
+            // Keep the binding: recordingName is user data (unbinding here would wipe it
+            // from the canvas on the next save). The deck shows an unavailable state and
+            // punching record retries the open.
             return;
         }
         isNewUncreated = false;
         AllocatePlaybackResources(file.Width, file.Height);
         playhead = Mathf.Clamp(savedPlayhead, 0f, file.Duration);
+    }
+
+    /// <summary>Swaps the read-only playback handle for a ReadWrite one (same file, same
+    /// frame table). False if someone else holds the write lock; playback is restored.</summary>
+    bool ReopenWritable()
+    {
+        if (file == null || RecordingManager.Instance == null) return false;
+        if (file.Writable) return true;
+        file.Dispose();
+        file = RecordingManager.Instance.Open(recordingName, writable: true);
+        if (file == null)
+        {
+            file = RecordingManager.Instance.Open(recordingName, writable: false);
+            return false;
+        }
+        return true;
     }
 
     void AllocatePlaybackResources(int width, int height)
@@ -182,12 +206,27 @@ public class CanopyTrackNode : TickingNode
                 Debug.LogWarning("CanopyTrack: record requested but RecordingManager is unavailable.");
                 return;
             }
-            if (!isNewUncreated) return;
-            // First frames of a brand-new recording define its dimensions
-            file = RecordingManager.Instance.CreateFile(recordingName, input.width, input.height, CaptureFps);
-            AllocatePlaybackResources(input.width, input.height);
-            isNewUncreated = false;
-            playhead = 0f;
+            if (isNewUncreated)
+            {
+                // First frames of a brand-new recording define its dimensions
+                file = RecordingManager.Instance.CreateFile(recordingName, input.width, input.height, CaptureFps);
+                AllocatePlaybackResources(input.width, input.height);
+                isNewUncreated = false;
+                playhead = 0f;
+            }
+            else
+            {
+                // Bound but unopened (file missing or locked at bind time): retry now
+                file = RecordingManager.Instance.Open(recordingName, writable: true);
+                if (file == null) return;   // Open() logged why
+                AllocatePlaybackResources(file.Width, file.Height);
+                playhead = Mathf.Clamp(savedPlayhead, 0f, file.Duration);
+            }
+        }
+        else if (!file.Writable && !ReopenWritable())
+        {
+            Debug.LogWarning($"CanopyTrack: '{recordingName}' can't be opened for writing (locked by another instance or process?); not recording.");
+            return;
         }
         if (input.width != file.Width || input.height != file.Height)
         {
@@ -378,7 +417,9 @@ public class CanopyTrackNode : TickingNode
         }
         else
         {
-            GUILayout.Label("empty — punch ● to start recording");
+            GUILayout.Label(isNewUncreated
+                ? "empty — punch ● to start recording"
+                : "⚠ file unavailable — punch ● to retry");
         }
         // Recording needs frames: surface the missing wire instead of no-op'ing on ●
         if (!textureInputKnob.connected())
