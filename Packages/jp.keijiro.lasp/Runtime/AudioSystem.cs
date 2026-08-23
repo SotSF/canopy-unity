@@ -36,6 +36,11 @@ namespace Lasp
         public static InputStream GetInputStream(string id)
           => GetInputStream(GetInputDevice(id));
 
+        // Local addition: force a device rescan on the next enumeration. Hot-plug
+        // events already set this flag via the libsoundio callback; this lets a UI
+        // "rescan" button guarantee freshness regardless.
+        public static void RequestDeviceScan() => _shouldScanDevices = true;
+
         #endregion
 
         #region Fast Enter Play Mode reset
