@@ -14,6 +14,7 @@ namespace Minis
 
         RtMidiDll.Wrapper* _rtmidi;
         string _portName;
+        double _portTime;
         MidiDevice [] _channels = new MidiDevice[16];
 
         // Get a device object bound with a specified channel.
@@ -50,6 +51,11 @@ namespace Minis
             }
 
             RtMidiDll.OpenPort(_rtmidi, (uint)portNumber, "RtMidi Input");
+
+            // RtMidi ignores timing messages by default; accept them so MIDI
+            // clock (0xF8) and friends reach MidiSystemRealtime. Sysex and
+            // active sensing stay ignored.
+            RtMidiDll.InIgnoreTypes(_rtmidi, true, false, true);
         }
 
         ~MidiPort()
@@ -75,18 +81,42 @@ namespace Minis
         {
             if (_rtmidi == null || !_rtmidi->ok) return;
 
+            const int bufferSize = 32;
+            var message = stackalloc byte [bufferSize];
+
             while (true)
             {
-                var size = 4ul;
-                var message = stackalloc byte [(int)size];
+                var size = (ulong)bufferSize;
 
                 var stamp = RtMidiDll.InGetMessage(_rtmidi, message, ref size);
-                if (size != 3) break;
+                if (size == 0) break; // Queue drained
+
+                // Accumulated per-port message time from RtMidi's
+                // inter-message delta stamps: driver-side precision, unlike
+                // the frame-quantized time at which we poll the queue.
+                _portTime += stamp;
+
+                if (size == 1)
+                {
+                    // System-realtime messages are port-wide (no channel).
+                    switch (message[0])
+                    {
+                        case 0xf8: MidiSystemRealtime.InvokeClock(_portName, _portTime); break;
+                        case 0xfa: MidiSystemRealtime.InvokeStart(_portName); break;
+                        case 0xfb: MidiSystemRealtime.InvokeContinue(_portName); break;
+                        case 0xfc: MidiSystemRealtime.InvokeStop(_portName); break;
+                    }
+                    continue;
+                }
+
+                if (size != 3) continue; // 2-byte messages (MTC quarter-frame, program change...)
 
                 var status = message[0] >> 4;
                 var channel = message[0] & 0xf;
                 var data1 = message[1];
                 var data2 = message[2];
+
+                if (status == 0xf) continue; // 3-byte system common (song position)
 
                 if (data1 > 0x7f || data2 > 0x7f) continue; // Invalid data
 

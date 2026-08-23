@@ -63,7 +63,7 @@ public class SignalGraphNode : TickingNode
         gridPointsKernel = graphShader.FindKernel("gridPoints");
         horizontalAxisKernel = graphShader.FindKernel("horizontalAxis");
         verticalAxisKernel = graphShader.FindKernel("verticalAxis");
-        graphKernel = graphShader.FindKernel("graph");
+        //graphKernel = graphShader.FindKernel("graph");
         graphSDFKernel = graphShader.FindKernel("graphSDF");
         InitializeRenderTexture();
     }
