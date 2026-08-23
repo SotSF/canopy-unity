@@ -14713,6 +14713,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1625924463}
     m_Modifications:
+    - target: {fileID: 2758143217978854108, guid: e3c9985b8b1218b42bd36e9b1175a9c8,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8489414766949599174, guid: e3c9985b8b1218b42bd36e9b1175a9c8,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -14767,6 +14772,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TrailCam
+      objectReference: {fileID: 0}
+    - target: {fileID: 8955934221321683318, guid: e3c9985b8b1218b42bd36e9b1175a9c8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15138,10 +15148,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1625924463}
     m_Modifications:
+    - target: {fileID: 1651114933202016011, guid: 30ea59f27dd76b04eb3d6482bda2e4ac,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3782262159444657124, guid: 30ea59f27dd76b04eb3d6482bda2e4ac,
         type: 3}
       propertyPath: m_Name
-      value: FluidDotsCam
+      value: VFXCam
+      objectReference: {fileID: 0}
+    - target: {fileID: 3782262159444657124, guid: 30ea59f27dd76b04eb3d6482bda2e4ac,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4480608410607161469, guid: 30ea59f27dd76b04eb3d6482bda2e4ac,
         type: 3}
