@@ -26,6 +26,14 @@ namespace Lasp
         /// <summary>True while bound but the device has vanished (e.g. unplugged).</summary>
         public bool DeviceLost { get; private set; }
 
+        /// <summary>Consecutive frames of empty or exactly-zero input while running.
+        /// CoreAudio delivers pure digital zeros to a process without mic permission
+        /// (and a badly-opened stream delivers nothing), whereas a live device always
+        /// carries a noise floor — so a long streak means the stream is effectively
+        /// dead even though it reports valid.</summary>
+        public int ZeroStreakFrames { get; private set; }
+        public bool LooksSilent => ZeroStreakFrames >= 90;
+
         public float AttackTau = 0.04f;
         public float ReleaseTau = 0.25f;
         public float FloorDb = -60f;
@@ -63,6 +71,7 @@ namespace Lasp
             _spectrum = new float[SpectrumResolution];
             IsRunning = true;
             DeviceLost = false;
+            ZeroStreakFrames = 0;
             return true;
         }
 
@@ -80,23 +89,52 @@ namespace Lasp
             Unbind();
         }
 
+        // Re-acquire the InputStream whenever the cached one is missing or invalid,
+        // mirroring LASP's own SpectrumAnalyzer/AudioLevelTracker. LASP's device list
+        // (and the handles our stream wraps) can be rebuilt out from under us — a
+        // rescan, a hot-plug event, or the fast-enter-playmode static reset all do
+        // this — which invalidates the cached wrapper without our GameObject changing.
+        // Fetching a fresh wrapper for the same device ID recovers transparently.
+        InputStream ResolveStream()
+        {
+            if (_stream != null && _stream.IsValid) return _stream;
+            var desc = string.IsNullOrEmpty(DeviceId)
+                ? AudioSystem.DefaultDevice
+                : AudioSystem.GetInputDevice(DeviceId);
+            _stream = desc.IsValid ? AudioSystem.GetInputStream(desc) : null;
+            return (_stream != null && _stream.IsValid) ? _stream : null;
+        }
+
         void Update()
         {
-            if (!IsRunning || _stream == null) return;
-            if (!_stream.IsValid)
+            if (!IsRunning) return;
+            var stream = ResolveStream();
+            if (stream == null)
             {
-                // Unplugged mid-run: keep state so the owning node can surface it and
-                // offer a rescan, and recover automatically if the device returns.
+                // Device gone (e.g. unplugged): keep state so the owning node can
+                // surface it and offer a rescan, and recover automatically — via
+                // ResolveStream — if the device returns.
                 DeviceLost = true;
                 return;
             }
             DeviceLost = false;
-            SampleRate = _stream.SampleRate;
+            // 0 while the stream is failing to open (LASP retry cooldown) — keep the
+            // last known rate rather than publishing a transient 0 downstream.
+            int sr = stream.SampleRate;
+            if (sr > 0) SampleRate = sr;
 
             // Channel 0 only: a spectrum gains little from a stereo downmix, and the
             // strided slice feeds the FFT without a copy. Accessing the data here is
             // what keeps LASP's on-demand stream open.
-            var slice = _stream.GetChannelDataSlice(0);
+            var slice = stream.GetChannelDataSlice(0);
+            bool anySignal = false;
+            for (int s = 0; s < slice.Length; s++)
+            {
+                // Exact-zero comparison is intentional: a live device's noise floor is
+                // dithered (never exactly 0), while a dead/unauthorized stream is.
+                if (slice[s] != 0f) { anySignal = true; break; }
+            }
+            ZeroStreakFrames = anySignal ? 0 : ZeroStreakFrames + 1;
             if (slice.Length > 0) _fft.Push(slice);
             _fft.Analyze(FloorDb, 0f);
 

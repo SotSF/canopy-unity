@@ -11792,6 +11792,7 @@ GameObject:
   - component: {fileID: 1574564310}
   - component: {fileID: 1574564313}
   - component: {fileID: 1574564314}
+  - component: {fileID: 1574564316}
   m_Layer: 10
   m_Name: NodeUI
   m_TagString: Untagged
@@ -11811,7 +11812,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 058701fb26fe9874f8dffda7e66a0fe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas: {fileID: 11400000, guid: 14e1f9dd5c575a0448afe2e09c2fb4e7, type: 2}
+  canvas: {fileID: 11400000, guid: 779441df02c067a4eadc37562fe2f3a7, type: 2}
   loadSceneName: 
   screenSize: 1
   specifiedRootRect:
@@ -11838,7 +11839,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11b12ccbf5533274f9abf5008f057a67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas: {fileID: 11400000, guid: 14e1f9dd5c575a0448afe2e09c2fb4e7, type: 2}
+  canvas: {fileID: 11400000, guid: 779441df02c067a4eadc37562fe2f3a7, type: 2}
 --- !u!114 &1574564310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12029,7 +12030,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bb532fc52453a04189e7a1f5085638b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas: {fileID: 11400000, guid: 14e1f9dd5c575a0448afe2e09c2fb4e7, type: 2}
+  canvas: {fileID: 11400000, guid: 779441df02c067a4eadc37562fe2f3a7, type: 2}
+--- !u!114 &1574564316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574564306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69d4f470bf38a4d148857a60b2e69796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!1 &1575556132
 GameObject:
   m_ObjectHideFlags: 0

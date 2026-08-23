@@ -44,8 +44,10 @@ namespace Lasp
 
         #region Basic stream properties
 
-        public int StreamChannelCount => PreparedStream.Layout.ChannelCount;
-        public int StreamSampleRate => PreparedStream.SampleRate;
+        // Local fix: null-guarded — PreparedStream is null while an open attempt
+        // is failing/cooling down (see Prepare), and callers treat 0 as "not ready".
+        public int StreamChannelCount => PreparedStream?.Layout.ChannelCount ?? 0;
+        public int StreamSampleRate => PreparedStream?.SampleRate ?? 0;
 
         #endregion
 
@@ -83,13 +85,35 @@ namespace Lasp
 
             if (IsStreamActive) return true;
 
-            OpenStream();
+            // Local fix: a failed open (e.g. CoreAudio 'OpeningDevice' while the
+            // device is still mid-teardown from a just-closed stream) used to throw
+            // out of every data-access property, killing consumer Update()s with an
+            // exception per frame per consumer. Treat it as "no data yet": warn,
+            // back off, and retry after the cooldown — consumers already handle the
+            // empty-data path, and the on-demand design retries naturally.
+            if (_openCooldown > 0) return false;
+            try
+            {
+                OpenStream();
+            }
+            catch (Exception e)
+            {
+                _openCooldown = OpenRetryCooldown;
+                UnityEngine.Debug.LogWarning(
+                    $"LASP: couldn't open input stream on '{_device.Name}' " +
+                    $"({e.Message}); retrying in {OpenRetryCooldown} frames.");
+            }
             return false;
         }
 
         SoundIO.InStream PreparedStream { get { Prepare(); return _stream; } }
 
         int _sleepTimer;
+
+        // Local fix: frames to wait (counted down in Update) before re-attempting
+        // a failed stream open.
+        const int OpenRetryCooldown = 30;
+        int _openCooldown;
 
         #endregion
 
@@ -127,6 +151,9 @@ namespace Lasp
 
         public void Update(float deltaTime)
         {
+            // Local fix: tick the failed-open retry cooldown while inactive.
+            if (_openCooldown > 0) _openCooldown--;
+
             // Nothing to do when the stream is inactive.
             if (!IsStreamActive) return;
 

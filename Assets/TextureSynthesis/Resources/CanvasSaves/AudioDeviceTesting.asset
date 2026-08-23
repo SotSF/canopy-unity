@@ -1,0 +1,567 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8915290692122598974
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 731d2a6a365a68542bf618d78c6ce2fa, type: 3}
+  m_Name: SpectrumVisualizer
+  m_EditorClassIdentifier: Assembly-CSharp::SpectrumVisualizerNode
+  position: {x: 394.63995, y: -260.61}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumDataKnob: {fileID: -8661533376519218289}
+  outputTexKnob: {fileID: -3812203597397598048}
+  barGradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 1, b: 1, a: 1}
+    key1: {r: 0, g: 0, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  width: 256
+  height: 256
+--- !u!114 &-8661533376519218289
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrumData
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8915290692122598974}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: -2967086872869118073}
+  side: 4
+  sidePosition: 29
+  sideOffset: 0
+--- !u!114 &-8340876293162314168
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c97e3a51d43e0844a68e583da70a8cf, type: 3}
+  m_Name: MelFilterbank
+  m_EditorClassIdentifier: Assembly-CSharp::MelFilterbankNode
+  position: {x: 115.76996, y: -284.65}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumKnob: {fileID: -1300071630788157646}
+  sampleRateKnob: {fileID: 6882477713964044438}
+  melSpectrumKnob: {fileID: -2967086872869118073}
+  bandCount: 64
+  minHz: 40
+  maxHz: 8000
+  sampleRate: 44100
+--- !u!114 &-5260921982209450830
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: sampleRate
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 7159712046855603036}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 55.145
+  sideOffset: 0
+--- !u!114 &-4434035593436611207
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6ab6487237ff124ea4c2aa5de9ce3fb, type: 3}
+  m_Name: MainEditorState
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.NodeEditorState
+  canvas: {fileID: 0}
+  parentEditor: {fileID: 0}
+  selectedNode: {fileID: 2293155001360548961}
+  panOffset: {x: -213.50493, y: -80.12002}
+  zoom: 1.28
+--- !u!114 &-3812203597397598048
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: outputTex
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8915290692122598974}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 1
+  sidePosition: 130
+  sideOffset: 0
+--- !u!114 &-3460125238460175298
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 731d2a6a365a68542bf618d78c6ce2fa, type: 3}
+  m_Name: SpectrumVisualizer
+  m_EditorClassIdentifier: Assembly-CSharp::SpectrumVisualizerNode
+  position: {x: 400.03995, y: 6.9599915}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumDataKnob: {fileID: -2083324839425084701}
+  outputTexKnob: {fileID: -461428152682126858}
+  barGradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 1, b: 1, a: 1}
+    key1: {r: 0, g: 0, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  width: 256
+  height: 256
+--- !u!114 &-2967086872869118073
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: melSpectrum
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8340876293162314168}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: -8661533376519218289}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-2375000973528414353
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrum
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 7159712046855603036}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: -292557887921511686}
+  side: 4
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-2083324839425084701
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrumData
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -3460125238460175298}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: 7146707170702447504}
+  side: 4
+  sidePosition: 29
+  sideOffset: 0
+--- !u!114 &-1919733247843300721
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eff3c0976eab564b9ce232abb12c78f, type: 3}
+  m_Name: LaspAudioSpectrum
+  m_EditorClassIdentifier: Assembly-CSharp::LaspAudioSpectrumNode
+  position: {x: -176.94003, y: 14.960014}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumDataKnob: {fileID: -292557887921511686}
+  audioLevelKnob: {fileID: 5404068546743962342}
+  capturing: 0
+  scalingModeSelection:
+    values: 0001
+    names:
+    - Log
+    - Linear
+  captureModeSelection:
+    values: 
+    names: []
+--- !u!114 &-1300071630788157646
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrum
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8340876293162314168}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: 4461789780921776523}
+  side: 4
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &-461428152682126858
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: outputTex
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -3460125238460175298}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: UnityEngine.Texture
+  _connections: []
+  side: 1
+  sidePosition: 130
+  sideOffset: 0
+--- !u!114 &-292557887921511686
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrumData
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -1919733247843300721}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: -2375000973528414353}
+  side: 2
+  sidePosition: 91
+  sideOffset: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26a89c36c30b2e940804d7efcccaf0bd, type: 3}
+  m_Name: AudioDeviceTesting
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.Standard.CalculationCanvasType
+  editorStates:
+  - {fileID: -4434035593436611207}
+  saveName: AudioDeviceTesting
+  savePath: Assets/TextureSynthesis/Resources/CanvasSaves/AudioDeviceTesting.asset
+  livesInScene: 0
+  nodes:
+  - {fileID: -1919733247843300721}
+  - {fileID: 7159712046855603036}
+  - {fileID: -3460125238460175298}
+  - {fileID: -8915290692122598974}
+  - {fileID: -8340876293162314168}
+  - {fileID: 2293155001360548961}
+  groups: []
+--- !u!114 &1508807764858589161
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: releaseTau
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 2293155001360548961}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 141.145
+  sideOffset: 0
+--- !u!114 &1800568295309462168
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: attackTau
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 2293155001360548961}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections: []
+  side: 4
+  sidePosition: 123.145004
+  sideOffset: 0
+--- !u!114 &2291232356660100425
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: sampleRate
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 2293155001360548961}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections:
+  - {fileID: 6882477713964044438}
+  side: 2
+  sidePosition: 97
+  sideOffset: 0
+--- !u!114 &2293155001360548961
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9c5acfe842c604e8c95e7599d2e7c8, type: 3}
+  m_Name: AudioDevice
+  m_EditorClassIdentifier: Assembly-CSharp::AudioDeviceNode
+  position: {x: -211.48999, y: -290.64}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumDataKnob: {fileID: 4461789780921776523}
+  sampleRateKnob: {fileID: 2291232356660100425}
+  attackTauKnob: {fileID: 1800568295309462168}
+  releaseTauKnob: {fileID: 1508807764858589161}
+  deviceId: BuiltInMicrophoneDevice
+  deviceName: MacBook Pro Microphone
+  deviceBound: 1
+  attackTau: 0.04
+  releaseTau: 0.25
+  floorDb: -60
+--- !u!114 &4461789780921776523
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: spectrumData
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 2293155001360548961}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: -1300071630788157646}
+  side: 2
+  sidePosition: 74
+  sideOffset: 0
+--- !u!114 &5404068546743962342
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: audioLevel
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -1919733247843300721}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: System.Single
+  _connections: []
+  side: 2
+  sidePosition: 114
+  sideOffset: 0
+--- !u!114 &6882477713964044438
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: sampleRate
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: -8340876293162314168}
+  direction: 1
+  maxConnectionCount: 0
+  styleID: System.Single
+  _connections:
+  - {fileID: 2291232356660100425}
+  side: 4
+  sidePosition: 51.145
+  sideOffset: 0
+--- !u!114 &7146707170702447504
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
+  m_Name: melSpectrum
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::NodeEditorFramework.ValueConnectionKnob
+  body: {fileID: 7159712046855603036}
+  direction: 2
+  maxConnectionCount: 1
+  styleID: 'System.Single[]'
+  _connections:
+  - {fileID: -2083324839425084701}
+  side: 2
+  sidePosition: 29.145
+  sideOffset: 0
+--- !u!114 &7159712046855603036
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c97e3a51d43e0844a68e583da70a8cf, type: 3}
+  m_Name: MelFilterbank
+  m_EditorClassIdentifier: Assembly-CSharp::MelFilterbankNode
+  position: {x: 94.619995, y: 11.8600235}
+  dynamicConnectionPorts: []
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  spectrumKnob: {fileID: -2375000973528414353}
+  sampleRateKnob: {fileID: -5260921982209450830}
+  melSpectrumKnob: {fileID: 7146707170702447504}
+  bandCount: 64
+  minHz: 40
+  maxHz: 8000
+  sampleRate: 44100

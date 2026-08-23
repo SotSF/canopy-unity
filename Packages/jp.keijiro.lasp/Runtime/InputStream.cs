@@ -45,9 +45,13 @@ namespace Lasp
         public NativeSlice<float> InterleavedDataSlice
           => _deviceHandle.LastFrameWindow.GetNativeSlice();
 
+        // Local fix: guarded — ChannelCount is 0 while the stream is failing to
+        // open (retry cooldown), and GetNativeSlice divides by the stride.
         public NativeSlice<float> GetChannelDataSlice(int channel)
-          => _deviceHandle.LastFrameWindow.GetNativeSlice
-             (channel, ChannelCount);
+          => ChannelCount > 0
+             ? _deviceHandle.LastFrameWindow.GetNativeSlice
+               (channel, ChannelCount)
+             : default;
 
         #endregion
 
