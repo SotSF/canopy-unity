@@ -383,6 +383,7 @@ MonoBehaviour:
   position: {x: 372.59995, y: -127}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -3701238422342076752}
   bKnob: {fileID: 9166697558569660539}
   cKnob: {fileID: -6539390100667894507}
@@ -745,6 +746,7 @@ MonoBehaviour:
   - {fileID: -9135329925839648939}
   - {fileID: -2740095573379207153}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: -4440715040242662663}
   stringexpr: 2*invlerp(0.1f, 0.4f, a)
 --- !u!114 &-6751686471877787125
@@ -791,6 +793,8 @@ MonoBehaviour:
   dyeDecay: 1
   forceMultiplierKnob: {fileID: 0}
   forceMultiplier: 0
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: 139452239076340692}
   timeMultiplier: 0.7244095
   runKnob: {fileID: 2714653788457308840}
@@ -902,6 +906,7 @@ MonoBehaviour:
   - {fileID: 8826023456704315558}
   - {fileID: 836862516308928678}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: -486756164146728533}
   stringexpr: lerp(-1,2,a) + 0
 --- !u!114 &-6344777013344168671
@@ -1380,6 +1385,7 @@ MonoBehaviour:
   position: {x: 481.09985, y: 1158.2006}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: 2371419310900497386}
   bKnob: {fileID: 5087640100478584275}
   cKnob: {fileID: 1616147787708632526}
@@ -1697,6 +1703,7 @@ MonoBehaviour:
   position: {x: 371.4, y: -16.999971}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: 9049982999930642398}
   bKnob: {fileID: -7029970339205035284}
   cKnob: {fileID: 6202863665157426716}
@@ -2288,6 +2295,7 @@ MonoBehaviour:
   - {fileID: -5356188085657939481}
   - {fileID: 258217367153049601}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: -8127337833380390132}
   stringexpr: lerp(24,256,a)
 --- !u!114 &-2172117728824204205
@@ -2470,6 +2478,8 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   outputTexKnob: {fileID: 2899669488350469536}
   crossfader: 0.27559054
+  layerOrder: 
+  layerOpacities: []
   mergeModeSelection:
     values: 0100
     names:
@@ -2505,7 +2515,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 4565473773007723443}
   direction: 2
@@ -2686,6 +2696,7 @@ MonoBehaviour:
   - {fileID: 860073256114224289}
   - {fileID: -5084487288585992773}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: -116017923728414867}
   stringexpr: a+b
 --- !u!114 &-979912937441059950
@@ -2705,7 +2716,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: 6006651860357207019}
   textureOutputKnob: {fileID: 5949308593790373038}
-  polarize: 1
   seamless: 0
 --- !u!114 &-923052041205191009
 MonoBehaviour:
@@ -2942,7 +2952,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 1249863239939898036}
   direction: 2
@@ -3093,6 +3103,7 @@ MonoBehaviour:
   position: {x: -185.70004, y: -250.79959}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -5459195282817477093}
   amplInputKnob: {fileID: 8519009800773149263}
   phaseInputKnob: {fileID: -2650851064887828077}
@@ -3215,6 +3226,7 @@ MonoBehaviour:
   - {fileID: 7995490638292763338}
   - {fileID: 8632703954677504323}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: -5704608644370723489}
   stringexpr: lerp(0,100,a)
 --- !u!114 &312017125923929076
@@ -3771,6 +3783,7 @@ MonoBehaviour:
   position: {x: -805.3003, y: 185.89914}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -2297341148253400546}
   amplInputKnob: {fileID: -6087484472967495296}
   phaseInputKnob: {fileID: 4337644349228697817}
@@ -3893,6 +3906,7 @@ MonoBehaviour:
   position: {x: 982.00024, y: 269.90012}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -4507853731811221994}
   amplInputKnob: {fileID: 219431573922491386}
   phaseInputKnob: {fileID: 682016863302943600}
@@ -3973,6 +3987,7 @@ MonoBehaviour:
   position: {x: -1080.7002, y: 182.59955}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -1614191311152031275}
   amplInputKnob: {fileID: 6040965472008905976}
   phaseInputKnob: {fileID: 1619976501283013072}
@@ -4117,6 +4132,7 @@ MonoBehaviour:
   - {fileID: 4641299829027108903}
   - {fileID: -5250812413695133193}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: -1154186346339753724}
   stringexpr: lerp(0,100,a)
 --- !u!114 &2886828041939795442
@@ -4330,7 +4346,38 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   spectrumDataKnob: {fileID: 8877778099681094670}
   outputTexKnob: {fileID: 1899803359114229126}
-  outputTex: {fileID: 0}
+  barGradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  width: 256
+  height: 256
 --- !u!114 &3318916721536518249
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4615,6 +4662,7 @@ MonoBehaviour:
   position: {x: -58.100006, y: 269.5}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: 8246997357383902765}
   amplInputKnob: {fileID: -4346672936533566029}
   phaseInputKnob: {fileID: -2764890877113719490}
@@ -4965,6 +5013,7 @@ MonoBehaviour:
   dynamicConnectionPorts:
   - {fileID: -8149517869837982265}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: 3186623056003139518}
   stringexpr: 512
 --- !u!114 &5559042293758863640
@@ -5953,7 +6002,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 1249863239939898036}
   direction: 1
@@ -6164,6 +6213,7 @@ MonoBehaviour:
   position: {x: -378.00006, y: 677.90027}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   spectrumDataKnob: {fileID: -5284945381023803451}
   outputSignalKnob: {fileID: 435178585788949391}
   filterLowEnd: 0
@@ -6178,7 +6228,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 4565473773007723443}
   direction: 1

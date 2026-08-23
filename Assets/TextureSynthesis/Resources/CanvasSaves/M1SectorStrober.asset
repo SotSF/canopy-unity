@@ -236,7 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: -5700737167982231660}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -295,7 +295,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 162130977884216380}
   direction: 2
@@ -633,7 +633,7 @@ MonoBehaviour:
   - {fileID: 3265486354012967888}
   - {fileID: 987546782798579866}
   - {fileID: 162130977884216380}
-  - {fileID: -5700737167982231660}
+  - {fileID: 0}
   - {fileID: 4052166325761054309}
   - {fileID: 71341026126263584}
   - {fileID: 6955448273264341001}
@@ -730,7 +730,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 162130977884216380}
   direction: 1
@@ -938,7 +938,14 @@ MonoBehaviour:
   position: {x: -640.9199, y: 793.415}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   signalOutputKnob: {fileID: 5933945310770031591}
+  pressedKnob: {fileID: 0}
+  heldKnob: {fileID: 0}
+  releasedKnob: {fileID: 0}
+  bindingKeys: 
+  boundKeys: 
+  bound: 0
 --- !u!114 &3269083997449532466
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1061,6 +1068,7 @@ MonoBehaviour:
   - {fileID: -824450213795779070}
   - {fileID: -9131815668561097899}
   - {fileID: 6484390935791215312}
+  - {fileID: 0}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   texNames:
   - AMLogo
@@ -1091,6 +1099,7 @@ MonoBehaviour:
   - TheCore
   - weed
   - xflash
+  - ConjurerIcon
 --- !u!114 &4032765325594466228
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1355,10 +1364,10 @@ MonoBehaviour:
   position: {x: -612.68, y: 428.61}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -8789688579527529854}
   amplInputKnob: {fileID: -4851760253319765405}
   phaseInputKnob: {fileID: -4602487475638716293}
-  qInputKnob: {fileID: 2440091577730826706}
   outputKnob: {fileID: -3396085066047177422}
   period: 0.15
   amplitude: 0.5
@@ -1380,6 +1389,7 @@ MonoBehaviour:
     names:
     - amplitude
     - min max
+  expSpikeLevel: 22
 --- !u!114 &7015267390166883474
 MonoBehaviour:
   m_ObjectHideFlags: 1

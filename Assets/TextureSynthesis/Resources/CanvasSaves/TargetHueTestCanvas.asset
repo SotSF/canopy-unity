@@ -118,6 +118,7 @@ MonoBehaviour:
   position: {x: -680.2, y: 362.7}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: -651307607052618337}
   rawMIDIValue: 0.503937
@@ -126,6 +127,7 @@ MonoBehaviour:
   rescale: 0
   controlID: 23
   channel: 0
+  deviceProduct: 
 --- !u!114 &-7661338547383402960
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -161,6 +163,7 @@ MonoBehaviour:
   position: {x: -679.6, y: 176.70006}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: 1786005017319995955}
   rawMIDIValue: 0.21259843
@@ -169,6 +172,7 @@ MonoBehaviour:
   rescale: 0
   controlID: 19
   channel: 0
+  deviceProduct: 
 --- !u!114 &-7494507363589252853
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -399,6 +403,7 @@ MonoBehaviour:
   position: {x: -985.6, y: -87.899895}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -8558986803579886992}
   amplInputKnob: {fileID: 8143132321906831409}
   phaseInputKnob: {fileID: -477060430660477529}
@@ -450,7 +455,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 5139976295940632985}
   direction: 1
@@ -1455,7 +1460,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 5139976295940632985}
   direction: 2

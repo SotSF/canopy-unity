@@ -58,6 +58,7 @@ MonoBehaviour:
   - {fileID: -1419795796867327486}
   - {fileID: -965727362621847134}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: -7805985635434611134}
   rawMIDIValue: 0.51968503
@@ -66,6 +67,7 @@ MonoBehaviour:
   rescale: 1
   controlID: 30
   channel: 0
+  deviceProduct: 
 --- !u!114 &-6818799076086290734
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -182,6 +184,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: 8155107797933734601}
   useDoubleDensity: 1
+  bakeAlpha: 1
+  ip: 
+  mirrorPort: 4
+  maxFrameRate: 60
   flipMirrorDirection: 0
   mirrorOffset: 27
 --- !u!114 &-4831548465271429784
@@ -201,6 +207,7 @@ MonoBehaviour:
   - {fileID: 4845318667922481328}
   - {fileID: 4072479888621094193}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: 924970765852571104}
   stringexpr: 1.0/a
 --- !u!114 &-4188885788573354378
@@ -281,6 +288,7 @@ MonoBehaviour:
   - {fileID: -887547422502941618}
   - {fileID: -1844756741619506907}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   outputKnob: {fileID: 5657416325972546548}
   stringexpr: 20
 --- !u!114 &-3326701130506936562
@@ -319,6 +327,7 @@ MonoBehaviour:
   position: {x: -925.3301, y: -27.519972}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -3326701130506936562}
   amplInputKnob: {fileID: 9089010520754605078}
   phaseInputKnob: {fileID: 3193215832251733814}
@@ -596,7 +605,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 3080076078871184464}
   direction: 1
@@ -980,7 +989,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 3080076078871184464}
   direction: 2
@@ -1006,6 +1015,7 @@ MonoBehaviour:
   position: {x: -786.69995, y: -284.30002}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 0
   valueKnob: {fileID: 4566379242190999589}
   rawMIDIValue: 0
@@ -1014,6 +1024,7 @@ MonoBehaviour:
   rescale: 0
   controlID: 0
   channel: 0
+  deviceProduct: 
 --- !u!114 &3080076078871184464
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1372,7 +1383,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: -1051675156154276896}
   textureOutputKnob: {fileID: -6791684868529942798}
-  polarize: 0
   seamless: 0
 --- !u!114 &6249564462015187917
 MonoBehaviour:
@@ -1391,6 +1401,7 @@ MonoBehaviour:
   - {fileID: 1593470661083040355}
   - {fileID: 4170362672447899474}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: 3423143523366218125}
   rawMIDIValue: 0.37795275
@@ -1399,6 +1410,7 @@ MonoBehaviour:
   rescale: 1
   controlID: 16
   channel: 0
+  deviceProduct: 
 --- !u!114 &6271192723471870549
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1414,6 +1426,7 @@ MonoBehaviour:
   position: {x: -407.00507, y: 471.37503}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: 1535737130095346229}
   rawMIDIValue: 1
@@ -1422,6 +1435,7 @@ MonoBehaviour:
   rescale: 0
   controlID: 57
   channel: 0
+  deviceProduct: 
 --- !u!114 &6351164164073340223
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1439,6 +1453,7 @@ MonoBehaviour:
   - {fileID: 5672491425404283700}
   - {fileID: 7918558372846661396}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: -6818799076086290734}
   rawMIDIValue: 0
@@ -1447,6 +1462,7 @@ MonoBehaviour:
   rescale: 1
   controlID: 26
   channel: 0
+  deviceProduct: 
 --- !u!114 &6765127033104559936
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1483,6 +1499,7 @@ MonoBehaviour:
   position: {x: -400.08508, y: 589.64496}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: 1923411431268511787}
   rawMIDIValue: 1
@@ -1491,6 +1508,7 @@ MonoBehaviour:
   rescale: 0
   controlID: 61
   channel: 0
+  deviceProduct: 
 --- !u!114 &6976293288793151110
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1562,6 +1580,7 @@ MonoBehaviour:
   position: {x: -398.09506, y: 697.645}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: -3827314509505036764}
   rawMIDIValue: 0
@@ -1570,6 +1589,7 @@ MonoBehaviour:
   rescale: 0
   controlID: 62
   channel: 0
+  deviceProduct: 
 --- !u!114 &9089010520754605078
 MonoBehaviour:
   m_ObjectHideFlags: 1

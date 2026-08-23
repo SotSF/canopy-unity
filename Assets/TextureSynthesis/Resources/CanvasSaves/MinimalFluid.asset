@@ -137,6 +137,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: -2258579599613004823}
   useDoubleDensity: 1
+  bakeAlpha: 1
+  ip: 
+  mirrorPort: 4
+  maxFrameRate: 60
   flipMirrorDirection: 1
   mirrorOffset: 27
 --- !u!114 &-7573988929908832924
@@ -709,6 +713,7 @@ MonoBehaviour:
   position: {x: -823.39, y: -833.155}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: 19262325581550802}
   amplInputKnob: {fileID: 2618073071594353530}
   phaseInputKnob: {fileID: -422036071299100764}
@@ -800,7 +805,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 7482388720170748842}
   direction: 1
@@ -1381,7 +1386,11 @@ MonoBehaviour:
   - {fileID: 1541871031731781070}
   - {fileID: -3130882991076334122}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   channel: 0
+  controls: []
+  nextControlUid: 0
+  deviceProduct: 
 --- !u!114 &4237304099859346711
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1515,7 +1524,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 7482388720170748842}
   direction: 2
@@ -1708,7 +1717,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: -4903857613498647739}
   textureOutputKnob: {fileID: -127497534616881963}
-  polarize: 1
   seamless: 0
 --- !u!114 &7989003731184380388
 MonoBehaviour:
@@ -1733,6 +1741,8 @@ MonoBehaviour:
   dyeDecay: 0.10299134
   forceMultiplierKnob: {fileID: -2823834908705566951}
   forceMultiplier: 2.2616494
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: 2675951034423938660}
   timeMultiplier: 0.4067564
   runKnob: {fileID: 8264557737357601946}

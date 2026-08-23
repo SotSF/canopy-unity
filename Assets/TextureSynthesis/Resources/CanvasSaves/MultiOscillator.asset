@@ -178,11 +178,26 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   velocityInputKnob: {fileID: -2970118624594797293}
   dyeInputKnob: {fileID: -7195323101161796721}
-  dyeInputLevel: {fileID: -1439351432160904375}
+  dyeInputLevelKnob: {fileID: 0}
+  dyeInputLevel: 1
+  dyeDecayKnob: {fileID: 0}
+  dyeDecay: 0
+  forceMultiplierKnob: {fileID: 0}
+  forceMultiplier: 1
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: 0}
   timeMultiplier: 1
+  runKnob: {fileID: 0}
+  resetKnob: {fileID: 0}
+  applyForceKnob: {fileID: 0}
+  applyDyeKnob: {fileID: 0}
   textureOutputKnob: {fileID: 7374695302534344148}
-  outputTex: {fileID: 0}
+  timestep: 0
+  useBoundaries: 1
+  continuousVelocity: 0
+  continuousDye: 0
+  running: 0
 --- !u!114 &-7195323101161796721
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -193,7 +208,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: In
+  m_Name: dyeIn
   m_EditorClassIdentifier: 
   body: {fileID: -7473403178702505644}
   direction: 1
@@ -234,7 +249,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 6591229676817717669}
   direction: 2
@@ -305,7 +320,6 @@ MonoBehaviour:
   offsetKnob: {fileID: -7162298699930008879}
   turbIntensityKnob: {fileID: -5104443982160968836}
   turbScaleKnob: {fileID: 543243905112030350}
-  outputTex: {fileID: 0}
   normalAngleOffset: 0.6939756
   turbFactor: 0.25
   turbScale: 16
@@ -530,7 +544,14 @@ MonoBehaviour:
   position: {x: 2166.8, y: -479.5001}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   signalOutputKnob: {fileID: -7756021221153487684}
+  pressedKnob: {fileID: 0}
+  heldKnob: {fileID: 0}
+  releasedKnob: {fileID: 0}
+  bindingKeys: 
+  boundKeys: 
+  bound: 0
 --- !u!114 &-4752510283740584715
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -726,7 +747,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: In
+  m_Name: velocityIn
   m_EditorClassIdentifier: 
   body: {fileID: -7473403178702505644}
   direction: 1
@@ -1304,13 +1325,19 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: 6604594015201786869}
   textureOutputKnob: {fileID: 2452161026036443452}
-  speedInputKnob: {fileID: -9079445548567726389}
-  angleInputKnob: {fileID: 7014331465324853256}
-  outputTex: {fileID: 0}
+  in1Knob: {fileID: 0}
+  in2Knob: {fileID: 0}
+  resetKnob: {fileID: 0}
   smoothTransitions: 0
   mirror: 0
-  speed: 0
-  angle: 0
+  in1: 0
+  in2: 0
+  offsetMode:
+    values: 
+    names: []
+  sampleMode:
+    values: 
+    names: []
 --- !u!114 &2452161026036443452
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1361,7 +1388,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 6562067876350152158}
   direction: 2
@@ -1468,7 +1495,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: -5950433165534024467}
   textureOutputKnob: {fileID: 5309108048754091662}
-  polarize: 1
   seamless: 0
 --- !u!114 &4156887904467330406
 MonoBehaviour:
@@ -1505,17 +1531,32 @@ MonoBehaviour:
   position: {x: 1755.2002, y: -916.20026}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -181910007918985199}
   amplInputKnob: {fileID: -4752510283740584715}
   phaseInputKnob: {fileID: -4957226906216861129}
   outputKnob: {fileID: 568395396053625110}
-  oscParams:
-    period: 8
-    amplitude: 0.5
-    phase: 0
   period: 8
   amplitude: 0.5
   phase: 0
+  max: 2
+  min: -2
+  signalType:
+    values: 01000000000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+    - expspike
+    - hemi
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
+  expSpikeLevel: 22
 --- !u!114 &4225459718977985678
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1627,7 +1668,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 6591229676817717669}
   direction: 1
@@ -1648,7 +1689,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 6562067876350152158}
   direction: 1
@@ -1673,17 +1714,32 @@ MonoBehaviour:
   position: {x: 2463.5999, y: -991.2003}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: 8981871381991812672}
   amplInputKnob: {fileID: 4432471861646101833}
   phaseInputKnob: {fileID: -339619608851791729}
   outputKnob: {fileID: 6029881314331297731}
-  oscParams:
-    period: 9
-    amplitude: 0.04
-    phase: 0
   period: 9
   amplitude: 0.04
   phase: 0
+  max: 2
+  min: -2
+  signalType:
+    values: 01000000000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+    - expspike
+    - hemi
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
+  expSpikeLevel: 22
 --- !u!114 &5105037236068897646
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1760,7 +1816,6 @@ MonoBehaviour:
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureOutputKnob: {fileID: 4532286832445222741}
-  outputTex: {fileID: 0}
 --- !u!114 &5602328097414320837
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1879,17 +1934,32 @@ MonoBehaviour:
   position: {x: 1755.8002, y: -734.40015}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -5724465785046373862}
   amplInputKnob: {fileID: 1629653640034998550}
   phaseInputKnob: {fileID: 1320085870125535717}
   outputKnob: {fileID: -1964828523548721396}
-  oscParams:
-    period: 5
-    amplitude: 0.06
-    phase: 6.2831855
   period: 5
   amplitude: 0.06
   phase: 6.2831855
+  max: 2
+  min: -2
+  signalType:
+    values: 01000000000000
+    names:
+    - sine
+    - square
+    - saw
+    - reverse-saw
+    - triangle
+    - expspike
+    - hemi
+  paramStyle:
+    values: 0100
+    names:
+    - amplitude
+    - min max
+  expSpikeLevel: 22
 --- !u!114 &6297630005695821423
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1968,7 +2038,9 @@ MonoBehaviour:
   hueKnob: {fileID: -5845670274136634417}
   satKnob: {fileID: -815579849953481697}
   valKnob: {fileID: -327707208706649535}
-  outputTex: {fileID: 0}
+  hue: 0
+  saturation: 0
+  value: 0
 --- !u!114 &6591229676817717669
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1989,7 +2061,9 @@ MonoBehaviour:
   hueKnob: {fileID: -6458126566501349853}
   satKnob: {fileID: -1335265249683397622}
   valKnob: {fileID: -6763993611736339334}
-  outputTex: {fileID: 0}
+  hue: 0
+  saturation: 0
+  value: 0
 --- !u!114 &6604594015201786869
 MonoBehaviour:
   m_ObjectHideFlags: 1

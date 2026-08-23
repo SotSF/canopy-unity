@@ -15,6 +15,7 @@ MonoBehaviour:
   position: {x: 1524.3997, y: 628.7002}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -1663823598271249011}
   bKnob: {fileID: 4401914145817101065}
   cKnob: {fileID: 0}
@@ -248,7 +249,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: -439229362012736222}
   direction: 2
@@ -273,6 +274,7 @@ MonoBehaviour:
   position: {x: 372.59995, y: -127}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -2375656979268536334}
   bKnob: {fileID: 6035504597201268784}
   cKnob: {fileID: 0}
@@ -290,7 +292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: released
   m_EditorClassIdentifier: 
-  body: {fileID: -1678433613488233862}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -330,7 +332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 6005977194591886057}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -351,7 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 25380126713266140}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -477,6 +479,7 @@ MonoBehaviour:
   position: {x: 910.0002, y: 226.7001}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: 3575712470661591171}
   amplInputKnob: {fileID: -5023658340663772941}
   phaseInputKnob: {fileID: 7631922578103327604}
@@ -576,7 +579,7 @@ MonoBehaviour:
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: -5370884709209707900}
-  name: waveformSender
+  spoutSenderName: spoutSender
   sendAlpha: 1
 --- !u!114 &-7519993655654205900
 MonoBehaviour:
@@ -692,7 +695,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: -640965690642403733}
   direction: 1
@@ -739,6 +742,7 @@ MonoBehaviour:
   position: {x: -748.50006, y: 287.9003}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   spectrumDataKnob: {fileID: 111015045790038152}
   outputSignalKnob: {fileID: 5289809145257388749}
   filterLowEnd: 28
@@ -775,7 +779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: pressed
   m_EditorClassIdentifier: 
-  body: {fileID: -1678433613488233862}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -811,8 +815,6 @@ MonoBehaviour:
     names:
     - System
     - Mic
-  captureMode: 0
-  scalingMode: 0
   spectrumSize: 32
   minFreq: 32
   maxFreq: 16384
@@ -952,7 +954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 4882216307651147253}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -992,7 +994,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 4084434308407114774}
   direction: 1
@@ -1121,6 +1123,7 @@ MonoBehaviour:
   position: {x: 1277.2, y: 1908.8}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -6180724436009451659}
   bKnob: {fileID: 8735232041755517184}
   cKnob: {fileID: 0}
@@ -1472,7 +1475,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 8160466157169758603}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -1534,7 +1537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 5670973495293326418}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -1576,7 +1579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: -1678433613488233862}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -1617,7 +1620,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: -2924890656161490340}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -1680,7 +1683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: held
   m_EditorClassIdentifier: 
-  body: {fileID: 2690983977677310943}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -2150,7 +2153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: pressed
   m_EditorClassIdentifier: 
-  body: {fileID: 2690983977677310943}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -2191,7 +2194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 8224464168576021102}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -2300,7 +2303,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: -7456100273035056348}
   textureOutputKnob: {fileID: 2889975939885848185}
-  polarize: 1
   seamless: 0
 --- !u!114 &-2375656979268536334
 MonoBehaviour:
@@ -2756,6 +2758,7 @@ MonoBehaviour:
   position: {x: 300.19983, y: 1242.8005}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -2253456068299358029}
   bKnob: {fileID: 8671376734628132579}
   cKnob: {fileID: 0}
@@ -2818,7 +2821,38 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   spectrumDataKnob: {fileID: 1731305271186534085}
   outputTexKnob: {fileID: -5577649448172243951}
-  outputTex: {fileID: 0}
+  barGradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  width: 256
+  height: 256
 --- !u!114 &-1275294701103738816
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2852,7 +2886,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: -2315478877766367825}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -3011,7 +3045,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: -640965690642403733}
   direction: 2
@@ -3102,7 +3136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 7158070197910215746}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -3213,32 +3247,32 @@ MonoBehaviour:
   livesInScene: 0
   nodes:
   - {fileID: -8046516885356202834}
-  - {fileID: -2094317830710575598}
+  - {fileID: 0}
   - {fileID: -7299085699926453644}
   - {fileID: 1576859337683383556}
-  - {fileID: -8170864909781975677}
+  - {fileID: 0}
   - {fileID: -8589517154862809314}
   - {fileID: -3947486084003277498}
   - {fileID: 3310397295606955343}
-  - {fileID: -2315478877766367825}
+  - {fileID: 0}
   - {fileID: -8433017829065522840}
   - {fileID: 871996057947830769}
   - {fileID: 460482471404041767}
-  - {fileID: 8160466157169758603}
+  - {fileID: 0}
   - {fileID: 6650770314785925143}
   - {fileID: -852438535139503542}
   - {fileID: 9125612246568921607}
   - {fileID: 8079339567933011778}
   - {fileID: 1120802097478522118}
   - {fileID: 4613780644584964010}
-  - {fileID: -1678433613488233862}
+  - {fileID: 0}
   - {fileID: -7092679307352319116}
   - {fileID: -7938388129228170063}
-  - {fileID: 6005977194591886057}
-  - {fileID: 25380126713266140}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 2252520991563372947}
-  - {fileID: 2690983977677310943}
-  - {fileID: 3635750421730617951}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 2839071777921924240}
   - {fileID: 7431300997948230325}
   - {fileID: -640965690642403733}
@@ -3249,8 +3283,8 @@ MonoBehaviour:
   - {fileID: -1386552634138954878}
   - {fileID: -7621308419254339508}
   - {fileID: 5421037679199448258}
-  - {fileID: -171026247053018330}
-  - {fileID: 8224464168576021102}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 3803899967703585791}
   - {fileID: -1560228910982636326}
   - {fileID: 4889035422598337122}
@@ -3268,16 +3302,16 @@ MonoBehaviour:
   - {fileID: 2969571537602894732}
   - {fileID: -6149336298931325799}
   - {fileID: 7887638338253365480}
-  - {fileID: -2924890656161490340}
+  - {fileID: 0}
   - {fileID: 5220006021571541177}
   - {fileID: -3587584015204155289}
-  - {fileID: 5670973495293326418}
+  - {fileID: 0}
   - {fileID: 4084434308407114774}
   - {fileID: 2333408981584036603}
-  - {fileID: 7158070197910215746}
+  - {fileID: 0}
   - {fileID: -1110845574676677955}
   - {fileID: 7247349842331516371}
-  - {fileID: 4882216307651147253}
+  - {fileID: 0}
   - {fileID: -9009588194074640623}
   groups: []
 --- !u!114 &25380126713266140
@@ -3336,7 +3370,7 @@ MonoBehaviour:
   body: {fileID: -7233893238667028525}
   direction: 1
   maxConnectionCount: 0
-  styleID: System.Single[]
+  styleID: 'System.Single[]'
   _connections:
   - {fileID: 1618406736101167009}
   side: 4
@@ -3374,7 +3408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: held
   m_EditorClassIdentifier: 
-  body: {fileID: -1678433613488233862}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -3454,7 +3488,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: -439229362012736222}
   direction: 1
@@ -3501,6 +3535,7 @@ MonoBehaviour:
   position: {x: -165.00005, y: -200.3996}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -3429628316567809464}
   amplInputKnob: {fileID: -4030067862744029988}
   phaseInputKnob: {fileID: 6050465703372922209}
@@ -3596,7 +3631,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 4084434308407114774}
   direction: 2
@@ -3619,7 +3654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: released
   m_EditorClassIdentifier: 
-  body: {fileID: 2690983977677310943}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -3701,7 +3736,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: InTex
   m_EditorClassIdentifier: 
   body: {fileID: 5421037679199448258}
   direction: 1
@@ -3767,7 +3802,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: -8170864909781975677}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -3824,7 +3859,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: held
   m_EditorClassIdentifier: 
-  body: {fileID: 3635750421730617951}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -3889,6 +3924,8 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   outputTexKnob: {fileID: 8285453458161125619}
   crossfader: 0.18897638
+  layerOrder: 
+  layerOpacities: []
   mergeModeSelection:
     values: 0100
     names:
@@ -3909,7 +3946,7 @@ MonoBehaviour:
   body: {fileID: -7092679307352319116}
   direction: 2
   maxConnectionCount: 1
-  styleID: System.Single[]
+  styleID: 'System.Single[]'
   _connections:
   - {fileID: 111015045790038152}
   - {fileID: 1731305271186534085}
@@ -3951,7 +3988,7 @@ MonoBehaviour:
   body: {fileID: -1386552634138954878}
   direction: 1
   maxConnectionCount: 0
-  styleID: System.Single[]
+  styleID: 'System.Single[]'
   _connections:
   - {fileID: 1618406736101167009}
   side: 4
@@ -4035,6 +4072,7 @@ MonoBehaviour:
   position: {x: 463.1999, y: 739.20044}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -8576055069832157206}
   bKnob: {fileID: -3882739778192956341}
   cKnob: {fileID: 0}
@@ -4192,6 +4230,8 @@ MonoBehaviour:
   dyeDecay: 0.8976378
   forceMultiplierKnob: {fileID: 0}
   forceMultiplier: 0
+  vorticityEpsilonKnob: {fileID: 0}
+  vorticityEpsilon: 5
   timeMultiplierKnob: {fileID: -946942172042037682}
   timeMultiplier: -0.6929134
   runKnob: {fileID: 7763590723603457191}
@@ -4216,7 +4256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: pressed
   m_EditorClassIdentifier: 
-  body: {fileID: 3635750421730617951}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -4236,7 +4276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: released
   m_EditorClassIdentifier: 
-  body: {fileID: 3635750421730617951}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Boolean
@@ -4448,6 +4488,7 @@ MonoBehaviour:
   position: {x: -123.10022, y: 706.3004}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -8042784137131810448}
   bKnob: {fileID: 8304056476707439792}
   cKnob: {fileID: 0}
@@ -4488,6 +4529,7 @@ MonoBehaviour:
   position: {x: 1281.7997, y: 1781.4005}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -30907264117297872}
   bKnob: {fileID: 70933787482253540}
   cKnob: {fileID: 0}
@@ -4562,6 +4604,7 @@ MonoBehaviour:
   position: {x: 1218.0001, y: 216.90036}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: -3801769904377253849}
   bKnob: {fileID: -197147918210360515}
   cKnob: {fileID: 0}
@@ -4662,7 +4705,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
-  m_Name: Texture
+  m_Name: OutTex
   m_EditorClassIdentifier: 
   body: {fileID: 5421037679199448258}
   direction: 2
@@ -4859,6 +4902,7 @@ MonoBehaviour:
   position: {x: -118.600006, y: 217.00002}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -6396222084984147275}
   amplInputKnob: {fileID: -4004852033550082285}
   phaseInputKnob: {fileID: -3578853059007448455}
@@ -4986,6 +5030,7 @@ MonoBehaviour:
   position: {x: 547.7994, y: 1121.2002}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: 2507240902087112016}
   bKnob: {fileID: -1694845893572077642}
   cKnob: {fileID: 0}
@@ -5068,7 +5113,7 @@ MonoBehaviour:
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: 2330877318510829855}
-  name: fluidSender
+  spoutSenderName: spoutSender
   sendAlpha: 0
 --- !u!114 &5289809145257388749
 MonoBehaviour:
@@ -5530,6 +5575,7 @@ MonoBehaviour:
   position: {x: 371.4, y: -16.999971}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: 6196372460455675861}
   bKnob: {fileID: 224305844459300911}
   cKnob: {fileID: 0}
@@ -5609,7 +5655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 2690983977677310943}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -5654,6 +5700,7 @@ MonoBehaviour:
   position: {x: 1760.1997, y: 427.7002}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -2603177876001293929}
   amplInputKnob: {fileID: 8795477120028604407}
   phaseInputKnob: {fileID: 1849664984564523681}
@@ -5794,7 +5841,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: 3635750421730617951}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -5895,6 +5942,7 @@ MonoBehaviour:
   position: {x: 1277.3995, y: 2016.6005}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: 270659376884598393}
   bKnob: {fileID: -129121299012573052}
   cKnob: {fileID: 0}
@@ -5935,6 +5983,7 @@ MonoBehaviour:
   position: {x: 186.00002, y: 361.2001}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   aKnob: {fileID: 9221979849373376608}
   bKnob: {fileID: 6767095016514626885}
   cKnob: {fileID: 0}
@@ -5993,7 +6042,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: -2094317830710575598}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
@@ -6178,7 +6227,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 017e2c7fd038ecb46b317c1e003f31dc, type: 3}
   m_Name: value
   m_EditorClassIdentifier: 
-  body: {fileID: -171026247053018330}
+  body: {fileID: 0}
   direction: 2
   maxConnectionCount: 1
   styleID: System.Single
