@@ -520,7 +520,10 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   inputTexKnob: {fileID: 1831459002137300326}
   useDoubleDensity: 1
+  bakeAlpha: 1
+  ip: 
   mirrorPort: 4
+  maxFrameRate: 60
   flipMirrorDirection: 1
   mirrorOffset: 70
 --- !u!114 &-1928701356329408488
@@ -621,7 +624,6 @@ MonoBehaviour:
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   textureInputKnob: {fileID: 6910127992651058414}
   textureOutputKnob: {fileID: -3466208218959887400}
-  polarize: 1
   seamless: 0
 --- !u!114 &-1294252674195905393
 MonoBehaviour:
@@ -701,6 +703,7 @@ MonoBehaviour:
   - {fileID: 4826505990887310801}
   - {fileID: 368219957553744416}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: 693314099331707226}
   rawMIDIValue: 0.53543305
@@ -709,6 +712,7 @@ MonoBehaviour:
   rescale: 1
   controlID: 17
   channel: 0
+  deviceProduct: 
 --- !u!114 &-895783716505038358
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -957,7 +961,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26a89c36c30b2e940804d7efcccaf0bd, type: 3}
-  m_Name: New Calculation Canvas
+  m_Name: TestShaderGraph
   m_EditorClassIdentifier: 
   editorStates:
   - {fileID: -514949198213854261}
@@ -1340,6 +1344,7 @@ MonoBehaviour:
   position: {x: -807.4001, y: -429.3}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   signalOutputKnob: {fileID: 8051865090242216618}
   pressedKnob: {fileID: 156112467524908254}
   heldKnob: {fileID: 7815363494013171793}
@@ -1444,6 +1449,7 @@ MonoBehaviour:
   position: {x: -964.69995, y: 331.6001}
   dynamicConnectionPorts: []
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   periodInputKnob: {fileID: -1510821546763687520}
   amplInputKnob: {fileID: 1500295186539508029}
   phaseInputKnob: {fileID: 4346586328951188563}
@@ -1506,6 +1512,7 @@ MonoBehaviour:
   - {fileID: 3032899442651055146}
   - {fileID: 6817518274127113494}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: -7722528845102991626}
   rawMIDIValue: 0.31496063
@@ -1514,6 +1521,7 @@ MonoBehaviour:
   rescale: 1
   controlID: 16
   channel: 0
+  deviceProduct: 
 --- !u!114 &5472087356495963504
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1614,6 +1622,7 @@ MonoBehaviour:
   - {fileID: 2955402336290060422}
   - {fileID: -1186892060661317565}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  sparklineCollapsed: 0
   bound: 1
   valueKnob: {fileID: 2230086442102958765}
   rawMIDIValue: 1
@@ -1622,6 +1631,7 @@ MonoBehaviour:
   rescale: 1
   controlID: 18
   channel: 0
+  deviceProduct: 
 --- !u!114 &6223255143961732189
 MonoBehaviour:
   m_ObjectHideFlags: 1
