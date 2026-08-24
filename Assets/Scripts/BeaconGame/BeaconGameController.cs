@@ -38,6 +38,11 @@ namespace BeaconGame
         // per-player-type ship variants.
         public Vector3 shipScale = new Vector3(2.3f, 2.3f, 2.3f);
 
+        [Header("Gameplay")]
+        // Beacon flee speed in board units/sec, driven by the MiniGame node's evadeSpeed knob
+        // via MiniGameController. At 0 the evasion pass is skipped entirely.
+        public float beaconEvasionSpeed = 0f;
+
         [Header("Game State (read-only)")]
         public int sharedPoints;
         public int level = 1;
@@ -86,6 +91,8 @@ namespace BeaconGame
         void Update()
         {
             if (activeBeacon == null) return;
+            if (beaconEvasionSpeed > 0f)
+                activeBeacon.Evade(players.Values, beaconEvasionSpeed);
             foreach (var player in players.Values)
             {
                 if (!player.IsAlive) continue;

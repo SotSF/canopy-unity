@@ -139,6 +139,15 @@ namespace MiniGame
             CurrentMode == GameMode.BeaconGame
             && (BeaconGameController.instance?.beaconCollectedThisFrame ?? false);
 
+        // Forwarded from the MiniGame node's evadeSpeed knob each tick. Harmless outside
+        // beacon mode — the value just sits on the (disabled) beacon controller.
+        public void SetBeaconEvasionSpeed(float speed)
+        {
+            var beacon = BeaconGameController.instance;
+            if (beacon != null)
+                beacon.beaconEvasionSpeed = speed;
+        }
+
         // Called by the node after reading pulses this tick so each event is consumed once.
         public void ClearFrameEvents()
         {

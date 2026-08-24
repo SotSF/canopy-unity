@@ -22,7 +22,7 @@ namespace BeaconGame
         // Fraction of boundaryRadius for spawn band
         public float beaconMinRadiusFraction = 0.15f;
         public float beaconMaxRadiusFraction = 0.85f;
-        public float beaconPulseRate = .5f;
+        public float beaconPulseRate = .3f;
 
         [Header("Scoring")]
         public int pointsPerBeacon = 1;

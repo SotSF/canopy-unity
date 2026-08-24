@@ -37,8 +37,11 @@ public class SpaceshipGameNode : TickingNode
     [ValueConnectionKnob("collect", Direction.Out, typeof(bool), NodeSide.Bottom, 160)]
     public ValueConnectionKnob beaconCollectedPulseKnob;
 
+    [ValueConnectionKnob("evadeSpeed", Direction.In, typeof(float))]
+    public ValueConnectionKnob evadeSpeedKnob;
+
     private const float BaseWidth = 220f;
-    private const float BaseHeight = 280f;
+    private const float BaseHeight = 305f;
     private const float PlayerRowHeight = 22f;
 
     private Vector2 _DefaultSize = new Vector2(BaseWidth, BaseHeight);
@@ -47,6 +50,10 @@ public class SpaceshipGameNode : TickingNode
     // Persisted with the canvas. On the first DoCalc tick after load we push this into
     // MiniGameController so the runtime mode matches what the canvas remembers.
     public RadioButtonSet gameModeSelection;
+
+    // Beacon flee speed in board units/sec; slider fallback when the knob is unconnected.
+    // Slider max matches BeaconGameConstants.topSpeed so a maxed beacon is barely catchable.
+    public float evadeSpeed = 0f;
 
     // Canonical mapping between radio-button labels and the GameMode enum. Kept here so the
     // node UI and the coordinator can't drift.
@@ -100,6 +107,10 @@ public class SpaceshipGameNode : TickingNode
 
         GUILayout.Label("Game mode");
         RadioButtons(gameModeSelection);
+
+        GUILayout.Space(6);
+
+        FloatKnobOrSlider(ref evadeSpeed, 0f, 5f, evadeSpeedKnob);
 
         GUILayout.Space(6);
 
@@ -176,6 +187,10 @@ public class SpaceshipGameNode : TickingNode
         levelUpPulseKnob.SetValue<bool>(miniController.LevelUpThisFrame);
         beaconCollectedPulseKnob.SetValue<bool>(miniController.BeaconCollectedThisFrame);
         miniController.ClearFrameEvents();
+
+        if (evadeSpeedKnob.connected())
+            evadeSpeed = evadeSpeedKnob.GetValue<float>();
+        miniController.SetBeaconEvasionSpeed(evadeSpeed);
 
         var activeIds = new HashSet<string>();
         foreach (var port in PlayerPorts)
