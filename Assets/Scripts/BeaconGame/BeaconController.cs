@@ -24,7 +24,7 @@ namespace BeaconGame
         void Update()
         {
             pulseTime += Time.deltaTime * BeaconGameConstants.Instance.beaconPulseRate;
-            float pulse = 0.75f + 0.25f * Mathf.Sin(pulseTime * Mathf.PI * 2f);
+            float pulse = 0.75f + 0.1f * Mathf.Sin(pulseTime * Mathf.PI * 2f);
             transform.localScale = baseScale * pulse;
 
             if (beaconMaterial != null && beaconMaterial.HasProperty(EmissionColorID))

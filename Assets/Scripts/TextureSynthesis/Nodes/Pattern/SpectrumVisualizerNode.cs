@@ -19,6 +19,13 @@ public class SpectrumVisualizerNode : TickingNode
     public ValueConnectionKnob spectrumDataKnob;
     private float[] spectrumData;
 
+    [ValueConnectionKnob("gradient", Direction.In, typeof(Gradient), NodeSide.Left)]
+    public ValueConnectionKnob gradientKnob;
+    // Rebaked every frame while a gradient is connected: the manager's gradients are
+    // edited live in the inspector, and the reference doesn't change when content does
+    [System.NonSerialized] private int lastGradientBakeFrame = -1;
+    [System.NonSerialized] private Color[] gradientBakeBuffer;
+
     [ValueConnectionKnob("outputTex", Direction.Out, typeof(Texture), NodeSide.Bottom)]
     public ValueConnectionKnob outputTexKnob;
 
@@ -61,7 +68,9 @@ public class SpectrumVisualizerNode : TickingNode
         outputTex.Create();
     }
     
-    private void UpdateGradientTexture()
+    private void UpdateGradientTexture() => BakeGradient(barGradient);
+
+    private void BakeGradient(Gradient gradient)
     {
         if (gradientTex == null)
         {
@@ -69,15 +78,18 @@ public class SpectrumVisualizerNode : TickingNode
             gradientTex.wrapMode = TextureWrapMode.Clamp;
             gradientTex.filterMode = FilterMode.Bilinear;
         }
-        
-        if (barGradient != null)
+
+        if (gradient != null)
         {
-            Color[] pixels = new Color[256];
+            if (gradientBakeBuffer == null || gradientBakeBuffer.Length != 256)
+            {
+                gradientBakeBuffer = new Color[256];
+            }
             for (int i = 0; i < 256; i++)
             {
-                pixels[i] = barGradient.Evaluate((float)i / 255f);
+                gradientBakeBuffer[i] = gradient.Evaluate((float)i / 255f);
             }
-            gradientTex.SetPixels(pixels);
+            gradientTex.SetPixels(gradientBakeBuffer);
             gradientTex.Apply();
         }
     }
@@ -86,13 +98,19 @@ public class SpectrumVisualizerNode : TickingNode
     {
         GUILayout.BeginVertical();
         spectrumDataKnob.DisplayLayout();
+        gradientKnob.DisplayLayout();
 
         #if UNITY_EDITOR
-        EditorGUI.BeginChangeCheck();
-        barGradient = EditorGUILayout.GradientField(new GUIContent("Gradient"), barGradient);
-        if (EditorGUI.EndChangeCheck())
+        // The connected port overrides this local gradient; keep the field editable
+        // only when it's actually in effect
+        if (gradientKnob == null || !gradientKnob.connected())
         {
-            UpdateGradientTexture();
+            EditorGUI.BeginChangeCheck();
+            barGradient = EditorGUILayout.GradientField(new GUIContent("Gradient"), barGradient);
+            if (EditorGUI.EndChangeCheck())
+            {
+                UpdateGradientTexture();
+            }
         }
         #endif
         width = RTEditorGUI.IntField("Width", width );
@@ -120,6 +138,17 @@ public class SpectrumVisualizerNode : TickingNode
     public override bool DoCalc()
     {
         spectrumData = spectrumDataKnob.GetValue<float[]>();
+        // Port-supplied gradient takes precedence over the node's own barGradient.
+        // Once-per-frame rebake (Calculate can re-run in-frame via OnNodeChange).
+        if (gradientKnob != null && gradientKnob.connected() && Time.frameCount != lastGradientBakeFrame)
+        {
+            var portGradient = gradientKnob.GetValue<Gradient>();
+            if (portGradient != null)
+            {
+                lastGradientBakeFrame = Time.frameCount;
+                BakeGradient(portGradient);
+            }
+        }
         if (spectrumData != null)
         {
             if (gradientTex == null) UpdateGradientTexture();

@@ -107,7 +107,7 @@ namespace BeaconGame
             activeBeacon = null;
 
             if (celebrationVFXPrefab != null)
-                Instantiate(celebrationVFXPrefab, beaconPos, Quaternion.identity, transform);
+                Instantiate(celebrationVFXPrefab, beaconPos, Quaternion.Euler(90,0,0), transform);
 
             sharedPoints += BeaconGameConstants.Instance.pointsPerBeacon;
             beaconCollectedThisFrame = true;

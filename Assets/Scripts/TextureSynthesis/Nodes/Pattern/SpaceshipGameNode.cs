@@ -31,14 +31,14 @@ public class SpaceshipGameNode : TickingNode
 
     // BeaconGame-mode pulse outputs. 1.0 for one tick when the event fires, 0 otherwise.
     // Always 0 in SpaceshipGame mode.
-    [ValueConnectionKnob("levelUp", Direction.Out, typeof(float), NodeSide.Bottom, 120)]
+    [ValueConnectionKnob("levelUp", Direction.Out, typeof(bool), NodeSide.Bottom, 120)]
     public ValueConnectionKnob levelUpPulseKnob;
 
-    [ValueConnectionKnob("collect", Direction.Out, typeof(float), NodeSide.Bottom, 160)]
+    [ValueConnectionKnob("collect", Direction.Out, typeof(bool), NodeSide.Bottom, 160)]
     public ValueConnectionKnob beaconCollectedPulseKnob;
 
     private const float BaseWidth = 220f;
-    private const float BaseHeight = 260f;
+    private const float BaseHeight = 280f;
     private const float PlayerRowHeight = 22f;
 
     private Vector2 _DefaultSize = new Vector2(BaseWidth, BaseHeight);
@@ -173,8 +173,8 @@ public class SpaceshipGameNode : TickingNode
 
         gameOutputKnob.SetValue<Texture>(miniController.GameBoardTex);
         fluidVelocityOutputKnob.SetValue<Texture>(miniController.FluidVelocityTex);
-        levelUpPulseKnob.SetValue<float>(miniController.LevelUpThisFrame ? 1f : 0f);
-        beaconCollectedPulseKnob.SetValue<float>(miniController.BeaconCollectedThisFrame ? 1f : 0f);
+        levelUpPulseKnob.SetValue<bool>(miniController.LevelUpThisFrame);
+        beaconCollectedPulseKnob.SetValue<bool>(miniController.BeaconCollectedThisFrame);
         miniController.ClearFrameEvents();
 
         var activeIds = new HashSet<string>();
@@ -201,8 +201,8 @@ public class SpaceshipGameNode : TickingNode
         gameOutputKnob.SetValue<Texture>(gameController.gameBoardTex);
         fluidVelocityOutputKnob.SetValue<Texture>(gameController.fluidVelocityTex);
         // No coordinator, no beacon game — new outputs stay silent.
-        levelUpPulseKnob.SetValue<float>(0f);
-        beaconCollectedPulseKnob.SetValue<float>(0f);
+        levelUpPulseKnob.SetValue<bool>(false);
+        beaconCollectedPulseKnob.SetValue<bool>(false);
 
         var activeIds = new HashSet<string>();
         foreach (var port in PlayerPorts)
