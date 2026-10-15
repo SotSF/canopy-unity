@@ -60,22 +60,7 @@ public class RecordingManager : Singleton<RecordingManager>
     /// <summary>Opens the recordings folder in the OS file browser (Explorer/Finder).</summary>
     public void OpenRecordingsFolder()
     {
-        string dir = RecordingsDir;
-        try
-        {
-            Directory.CreateDirectory(dir);
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-            System.Diagnostics.Process.Start("open", $"\"{dir}\"");
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            System.Diagnostics.Process.Start("explorer.exe", dir.Replace('/', '\\'));
-#else
-            Application.OpenURL("file://" + dir);
-#endif
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"RecordingManager: couldn't open '{dir}': {e.Message}");
-        }
+        FolderUtil.Reveal(RecordingsDir);
     }
 
     public CanopyRecordingFile CreateFile(string name, int width, int height, float nominalFps)

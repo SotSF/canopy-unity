@@ -361,7 +361,7 @@ public class CanopyTrackNode : TickingNode
         {
             RecordingManager.Instance?.OpenRecordingsFolder();
         }
-        if (GUILayout.Button("⟳", GUILayout.Width(24)))
+        if (GUILayout.Button("Reload", GUILayout.Width(56)))
         {
             RecordingManager.Instance?.Refresh();
         }
