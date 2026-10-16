@@ -23,6 +23,8 @@ public class VFXGraphNode: DynamicPatternNode
 
     public string gameObjectName = "VFXCam";
     private Dictionary<string, Texture> lastTexInputs;
+    // Unsupported input types warn once per port, not every tick
+    [NonSerialized] private HashSet<string> warnedUnsupported = new HashSet<string>();
 
     public bool vfxBound = false;
     public string[] visualEffectNames = new string[] { "VFXCam", "TrailCam", "TorusCam", "GoldenSpiralCam" };
@@ -74,13 +76,36 @@ public class VFXGraphNode: DynamicPatternNode
         GUILayout.EndHorizontal();
     }
 
+    // GameObject.Find skips inactive objects, and unused VFX rigs under VFXManager are kept
+    // inactive (e.g. GoldenSpiralCam), so search inactive scene objects too
+    static GameObject FindSceneObject(string name)
+    {
+        var active = GameObject.Find(name);
+        if (active != null) return active;
+        foreach (var t in FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (t.name == name) return t.gameObject;
+        }
+        return null;
+    }
+
     private void EnableFx()
     {
-        sceneObj = GameObject.Find(gameObjectName);
-        cam = sceneObj.GetComponentsInChildren<Camera>(true).First();
+        sceneObj = FindSceneObject(gameObjectName);
+        cam = sceneObj != null ? sceneObj.GetComponentsInChildren<Camera>(true).FirstOrDefault() : null;
+        effect = sceneObj != null ? sceneObj.GetComponentsInChildren<VisualEffect>(true).FirstOrDefault() : null;
+        if (cam == null || effect == null)
+        {
+            // Stay bound (gameObjectName is user data) but inert; the node shows the problem.
+            // Throwing here would fail DoInit, which retries — and throws — every tick
+            Debug.LogError($"VFXGraph: no VFX rig '{gameObjectName}' with a Camera and VisualEffect in the scene.");
+            cam = null;
+            effect = null;
+            return;
+        }
+        sceneObj.SetActive(true);
         cam.gameObject.SetActive(true);
         outputTex = cam.targetTexture;
-        effect = sceneObj.GetComponentsInChildren<VisualEffect>().First();
         effect.Play();
         // Query exposed properties from the VFX Graph
         List<VFXExposedProperty> exposedProperties = new List<VFXExposedProperty>(); ;
@@ -89,20 +114,26 @@ public class VFXGraphNode: DynamicPatternNode
         {
             inputPortNames.Add(prop.name);
             inputPortTypes.Add(prop.type);
-            if (prop.type == typeof(Texture))
+            if (typeof(Texture).IsAssignableFrom(prop.type))
             {
                 lastTexInputs[prop.name] = null;
             }
             //Debug.Log($"Exposed property: {prop.name}");
         }
+        // Heal serialized ports against the graph's current exposed properties: same name +
+        // type keeps its wire, a property whose type changed gets a fresh port (with a warning
+        // if it was connected) instead of pushing the old type at it every frame
+        ReconcileDynamicPorts();
     }
 
     private void DisableFx()
     {
         vfxBound = false;
         gameObjectName = "";
-        effect.Stop();
-        cam.gameObject.SetActive(false);
+        if (effect != null) effect.Stop();
+        if (cam != null) cam.gameObject.SetActive(false);
+        effect = null;
+        cam = null;
         outputTex = null;
         InitBuffers();
         CleanExistingConnections();
@@ -111,6 +142,10 @@ public class VFXGraphNode: DynamicPatternNode
     protected override void BottomGUI()
     {
         if (!vfxBound) return;
+        if (effect == null && Application.isPlaying)
+        {
+            GUILayout.Label($"⚠ VFX rig '{gameObjectName}' not found");
+        }
         if (GUILayout.Button("Unbind VFX"))
         {
             DisableFx();
@@ -119,46 +154,69 @@ public class VFXGraphNode: DynamicPatternNode
 
     public override float GetPortPropValue(string portName)
     {
-        return effect.GetFloat(portName);
+        if (effect != null && effect.HasFloat(portName))
+        {
+            return effect.GetFloat(portName);
+        }
+        // DynamicPatternNode.NodeGUI catches this and falls back to the port's own value
+        throw new NotImplementedException();
     }
 
     public override bool DoCalc()
     {
+        if (!vfxBound || effect == null)
+        {
+            textureOutputKnob.SetValue<Texture>(outputTex);
+            return true;
+        }
         for (int i = 0; i < dynamicConnectionPorts.Count; i++)
         {
             var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
+            if (port.connections.Count == 0) continue;
             var portType = port.valueType;
-            if (port.connections.Count > 0)
+            var propName = port.name; // index-independent: survives port/property drift
+            if (portType == typeof(float))
             {
-                if (portType == typeof(float))
+                effect.SetFloat(propName, port.GetValue<float>());
+            }
+            else if (portType == typeof(int))
+            {
+                effect.SetInt(propName, port.GetValue<int>());
+            }
+            else if (portType == typeof(bool))
+            {
+                effect.SetBool(propName, port.GetValue<bool>());
+            }
+            else if (portType == typeof(Vector2))
+            {
+                effect.SetVector2(propName, port.GetValue<Vector2>());
+            }
+            else if (portType == typeof(Vector3))
+            {
+                effect.SetVector3(propName, port.GetValue<Vector3>());
+            }
+            else if (portType == typeof(Vector4))
+            {
+                effect.SetVector4(propName, port.GetValue<Vector4>());
+            }
+            else if (portType == typeof(Gradient))
+            {
+                var val = port.GetValue<Gradient>();
+                if (val != null) effect.SetGradient(propName, val);
+            }
+            else if (typeof(Texture).IsAssignableFrom(portType))
+            {
+                Texture val = port.GetValue<Texture>();
+                lastTexInputs.TryGetValue(propName, out var last);
+                if (val != null && val != last)
                 {
-                    float val = port.GetValue<float>();
-                    effect.SetFloat(inputPortNames[i], val);
+                    effect.SetTexture(propName, val);
+                    lastTexInputs[propName] = val;
                 }
-                else if (portType == typeof(int))
-                {
-                    int val = port.GetValue<int>();
-                    effect.SetInt(inputPortNames[i], val);
-                }
-                else if (portType == typeof(Texture))
-                {
-                    Texture val = port.GetValue<Texture>();
-                    try
-                    {
-                        if (lastTexInputs[inputPortNames[i]] != val)
-                        {
-                            effect.SetTexture(inputPortNames[i], val);
-                        }
-                    }
-                    catch
-                    {
-
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"Unsupported type {portType} for VFX Graph input {inputPortNames[i]}.");
-                }
+            }
+            else if (warnedUnsupported.Add(propName))
+            {
+                Debug.LogWarning($"VFXGraph: unsupported type {portType.Name} for input '{propName}'; it won't be driven.");
             }
         }
         textureOutputKnob.SetValue(outputTex);

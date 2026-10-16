@@ -21,6 +21,8 @@ public class VFXInstanceNode : DynamicPatternNode
 
     private VFXInstance instance;
     private Dictionary<string, Texture> lastTexInputs;
+    // Unsupported input types warn once per port, not every tick
+    [NonSerialized] private HashSet<string> warnedUnsupported = new HashSet<string>();
     private int selectedVfxIdx = 0;
 
     public void InitBuffers()
@@ -204,6 +206,11 @@ public class VFXInstanceNode : DynamicPatternNode
                 Vector4 val = port.GetValue<Vector4>();
                 if (!instance.TrySetBinderPort(propName, val)) effect.SetVector4(propName, val);
             }
+            else if (portType == typeof(Gradient))
+            {
+                var val = port.GetValue<Gradient>();
+                if (val != null) effect.SetGradient(propName, val);
+            }
             else if (typeof(Texture).IsAssignableFrom(portType))
             {
                 Texture val = port.GetValue<Texture>();
@@ -214,9 +221,9 @@ public class VFXInstanceNode : DynamicPatternNode
                     lastTexInputs[propName] = val;
                 }
             }
-            else
+            else if (warnedUnsupported.Add(propName))
             {
-                Debug.LogWarning($"Unsupported type {portType} for VFX input {propName}.");
+                Debug.LogWarning($"VFXInstance: unsupported type {portType.Name} for input '{propName}'; it won't be driven.");
             }
         }
         textureOutputKnob.SetValue(outputTex);

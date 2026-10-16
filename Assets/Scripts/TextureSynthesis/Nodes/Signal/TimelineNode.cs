@@ -122,6 +122,7 @@ public class TimelineNode : TickingNode
     [NonSerialized] float[] smoothedSpectrum;
     [NonSerialized] RenderTexture waveformTex;
     [NonSerialized] bool peaksPending = false;       // clip data still loading async
+    [NonSerialized] bool audioBindPending = false;   // disk clip still decoding; FinishAudioBind on arrival
     [NonSerialized] float waveViewStart = float.NaN; // waveform cache validity
     [NonSerialized] float waveViewEnd = float.NaN;
     [NonSerialized] int waveWidth = -1;
@@ -356,16 +357,36 @@ public class TimelineNode : TickingNode
     void BindAudio()
     {
         audioSource = AudioTrackManager.Instance.CreateSource(this, audioClipName);
-        if (audioSource == null || audioSource.clip == null)
+        if (audioSource == null)
         {
             Debug.LogError($"Timeline: failed to bind audio '{audioClipName}', unbinding.");
             UnbindAudio();
             return;
         }
+        if (audioSource.clip == null)
+        {
+            // Disk clip still decoding: SyncAudioPlayback finishes the bind when it lands
+            audioBindPending = true;
+            EnsurePorts();
+            return;
+        }
+        FinishAudioBind();
+    }
+
+    void FinishAudioBind()
+    {
+        audioBindPending = false;
         audioSource.volume = audioVolume;
         if (rawSpectrum == null) rawSpectrum = new float[SpectrumSize];
         if (smoothedSpectrum == null) smoothedSpectrum = new float[SpectrumSize];
-        ExtractPeaks(audioSource.clip);
+        if (AudioTrackManager.Instance.IsDiskClip(audioClipName))
+        {
+            RequestDiskPeaks();
+        }
+        else
+        {
+            ExtractPeaks(audioSource.clip);
+        }
         // An audio timeline is 1:1 with its clip: re-anchor the duration WITHOUT rescaling
         // existing keys/events (this is a re-anchoring, not a stretch). On reload the saved
         // duration already matches, so nothing moves.
@@ -385,6 +406,7 @@ public class TimelineNode : TickingNode
     void UnbindAudio()
     {
         audioBound = false;
+        audioBindPending = false;
         audioClipName = "";
         if (Application.isPlaying && AudioTrackManager.Instance != null)
         {
@@ -399,6 +421,27 @@ public class TimelineNode : TickingNode
             waveformTex = null;
         }
         EnsurePorts(); // drops the spectrum/sampleRate ports
+    }
+
+    // Disk clips play from compressed memory, which GetData can't read: peaks come from a
+    // one-off decompressed copy, scanned and discarded
+    void RequestDiskPeaks()
+    {
+        peakMin = null;
+        peakMax = null;
+        peaksPending = false;
+        string name = audioClipName;
+        AudioTrackManager.Instance.RequestDecompressedCopy(name, copy =>
+        {
+            if (copy == null) return;
+            // Unbound, rebound or deleted while the decode was in flight
+            if (this != null && audioBound && audioClipName == name)
+            {
+                ExtractPeaks(copy);
+                waveViewStart = float.NaN; // force waveform rebuild with real data
+            }
+            Destroy(copy);
+        });
     }
 
     // One-shot scan at bind: per-block min/max of the mono mix, so waveform columns for any
@@ -451,7 +494,21 @@ public class TimelineNode : TickingNode
     // drift-corrects to the playhead (scrubs, loops and jumps all just look like drift).
     void SyncAudioPlayback()
     {
-        if (audioSource == null || audioSource.clip == null) return;
+        if (audioSource == null) return;
+        if (audioBindPending)
+        {
+            if (audioSource.clip != null)
+            {
+                FinishAudioBind();
+            }
+            else if (AudioTrackManager.Instance.GetStatus(audioClipName) == AudioTrackManager.ClipStatus.Failed)
+            {
+                Debug.LogError($"Timeline: failed to load audio '{audioClipName}', unbinding.");
+                UnbindAudio();
+                return;
+            }
+        }
+        if (audioSource.clip == null) return;
         if (peaksPending)
         {
             var loadState = audioSource.clip.loadState;
@@ -742,7 +799,7 @@ public class TimelineNode : TickingNode
             playhead = Mathf.Max(playhead - 5f, 0f);
         }
         loop = GUI.Toggle(Next(44f), loop, "Loop", GUI.skin.button);
-        if (GUI.Button(Next(44f), "Zoom⟲")) view.Reset(duration);
+        if (GUI.Button(Next(56f), "Zoom⟲")) view.Reset(duration);
         if (GUI.Button(Next(56f), "+ Signal")) AddChannel();
         if (GUI.Toggle(Next(26f), audioPickerOpen, "♪", GUI.skin.button) != audioPickerOpen)
         {
@@ -833,7 +890,7 @@ public class TimelineNode : TickingNode
         }
         if (audioBound)
         {
-            GUI.Label(new Rect(r.x + 6f, r.y + 2f, r.width - 120f, 16f), $"♪ {audioClipName}");
+            GUI.Label(new Rect(r.x + 6f, r.y + 2f, r.width - 120f, 16f), $"♪ {audioClipName}{(audioBindPending ? "  (loading…)" : "")}");
             if (GUI.Button(new Rect(r.xMax - 96f, r.y + 2f, 92f, 18f), "Unbind audio"))
             {
                 UnbindAudio();
@@ -844,11 +901,21 @@ public class TimelineNode : TickingNode
         }
         else
         {
-            GUI.Label(new Rect(r.x + 6f, r.y + 2f, r.width - 12f, 16f), "Bind audio track:");
-            var names = AudioTrackManager.Instance.ClipNames;
+            var manager = AudioTrackManager.Instance;
+            GUI.Label(new Rect(r.x + 6f, r.y + 2f, r.width - 140f, 16f), "Bind audio track:");
+            if (GUI.Button(new Rect(r.xMax - 128f, r.y + 2f, 64f, 18f), "Open dir"))
+            {
+                manager.OpenDiskFolder();
+            }
+            if (GUI.Button(new Rect(r.xMax - 60f, r.y + 2f, 56f, 18f), "Reload"))
+            {
+                manager.RefreshClips(); // the picker height follows ClipNames next layout
+            }
+            var names = manager.ClipNames;
             if (names.Length == 0)
             {
-                GUI.Label(new Rect(r.x + 6f, r.y + 26f, r.width - 12f, 18f), "No clips found (Resources/AudioTracks)");
+                GUI.Label(new Rect(r.x + 6f, r.y + 26f, r.width - 12f, 18f),
+                    $"No clips in Resources/{manager.clipResourcePath} or Files/{AudioTrackManager.DiskFolderName}/");
                 return;
             }
             for (int i = 0; i < names.Length; i++)

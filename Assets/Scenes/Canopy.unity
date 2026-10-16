@@ -11117,6 +11117,7 @@ MonoBehaviour:
   celebrationVFXPrefab: {fileID: 2157216240594670859, guid: 5525c8308418ca24c9f9a8508fd45e53,
     type: 3}
   shipScale: {x: 2.3, y: 2.3, z: 2.3}
+  beaconEvasionSpeed: 0
   sharedPoints: 0
   level: 1
   beaconCollectedThisFrame: 0
@@ -12381,11 +12382,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1574564306}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69d4f470bf38a4d148857a60b2e69796, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  limitFps: 0
+  targetFps: 30
 --- !u!1 &1575556132
 GameObject:
   m_ObjectHideFlags: 0
@@ -14453,7 +14456,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 146f694dc226ebd44bf9b79529c61c04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasSaves: []
+  exampleCanvases:
+  - CanvasSaves/AudioReactiveFluid_20251118
+  - CanvasSaves/AudioSpectrumTestCanvas
+  - CanvasSaves/ConjurerPlusVFX
+  - CanvasSaves/StripTestCanvas
+  - CanvasSaves/Overcome_Canvas_jets
 --- !u!84 &2044273534
 RenderTexture:
   m_ObjectHideFlags: 0

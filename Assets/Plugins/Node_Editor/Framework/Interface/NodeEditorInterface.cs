@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 using NodeEditorFramework.IO;
@@ -13,7 +14,6 @@ namespace NodeEditorFramework.Standard
 		public Action<GUIContent> ShowNotificationAction;
 
 		// GUI
-		public string sceneCanvasName = "";
 		public float toolbarHeight = 17;
 
 		// Modal Panel
@@ -22,6 +22,8 @@ namespace NodeEditorFramework.Standard
 		public Action modalPanelContent;
 
 		// IO Format modal panel
+		// Format behind File > Load/Save Canvas (XMLImportExport.FormatIdentifier)
+		private const string CanvasFileFormat = "XML";
 		private ImportExportFormat IOFormat;
 		private object[] IOLocationArgs;
 		private delegate bool? DefExportLocationGUI(string canvasName, ref object[] locationArgs);
@@ -48,47 +50,47 @@ namespace NodeEditorFramework.Standard
 			{
 				GenericMenu menu = new GenericMenu(!Application.isPlaying);
 
-				// New Canvas filled with canvas types
-				NodeCanvasManager.FillCanvasTypeMenu(ref menu, NewNodeCanvas, "New Canvas/");
+				// A single New Canvas rather than a submenu of canvas types: canopy only uses
+				// Calculation canvases. The framework's other built-in type (the Graph example)
+				// only traverses from a root node and ignores node changes, so GUI edits on
+				// non-ticking nodes never propagated there — the choice was only a trap.
+				menu.AddItem(new GUIContent("New Canvas"), false, () => NewNodeCanvas(typeof(NodeEditorFramework.Standard.CalculationCanvasType)));
 				menu.AddSeparator("");
 
-				// Load / Save
-#if UNITY_EDITOR
-				menu.AddItem(new GUIContent("Load Canvas"), false, LoadCanvas);
-				menu.AddItem(new GUIContent("Reload Canvas"), false, ReloadCanvas);
+				// Load / Save as canvas files (XML) — the format the built app uses, so it leads.
+				// Direct items rather than Import/Export submenus: XML is the only format.
+				menu.AddItem(new GUIContent("Load Canvas"), false, () => ImportCanvasCallback(CanvasFileFormat));
+				if (canvasCache.nodeCanvas.allowSceneSaveOnly)
+					menu.AddDisabledItem(new GUIContent("Save Canvas"));
+				else
+					menu.AddItem(new GUIContent("Save Canvas"), false, () => ExportCanvasCallback(CanvasFileFormat));
 				menu.AddSeparator("");
+
+				// Load / Save as Unity assets (editor only)
+#if UNITY_EDITOR
+				menu.AddItem(new GUIContent("Load Canvas Asset"), false, LoadCanvas);
+				menu.AddItem(new GUIContent("Reload Canvas Asset"), false, ReloadCanvas);
 				if (canvasCache.nodeCanvas.allowSceneSaveOnly)
 				{
-					menu.AddDisabledItem(new GUIContent("Save Canvas"));
-					menu.AddDisabledItem(new GUIContent("Save Canvas As"));
+					menu.AddDisabledItem(new GUIContent("Save Canvas Asset"));
+					menu.AddDisabledItem(new GUIContent("Save Canvas Asset As"));
 				}
 				else
 				{
-					menu.AddItem(new GUIContent("Save Canvas"), false, SaveCanvas);
-					menu.AddItem(new GUIContent("Save Canvas As"), false, SaveCanvasAs);
+					menu.AddItem(new GUIContent("Save Canvas Asset"), false, SaveCanvas);
+					menu.AddItem(new GUIContent("Save Canvas Asset As"), false, SaveCanvasAs);
 				}
 				menu.AddSeparator("");
 #endif
 
-				// Import / Export filled with import/export types
-				ImportExportManager.FillImportFormatMenu(ref menu, ImportCanvasCallback, "Import/");
-				if (canvasCache.nodeCanvas.allowSceneSaveOnly)
-				{
-					menu.AddDisabledItem(new GUIContent("Export"));
-				}
-				else
-				{
-					ImportExportManager.FillExportFormatMenu(ref menu, ExportCanvasCallback, "Export/");
-				}
-				menu.AddSeparator("");
-
-				// Scene Saving
-				string[] sceneSaves = NodeEditorSaveManager.GetSceneSaves();
-				if (sceneSaves.Length <= 0) // Display disabled item
-					menu.AddItem(new GUIContent("Load Canvas from Scene"), false, null);
-				else foreach (string sceneSave in sceneSaves) // Display scene saves to load
-						menu.AddItem(new GUIContent("Load Canvas from Scene/" + sceneSave), false, LoadSceneCanvasCallback, sceneSave);
-				menu.AddItem(new GUIContent("Save Canvas to Scene"), false, SaveSceneCanvasCallback);
+				// Bundled example canvases (CanvasStorageManager), loaded from Resources on demand.
+				// Replaces NEF's Load/Save Canvas to Scene: scene saves made at runtime land in the
+				// play-mode / player scene and are lost on exit, so they never persisted here.
+				List<string> examples = CanvasStorageManager.Examples;
+				if (examples.Count == 0)
+					menu.AddDisabledItem(new GUIContent("Load Example"));
+				else foreach (string example in examples)
+					menu.AddItem(new GUIContent("Load Example/" + CanvasStorageManager.DisplayName(example)), false, LoadExampleCallback, example);
 
 				// Show dropdown
 				menu.Show(new Vector2(5, toolbarHeight));
@@ -121,29 +123,6 @@ namespace NodeEditorFramework.Standard
 			GUILayout.EndArea();
 			if (Event.current.type == EventType.Repaint)
 				toolbarHeight = curToolbarHeight;
-		}
-
-		private void SaveSceneCanvasPanel()
-		{
-			GUILayout.Label("Save Canvas To Scene");
-
-			GUILayout.BeginHorizontal();
-			sceneCanvasName = GUILayout.TextField(sceneCanvasName, GUILayout.ExpandWidth(true));
-			bool overwrite = NodeEditorSaveManager.HasSceneSave(sceneCanvasName);
-			if (overwrite)
-				GUILayout.Label(new GUIContent("!!!", "A canvas with the specified name already exists. It will be overwritten!"), GUILayout.ExpandWidth(false));
-			GUILayout.EndHorizontal();
-
-			GUILayout.BeginHorizontal();
-			if (GUILayout.Button("Cancel"))
-				showModalPanel = false;
-			if (GUILayout.Button(new GUIContent(overwrite ? "Overwrite" : "Save", "Save the canvas to the Scene")))
-			{
-				showModalPanel = false;
-				if (!string.IsNullOrEmpty (sceneCanvasName))
-					canvasCache.SaveSceneNodeCanvas(sceneCanvasName);
-			}
-			GUILayout.EndHorizontal();
 		}
 
 		public void DrawModalPanel()
@@ -221,16 +200,14 @@ namespace NodeEditorFramework.Standard
 		}
 #endif
 
-		private void LoadSceneCanvasCallback(object canvas)
+		private void LoadExampleCallback(object resourcePath)
 		{
-			canvasCache.LoadSceneNodeCanvas((string)canvas);
-			sceneCanvasName = canvasCache.nodeCanvas.name;
-		}
-
-		private void SaveSceneCanvasCallback()
-		{
-			modalPanelContent = SaveSceneCanvasPanel;
-			showModalPanel = true;
+			string path = (string)resourcePath;
+			if (!canvasCache.LoadResourceNodeCanvas(path))
+			{
+				Debug.LogError("Load Example: no canvas at Resources path '" + path + "' (moved or renamed?)");
+				ShowNotification(new GUIContent("Example '" + CanvasStorageManager.DisplayName(path) + "' not found"));
+			}
 		}
 
 		private void ImportCanvasCallback(string formatID)

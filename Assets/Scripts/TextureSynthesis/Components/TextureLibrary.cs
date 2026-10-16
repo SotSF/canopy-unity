@@ -36,10 +36,7 @@ public class TextureLibrary : Singleton<TextureLibrary>
     private readonly Queue<string> thumbnailQueue = new Queue<string>();
     private readonly HashSet<string> thumbnailQueued = new HashSet<string>();
 
-    // ImportExportFormat.RuntimeIOPath is the CWD-relative "Files/NodeEditor/"; anchoring
-    // on dataPath lands in the same game folder without depending on the launch directory
-    public string DiskDir =>
-        Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Files", "Textures"));
+    public string DiskDir => FolderUtil.GameFilesDir("Textures");
 
     protected override void OnAwake()
     {

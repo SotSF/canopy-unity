@@ -51,33 +51,41 @@ abstract public class DynamicPatternNode : TickingNode
     /// </summary>
     protected void ReconcileDynamicPorts()
     {
-        // Collect keepers by name (first match wins), delete everything else
+        // One keeper per still-existing name+type. Canvases saved by older code can hold
+        // duplicate same-named ports (the old index-based SetupPorts appended them whenever
+        // the property list drifted), so prefer a duplicate that actually carries a wire
         var keepers = new Dictionary<string, ValueConnectionKnob>();
-        for (int i = dynamicConnectionPorts.Count - 1; i >= 0; i--)
+        foreach (ValueConnectionKnob port in dynamicConnectionPorts)
         {
-            var port = (ValueConnectionKnob)dynamicConnectionPorts[i];
-            bool wanted = false;
-            for (int j = 0; j < inputPortNames.Count; j++)
-            {
-                if (inputPortNames[j] == port.name && inputPortTypes[j] == port.valueType)
-                {
-                    wanted = true;
-                    break;
-                }
-            }
-            if (wanted && !keepers.ContainsKey(port.name))
+            int idx = inputPortNames.IndexOf(port.name);
+            if (idx < 0 || inputPortTypes[idx] != port.valueType) continue;
+            if (!keepers.TryGetValue(port.name, out var current)
+                || (current.connections.Count == 0 && port.connections.Count > 0))
             {
                 keepers[port.name] = port;
-                dynamicConnectionPorts.RemoveAt(i); // re-added below in canonical order
             }
-            else
+        }
+        // Delete everything else, saying which wires were lost so they can be redone
+        foreach (ValueConnectionKnob port in dynamicConnectionPorts.ToList())
+        {
+            if (keepers.TryGetValue(port.name, out var keeper) && keeper == port) continue;
+            if (port.connections.Count > 0)
             {
-                port.ClearConnections();
-                DeleteConnectionPort(port);
+                int idx = inputPortNames.IndexOf(port.name);
+                string reason = idx < 0 ? "no longer exists in its source"
+                    : inputPortTypes[idx] != port.valueType ? $"changed type ({port.valueType.Name} → {inputPortTypes[idx].Name})"
+                    : "was a duplicate left by an older save";
+                string from = port.connections[0].body != null ? port.connections[0].body.Title : "?";
+                Debug.LogWarning($"{Title}: input '{port.name}' {reason}; removed its connection from {from}.");
             }
+            // Silent: this runs inside DoInit, and connection callbacks would recalculate this
+            // node mid-init (nothing downstream needs notifying of a structural rebuild)
+            port.ClearConnections(true);
+            DeleteConnectionPort(port);
         }
         // Rebuild in inputPortNames order: keepers slot back in, missing ports get created
         // (CreateValueConnectionKnob appends, so creation order = list order)
+        dynamicConnectionPorts.Clear();
         for (int j = 0; j < inputPortNames.Count; j++)
         {
             if (keepers.TryGetValue(inputPortNames[j], out var keep))

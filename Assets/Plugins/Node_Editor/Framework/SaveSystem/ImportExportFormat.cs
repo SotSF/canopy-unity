@@ -61,6 +61,14 @@ namespace NodeEditorFramework.IO
 		}
 #endif
 
+#if UNITY_EDITOR
+		/// <summary>RuntimeIOPath as an absolute folder (created if missing) for the editor's file panels.</summary>
+		private string EditorIOFolder ()
+		{
+			return Directory.CreateDirectory(RuntimeIOPath).FullName;
+		}
+#endif
+
 		/// <summary>
 		/// Called only if RequiresLocationGUI is true.
 		/// Displays GUI filling in locationArgs with the information necessary to locate the import operation.
@@ -72,7 +80,7 @@ namespace NodeEditorFramework.IO
 #if UNITY_EDITOR
 			return ImportLocationArgsSelection (out locationArgs);
 #else
-			GUILayout.Label("Import canvas from " + FormatIdentifier);
+			GUILayout.Label("Load canvas");
 			GUILayout.BeginHorizontal();
 			// Fixed-width, non-wrapping path label: a long file name on the button must not be able to
 			// squeeze this label into wrapping, which would grow the row tall enough to push the
@@ -102,7 +110,7 @@ namespace NodeEditorFramework.IO
 			GUILayout.BeginHorizontal();
 			if (GUILayout.Button("Cancel"))
 				return false;
-			if (GUILayout.Button("Import"))
+			if (GUILayout.Button("Load"))
 			{
 				if (string.IsNullOrEmpty(fileSelection) || !File.Exists(RuntimeIOPath + fileSelection + "." + FormatExtension))
 					return false;
@@ -125,9 +133,8 @@ namespace NodeEditorFramework.IO
 		{
 			string path = null;
 #if UNITY_EDITOR
-			path = UnityEditor.EditorUtility.OpenFilePanel(
-					"Import " + FormatIdentifier + (!string.IsNullOrEmpty (FormatDescription)? (" (" + FormatDescription + ")") : ""), 
-					"Assets", FormatExtension.ToLower ());
+			// Start in the folder the built app loads from, so editor and build share canvases
+			path = UnityEditor.EditorUtility.OpenFilePanel("Load Canvas", EditorIOFolder(), FormatExtension.ToLower ());
 #endif
 			locationArgs = new object[] { path };
 			return !string.IsNullOrEmpty (path);
@@ -144,7 +151,7 @@ namespace NodeEditorFramework.IO
 #if UNITY_EDITOR
 			return ExportLocationArgsSelection(canvasName, out locationArgs);
 #else
-			GUILayout.Label("Export canvas to " + FormatIdentifier);
+			GUILayout.Label("Save canvas");
 
 			// File save field
 			GUILayout.BeginHorizontal();
@@ -157,7 +164,7 @@ namespace NodeEditorFramework.IO
 			GUILayout.BeginHorizontal();
 			if (GUILayout.Button("Cancel"))
 				return false;
-			if (GUILayout.Button("Export"))
+			if (GUILayout.Button("Save"))
 			{
 				if (string.IsNullOrEmpty(fileSelection))
 					return false;
@@ -180,9 +187,7 @@ namespace NodeEditorFramework.IO
 		{
 			string path = null;
 #if UNITY_EDITOR
-			path = UnityEditor.EditorUtility.SaveFilePanel(
-				"Export " + FormatIdentifier + (!string.IsNullOrEmpty (FormatDescription)? (" (" + FormatDescription + ")") : ""), 
-				"Assets", canvasName, FormatExtension.ToLower ());
+			path = UnityEditor.EditorUtility.SaveFilePanel("Save Canvas", EditorIOFolder(), canvasName, FormatExtension.ToLower ());
 #endif
 			locationArgs = new object[] { path };
 			return !string.IsNullOrEmpty (path);

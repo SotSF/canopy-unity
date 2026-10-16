@@ -1,0 +1,59 @@
+#pragma kernel Rotate
+
+Texture2D<float4> InputTex;
+RWTexture2D<float4> OutputTex;
+
+uint width;
+uint height;
+// Rotation of the image, as cos/sin of the angle (computed once on the CPU)
+float2 rotation;
+// 0 = mirror, 1 = repeat, 2 = clamp, 3 = transparent outside the source
+uint wrapMode;
+bool smooth;
+
+SamplerState SmpLinearMirror;
+SamplerState SmpLinearRepeat;
+SamplerState SmpLinearClamp;
+SamplerState SmpPointMirror;
+SamplerState SmpPointRepeat;
+SamplerState SmpPointClamp;
+
+float4 SampleWrapped(float2 uv)
+{
+    // wrapMode/smooth are uniform, so these branches don't diverge
+    float4 color;
+    if (smooth)
+    {
+        if (wrapMode == 0)      color = InputTex.SampleLevel(SmpLinearMirror, uv, 0);
+        else if (wrapMode == 1) color = InputTex.SampleLevel(SmpLinearRepeat, uv, 0);
+        else                    color = InputTex.SampleLevel(SmpLinearClamp, uv, 0);
+    }
+    else
+    {
+        if (wrapMode == 0)      color = InputTex.SampleLevel(SmpPointMirror, uv, 0);
+        else if (wrapMode == 1) color = InputTex.SampleLevel(SmpPointRepeat, uv, 0);
+        else                    color = InputTex.SampleLevel(SmpPointClamp, uv, 0);
+    }
+    return color;
+}
+
+[numthreads(16, 16, 1)]
+void Rotate(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= width || id.y >= height) return;
+    float2 dims = float2(width, height);
+    float2 center = dims * 0.5;
+    // Rotate in pixel space (not UV) so non-square textures don't skew. Each output pixel
+    // samples the source at its position rotated BACK by the angle, which turns the image
+    // forward (counter-clockwise for positive angles, with y up).
+    float2 p = (id.xy + 0.5) - center;
+    float2 src = float2(rotation.x * p.x + rotation.y * p.y,
+                        -rotation.y * p.x + rotation.x * p.y) + center;
+    float2 uv = src / dims;
+    if (wrapMode == 3 && (any(uv < 0.0) || any(uv > 1.0)))
+    {
+        OutputTex[id.xy] = float4(0, 0, 0, 0);
+        return;
+    }
+    OutputTex[id.xy] = SampleWrapped(uv);
+}

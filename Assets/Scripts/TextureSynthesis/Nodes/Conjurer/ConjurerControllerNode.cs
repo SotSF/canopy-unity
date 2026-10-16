@@ -204,7 +204,7 @@ public class ConjurerControllerNode : TickingNode
             patternValChanged[paramIdx] = true;
             patternParamVals[paramIdx] = curVal;
         }
-        transmitPatternData[paramIdx] = GUILayout.Toggle(transmitPatternData[paramIdx], "🆒");
+        transmitPatternData[paramIdx] = GUILayout.Toggle(transmitPatternData[paramIdx], "Tx");
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
     }

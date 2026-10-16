@@ -26,6 +26,15 @@ namespace NodeEditorFramework
 		public static GUISkin nodeSkin;
 		public static GUISkin defaultSkin;
 
+		// Bundled fonts (Resources/Fonts): Canopy UI Sans = Liberation Sans (metric-compatible
+		// with the Arial the built-in runtime font resolves to) with the symbol blocks of Noto
+		// Sans Symbols 2 + Noto Sans Math merged in (⏮ ⚠ ↶ ❚ ⟳ ...), built by
+		// Tools/UIFont/build_ui_font.py. One self-sufficient font, because built players ignore
+		// Unity's font fallback references and drop to OS fonts: glyphs that looked fine in the
+		// editor (with its much broader fallback chain) rendered as boxes in builds.
+		public static Font nodeFont;
+		public static Font nodeFontBold;
+
 		public static GUIStyle nodeLabel;
 		public static GUIStyle nodeLabelBold;
 		public static GUIStyle nodeLabelSelected;
@@ -60,6 +69,8 @@ namespace NodeEditorFramework
 
 			nodeSkin = null;
 			defaultSkin = null;
+			nodeFont = null;
+			nodeFontBold = null;
 
 			nodeLabel = null;
 			nodeLabelBold = null;
@@ -92,20 +103,34 @@ namespace NodeEditorFramework
 			if (!Background || !AALineTex || !GUIBox || !GUIButton || !GUIToolbar || !GUIToolbarButton)
 				return false;
 
+			// Fonts: a missing file only costs the glyph coverage, so fall back to the skin's
+			// default font rather than failing init
+			nodeFont = ResourceManager.LoadResource<Font> ("Fonts/CanopyUISans-Regular.ttf");
+			nodeFontBold = ResourceManager.LoadResource<Font> ("Fonts/CanopyUISans-Bold.ttf");
+			if (!nodeFont)
+				Debug.LogWarning ("NodeEditorGUI: bundled font missing; symbol glyphs may render as boxes in builds.");
+
 			// Skin & Styles
 			nodeSkin = Object.Instantiate (GUI.skin);
 			GUI.skin = nodeSkin;
+			if (nodeFont)
+				nodeSkin.font = nodeFont;
 
 			foreach (GUIStyle style in GUI.skin)
 			{
 				style.fontSize = 11;
+				if (nodeFont)
+					style.font = nodeFont;
 				//style.normal.textColor = style.active.textColor = style.focused.textColor = style.hover.textColor = NE_TextColor;
 			}
 
 			// Label
 			nodeSkin.label.normal.textColor = NE_TextColor;
 			nodeLabel = nodeSkin.label;
-			nodeLabelBold = new GUIStyle (nodeLabel) { fontStyle = FontStyle.Bold };
+			// The real Bold face rather than FontStyle.Bold, which a bundled font can only fake
+			nodeLabelBold = nodeFontBold
+				? new GUIStyle (nodeLabel) { font = nodeFontBold }
+				: new GUIStyle (nodeLabel) { fontStyle = FontStyle.Bold };
 			nodeLabelSelected = new GUIStyle (nodeLabel);
 			nodeLabelSelected.normal.background = RTEditorGUI.ColorToTex (1, NE_LightColor);
 			nodeLabelCentered = new GUIStyle (nodeLabel) { alignment = TextAnchor.MiddleCenter };
@@ -118,7 +143,9 @@ namespace NodeEditorFramework
 			nodeSkin.box.normal.textColor = NE_TextColor;
 			nodeSkin.box.active.textColor = NE_TextColor;
 			nodeBox = nodeSkin.box;
-			nodeBoxBold = new GUIStyle (nodeBox) { fontStyle = FontStyle.Bold };
+			nodeBoxBold = nodeFontBold
+				? new GUIStyle (nodeBox) { font = nodeFontBold }
+				: new GUIStyle (nodeBox) { fontStyle = FontStyle.Bold };
 
 			// Button
 			nodeSkin.button.normal.textColor = NE_TextColor;

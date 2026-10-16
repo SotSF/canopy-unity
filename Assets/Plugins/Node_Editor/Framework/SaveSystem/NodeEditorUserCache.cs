@@ -319,7 +319,28 @@ namespace NodeEditorFramework
 		/// <summary>
 		/// Loads the mainNodeCanvas and it's associated mainEditorState from an asset at path
 		/// </summary>
-		public void LoadNodeCanvas (string path) 
+		/// <summary>
+		/// Loads the canvas at a Resources path as a working copy (see NodeEditorSaveManager.LoadResourceNodeCanvas).
+		/// Returns false, leaving the current canvas open, if there's no canvas at the path.
+		/// </summary>
+		public bool LoadResourceNodeCanvas (string resourcePath)
+		{
+			NodeCanvas loaded = NodeEditorSaveManager.LoadResourceNodeCanvas (resourcePath, true);
+			if (loaded == null)
+				return false;
+			nodeCanvas = loaded;
+			editorState = NodeEditorSaveManager.ExtractEditorState (nodeCanvas, MainEditorStateIdentifier);
+
+			openedCanvasPath = nodeCanvas.savePath;
+			nodeCanvas.Validate();
+			RecreateCache ();
+			UpdateCanvasInfo ();
+			nodeCanvas.TraverseAll ();
+			NodeEditor.RepaintClients ();
+			return true;
+		}
+
+		public void LoadNodeCanvas (string path)
 		{
 			// Try to load the NodeCanvas
 			if (!File.Exists (path) || (nodeCanvas = NodeEditorSaveManager.LoadNodeCanvas (path, true)) == null)

@@ -3,6 +3,15 @@ using UnityEngine;
 
 public static class FolderUtil
 {
+    /// <summary>
+    /// Files/&lt;subfolder&gt; beside the built player (or beside Assets/ in the editor), where
+    /// user-supplied runtime content lives next to the Files/NodeEditor/ canvas XML exports.
+    /// ImportExportFormat.RuntimeIOPath is CWD-relative; anchoring on dataPath lands in the
+    /// same game folder without depending on the launch directory.
+    /// </summary>
+    public static string GameFilesDir(string subfolder) =>
+        Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Files", subfolder));
+
     /// <summary>Opens a folder in the OS file browser (Explorer/Finder), creating it first.</summary>
     public static void Reveal(string dir)
     {

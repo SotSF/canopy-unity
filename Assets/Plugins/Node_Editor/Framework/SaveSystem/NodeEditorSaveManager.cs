@@ -317,6 +317,47 @@ namespace NodeEditorFramework
 		}
 
 		/// <summary>
+		/// Loads the NodeCanvas at a Resources path (e.g. "CanvasSaves/Foo") and optionally creates
+		/// a working copy. Unlike LoadNodeCanvas this works in builds. The asset itself deserializes
+		/// with NodeEditor.IsInitializing set, so its nodes never run DoInit — only the working copy
+		/// initializes (lazily, on first Calculate) — and nothing about the asset is modified.
+		/// Returns null if there's no canvas at the path.
+		/// </summary>
+		public static NodeCanvas LoadResourceNodeCanvas (string resourcePath, bool createWorkingCopy)
+		{
+			if (string.IsNullOrEmpty (resourcePath))
+				throw new System.ArgumentNullException ("Cannot load Canvas: No resource path specified!");
+
+			NodeCanvas nodeCanvas;
+			bool wasInitializing = NodeEditor.IsInitializing;
+			NodeEditor.IsInitializing = true;
+			try
+			{
+				nodeCanvas = Resources.Load<NodeCanvas> (resourcePath);
+			}
+			finally
+			{
+				NodeEditor.IsInitializing = wasInitializing;
+			}
+			if (nodeCanvas == null)
+				return null;
+
+		#if UNITY_EDITOR
+			string assetPath = UnityEditor.AssetDatabase.GetAssetPath (nodeCanvas);
+		#endif
+			if (createWorkingCopy)
+				nodeCanvas = CreateWorkingCopy(nodeCanvas);
+		#if UNITY_EDITOR
+			// Point Save/Reload Canvas Asset at the source file (on the copy, not the asset)
+			if (createWorkingCopy && !string.IsNullOrEmpty (assetPath))
+				nodeCanvas.UpdateSource (assetPath);
+		#endif
+
+			NodeEditorCallbacks.IssueOnLoadCanvas (nodeCanvas);
+			return nodeCanvas;
+		}
+
+		/// <summary>
 		/// Loads the NodeCanvas from the asset file at path and optionally creates a working copy of it before returning
 		/// </summary>
 		public static NodeCanvas LoadNodeCanvas (string path, bool createWorkingCopy)
@@ -435,8 +476,18 @@ namespace NodeEditorFramework
 				Node clonedNode = AddClonedSO (allSOs, clonedSOs, node);
 				AddClonedSOs (allSOs, clonedSOs, clonedNode.GetScriptableObjects ());
 
-				// Update representative port list connectionPorts with all ports and clone them
-				ConnectionPortManager.UpdatePortLists(clonedNode);
+				// Update representative port list connectionPorts with all ports and clone them.
+				// A port declared after the canvas was saved (a knob added to the node class) is
+				// null on the saved node; create it on the clone here, since the replacement pass
+				// below assumes every declared port exists. Without this one stale node aborted the
+				// whole copy, so a cold start fell back to an empty canvas while File > Load (which
+				// validates before copying) worked. Only null fields are filled: the clone's other
+				// ports still belong to the source canvas at this point and must not be modified.
+				foreach (ConnectionPortDeclaration portDecl in ConnectionPortManager.GetPortDeclarationEnumerator(clonedNode, true))
+				{
+					if (portDecl.portField.GetValue(clonedNode) == null)
+						portDecl.portField.SetValue(clonedNode, portDecl.portInfo.CreateNew(clonedNode));
+				}
 				AddClonedSOs(allSOs, clonedSOs, clonedNode.connectionPorts);
 			}
 

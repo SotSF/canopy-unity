@@ -5,8 +5,9 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Plays a pre-recorded audio clip (from AudioTrackManager: inspector list or a
-/// Resources/AudioTracks folder) through the system audio device, with transport +
+/// Plays a pre-recorded audio clip (from AudioTrackManager: inspector list, a
+/// Resources/AudioTracks folder, or audio files in Files/Audio/ beside the player,
+/// decoded at runtime) through the system audio device, with transport +
 /// scrub controls, and outputs its live spectrum for downstream analysis
 /// (MelFilterbank → SpectrumVisualizer etc.), plus the current playback time.
 /// The syncTime input drift-corrects playback to an external clock, e.g. a
@@ -64,6 +65,7 @@ public class AudioTrackNode : TickingNode
     [NonSerialized] float[] smoothedSpectrum;
     [NonSerialized] int selectedClipIdx = 0;
     [NonSerialized] bool scrubbing = false;
+    [NonSerialized] bool clipStarted = false;
 
     public override void DoInit()
     {
@@ -77,13 +79,20 @@ public class AudioTrackNode : TickingNode
 
     void BindClip()
     {
+        clipStarted = false;
         source = AudioTrackManager.Instance.CreateSource(this, clipName);
-        if (source == null)
-        {
-            Debug.LogError($"AudioTrackNode: failed to bind clip '{clipName}', unbinding.");
-            UnbindClip();
-            return;
-        }
+        // A missing clip keeps its binding: clipName is user data (unbinding here would
+        // wipe it from the canvas on the next save). The transport shows it unavailable
+        // with a Retry, and Unbind is an explicit choice.
+        StartWhenReady();
+    }
+
+    // Disk clips decode asynchronously, so the source can exist before its clip does;
+    // the restored position and play state apply once the clip lands
+    void StartWhenReady()
+    {
+        if (clipStarted || source == null || source.clip == null) return;
+        clipStarted = true;
         source.loop = loop;
         source.volume = volume;
         source.time = Mathf.Clamp(savedTime, 0f, Mathf.Max(source.clip.length - 0.05f, 0f));
@@ -101,6 +110,7 @@ public class AudioTrackNode : TickingNode
             AudioTrackManager.Instance.ReleaseSource(this);
         }
         source = null;
+        clipStarted = false;
     }
 
     protected override void OnDelete()
@@ -150,13 +160,25 @@ public class AudioTrackNode : TickingNode
             GUILayout.Label("Enter play mode to bind a track");
             return;
         }
-        var names = AudioTrackManager.Instance.ClipNames;
+        var manager = AudioTrackManager.Instance;
+        var names = manager.ClipNames;
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Track:");
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button("Open dir", GUILayout.Width(60)))
+        {
+            manager.OpenDiskFolder();
+        }
+        if (GUILayout.Button("Reload", GUILayout.Width(56)))
+        {
+            manager.RefreshClips();
+        }
+        GUILayout.EndHorizontal();
         if (names.Length == 0)
         {
-            GUILayout.Label("No clips found (Resources/AudioTracks)");
+            GUILayout.Label($"No clips in Resources/{manager.clipResourcePath} or Files/{AudioTrackManager.DiskFolderName}/");
             return;
         }
-        GUILayout.Label("Track:");
         selectedClipIdx = Mathf.Clamp(selectedClipIdx, 0, names.Length - 1);
         selectedClipIdx = GUILayout.SelectionGrid(selectedClipIdx, names, 1);
         GUILayout.Space(6);
@@ -172,8 +194,27 @@ public class AudioTrackNode : TickingNode
     void DrawTransport()
     {
         GUILayout.Label(clipName);
+        bool sourceAlive = clipStarted && source != null && source.clip != null;
+        if (!sourceAlive && Application.isPlaying)
+        {
+            GUILayout.BeginHorizontal();
+            if (source != null && AudioTrackManager.Instance.GetStatus(clipName) == AudioTrackManager.ClipStatus.Loading)
+            {
+                GUILayout.Label("loading…");
+            }
+            else
+            {
+                GUILayout.Label("⚠ unavailable (missing or undecodable)");
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Retry", GUILayout.Width(48)))
+                {
+                    AudioTrackManager.Instance.RefreshClips();
+                    BindClip();
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
         GUILayout.BeginHorizontal();
-        bool sourceAlive = source != null && source.clip != null;
         if (GUILayout.Button(playing ? "❚❚" : "▶", GUILayout.Width(30)))
         {
             TogglePlay();
@@ -250,7 +291,7 @@ public class AudioTrackNode : TickingNode
     void TogglePlay()
     {
         playing = !playing;
-        if (source == null) return;
+        if (!clipStarted) return;   // StartWhenReady applies the play state on arrival
         if (playing) source.Play();
         else source.Pause();
     }
@@ -286,7 +327,8 @@ public class AudioTrackNode : TickingNode
         if (rawSpectrum == null) rawSpectrum = new float[SpectrumSize];
         if (smoothedSpectrum == null) smoothedSpectrum = new float[SpectrumSize];
 
-        if (!trackBound || source == null || source.clip == null)
+        StartWhenReady();
+        if (!trackBound || !clipStarted || source == null || source.clip == null)
         {
             spectrumDataKnob?.SetValue(smoothedSpectrum);
             sampleRateKnob?.SetValue((float)AudioSettings.outputSampleRate);

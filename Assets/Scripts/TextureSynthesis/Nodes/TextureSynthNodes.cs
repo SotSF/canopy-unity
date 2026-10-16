@@ -79,8 +79,16 @@ namespace SecretFire.TextureSynth
             }
         }
 
+        [NonSerialized]
+        private bool initializing = false;
+
         public bool TryInit()
         {
+            // DoInit can trigger callbacks (e.g. removing a connection → OnNodeChange) that
+            // recalculate this same node; re-entering DoInit mid-run would rebuild state the
+            // outer call is still using (seen: VFXGraph port sync multiplying its ports)
+            if (initializing) return false;
+            initializing = true;
             try
             {
                 DoInit();
@@ -93,11 +101,18 @@ namespace SecretFire.TextureSynth
                 Debug.LogException(err);
                 return false;
             }
+            finally
+            {
+                initializing = false;
+            }
         }
 
         public override bool Calculate()
         {
-            if (!initialized) return TryInit();
+            // Lazily-initialized nodes (XML import, working-copy clones) must also calculate
+            // on this pass: a non-ticking node only gets recalculated when something upstream
+            // changes, so an init-only first pass left static chains with no output
+            if (!initialized && !TryInit()) return false;
             try
             {
                 return DoCalc();
